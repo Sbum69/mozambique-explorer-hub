@@ -14,6 +14,7 @@ export interface Destination {
   visitorsK: number;
   badges: ("most-visited" | "most-recommended")[];
   highlights: { pt: string; en: string }[];
+  coords: [number, number]; // [lat, lng]
 }
 
 export const DESTINATIONS: Destination[] = [
