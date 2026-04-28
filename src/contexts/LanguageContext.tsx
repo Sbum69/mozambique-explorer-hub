@@ -98,6 +98,22 @@ const dict = {
   intHeritage: { pt: "Património UNESCO", en: "UNESCO Heritage" },
   intFestival: { pt: "Festivais e Eventos", en: "Festivals & Events" },
   intAdventure: { pt: "Atividades e Aventura", en: "Activities & Adventure" },
+  // gamification
+  gamiTitle: { pt: "Conquistas e Recompensas", en: "Achievements & Rewards" },
+  gamiSub: { pt: "Ganha XP, sobe de nível e desbloqueia recompensas únicas", en: "Earn XP, level up and unlock unique rewards" },
+  yourLevel: { pt: "O teu nível", en: "Your level" },
+  toNextLevel: { pt: "para o próximo nível", en: "to next level" },
+  badges: { pt: "Conquistas", en: "Badges" },
+  rewards: { pt: "Recompensas", en: "Rewards" },
+  unlocked: { pt: "Desbloqueado", en: "Unlocked" },
+  locked: { pt: "Bloqueado", en: "Locked" },
+  claim: { pt: "Resgatar", en: "Claim" },
+  claimed: { pt: "Resgatado", en: "Claimed" },
+  // map
+  mapTitle: { pt: "Mapa Interativo", en: "Interactive Map" },
+  mapSub: { pt: "Descobre destinos autênticos em Moçambique", en: "Discover authentic destinations in Mozambique" },
+  viewDetails: { pt: "Ver detalhes", en: "View details" },
+  backToDashboard: { pt: "Voltar ao painel", en: "Back to dashboard" },
 } as const;
 
 export type DictKey = keyof typeof dict;
