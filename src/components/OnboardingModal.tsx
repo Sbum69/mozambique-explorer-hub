@@ -50,8 +50,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
-        showCloseButton={false}
-        className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 gap-0 border-0 bg-card"
+        className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 gap-0 border-0 bg-card [&>button]:hidden"
       >
         {/* Header */}
         <div className="px-6 sm:px-10 pt-8 pb-4 bg-gradient-to-br from-primary/10 via-card to-secondary/10">
