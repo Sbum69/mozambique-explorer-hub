@@ -9,8 +9,92 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsefulInfoRouteImport } from './routes/useful-info'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ItinerariesRouteImport } from './routes/itineraries'
+import { Route as ImpactRouteImport } from './routes/impact'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as GamificationRouteImport } from './routes/gamification'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as ExperiencesRouteImport } from './routes/experiences'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CultureHistoryRouteImport } from './routes/culture-history'
+import { Route as BusinessRegisterRouteImport } from './routes/business-register'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UsefulInfoRoute = UsefulInfoRouteImport.update({
+  id: '/useful-info',
+  path: '/useful-info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsAlertsRoute = NewsAlertsRouteImport.update({
+  id: '/news-alerts',
+  path: '/news-alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItinerariesRoute = ItinerariesRouteImport.update({
+  id: '/itineraries',
+  path: '/itineraries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpactRoute = ImpactRouteImport.update({
+  id: '/impact',
+  path: '/impact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamificationRoute = GamificationRouteImport.update({
+  id: '/gamification',
+  path: '/gamification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExperiencesRoute = ExperiencesRouteImport.update({
+  id: '/experiences',
+  path: '/experiences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CultureHistoryRoute = CultureHistoryRouteImport.update({
+  id: '/culture-history',
+  path: '/culture-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
+  id: '/business-register',
+  path: '/business-register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +103,228 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/business-register': typeof BusinessRegisterRoute
+  '/culture-history': typeof CultureHistoryRoute
+  '/dashboard': typeof DashboardRoute
+  '/experiences': typeof ExperiencesRoute
+  '/favorites': typeof FavoritesRoute
+  '/gamification': typeof GamificationRoute
+  '/home': typeof HomeRoute
+  '/impact': typeof ImpactRoute
+  '/itineraries': typeof ItinerariesRoute
+  '/login': typeof LoginRoute
+  '/map': typeof MapRoute
+  '/news-alerts': typeof NewsAlertsRoute
+  '/signup': typeof SignupRoute
+  '/useful-info': typeof UsefulInfoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/business-register': typeof BusinessRegisterRoute
+  '/culture-history': typeof CultureHistoryRoute
+  '/dashboard': typeof DashboardRoute
+  '/experiences': typeof ExperiencesRoute
+  '/favorites': typeof FavoritesRoute
+  '/gamification': typeof GamificationRoute
+  '/home': typeof HomeRoute
+  '/impact': typeof ImpactRoute
+  '/itineraries': typeof ItinerariesRoute
+  '/login': typeof LoginRoute
+  '/map': typeof MapRoute
+  '/news-alerts': typeof NewsAlertsRoute
+  '/signup': typeof SignupRoute
+  '/useful-info': typeof UsefulInfoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/business-register': typeof BusinessRegisterRoute
+  '/culture-history': typeof CultureHistoryRoute
+  '/dashboard': typeof DashboardRoute
+  '/experiences': typeof ExperiencesRoute
+  '/favorites': typeof FavoritesRoute
+  '/gamification': typeof GamificationRoute
+  '/home': typeof HomeRoute
+  '/impact': typeof ImpactRoute
+  '/itineraries': typeof ItinerariesRoute
+  '/login': typeof LoginRoute
+  '/map': typeof MapRoute
+  '/news-alerts': typeof NewsAlertsRoute
+  '/signup': typeof SignupRoute
+  '/useful-info': typeof UsefulInfoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/business-register'
+    | '/culture-history'
+    | '/dashboard'
+    | '/experiences'
+    | '/favorites'
+    | '/gamification'
+    | '/home'
+    | '/impact'
+    | '/itineraries'
+    | '/login'
+    | '/map'
+    | '/news-alerts'
+    | '/signup'
+    | '/useful-info'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/business-register'
+    | '/culture-history'
+    | '/dashboard'
+    | '/experiences'
+    | '/favorites'
+    | '/gamification'
+    | '/home'
+    | '/impact'
+    | '/itineraries'
+    | '/login'
+    | '/map'
+    | '/news-alerts'
+    | '/signup'
+    | '/useful-info'
+  id:
+    | '__root__'
+    | '/'
+    | '/business-register'
+    | '/culture-history'
+    | '/dashboard'
+    | '/experiences'
+    | '/favorites'
+    | '/gamification'
+    | '/home'
+    | '/impact'
+    | '/itineraries'
+    | '/login'
+    | '/map'
+    | '/news-alerts'
+    | '/signup'
+    | '/useful-info'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BusinessRegisterRoute: typeof BusinessRegisterRoute
+  CultureHistoryRoute: typeof CultureHistoryRoute
+  DashboardRoute: typeof DashboardRoute
+  ExperiencesRoute: typeof ExperiencesRoute
+  FavoritesRoute: typeof FavoritesRoute
+  GamificationRoute: typeof GamificationRoute
+  HomeRoute: typeof HomeRoute
+  ImpactRoute: typeof ImpactRoute
+  ItinerariesRoute: typeof ItinerariesRoute
+  LoginRoute: typeof LoginRoute
+  MapRoute: typeof MapRoute
+  NewsAlertsRoute: typeof NewsAlertsRoute
+  SignupRoute: typeof SignupRoute
+  UsefulInfoRoute: typeof UsefulInfoRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/useful-info': {
+      id: '/useful-info'
+      path: '/useful-info'
+      fullPath: '/useful-info'
+      preLoaderRoute: typeof UsefulInfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news-alerts': {
+      id: '/news-alerts'
+      path: '/news-alerts'
+      fullPath: '/news-alerts'
+      preLoaderRoute: typeof NewsAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/itineraries': {
+      id: '/itineraries'
+      path: '/itineraries'
+      fullPath: '/itineraries'
+      preLoaderRoute: typeof ItinerariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impact': {
+      id: '/impact'
+      path: '/impact'
+      fullPath: '/impact'
+      preLoaderRoute: typeof ImpactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gamification': {
+      id: '/gamification'
+      path: '/gamification'
+      fullPath: '/gamification'
+      preLoaderRoute: typeof GamificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/experiences': {
+      id: '/experiences'
+      path: '/experiences'
+      fullPath: '/experiences'
+      preLoaderRoute: typeof ExperiencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/culture-history': {
+      id: '/culture-history'
+      path: '/culture-history'
+      fullPath: '/culture-history'
+      preLoaderRoute: typeof CultureHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business-register': {
+      id: '/business-register'
+      path: '/business-register'
+      fullPath: '/business-register'
+      preLoaderRoute: typeof BusinessRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,16 +337,21 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BusinessRegisterRoute: BusinessRegisterRoute,
+  CultureHistoryRoute: CultureHistoryRoute,
+  DashboardRoute: DashboardRoute,
+  ExperiencesRoute: ExperiencesRoute,
+  FavoritesRoute: FavoritesRoute,
+  GamificationRoute: GamificationRoute,
+  HomeRoute: HomeRoute,
+  ImpactRoute: ImpactRoute,
+  ItinerariesRoute: ItinerariesRoute,
+  LoginRoute: LoginRoute,
+  MapRoute: MapRoute,
+  NewsAlertsRoute: NewsAlertsRoute,
+  SignupRoute: SignupRoute,
+  UsefulInfoRoute: UsefulInfoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
