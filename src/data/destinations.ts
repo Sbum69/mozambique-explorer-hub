@@ -14,6 +14,7 @@ export interface Destination {
   visitorsK: number;
   badges: ("most-visited" | "most-recommended")[];
   highlights: { pt: string; en: string }[];
+  coords: [number, number]; // [lat, lng]
 }
 
 export const DESTINATIONS: Destination[] = [
@@ -33,6 +34,7 @@ export const DESTINATIONS: Destination[] = [
       { pt: "Fortaleza", en: "Fortress" },
       { pt: "Marginal", en: "Marginal" },
     ],
+    coords: [-25.9692, 32.5732],
   },
   {
     id: "ilha",
@@ -49,6 +51,7 @@ export const DESTINATIONS: Destination[] = [
       { pt: "Stone Town", en: "Stone Town" },
       { pt: "Palácio de São Paulo", en: "São Paulo Palace" },
     ],
+    coords: [-15.0333, 40.7333],
   },
   {
     id: "inhambane",
@@ -65,6 +68,7 @@ export const DESTINATIONS: Destination[] = [
       { pt: "Praia do Tofo", en: "Tofo Beach" },
       { pt: "Mergulho com manta", en: "Manta diving" },
     ],
+    coords: [-23.865, 35.3833],
   },
   {
     id: "vilankulo",
@@ -81,6 +85,7 @@ export const DESTINATIONS: Destination[] = [
       { pt: "Bazaruto", en: "Bazaruto" },
       { pt: "Passeio de dhow", en: "Dhow trips" },
     ],
+    coords: [-22.0023, 35.3133],
   },
   {
     id: "pemba",
@@ -97,6 +102,7 @@ export const DESTINATIONS: Destination[] = [
       { pt: "Quirimbas", en: "Quirimbas" },
       { pt: "Recifes de coral", en: "Coral reefs" },
     ],
+    coords: [-12.974, 40.5178],
   },
   {
     id: "gorongosa",
@@ -113,6 +119,7 @@ export const DESTINATIONS: Destination[] = [
       { pt: "Safari", en: "Safari" },
       { pt: "Aves endémicas", en: "Endemic birds" },
     ],
+    coords: [-18.8167, 34.5],
   },
 ];
 
