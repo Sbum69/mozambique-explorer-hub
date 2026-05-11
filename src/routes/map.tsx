@@ -1,12 +1,14 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
-import { ArrowLeft, MapPin, Users, Award } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Award, Check, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 
