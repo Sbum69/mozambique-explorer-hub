@@ -92,6 +92,8 @@ interface AuthContextValue {
   logout: () => void;
   setPreferences: (prefs: UserPreferences) => void;
   needsOnboarding: boolean;
+  addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
+  visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
