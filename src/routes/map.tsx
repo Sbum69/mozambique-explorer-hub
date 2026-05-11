@@ -173,9 +173,22 @@ function MapPage() {
                     </div>
                   </div>
 
-                  <Button className="mt-6 w-full sm:w-auto" onClick={() => navigate({ to: "/experiences" })}>
-                    {lang === "pt" ? "Ver experiências" : "See experiences"}
-                  </Button>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => handleVisit(selected)}
+                      disabled={isVisited(selected.id)}
+                      className="bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
+                    >
+                      {isVisited(selected.id) ? (
+                        <><Check className="size-4" /> {t("alreadyVisited")}</>
+                      ) : (
+                        <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>
+                      )}
+                    </Button>
+                    <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
+                      {lang === "pt" ? "Ver experiências" : "See experiences"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
