@@ -146,6 +146,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist({ ...user, preferences: { ...user.preferences, ...prefs } });
   };
 
+  const addXP: AuthContextValue["addXP"] = (amount) => {
+    if (!user) return { newXp: 0, leveledUp: false, newLevel: 0 };
+    const newXp = user.xp + amount;
+    const newLevel = computeLevel(newXp);
+    const leveledUp = newLevel > user.level;
+    persist({ ...user, xp: newXp, level: newLevel });
+    return { newXp, leveledUp, newLevel };
+  };
+
+  const visitDestination: AuthContextValue["visitDestination"] = (id, km = 0) => {
+    if (!user) return null;
+    const visited = user.visitedIds ?? [];
+    const alreadyVisited = visited.includes(id);
+    if (alreadyVisited) {
+      return { gained: 0, alreadyVisited: true, leveledUp: false, newLevel: user.level };
+    }
+    const gained = 150;
+    const newXp = user.xp + gained;
+    const newLevel = computeLevel(newXp);
+    const leveledUp = newLevel > user.level;
+    persist({
+      ...user,
+      xp: newXp,
+      level: newLevel,
+      visitedIds: [...visited, id],
+      visitedPlaces: user.visitedPlaces + 1,
+      kmExplored: user.kmExplored + km,
+    });
+    return { gained, alreadyVisited: false, leveledUp, newLevel };
+  };
+
   const needsOnboarding =
     !!user &&
     (user.role === "user" || user.role === "guest") &&
@@ -153,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, loginAsGuest, logout, setPreferences, needsOnboarding }}
+      value={{ user, login, loginAsGuest, logout, setPreferences, needsOnboarding, addXP, visitDestination }}
     >
       {children}
     </AuthContext.Provider>
