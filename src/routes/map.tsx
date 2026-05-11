@@ -125,6 +125,9 @@ function MapPage() {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{d.description[lang]}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
+                        {isVisited(d.id) && (
+                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-white"><Check className="size-2.5 mr-1" />{t("alreadyVisited")}</Badge>
+                        )}
                         {d.badges.includes("most-visited") && (
                           <Badge variant="secondary" className="text-[9px] px-1.5 py-0"><Users className="size-2.5 mr-1" />{t("mostVisited")}</Badge>
                         )}
