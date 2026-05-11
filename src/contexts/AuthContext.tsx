@@ -18,6 +18,16 @@ export interface AppUser {
   completedItineraries: number;
   kmExplored: number;
   preferences?: UserPreferences;
+  visitedIds?: string[];
+}
+
+export function computeLevel(xp: number) {
+  // Level n requires sum 1..n * 1000 XP — simple: level = floor(xp/1000)+1 capped at 5? Use thresholds.
+  if (xp >= 5000) return 5;
+  if (xp >= 3000) return 4;
+  if (xp >= 1500) return 3;
+  if (xp >= 500) return 2;
+  return 1;
 }
 
 const DEMO_USERS: Record<string, { password: string; user: AppUser }> = {
