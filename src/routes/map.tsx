@@ -33,10 +33,41 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
+const BADGE_THRESHOLDS = [100, 500, 750, 1000, 1500, 2500, 4000, 5000];
+
 function MapPage() {
   const { t, lang } = useLang();
+  const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Destination | null>(DESTINATIONS[0]);
+
+  const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
+
+  const handleVisit = (d: Destination) => {
+    const prevXp = user?.xp ?? 0;
+    const result = visitDestination(d.id, 25);
+    if (!result) return;
+    if (result.alreadyVisited) {
+      toast.info(t("alreadyVisited"), { description: d.name });
+      return;
+    }
+    toast.success(`+${result.gained} ${t("xpGained")}`, {
+      description: d.name,
+      icon: <Sparkles className="size-4" />,
+    });
+    if (result.leveledUp) {
+      setTimeout(() => {
+        toast.success(`${t("levelUp")} Lv ${result.newLevel}`, { icon: <Award className="size-4" /> });
+      }, 400);
+    }
+    const newXp = prevXp + result.gained;
+    const unlockedNow = BADGE_THRESHOLDS.filter((x) => prevXp < x && newXp >= x).length;
+    if (unlockedNow > 0) {
+      setTimeout(() => {
+        toast.success(`${unlockedNow} × ${t("newBadgesUnlocked")}`, { icon: <Sparkles className="size-4" /> });
+      }, 800);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
