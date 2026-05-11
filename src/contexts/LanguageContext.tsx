@@ -114,6 +114,11 @@ const dict = {
   mapSub: { pt: "Descobre destinos autênticos em Moçambique", en: "Discover authentic destinations in Mozambique" },
   viewDetails: { pt: "Ver detalhes", en: "View details" },
   backToDashboard: { pt: "Voltar ao painel", en: "Back to dashboard" },
+  visitHere: { pt: "Marcar como visitado", en: "Mark as visited" },
+  alreadyVisited: { pt: "Já visitado", en: "Already visited" },
+  xpGained: { pt: "XP ganhos!", en: "XP earned!" },
+  levelUp: { pt: "Subiste de nível!", en: "You leveled up!" },
+  newBadgesUnlocked: { pt: "Novas conquistas desbloqueadas!", en: "New badges unlocked!" },
 } as const;
 
 export type DictKey = keyof typeof dict;
