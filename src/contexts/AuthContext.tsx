@@ -18,6 +18,16 @@ export interface AppUser {
   completedItineraries: number;
   kmExplored: number;
   preferences?: UserPreferences;
+  visitedIds?: string[];
+}
+
+export function computeLevel(xp: number) {
+  // Level n requires sum 1..n * 1000 XP — simple: level = floor(xp/1000)+1 capped at 5? Use thresholds.
+  if (xp >= 5000) return 5;
+  if (xp >= 3000) return 4;
+  if (xp >= 1500) return 3;
+  if (xp >= 500) return 2;
+  return 1;
 }
 
 const DEMO_USERS: Record<string, { password: string; user: AppUser }> = {
@@ -82,6 +92,8 @@ interface AuthContextValue {
   logout: () => void;
   setPreferences: (prefs: UserPreferences) => void;
   needsOnboarding: boolean;
+  addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
+  visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -134,6 +146,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist({ ...user, preferences: { ...user.preferences, ...prefs } });
   };
 
+  const addXP: AuthContextValue["addXP"] = (amount) => {
+    if (!user) return { newXp: 0, leveledUp: false, newLevel: 0 };
+    const newXp = user.xp + amount;
+    const newLevel = computeLevel(newXp);
+    const leveledUp = newLevel > user.level;
+    persist({ ...user, xp: newXp, level: newLevel });
+    return { newXp, leveledUp, newLevel };
+  };
+
+  const visitDestination: AuthContextValue["visitDestination"] = (id, km = 0) => {
+    if (!user) return null;
+    const visited = user.visitedIds ?? [];
+    const alreadyVisited = visited.includes(id);
+    if (alreadyVisited) {
+      return { gained: 0, alreadyVisited: true, leveledUp: false, newLevel: user.level };
+    }
+    const gained = 150;
+    const newXp = user.xp + gained;
+    const newLevel = computeLevel(newXp);
+    const leveledUp = newLevel > user.level;
+    persist({
+      ...user,
+      xp: newXp,
+      level: newLevel,
+      visitedIds: [...visited, id],
+      visitedPlaces: user.visitedPlaces + 1,
+      kmExplored: user.kmExplored + km,
+    });
+    return { gained, alreadyVisited: false, leveledUp, newLevel };
+  };
+
   const needsOnboarding =
     !!user &&
     (user.role === "user" || user.role === "guest") &&
@@ -141,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, loginAsGuest, logout, setPreferences, needsOnboarding }}
+      value={{ user, login, loginAsGuest, logout, setPreferences, needsOnboarding, addXP, visitDestination }}
     >
       {children}
     </AuthContext.Provider>

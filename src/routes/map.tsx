@@ -1,12 +1,14 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
-import { ArrowLeft, MapPin, Users, Award } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Award, Check, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 
@@ -31,10 +33,41 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
+const BADGE_THRESHOLDS = [100, 500, 750, 1000, 1500, 2500, 4000, 5000];
+
 function MapPage() {
   const { t, lang } = useLang();
+  const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Destination | null>(DESTINATIONS[0]);
+
+  const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
+
+  const handleVisit = (d: Destination) => {
+    const prevXp = user?.xp ?? 0;
+    const result = visitDestination(d.id, 25);
+    if (!result) return;
+    if (result.alreadyVisited) {
+      toast.info(t("alreadyVisited"), { description: d.name });
+      return;
+    }
+    toast.success(`+${result.gained} ${t("xpGained")}`, {
+      description: d.name,
+      icon: <Sparkles className="size-4" />,
+    });
+    if (result.leveledUp) {
+      setTimeout(() => {
+        toast.success(`${t("levelUp")} Lv ${result.newLevel}`, { icon: <Award className="size-4" /> });
+      }, 400);
+    }
+    const newXp = prevXp + result.gained;
+    const unlockedNow = BADGE_THRESHOLDS.filter((x) => prevXp < x && newXp >= x).length;
+    if (unlockedNow > 0) {
+      setTimeout(() => {
+        toast.success(`${unlockedNow} × ${t("newBadgesUnlocked")}`, { icon: <Sparkles className="size-4" /> });
+      }, 800);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
@@ -92,6 +125,9 @@ function MapPage() {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{d.description[lang]}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
+                        {isVisited(d.id) && (
+                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-white"><Check className="size-2.5 mr-1" />{t("alreadyVisited")}</Badge>
+                        )}
                         {d.badges.includes("most-visited") && (
                           <Badge variant="secondary" className="text-[9px] px-1.5 py-0"><Users className="size-2.5 mr-1" />{t("mostVisited")}</Badge>
                         )}
@@ -140,9 +176,22 @@ function MapPage() {
                     </div>
                   </div>
 
-                  <Button className="mt-6 w-full sm:w-auto" onClick={() => navigate({ to: "/experiences" })}>
-                    {lang === "pt" ? "Ver experiências" : "See experiences"}
-                  </Button>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => handleVisit(selected)}
+                      disabled={isVisited(selected.id)}
+                      className="bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
+                    >
+                      {isVisited(selected.id) ? (
+                        <><Check className="size-4" /> {t("alreadyVisited")}</>
+                      ) : (
+                        <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>
+                      )}
+                    </Button>
+                    <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
+                      {lang === "pt" ? "Ver experiências" : "See experiences"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
