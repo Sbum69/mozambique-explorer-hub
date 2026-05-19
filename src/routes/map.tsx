@@ -42,8 +42,96 @@ function MapPage() {
   const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Destination | null>(DESTINATIONS[0]);
+  const [origin, setOrigin] = useState<[number, number] | null>(null);
+  const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
+  const [routeStats, setRouteStats] = useState<Record<TravelMode, { distance: number; duration: number } | null>>({ car: null, bike: null, foot: null });
+  const [mode, setMode] = useState<TravelMode>("car");
+  const [loadingRoute, setLoadingRoute] = useState(false);
+  const [directionsOpen, setDirectionsOpen] = useState(false);
 
   const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
+
+  const locateUser = (): Promise<[number, number]> =>
+    new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject(new Error("no-geo"));
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve([pos.coords.latitude, pos.coords.longitude]),
+        () => reject(new Error("denied")),
+        { timeout: 8000 },
+      );
+    });
+
+  const fetchRoute = async (from: [number, number], to: [number, number], m: TravelMode) => {
+    const url = `https://router.project-osrm.org/route/v1/${OSRM_PROFILE[m]}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("route");
+    const data = await res.json();
+    const r = data.routes?.[0];
+    if (!r) throw new Error("route");
+    return {
+      coords: (r.geometry.coordinates as [number, number][]).map(([lng, lat]) => [lat, lng] as [number, number]),
+      distance: r.distance as number,
+      duration: r.duration as number,
+    };
+  };
+
+  const computeDirections = async (d: Destination) => {
+    setDirectionsOpen(true);
+    setLoadingRoute(true);
+    setSelected(d);
+    try {
+      let from = origin;
+      if (!from) {
+        from = await locateUser();
+        setOrigin(from);
+      }
+      const [carR, bikeR, footR] = await Promise.allSettled([
+        fetchRoute(from, d.coords, "car"),
+        fetchRoute(from, d.coords, "bike"),
+        fetchRoute(from, d.coords, "foot"),
+      ]);
+      const pick = (r: PromiseSettledResult<Awaited<ReturnType<typeof fetchRoute>>>) =>
+        r.status === "fulfilled" ? { distance: r.value.distance, duration: r.value.duration } : null;
+      setRouteStats({ car: pick(carR), bike: pick(bikeR), foot: pick(footR) });
+      const active = mode === "car" ? carR : mode === "bike" ? bikeR : footR;
+      const fallback = [carR, bikeR, footR].find((r) => r.status === "fulfilled") as PromiseFulfilledResult<Awaited<ReturnType<typeof fetchRoute>>> | undefined;
+      if (active.status === "fulfilled") setRouteCoords(active.value.coords);
+      else if (fallback) setRouteCoords(fallback.value.coords);
+      else throw new Error("route");
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message === "denied" || err.message === "no-geo" ? t("locationError") : t("routeError"));
+    } finally {
+      setLoadingRoute(false);
+    }
+  };
+
+  const switchMode = async (m: TravelMode) => {
+    setMode(m);
+    if (!origin || !selected) return;
+    setLoadingRoute(true);
+    try {
+      const r = await fetchRoute(origin, selected.coords, m);
+      setRouteCoords(r.coords);
+      setRouteStats((s) => ({ ...s, [m]: { distance: r.distance, duration: r.duration } }));
+    } catch {
+      toast.error(t("routeError"));
+    } finally {
+      setLoadingRoute(false);
+    }
+  };
+
+  const clearRoute = () => {
+    setRouteCoords(null);
+    setDirectionsOpen(false);
+  };
+
+  const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
+  const fmtDur = (s: number) => {
+    const h = Math.floor(s / 3600);
+    const min = Math.round((s % 3600) / 60);
+    return h > 0 ? `${h}h ${min}min` : `${min} min`;
+  };
 
   const handleVisit = (d: Destination) => {
     const prevXp = user?.xp ?? 0;
