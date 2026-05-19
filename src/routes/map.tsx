@@ -278,10 +278,78 @@ function MapPage() {
                         <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>
                       )}
                     </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => computeDirections(selected)}
+                      disabled={loadingRoute}
+                    >
+                      {loadingRoute ? <Loader2 className="size-4 animate-spin" /> : <Navigation className="size-4" />}
+                      {t("getDirections")}
+                    </Button>
                     <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
                       {lang === "pt" ? "Ver experiências" : "See experiences"}
                     </Button>
                   </div>
+
+                  <AnimatePresence>
+                    {directionsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-6 overflow-hidden"
+                      >
+                        <div className="rounded-xl border bg-accent/30 p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold flex items-center gap-2">
+                              <Navigation className="size-4 text-primary" /> {t("directions")}
+                            </h3>
+                            <Button size="sm" variant="ghost" onClick={clearRoute}>
+                              <X className="size-4" /> {t("clearRoute")}
+                            </Button>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2">
+                            {([
+                              { id: "car" as const, icon: Car, label: t("byCar") },
+                              { id: "bike" as const, icon: Bike, label: t("byBike") },
+                              { id: "foot" as const, icon: Footprints, label: t("onFoot") },
+                            ]).map(({ id, icon: Icon, label }) => {
+                              const stats = routeStats[id];
+                              const active = mode === id;
+                              return (
+                                <button
+                                  key={id}
+                                  onClick={() => switchMode(id)}
+                                  disabled={loadingRoute}
+                                  className={`text-left rounded-lg border p-3 transition-all ${active ? "border-primary bg-primary/10 shadow-sm" : "border-border bg-background hover:border-primary/40"}`}
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Icon className="size-4" />
+                                    <span className="text-xs font-semibold">{label}</span>
+                                  </div>
+                                  {stats ? (
+                                    <>
+                                      <div className="text-sm font-bold">{fmtDur(stats.duration)}</div>
+                                      <div className="text-[11px] text-muted-foreground">{fmtDist(stats.distance)}</div>
+                                    </>
+                                  ) : (
+                                    <div className="text-[11px] text-muted-foreground">—</div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {loadingRoute && (
+                            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-2">
+                              <Loader2 className="size-3 animate-spin" /> {t("locating")}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </Card>
