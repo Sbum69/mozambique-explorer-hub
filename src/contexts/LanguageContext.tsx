@@ -128,7 +128,7 @@ const dict = {
   byBike: { pt: "De bicicleta", en: "By bike" },
   onFoot: { pt: "A pé", en: "On foot" },
   distance: { pt: "Distância", en: "Distance" },
-  duration: { pt: "Duração", en: "Duration" },
+  routeDuration: { pt: "Duração", en: "Duration" },
   clearRoute: { pt: "Limpar rota", en: "Clear route" },
   routeError: { pt: "Não foi possível calcular a rota.", en: "Could not calculate route." },
   locationError: { pt: "Sem acesso à tua localização.", en: "Location access denied." },
