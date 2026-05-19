@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
-import { ArrowLeft, MapPin, Users, Award, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Award, Check, Sparkles, Navigation, Car, Bike, Footprints, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 
-// Leaflet must be client-only (uses window)
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
 );
+
+type TravelMode = "car" | "bike" | "foot";
+const OSRM_PROFILE: Record<TravelMode, string> = { car: "driving", bike: "cycling", foot: "walking" };
 
 export const Route = createFileRoute("/map")({
   head: () => ({
@@ -40,8 +42,96 @@ function MapPage() {
   const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Destination | null>(DESTINATIONS[0]);
+  const [origin, setOrigin] = useState<[number, number] | null>(null);
+  const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
+  const [routeStats, setRouteStats] = useState<Record<TravelMode, { distance: number; duration: number } | null>>({ car: null, bike: null, foot: null });
+  const [mode, setMode] = useState<TravelMode>("car");
+  const [loadingRoute, setLoadingRoute] = useState(false);
+  const [directionsOpen, setDirectionsOpen] = useState(false);
 
   const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
+
+  const locateUser = (): Promise<[number, number]> =>
+    new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject(new Error("no-geo"));
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve([pos.coords.latitude, pos.coords.longitude]),
+        () => reject(new Error("denied")),
+        { timeout: 8000 },
+      );
+    });
+
+  const fetchRoute = async (from: [number, number], to: [number, number], m: TravelMode) => {
+    const url = `https://router.project-osrm.org/route/v1/${OSRM_PROFILE[m]}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("route");
+    const data = await res.json();
+    const r = data.routes?.[0];
+    if (!r) throw new Error("route");
+    return {
+      coords: (r.geometry.coordinates as [number, number][]).map(([lng, lat]) => [lat, lng] as [number, number]),
+      distance: r.distance as number,
+      duration: r.duration as number,
+    };
+  };
+
+  const computeDirections = async (d: Destination) => {
+    setDirectionsOpen(true);
+    setLoadingRoute(true);
+    setSelected(d);
+    try {
+      let from = origin;
+      if (!from) {
+        from = await locateUser();
+        setOrigin(from);
+      }
+      const [carR, bikeR, footR] = await Promise.allSettled([
+        fetchRoute(from, d.coords, "car"),
+        fetchRoute(from, d.coords, "bike"),
+        fetchRoute(from, d.coords, "foot"),
+      ]);
+      const pick = (r: PromiseSettledResult<Awaited<ReturnType<typeof fetchRoute>>>) =>
+        r.status === "fulfilled" ? { distance: r.value.distance, duration: r.value.duration } : null;
+      setRouteStats({ car: pick(carR), bike: pick(bikeR), foot: pick(footR) });
+      const active = mode === "car" ? carR : mode === "bike" ? bikeR : footR;
+      const fallback = [carR, bikeR, footR].find((r) => r.status === "fulfilled") as PromiseFulfilledResult<Awaited<ReturnType<typeof fetchRoute>>> | undefined;
+      if (active.status === "fulfilled") setRouteCoords(active.value.coords);
+      else if (fallback) setRouteCoords(fallback.value.coords);
+      else throw new Error("route");
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message === "denied" || err.message === "no-geo" ? t("locationError") : t("routeError"));
+    } finally {
+      setLoadingRoute(false);
+    }
+  };
+
+  const switchMode = async (m: TravelMode) => {
+    setMode(m);
+    if (!origin || !selected) return;
+    setLoadingRoute(true);
+    try {
+      const r = await fetchRoute(origin, selected.coords, m);
+      setRouteCoords(r.coords);
+      setRouteStats((s) => ({ ...s, [m]: { distance: r.distance, duration: r.duration } }));
+    } catch {
+      toast.error(t("routeError"));
+    } finally {
+      setLoadingRoute(false);
+    }
+  };
+
+  const clearRoute = () => {
+    setRouteCoords(null);
+    setDirectionsOpen(false);
+  };
+
+  const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
+  const fmtDur = (s: number) => {
+    const h = Math.floor(s / 3600);
+    const min = Math.round((s % 3600) / 60);
+    return h > 0 ? `${h}h ${min}min` : `${min} min`;
+  };
 
   const handleVisit = (d: Destination) => {
     const prevXp = user?.xp ?? 0;
@@ -96,7 +186,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap onSelect={setSelected} />
+              <InteractiveMap onSelect={setSelected} routeCoords={routeCoords} origin={origin} />
             </Suspense>
           </Card>
 
@@ -188,10 +278,78 @@ function MapPage() {
                         <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>
                       )}
                     </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => computeDirections(selected)}
+                      disabled={loadingRoute}
+                    >
+                      {loadingRoute ? <Loader2 className="size-4 animate-spin" /> : <Navigation className="size-4" />}
+                      {t("getDirections")}
+                    </Button>
                     <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
                       {lang === "pt" ? "Ver experiências" : "See experiences"}
                     </Button>
                   </div>
+
+                  <AnimatePresence>
+                    {directionsOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-6 overflow-hidden"
+                      >
+                        <div className="rounded-xl border bg-accent/30 p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold flex items-center gap-2">
+                              <Navigation className="size-4 text-primary" /> {t("directions")}
+                            </h3>
+                            <Button size="sm" variant="ghost" onClick={clearRoute}>
+                              <X className="size-4" /> {t("clearRoute")}
+                            </Button>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2">
+                            {([
+                              { id: "car" as const, icon: Car, label: t("byCar") },
+                              { id: "bike" as const, icon: Bike, label: t("byBike") },
+                              { id: "foot" as const, icon: Footprints, label: t("onFoot") },
+                            ]).map(({ id, icon: Icon, label }) => {
+                              const stats = routeStats[id];
+                              const active = mode === id;
+                              return (
+                                <button
+                                  key={id}
+                                  onClick={() => switchMode(id)}
+                                  disabled={loadingRoute}
+                                  className={`text-left rounded-lg border p-3 transition-all ${active ? "border-primary bg-primary/10 shadow-sm" : "border-border bg-background hover:border-primary/40"}`}
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Icon className="size-4" />
+                                    <span className="text-xs font-semibold">{label}</span>
+                                  </div>
+                                  {stats ? (
+                                    <>
+                                      <div className="text-sm font-bold">{fmtDur(stats.duration)}</div>
+                                      <div className="text-[11px] text-muted-foreground">{fmtDist(stats.distance)}</div>
+                                    </>
+                                  ) : (
+                                    <div className="text-[11px] text-muted-foreground">—</div>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {loadingRoute && (
+                            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-2">
+                              <Loader2 className="size-3 animate-spin" /> {t("locating")}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </Card>
