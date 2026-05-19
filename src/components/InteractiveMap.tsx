@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, CircleMarker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 import { useLang } from "@/contexts/LanguageContext";
 
-// Custom orange pin
 const pinIcon = L.divIcon({
   className: "ekaya-pin",
   html: `<div style="
@@ -31,11 +30,23 @@ function MapResizer() {
   return null;
 }
 
-interface Props {
-  onSelect?: (d: Destination) => void;
+function FitRoute({ coords }: { coords: [number, number][] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords && coords.length > 1) {
+      map.fitBounds(coords, { padding: [40, 40] });
+    }
+  }, [coords, map]);
+  return null;
 }
 
-export function InteractiveMap({ onSelect }: Props) {
+interface Props {
+  onSelect?: (d: Destination) => void;
+  routeCoords?: [number, number][] | null;
+  origin?: [number, number] | null;
+}
+
+export function InteractiveMap({ onSelect, routeCoords, origin }: Props) {
   const { lang } = useLang();
 
   return (
@@ -46,10 +57,29 @@ export function InteractiveMap({ onSelect }: Props) {
       scrollWheelZoom
     >
       <MapResizer />
+      <FitRoute coords={routeCoords ?? null} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+
+      {routeCoords && routeCoords.length > 1 && (
+        <Polyline
+          positions={routeCoords}
+          pathOptions={{ color: "oklch(0.68 0.19 45)", weight: 5, opacity: 0.85 }}
+        />
+      )}
+
+      {origin && (
+        <CircleMarker
+          center={origin}
+          radius={8}
+          pathOptions={{ color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }}
+        >
+          <Popup>{lang === "pt" ? "Tu estás aqui" : "You are here"}</Popup>
+        </CircleMarker>
+      )}
+
       {DESTINATIONS.map((d) => (
         <Marker key={d.id} position={d.coords} icon={pinIcon}>
           <Popup>
