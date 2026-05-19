@@ -119,6 +119,33 @@ const dict = {
   xpGained: { pt: "XP ganhos!", en: "XP earned!" },
   levelUp: { pt: "Subiste de nível!", en: "You leveled up!" },
   newBadgesUnlocked: { pt: "Novas conquistas desbloqueadas!", en: "New badges unlocked!" },
+  // directions
+  directions: { pt: "Direções", en: "Directions" },
+  getDirections: { pt: "Como chegar", en: "Get directions" },
+  useMyLocation: { pt: "Usar a minha localização", en: "Use my location" },
+  locating: { pt: "A localizar...", en: "Locating..." },
+  byCar: { pt: "De carro", en: "By car" },
+  byBike: { pt: "De bicicleta", en: "By bike" },
+  onFoot: { pt: "A pé", en: "On foot" },
+  distance: { pt: "Distância", en: "Distance" },
+  duration: { pt: "Duração", en: "Duration" },
+  clearRoute: { pt: "Limpar rota", en: "Clear route" },
+  routeError: { pt: "Não foi possível calcular a rota.", en: "Could not calculate route." },
+  locationError: { pt: "Sem acesso à tua localização.", en: "Location access denied." },
+  selectStart: { pt: "Origem", en: "From" },
+  selectEnd: { pt: "Destino", en: "To" },
+  // experiences
+  expTitle: { pt: "Experiências Comunitárias", en: "Community Experiences" },
+  expSub: { pt: "Reserva atividades autênticas guiadas por locais", en: "Book authentic activities guided by locals" },
+  bookNow: { pt: "Reservar", en: "Book now" },
+  booked: { pt: "Reservado!", en: "Booked!" },
+  hours: { pt: "horas", en: "hours" },
+  hour: { pt: "hora", en: "hour" },
+  perPerson: { pt: "por pessoa", en: "per person" },
+  category: { pt: "Categoria", en: "Category" },
+  allCategories: { pt: "Todas", en: "All" },
+  bookingConfirmed: { pt: "Reserva confirmada", en: "Booking confirmed" },
+  bookingDesc: { pt: "Receberás detalhes no e-mail (simulado).", en: "You will receive details via email (simulated)." },
 } as const;
 
 export type DictKey = keyof typeof dict;
