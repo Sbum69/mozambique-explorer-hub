@@ -186,7 +186,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap onSelect={setSelected} />
+              <InteractiveMap onSelect={setSelected} routeCoords={routeCoords} origin={origin} />
             </Suspense>
           </Card>
 
