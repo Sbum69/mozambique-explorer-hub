@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
-import { ArrowLeft, MapPin, Users, Award, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Award, Check, Sparkles, Navigation, Car, Bike, Footprints, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 
-// Leaflet must be client-only (uses window)
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
 );
+
+type TravelMode = "car" | "bike" | "foot";
+const OSRM_PROFILE: Record<TravelMode, string> = { car: "driving", bike: "cycling", foot: "walking" };
 
 export const Route = createFileRoute("/map")({
   head: () => ({
