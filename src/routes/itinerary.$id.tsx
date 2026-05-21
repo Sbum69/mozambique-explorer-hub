@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { findItineraryById, type Difficulty } from "@/data/itineraries";
+import { findItineraryById, type Difficulty, type Itinerary } from "@/data/itineraries";
 
 export const Route = createFileRoute("/itinerary/$id")({
   head: ({ params }) => ({
@@ -60,7 +60,7 @@ const difficultyColor: Record<Difficulty, string> = {
 };
 
 function ItineraryDetailPage() {
-  const it = Route.useLoaderData();
+  const it = Route.useLoaderData() as Itinerary;
   const [expandedStory, setExpandedStory] = useState<number | null>(null);
   const [completedStops, setCompletedStops] = useState<number[]>([]);
 
