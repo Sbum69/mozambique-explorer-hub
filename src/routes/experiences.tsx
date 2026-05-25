@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { EXPERIENCES, type Experience, type ExperienceCategory } from "@/data/experiences";
 
 export const Route = createFileRoute("/experiences")({
