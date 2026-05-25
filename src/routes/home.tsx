@@ -34,6 +34,7 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { DESTINATIONS } from "@/data/destinations";
 import { EXPERIENCES, type ExperienceCategory } from "@/data/experiences";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
+import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
 import hero from "@/assets/hero-mozambique.jpg";
 
