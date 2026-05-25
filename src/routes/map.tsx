@@ -167,7 +167,10 @@ function MapPage() {
           <button onClick={() => navigate({ to: "/dashboard" })} className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
             <ArrowLeft className="size-4" /> {t("backToDashboard")}
           </button>
-          <LanguageToggle />
+          <div className="flex items-center gap-1">
+            <NotificationsBell />
+            <LanguageToggle />
+          </div>
         </div>
       </nav>
 
