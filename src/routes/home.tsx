@@ -12,6 +12,7 @@ import {
   Heart,
   Star,
   Clock,
+  Newspaper,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
