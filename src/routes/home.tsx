@@ -166,6 +166,7 @@ function HomePage() {
             Ekaya
           </div>
           <div className="flex items-center gap-2">
+            <NotificationsBell variant="onDark" />
             <LanguageToggle />
             <Button
               asChild
