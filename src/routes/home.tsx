@@ -495,6 +495,55 @@ function HomePage() {
         </div>
       </section>
 
+      {/* ============ NEWS & UPDATES ============ */}
+      <section className="px-6 sm:px-10 py-16 max-w-6xl mx-auto">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+              <Newspaper className="size-6 text-primary" />
+              {lang === "pt"
+                ? "Notícias e atualizações de Moçambique"
+                : "News & updates from Mozambique"}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {lang === "pt"
+                ? "Eventos, dicas e alertas para a tua próxima viagem."
+                : "Events, tips and alerts for your next trip."}
+            </p>
+          </div>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/news-alerts">
+              {lang === "pt" ? "Ver todas" : "View all"}
+              <ArrowRight className="size-3.5 ml-1" />
+            </Link>
+          </Button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {MOCK_NEWS.slice(0, 3).map((n) => (
+            <Card key={n.id} className="h-full flex flex-col p-5 hover:shadow-[var(--shadow-elegant)] transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <Badge variant="secondary" className="text-[10px] uppercase">
+                  {newsCategoryLabel(n.category, lang)}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(n.date).toLocaleDateString(lang === "pt" ? "pt-PT" : "en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                  })}
+                </span>
+              </div>
+              <h3 className="font-bold text-base leading-tight mb-2">{n.title[lang]}</h3>
+              <p className="text-sm text-muted-foreground flex-1">{n.summary[lang]}</p>
+              <Button asChild variant="link" size="sm" className="self-start mt-3 p-0">
+                <Link to="/news-alerts">
+                  {lang === "pt" ? "Ler mais →" : "Read more →"}
+                </Link>
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* ============ OFFLINE + IMPACT ============ */}
       <section className="px-6 sm:px-10 py-16 max-w-6xl mx-auto grid gap-6 md:grid-cols-2">
         <Card>
