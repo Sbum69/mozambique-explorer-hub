@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { DESTINATIONS } from "@/data/destinations";
 
 export const Route = createFileRoute("/dashboard")({
