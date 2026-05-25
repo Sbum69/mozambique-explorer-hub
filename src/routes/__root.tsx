@@ -3,6 +3,7 @@ import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-r
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
