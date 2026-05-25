@@ -72,6 +72,7 @@ function DashboardPage() {
             Ekaya
           </Link>
           <div className="flex items-center gap-2">
+            <NotificationsBell />
             <LanguageToggle />
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
               <span className="size-7 rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground flex items-center justify-center text-xs font-bold">
