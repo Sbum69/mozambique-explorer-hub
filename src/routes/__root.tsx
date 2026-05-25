@@ -72,8 +72,10 @@ function RootComponent() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <Outlet />
-        <Toaster />
+        <NotificationsProvider>
+          <Outlet />
+          <Toaster />
+        </NotificationsProvider>
       </AuthProvider>
     </LanguageProvider>
   );
