@@ -27,6 +27,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
 import { DESTINATIONS } from "@/data/destinations";
