@@ -29,6 +29,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
 import { DESTINATIONS } from "@/data/destinations";
@@ -162,11 +163,16 @@ function HomePage() {
 
         {/* Nav */}
         <nav className="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5 text-white">
-          <div className="flex items-center gap-2 font-bold text-xl">
-            <span className="size-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
-              🌍
-            </span>
-            Ekaya
+          <div className="flex items-center gap-1">
+            <div className="text-white">
+              <AppSidebar />
+            </div>
+            <div className="flex items-center gap-2 font-bold text-xl ml-1">
+              <span className="size-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+                🌍
+              </span>
+              Ekaya
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell variant="onDark" />

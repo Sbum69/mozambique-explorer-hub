@@ -1,8 +1,9 @@
 import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
   Trophy, Award, Star, MapPin, Camera, Heart, Users, Sparkles, Lock, ArrowLeft, Check,
+  Share2, Copy, Instagram, Twitter, MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -13,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { AppSidebar } from "@/components/AppSidebar";
 
 export const Route = createFileRoute("/gamification")({
   head: () => ({
@@ -72,6 +74,8 @@ function GamificationPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
+  const [showShare, setShowShare] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   if (!user) return null;
 
@@ -81,16 +85,36 @@ function GamificationPage() {
 
   const handleClaim = (id: string) => {
     setClaimed((prev) => new Set(prev).add(id));
+    navigate({ to: "/voucher/$rewardId", params: { rewardId: id } });
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`https://ekaya-explore.com/profile/${user.username}`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button onClick={() => navigate({ to: "/dashboard" })} className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
-            <ArrowLeft className="size-4" /> {t("backToDashboard")}
-          </button>
-          <LanguageToggle />
+          <div className="flex items-center gap-1">
+            <AppSidebar />
+            <button onClick={() => navigate({ to: "/dashboard" })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
+              <ArrowLeft className="size-4" /> {t("backToDashboard")}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setShowShare(true)}
+              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:opacity-90 rounded-full"
+            >
+              <Share2 className="size-4" />
+              <span className="hidden sm:inline">{lang === "pt" ? "Partilhar" : "Share"}</span>
+            </Button>
+            <LanguageToggle />
+          </div>
         </div>
       </nav>
 
@@ -223,6 +247,105 @@ function GamificationPage() {
           </Link>
         </div>
       </main>
+
+      <AnimatePresence>
+        {showShare && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowShare(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card rounded-3xl shadow-2xl z-[101] max-w-lg w-[92vw] p-6"
+            >
+              <h3 className="text-2xl font-bold text-center mb-1">
+                {lang === "pt" ? "Partilhar Conquistas" : "Share Achievements"}
+              </h3>
+              <p className="text-sm text-muted-foreground text-center mb-5">
+                {lang === "pt" ? "Mostra as tuas aventuras aos amigos!" : "Show your adventures to friends!"}
+              </p>
+
+              {/* Preview card */}
+              <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-6 text-white mb-5 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
+                  {Array.from({ length: 30 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute w-1 h-1 bg-white rounded-full"
+                      style={{ left: `${(i * 7) % 100}%`, top: `${(i * 11) % 100}%` }}
+                    />
+                  ))}
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="size-14 bg-white/20 rounded-full flex items-center justify-center text-xl font-bold">
+                      {user.displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-bold">{user.displayName}</h4>
+                      <p className="text-xs text-purple-100">
+                        {lang === "pt" ? "Explorador de Moçambique" : "Mozambique Explorer"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <Mini label={t("level")} value={user.level} />
+                    <Mini label={t("visited")} value={user.visitedPlaces} />
+                    <Mini label={t("badges")} value={unlockedBadges} />
+                  </div>
+                  <p className="text-center text-xs text-purple-100 mt-2">
+                    {lang === "pt" ? "Explora Moçambique comigo! 🌍" : "Explore Mozambique with me! 🌍"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <Social icon={Instagram} label="Instagram" gradient="from-pink-500 to-rose-600" />
+                <Social icon={Twitter} label="Twitter" gradient="from-blue-400 to-blue-600" />
+                <Social icon={MessageCircle} label="WhatsApp" gradient="from-green-500 to-emerald-600" />
+              </div>
+
+              <Button variant="outline" className="w-full mb-2" onClick={handleCopyLink}>
+                {linkCopied ? <Check className="size-4 text-green-600" /> : <Copy className="size-4" />}
+                {linkCopied
+                  ? lang === "pt" ? "Link copiado!" : "Link copied!"
+                  : lang === "pt" ? "Copiar link do perfil" : "Copy profile link"}
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={() => setShowShare(false)}>
+                {lang === "pt" ? "Fechar" : "Close"}
+              </Button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function Mini({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center">
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-[10px] text-purple-100 uppercase tracking-wide">{label}</div>
+    </div>
+  );
+}
+
+function Social({ icon: Icon, label, gradient }: { icon: typeof Instagram; label: string; gradient: string }) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      className={`flex flex-col items-center gap-2 p-3 bg-gradient-to-br ${gradient} text-white rounded-xl shadow-lg`}
+    >
+      <Icon className="size-5" />
+      <span className="text-[11px] font-semibold">{label}</span>
+    </motion.button>
   );
 }
