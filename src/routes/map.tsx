@@ -11,6 +11,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { AppSidebar } from "@/components/AppSidebar";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 
 const InteractiveMap = lazy(() =>
