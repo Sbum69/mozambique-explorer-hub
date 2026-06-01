@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { AppSidebar } from "@/components/AppSidebar";
 import { DESTINATIONS } from "@/data/destinations";
 
 export const Route = createFileRoute("/dashboard")({
