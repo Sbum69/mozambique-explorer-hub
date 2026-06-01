@@ -74,6 +74,8 @@ function GamificationPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
+  const [showShare, setShowShare] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   if (!user) return null;
 
@@ -83,6 +85,13 @@ function GamificationPage() {
 
   const handleClaim = (id: string) => {
     setClaimed((prev) => new Set(prev).add(id));
+    navigate({ to: "/voucher/$rewardId", params: { rewardId: id } });
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`https://ekaya-explore.com/profile/${user.username}`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   return (
