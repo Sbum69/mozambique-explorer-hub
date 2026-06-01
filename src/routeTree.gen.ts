@@ -24,6 +24,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CultureHistoryRouteImport } from './routes/culture-history'
 import { Route as BusinessRegisterRouteImport } from './routes/business-register'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
 
 const UsefulInfoRoute = UsefulInfoRouteImport.update({
@@ -101,6 +102,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VoucherRewardIdRoute = VoucherRewardIdRouteImport.update({
+  id: '/voucher/$rewardId',
+  path: '/voucher/$rewardId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ItineraryIdRoute = ItineraryIdRouteImport.update({
   id: '/itinerary/$id',
   path: '/itinerary/$id',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/itinerary/$id': typeof ItineraryIdRoute
+  '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/itinerary/$id': typeof ItineraryIdRoute
+  '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/itinerary/$id': typeof ItineraryIdRoute
+  '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/useful-info'
     | '/itinerary/$id'
+    | '/voucher/$rewardId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/useful-info'
     | '/itinerary/$id'
+    | '/voucher/$rewardId'
   id:
     | '__root__'
     | '/'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/useful-info'
     | '/itinerary/$id'
+    | '/voucher/$rewardId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
+  VoucherRewardIdRoute: typeof VoucherRewardIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/voucher/$rewardId': {
+      id: '/voucher/$rewardId'
+      path: '/voucher/$rewardId'
+      fullPath: '/voucher/$rewardId'
+      preLoaderRoute: typeof VoucherRewardIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/itinerary/$id': {
       id: '/itinerary/$id'
       path: '/itinerary/$id'
@@ -372,16 +392,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   UsefulInfoRoute: UsefulInfoRoute,
   ItineraryIdRoute: ItineraryIdRoute,
+  VoucherRewardIdRoute: VoucherRewardIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

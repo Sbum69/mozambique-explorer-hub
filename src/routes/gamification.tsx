@@ -1,8 +1,9 @@
 import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
   Trophy, Award, Star, MapPin, Camera, Heart, Users, Sparkles, Lock, ArrowLeft, Check,
+  Share2, Copy, Instagram, Twitter, MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -13,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { AppSidebar } from "@/components/AppSidebar";
 
 export const Route = createFileRoute("/gamification")({
   head: () => ({
