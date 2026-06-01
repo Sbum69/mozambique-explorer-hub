@@ -98,10 +98,23 @@ function GamificationPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button onClick={() => navigate({ to: "/dashboard" })} className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
-            <ArrowLeft className="size-4" /> {t("backToDashboard")}
-          </button>
-          <LanguageToggle />
+          <div className="flex items-center gap-1">
+            <AppSidebar />
+            <button onClick={() => navigate({ to: "/dashboard" })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
+              <ArrowLeft className="size-4" /> {t("backToDashboard")}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setShowShare(true)}
+              className="bg-gradient-to-r from-purple-500 to-purple-700 text-white hover:opacity-90 rounded-full"
+            >
+              <Share2 className="size-4" />
+              <span className="hidden sm:inline">{lang === "pt" ? "Partilhar" : "Share"}</span>
+            </Button>
+            <LanguageToggle />
+          </div>
         </div>
       </nav>
 
