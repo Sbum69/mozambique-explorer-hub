@@ -13,6 +13,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { EXPERIENCES, type Experience, type ExperienceCategory } from "@/data/experiences";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/experiences")({
   head: () => ({
@@ -127,13 +128,28 @@ function ExperiencesPage() {
                         {exp.rating.toFixed(1)} · {exp.reviews}
                       </Badge>
                     </div>
-                    <div className="absolute top-3 right-3">
+                    <div className="absolute top-3 right-3 flex items-center gap-2">
                       <Badge className="bg-gradient-to-r from-warning to-primary text-white border-0">
                         {CATEGORIES.find((c) => c.id === exp.category)?.emoji}{" "}
                         {lang === "pt"
                           ? CATEGORIES.find((c) => c.id === exp.category)?.labelPt
                           : CATEGORIES.find((c) => c.id === exp.category)?.labelEn}
                       </Badge>
+                      <FavoriteButton
+                        itemId={exp.id}
+                        itemType="experience"
+                        itemData={{
+                          title: exp.title,
+                          description: exp.description,
+                          image: exp.image,
+                          location: exp.location,
+                          rating: exp.rating,
+                          priceMzn: exp.priceMzn,
+                          durationHours: exp.durationHours,
+                          host: exp.host,
+                        }}
+                        size="sm"
+                      />
                     </div>
                   </div>
 
