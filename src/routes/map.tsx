@@ -13,6 +13,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
@@ -251,7 +252,23 @@ function MapPage() {
           >
             <Card className="overflow-hidden border-0 shadow-[var(--shadow-elegant)]">
               <div className="grid md:grid-cols-2">
-                <img src={selected.image} alt={selected.name} className="w-full h-64 md:h-full object-cover" />
+                <div className="relative">
+                  <img src={selected.image} alt={selected.name} className="w-full h-64 md:h-full object-cover" />
+                  <div className="absolute top-3 right-3">
+                    <FavoriteButton
+                      itemId={selected.id}
+                      itemType="place"
+                      itemData={{
+                        name: selected.name,
+                        description: selected.description,
+                        image: selected.image,
+                        location: selected.region[lang],
+                        region: selected.region,
+                      }}
+                      size="md"
+                    />
+                  </div>
+                </div>
                 <div className="p-6">
                   <p className="text-xs uppercase tracking-wide text-primary font-semibold">{selected.region[lang]}</p>
                   <h2 className="text-2xl font-bold mt-1">{selected.name}</h2>
