@@ -4,6 +4,7 @@ import appCss from "../styles.css?url";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -73,8 +74,10 @@ function RootComponent() {
     <LanguageProvider>
       <AuthProvider>
         <NotificationsProvider>
-          <Outlet />
-          <Toaster />
+          <FavoritesProvider>
+            <Outlet />
+            <Toaster />
+          </FavoritesProvider>
         </NotificationsProvider>
       </AuthProvider>
     </LanguageProvider>
