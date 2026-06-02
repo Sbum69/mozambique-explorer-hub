@@ -27,6 +27,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { findItineraryById, type Difficulty, type Itinerary } from "@/data/itineraries";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itinerary/$id")({
   head: ({ params }) => ({
@@ -107,6 +108,21 @@ function ItineraryDetailPage() {
         >
           <ArrowLeft className="h-4 w-4" /> Roteiros
         </Link>
+        <div className="absolute top-6 right-6">
+          <FavoriteButton
+            itemId={it.id}
+            itemType="itinerary"
+            itemData={{
+              name: it.name,
+              description: it.description,
+              image: it.image,
+              duration: it.duration,
+              rating: it.rating,
+              location: it.code,
+            }}
+            size="md"
+          />
+        </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
           <div className="container mx-auto">
             <div className="flex gap-2 mb-3">

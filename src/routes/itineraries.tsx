@@ -51,6 +51,7 @@ import {
   type Difficulty,
 } from "@/data/itineraries";
 import { useAuth } from "@/contexts/AuthContext";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
@@ -174,9 +175,24 @@ function ItinerariesPage() {
                       {it.difficulty}
                     </Badge>
                   </div>
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/60 text-white px-2 py-1 rounded-md text-sm">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    {it.rating}
+                  <div className="absolute top-3 right-3 flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-black/60 text-white px-2 py-1 rounded-md text-sm">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      {it.rating}
+                    </div>
+                    <FavoriteButton
+                      itemId={it.id}
+                      itemType="itinerary"
+                      itemData={{
+                        name: it.name,
+                        description: it.description,
+                        image: it.image,
+                        duration: it.duration,
+                        rating: it.rating,
+                        location: it.code,
+                      }}
+                      size="sm"
+                    />
                   </div>
                   <div className="absolute bottom-3 left-3 right-3 text-white">
                     <h3 className="text-xl font-bold">{it.name}</h3>
