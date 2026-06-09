@@ -19,6 +19,7 @@ import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GamificationRouteImport } from './routes/gamification'
 import { Route as GamesRouteImport } from './routes/games'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -71,6 +72,11 @@ const HomeRoute = HomeRouteImport.update({
 const GamificationRoute = GamificationRouteImport.update({
   id: '/gamification',
   path: '/gamification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesRoute = GamesRouteImport.update({
