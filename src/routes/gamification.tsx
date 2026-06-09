@@ -153,6 +153,56 @@ function GamificationPage() {
           </Card>
         </motion.div>
 
+        {/* Games CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mt-8 relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 text-white p-6 sm:p-8 shadow-2xl"
+        >
+          <div className="absolute -top-10 -right-10 size-48 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute -bottom-12 -left-12 size-56 bg-white/10 rounded-full blur-2xl" />
+          <div className="relative grid md:grid-cols-[1fr_auto] gap-6 items-center">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <motion.span
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 2.2 }}
+                  className="text-3xl"
+                >🎮</motion.span>
+                <h3 className="text-2xl font-bold">Jogos & Desafios</h3>
+              </div>
+              <p className="text-white/90 mb-4 max-w-xl text-sm">
+                Caça ao tesouro, quizzes, fotografia e muito mais. Joga, ganha pontos e desbloqueia selos exclusivos.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-5">
+                {["🗺️ Caça ao Tesouro", "📸 Fotografia", "🧠 Quizzes", "🤝 Experiências", "⏱️ Roteiros"].map((p) => (
+                  <span key={p} className="text-xs bg-white/15 backdrop-blur px-3 py-1 rounded-full">{p}</span>
+                ))}
+              </div>
+              <Button
+                onClick={() => navigate({ to: "/games" })}
+                className="bg-white text-purple-700 hover:bg-white/90 font-bold"
+              >
+                🎮 Jogar Agora
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 min-w-[200px]">
+              {[
+                { icon: "🏆", label: "18 Jogos" },
+                { icon: "⭐", label: "8 Selos" },
+                { icon: "🎯", label: "Pontos" },
+                { icon: "🔓", label: "Níveis" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-xl bg-white/15 backdrop-blur p-3 text-center">
+                  <div className="text-2xl">{s.icon}</div>
+                  <p className="text-xs mt-1 font-semibold">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {/* Badges */}
         <h2 className="mt-10 mb-5 text-2xl font-bold tracking-tight flex items-center gap-2">
           <Award className="size-6 text-warning" /> {t("badges")}
