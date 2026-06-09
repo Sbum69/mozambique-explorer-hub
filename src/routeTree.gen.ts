@@ -18,6 +18,7 @@ import { Route as ItinerariesRouteImport } from './routes/itineraries'
 import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GamificationRouteImport } from './routes/gamification'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -72,6 +73,11 @@ const GamificationRoute = GamificationRouteImport.update({
   path: '/gamification',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
   '/favorites': typeof FavoritesRoute
+  '/games': typeof GamesRoute
   '/gamification': typeof GamificationRoute
   '/home': typeof HomeRoute
   '/impact': typeof ImpactRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
   '/favorites': typeof FavoritesRoute
+  '/games': typeof GamesRoute
   '/gamification': typeof GamificationRoute
   '/home': typeof HomeRoute
   '/impact': typeof ImpactRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
   '/favorites': typeof FavoritesRoute
+  '/games': typeof GamesRoute
   '/gamification': typeof GamificationRoute
   '/home': typeof HomeRoute
   '/impact': typeof ImpactRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/experiences'
     | '/favorites'
+    | '/games'
     | '/gamification'
     | '/home'
     | '/impact'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/experiences'
     | '/favorites'
+    | '/games'
     | '/gamification'
     | '/home'
     | '/impact'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/experiences'
     | '/favorites'
+    | '/games'
     | '/gamification'
     | '/home'
     | '/impact'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
   FavoritesRoute: typeof FavoritesRoute
+  GamesRoute: typeof GamesRoute
   GamificationRoute: typeof GamificationRoute
   HomeRoute: typeof HomeRoute
   ImpactRoute: typeof ImpactRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamificationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favorites': {
       id: '/favorites'
       path: '/favorites'
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,
   FavoritesRoute: FavoritesRoute,
+  GamesRoute: GamesRoute,
   GamificationRoute: GamificationRoute,
   HomeRoute: HomeRoute,
   ImpactRoute: ImpactRoute,
