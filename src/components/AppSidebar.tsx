@@ -46,7 +46,7 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     items: [
       { to: "/culture-history", icon: BookOpen, label: { pt: "Cultura & História", en: "Culture & History" } },
       { to: "/useful-info", icon: Info, label: { pt: "Centro de Conhecimento", en: "Knowledge Center" } },
-      { to: "/business-register", icon: Users, label: { pt: "Comunidade", en: "Community" } },
+      { to: "/community", icon: Users, label: { pt: "Comunidade", en: "Community" } },
     ],
   },
 ];

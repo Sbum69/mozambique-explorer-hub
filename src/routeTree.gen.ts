@@ -23,6 +23,7 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CultureHistoryRouteImport } from './routes/culture-history'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as BusinessRegisterRouteImport } from './routes/business-register'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
@@ -98,6 +99,11 @@ const CultureHistoryRoute = CultureHistoryRouteImport.update({
   path: '/culture-history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   id: '/business-register',
   path: '/business-register',
@@ -122,6 +128,7 @@ const ItineraryIdRoute = ItineraryIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/business-register': typeof BusinessRegisterRoute
+  '/community': typeof CommunityRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/business-register': typeof BusinessRegisterRoute
+  '/community': typeof CommunityRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/business-register': typeof BusinessRegisterRoute
+  '/community': typeof CommunityRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/business-register'
+    | '/community'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/business-register'
+    | '/community'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/business-register'
+    | '/community'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -246,6 +258,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
+  CommunityRoute: typeof CommunityRoute
   CultureHistoryRoute: typeof CultureHistoryRoute
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CultureHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business-register': {
       id: '/business-register'
       path: '/business-register'
@@ -398,6 +418,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
+  CommunityRoute: CommunityRoute,
   CultureHistoryRoute: CultureHistoryRoute,
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,
