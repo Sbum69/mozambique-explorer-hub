@@ -31,6 +31,7 @@ import {
   DollarSign,
   Activity,
   Tag,
+  MessageSquare,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
