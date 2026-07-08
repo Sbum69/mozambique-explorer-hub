@@ -56,7 +56,14 @@ function LoginPage() {
       return;
     }
     toast.success(t("welcomeBack"));
-    navigate({ to: "/home" });
+    const key = username.trim().toLowerCase();
+    if (key === "admin") {
+      navigate({ to: "/admin" });
+    } else if (key === "banca_maria" || key === "lodge_bazaruto" || key.includes("business") || key.includes("negocio")) {
+      navigate({ to: "/business-dashboard" });
+    } else {
+      navigate({ to: "/home" });
+    }
   };
 
   const handleGuest = () => {
