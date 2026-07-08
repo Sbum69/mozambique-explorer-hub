@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 export type UserRole = "guest" | "user" | "admin" | "business-small" | "business-large";
 
@@ -6,6 +6,16 @@ export interface UserPreferences {
   province?: string;
   durationDays?: number;
   interests?: string[];
+}
+
+export interface BusinessInfo {
+  businessName: string;
+  businessType: "small" | "large";
+  category: string;
+  location: string;
+  description: string;
+  contact: string;
+  verified: boolean;
 }
 
 export interface AppUser {
@@ -19,10 +29,10 @@ export interface AppUser {
   kmExplored: number;
   preferences?: UserPreferences;
   visitedIds?: string[];
+  businessInfo?: BusinessInfo;
 }
 
 export function computeLevel(xp: number) {
-  // Level n requires sum 1..n * 1000 XP — simple: level = floor(xp/1000)+1 capped at 5? Use thresholds.
   if (xp >= 5000) return 5;
   if (xp >= 3000) return 4;
   if (xp >= 1500) return 3;
@@ -68,6 +78,16 @@ const DEMO_USERS: Record<string, { password: string; user: AppUser }> = {
       visitedPlaces: 0,
       completedItineraries: 0,
       kmExplored: 0,
+      businessInfo: {
+        businessName: "Banca da Maria",
+        businessType: "small",
+        category: "Artesanato Local",
+        location: "Mercado Central, Maputo",
+        description:
+          "Artesanato tradicional moçambicano feito à mão. Cestos, esculturas em madeira, e tecidos coloridos.",
+        contact: "+258 84 123 4567",
+        verified: true,
+      },
     },
   },
   lodge_bazaruto: {
@@ -81,6 +101,16 @@ const DEMO_USERS: Record<string, { password: string; user: AppUser }> = {
       visitedPlaces: 0,
       completedItineraries: 0,
       kmExplored: 0,
+      businessInfo: {
+        businessName: "Bazaruto Paradise Lodge",
+        businessType: "large",
+        category: "Alojamento e Hospedagem",
+        location: "Arquipélago de Bazaruto, Inhambane",
+        description:
+          "Lodge de luxo com vista para o mar. Inclui restaurante, spa e atividades aquáticas.",
+        contact: "+258 84 987 6543",
+        verified: true,
+      },
     },
   },
 };
@@ -94,6 +124,13 @@ interface AuthContextValue {
   needsOnboarding: boolean;
   addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
   visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
+  registerBusiness: (businessData: BusinessInfo, username: string, code: string) => { ok: boolean; error?: string };
+  isGuest: boolean;
+  isUser: boolean;
+  isAdmin: boolean;
+  isBusinessSmall: boolean;
+  isBusinessLarge: boolean;
+  isBusiness: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -101,6 +138,8 @@ const STORAGE_KEY = "ekaya.auth.user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
+  // In-memory registry of dynamically registered businesses (session-only)
+  const registeredBusinesses = useRef<Map<string, AppUser>>(new Map());
 
   useEffect(() => {
     try {
@@ -118,17 +157,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login: AuthContextValue["login"] = (username, password) => {
-    const entry = DEMO_USERS[username.toLowerCase()];
-    if (!entry || entry.password !== password) {
-      return { ok: false, error: "Credenciais inválidas" };
+    const key = username.trim().toLowerCase();
+    const entry = DEMO_USERS[key];
+    if (entry && entry.password === password) {
+      persist({ ...entry.user });
+      return { ok: true };
     }
-    persist({ ...entry.user });
-    return { ok: true };
+    const dyn = registeredBusinesses.current.get(`${key}:${password}`);
+    if (dyn) {
+      persist({ ...dyn });
+      return { ok: true };
+    }
+    return { ok: false, error: "Credenciais inválidas" };
   };
 
   const loginAsGuest = () => {
     persist({
-      username: "guest",
+      username: "Convidado",
       role: "guest",
       displayName: "Convidado",
       xp: 0,
@@ -177,14 +222,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { gained, alreadyVisited: false, leveledUp, newLevel };
   };
 
+  const registerBusiness: AuthContextValue["registerBusiness"] = (businessData, username, code) => {
+    const key = username.trim().toLowerCase();
+    if (!key || !code) return { ok: false, error: "Credenciais em falta" };
+    if (DEMO_USERS[key]) return { ok: false, error: "Utilizador já existe" };
+    for (const stored of registeredBusinesses.current.keys()) {
+      if (stored.startsWith(`${key}:`)) return { ok: false, error: "Utilizador já existe" };
+    }
+    const role: UserRole = businessData.businessType === "large" ? "business-large" : "business-small";
+    const newUser: AppUser = {
+      username: key,
+      role,
+      displayName: businessData.businessName,
+      xp: 0,
+      level: 1,
+      visitedPlaces: 0,
+      completedItineraries: 0,
+      kmExplored: 0,
+      businessInfo: { ...businessData, verified: false },
+    };
+    registeredBusinesses.current.set(`${key}:${code}`, newUser);
+    persist(newUser);
+    return { ok: true };
+  };
+
   const needsOnboarding =
     !!user &&
     (user.role === "user" || user.role === "guest") &&
     !user.preferences?.province;
 
+  const isGuest = user?.role === "guest";
+  const isUser = user?.role === "user";
+  const isAdmin = user?.role === "admin";
+  const isBusinessSmall = user?.role === "business-small";
+  const isBusinessLarge = user?.role === "business-large";
+  const isBusiness = isBusinessSmall || isBusinessLarge;
+
   return (
     <AuthContext.Provider
-      value={{ user, login, loginAsGuest, logout, setPreferences, needsOnboarding, addXP, visitDestination }}
+      value={{
+        user,
+        login,
+        loginAsGuest,
+        logout,
+        setPreferences,
+        needsOnboarding,
+        addXP,
+        visitDestination,
+        registerBusiness,
+        isGuest,
+        isUser,
+        isAdmin,
+        isBusinessSmall,
+        isBusinessLarge,
+        isBusiness,
+      }}
     >
       {children}
     </AuthContext.Provider>
