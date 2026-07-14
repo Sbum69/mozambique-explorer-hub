@@ -33,10 +33,7 @@ export interface AppUser {
   businessInfo?: BusinessInfo;
 }
 
-  preferences?: UserPreferences;
-  visitedIds?: string[];
-  businessInfo?: BusinessInfo;
-}
+
 
 export function computeLevel(xp: number) {
   if (xp >= 5000) return 5;
