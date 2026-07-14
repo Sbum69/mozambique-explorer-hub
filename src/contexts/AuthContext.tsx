@@ -22,11 +22,17 @@ export interface AppUser {
   username: string;
   role: UserRole;
   displayName: string;
+  email?: string;
   xp: number;
   level: number;
   visitedPlaces: number;
   completedItineraries: number;
   kmExplored: number;
+  preferences?: UserPreferences;
+  visitedIds?: string[];
+  businessInfo?: BusinessInfo;
+}
+
   preferences?: UserPreferences;
   visitedIds?: string[];
   businessInfo?: BusinessInfo;
