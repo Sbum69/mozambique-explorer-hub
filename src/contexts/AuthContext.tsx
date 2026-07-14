@@ -271,6 +271,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   };
 
+  const registerUser: AuthContextValue["registerUser"] = ({ username, password, displayName, email }) => {
+    const key = username.trim().toLowerCase();
+    if (!key) return { ok: false, error: "Escolhe um nome de utilizador" };
+    if (/\s/.test(key)) return { ok: false, error: "Sem espaços no nome de utilizador" };
+    if (DEMO_USERS[key] || registeredUsers.current.has(key)) {
+      return { ok: false, error: "Este nome já está em uso" };
+    }
+    for (const stored of registeredBusinesses.current.keys()) {
+      if (stored.startsWith(`${key}:`)) return { ok: false, error: "Este nome já está em uso" };
+    }
+    const newUser: AppUser = {
+      username: key,
+      role: "user",
+      displayName: displayName.trim() || key,
+      email: email.trim(),
+      xp: 0,
+      level: 1,
+      visitedPlaces: 0,
+      completedItineraries: 0,
+      kmExplored: 0,
+    };
+    registeredUsers.current.set(key, { password, user: newUser });
+    persistRegisteredUsers();
+    persist(newUser);
+    return { ok: true };
+  };
+
+
   const needsOnboarding =
     !!user &&
     (user.role === "user" || user.role === "guest") &&
