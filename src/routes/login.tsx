@@ -202,12 +202,14 @@ function LoginPage() {
             </Button>
           </div>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            {t("createAccount")}{" "}
-            <Link to="/signup" className="text-primary font-semibold hover:underline">
-              →
-            </Link>
-          </p>
+          <Link
+            to="/signup"
+            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-orange-500 text-orange-600 font-semibold hover:bg-orange-50 transition-colors"
+          >
+            <UserPlus className="size-4" />
+            Não tens conta? Criar Conta Gratuita
+          </Link>
+
 
           {/* Demo credentials */}
           <Card className="mt-6 p-4 bg-muted/40 border-dashed">
