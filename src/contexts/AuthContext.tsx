@@ -182,6 +182,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       persist({ ...entry.user });
       return { ok: true };
     }
+    const reg = registeredUsers.current.get(key);
+    if (reg && reg.password === password) {
+      persist({ ...reg.user });
+      return { ok: true };
+    }
     const dyn = registeredBusinesses.current.get(`${key}:${password}`);
     if (dyn) {
       persist({ ...dyn });
@@ -189,6 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     return { ok: false, error: "Credenciais inválidas" };
   };
+
 
   const loginAsGuest = () => {
     persist({
