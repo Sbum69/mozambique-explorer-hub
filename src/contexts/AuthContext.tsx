@@ -145,15 +145,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   // In-memory registry of dynamically registered businesses (session-only)
   const registeredBusinesses = useRef<Map<string, AppUser>>(new Map());
+  // Registered end-users (persisted in localStorage)
+  const registeredUsers = useRef<Map<string, { password: string; user: AppUser }>>(new Map());
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setUser(JSON.parse(raw));
+      const usersRaw = localStorage.getItem("ekaya.registeredUsers");
+      if (usersRaw) {
+        const parsed = JSON.parse(usersRaw) as Record<string, { password: string; user: AppUser }>;
+        registeredUsers.current = new Map(Object.entries(parsed));
+      }
     } catch {
       /* ignore */
     }
   }, []);
+
+  const persistRegisteredUsers = () => {
+    const obj: Record<string, { password: string; user: AppUser }> = {};
+    registeredUsers.current.forEach((v, k) => { obj[k] = v; });
+    localStorage.setItem("ekaya.registeredUsers", JSON.stringify(obj));
+  };
+
 
   const persist = (u: AppUser | null) => {
     setUser(u);
