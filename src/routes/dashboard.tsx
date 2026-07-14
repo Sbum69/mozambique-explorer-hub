@@ -58,15 +58,33 @@ const MODULES: ModuleDef[] = [
 ];
 
 function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, needsOnboarding } = useAuth();
   const { t, lang } = useLang();
   const navigate = useNavigate();
+  const [showChangeDest, setShowChangeDest] = useState(false);
 
   if (!user) return null;
 
   const province = DESTINATIONS.find((d) => d.id === user.preferences?.province);
   const xpToNext = (user.level + 1) * 1000;
   const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
+
+  const recommendedItinerary = province
+    ? SAMPLE_ITINERARIES.find((it) => it.id === DESTINATION_ITINERARY[province.id])
+    : null;
+  const tripDays = user.preferences?.durationDays ?? 3;
+  const daySlices = recommendedItinerary
+    ? Array.from({ length: Math.min(tripDays, 5) }).map((_, idx) => {
+        const stops = recommendedItinerary.route;
+        return {
+          day: idx + 1,
+          morning: stops[(idx * 3) % stops.length]?.name ?? stops[(idx * 3) % stops.length]?.title ?? "Explorar a região",
+          afternoon: stops[(idx * 3 + 1) % stops.length]?.name ?? stops[(idx * 3 + 1) % stops.length]?.title ?? "Passeio local",
+          evening: stops[(idx * 3 + 2) % stops.length]?.name ?? stops[(idx * 3 + 2) % stops.length]?.title ?? "Jantar típico",
+        };
+      })
+    : [];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
