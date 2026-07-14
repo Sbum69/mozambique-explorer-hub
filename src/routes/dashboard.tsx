@@ -124,12 +124,29 @@ function DashboardPage() {
               <div>
                 <p className="text-sm opacity-90">{t("hello")},</p>
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{user.displayName} 👋</h1>
-                {province && (
-                  <p className="mt-2 text-sm opacity-90">
-                    📍 {province.name} · {user.preferences?.durationDays} {t("days")}
-                  </p>
+                {province ? (
+                  <>
+                    <p className="mt-2 text-sm opacity-90">
+                      A explorar <strong>{province.name}</strong> · {tripDays} {t("days")}
+                      {user.preferences?.interests?.length ? ` · ${user.preferences.interests.slice(0, 3).join(", ")}` : ""}
+                    </p>
+                    <button
+                      onClick={() => setShowChangeDest(true)}
+                      className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
+                    >
+                      <MapPin className="size-3.5" /> Mudar destino
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowChangeDest(true)}
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
+                  >
+                    <MapPin className="size-3.5" /> Escolher destino
+                  </button>
                 )}
               </div>
+
               <div className="grid grid-cols-3 gap-4 text-center">
                 <Stat label={t("level")} value={user.level} />
                 <Stat label={t("visited")} value={user.visitedPlaces} />
