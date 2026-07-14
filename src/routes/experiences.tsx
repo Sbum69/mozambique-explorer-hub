@@ -42,9 +42,13 @@ const CATEGORIES: { id: ExperienceCategory | "all"; emoji: string; labelPt: stri
 
 function ExperiencesPage() {
   const { t, lang } = useLang();
-  const { addXP } = useAuth();
+  const { addXP, user } = useAuth();
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<ExperienceCategory | "all">("all");
+  const preferredInterest = user?.preferences?.interests?.find((i) =>
+    CATEGORIES.some((c) => c.id === i),
+  ) as ExperienceCategory | undefined;
+  const [filter, setFilter] = useState<ExperienceCategory | "all">(preferredInterest ?? "all");
+
   const [booked, setBooked] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(
