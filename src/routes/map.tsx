@@ -44,7 +44,10 @@ function MapPage() {
   const { t, lang } = useLang();
   const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<Destination | null>(DESTINATIONS[0]);
+  const preferredId = user?.preferences?.province;
+  const initialDest = DESTINATIONS.find((d) => d.id === preferredId) ?? DESTINATIONS[0];
+  const [selected, setSelected] = useState<Destination | null>(initialDest);
+
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
   const [routeStats, setRouteStats] = useState<Record<TravelMode, { distance: number; duration: number } | null>>({ car: null, bike: null, foot: null });

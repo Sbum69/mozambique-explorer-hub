@@ -51,6 +51,8 @@ import {
   type Difficulty,
 } from "@/data/itineraries";
 import { useAuth } from "@/contexts/AuthContext";
+import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+
 import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itineraries")({
@@ -71,7 +73,14 @@ function ItinerariesPage() {
   const [userItins, setUserItins] = useState<Itinerary[]>(() =>
     getUserItineraries(),
   );
-  const all = [...SAMPLE_ITINERARIES, ...userItins];
+  const provinceId = user?.preferences?.province;
+  const recommendedId = provinceId ? DESTINATION_ITINERARY[provinceId] : undefined;
+  const samples = [...SAMPLE_ITINERARIES].sort((a, b) =>
+    a.id === recommendedId ? -1 : b.id === recommendedId ? 1 : 0,
+  );
+  const all = [...samples, ...userItins];
+
+
 
   const [showShareModal, setShowShareModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -148,6 +157,18 @@ function ItinerariesPage() {
           </div>
         </div>
 
+        {provinceId && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-orange-500/10 border border-primary/20">
+            <p className="text-sm">
+              <Sparkles className="inline size-4 text-primary mr-1" />
+              Baseado na tua seleção: <strong>{provinceId}</strong>
+              {user?.preferences?.durationDays ? `, ${user.preferences.durationDays} dias` : ""}
+            </p>
+          </div>
+        )}
+
+
+
         {/* Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {all.map((it, idx) => (
@@ -174,6 +195,12 @@ function ItinerariesPage() {
                     <Badge className={difficultyColor[it.difficulty]}>
                       {it.difficulty}
                     </Badge>
+                    {it.id === recommendedId && (
+                      <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0">
+                        ⭐ Recomendado para Ti
+                      </Badge>
+                    )}
+
                   </div>
                   <div className="absolute top-3 right-3 flex items-center gap-2">
                     <div className="flex items-center gap-1 bg-black/60 text-white px-2 py-1 rounded-md text-sm">

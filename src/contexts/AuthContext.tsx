@@ -22,6 +22,7 @@ export interface AppUser {
   username: string;
   role: UserRole;
   displayName: string;
+  email?: string;
   xp: number;
   level: number;
   visitedPlaces: number;
@@ -31,6 +32,8 @@ export interface AppUser {
   visitedIds?: string[];
   businessInfo?: BusinessInfo;
 }
+
+
 
 export function computeLevel(xp: number) {
   if (xp >= 5000) return 5;
@@ -125,6 +128,8 @@ interface AuthContextValue {
   addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
   visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
   registerBusiness: (businessData: BusinessInfo, username: string, code: string) => { ok: boolean; error?: string };
+  registerUser: (data: { username: string; password: string; displayName: string; email: string }) => { ok: boolean; error?: string };
+
   isGuest: boolean;
   isUser: boolean;
   isAdmin: boolean;
@@ -140,15 +145,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   // In-memory registry of dynamically registered businesses (session-only)
   const registeredBusinesses = useRef<Map<string, AppUser>>(new Map());
+  // Registered end-users (persisted in localStorage)
+  const registeredUsers = useRef<Map<string, { password: string; user: AppUser }>>(new Map());
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setUser(JSON.parse(raw));
+      const usersRaw = localStorage.getItem("ekaya.registeredUsers");
+      if (usersRaw) {
+        const parsed = JSON.parse(usersRaw) as Record<string, { password: string; user: AppUser }>;
+        registeredUsers.current = new Map(Object.entries(parsed));
+      }
     } catch {
       /* ignore */
     }
   }, []);
+
+  const persistRegisteredUsers = () => {
+    const obj: Record<string, { password: string; user: AppUser }> = {};
+    registeredUsers.current.forEach((v, k) => { obj[k] = v; });
+    localStorage.setItem("ekaya.registeredUsers", JSON.stringify(obj));
+  };
+
 
   const persist = (u: AppUser | null) => {
     setUser(u);
@@ -163,6 +182,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       persist({ ...entry.user });
       return { ok: true };
     }
+    const reg = registeredUsers.current.get(key);
+    if (reg && reg.password === password) {
+      persist({ ...reg.user });
+      return { ok: true };
+    }
     const dyn = registeredBusinesses.current.get(`${key}:${password}`);
     if (dyn) {
       persist({ ...dyn });
@@ -170,6 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     return { ok: false, error: "Credenciais inválidas" };
   };
+
 
   const loginAsGuest = () => {
     persist({
@@ -246,6 +271,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   };
 
+  const registerUser: AuthContextValue["registerUser"] = ({ username, password, displayName, email }) => {
+    const key = username.trim().toLowerCase();
+    if (!key) return { ok: false, error: "Escolhe um nome de utilizador" };
+    if (/\s/.test(key)) return { ok: false, error: "Sem espaços no nome de utilizador" };
+    if (DEMO_USERS[key] || registeredUsers.current.has(key)) {
+      return { ok: false, error: "Este nome já está em uso" };
+    }
+    for (const stored of registeredBusinesses.current.keys()) {
+      if (stored.startsWith(`${key}:`)) return { ok: false, error: "Este nome já está em uso" };
+    }
+    const newUser: AppUser = {
+      username: key,
+      role: "user",
+      displayName: displayName.trim() || key,
+      email: email.trim(),
+      xp: 0,
+      level: 1,
+      visitedPlaces: 0,
+      completedItineraries: 0,
+      kmExplored: 0,
+    };
+    registeredUsers.current.set(key, { password, user: newUser });
+    persistRegisteredUsers();
+    persist(newUser);
+    return { ok: true };
+  };
+
+
   const needsOnboarding =
     !!user &&
     (user.role === "user" || user.role === "guest") &&
@@ -270,6 +323,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         addXP,
         visitDestination,
         registerBusiness,
+        registerUser,
+
         isGuest,
         isUser,
         isAdmin,
