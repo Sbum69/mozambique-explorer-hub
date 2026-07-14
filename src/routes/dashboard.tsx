@@ -253,7 +253,13 @@ function DashboardPage() {
           ))}
         </div>
       </main>
+
+      <OnboardingModal
+        open={showChangeDest || needsOnboarding}
+        onComplete={() => setShowChangeDest(false)}
+      />
     </div>
+
   );
 }
 
