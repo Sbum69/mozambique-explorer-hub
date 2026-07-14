@@ -157,6 +157,18 @@ function ItinerariesPage() {
           </div>
         </div>
 
+        {provinceId && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-orange-500/10 border border-primary/20">
+            <p className="text-sm">
+              <Sparkles className="inline size-4 text-primary mr-1" />
+              Baseado na tua seleção: <strong>{provinceId}</strong>
+              {user?.preferences?.durationDays ? `, ${user.preferences.durationDays} dias` : ""}
+            </p>
+          </div>
+        )}
+
+
+
         {/* Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {all.map((it, idx) => (
