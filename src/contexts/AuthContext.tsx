@@ -128,6 +128,8 @@ interface AuthContextValue {
   addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
   visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
   registerBusiness: (businessData: BusinessInfo, username: string, code: string) => { ok: boolean; error?: string };
+  registerUser: (data: { username: string; password: string; displayName: string; email: string }) => { ok: boolean; error?: string };
+
   isGuest: boolean;
   isUser: boolean;
   isAdmin: boolean;
