@@ -165,8 +165,69 @@ function DashboardPage() {
           </Card>
         </motion.div>
 
+        {/* Personalized itinerary */}
+        {recommendedItinerary && province && (
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-8"
+          >
+            <div className="flex items-end justify-between mb-4 gap-3 flex-wrap">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">O Teu Itinerário</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Itinerário para {tripDays} dias em {province.name}
+                  {user.preferences?.interests?.length
+                    ? ` · baseado em ${user.preferences.interests.slice(0, 3).join(", ")}`
+                    : ""}
+                </p>
+              </div>
+              <Button asChild variant="outline" className="gap-2">
+                <Link to="/itineraries">Ver completo <ArrowRight className="size-4" /></Link>
+              </Button>
+            </div>
+            <Card className="p-5 sm:p-6 border-0 shadow-[var(--shadow-soft)]">
+              <div className="space-y-4">
+                {daySlices.map((d, i) => (
+                  <motion.div
+                    key={d.day}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex gap-4 relative"
+                  >
+                    <div className="flex flex-col items-center">
+                      <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-bold flex items-center justify-center shadow-md shrink-0">
+                        {d.day}
+                      </div>
+                      {i < daySlices.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
+                    </div>
+                    <div className="flex-1 pb-4 space-y-1.5">
+                      <p className="text-sm font-semibold">Dia {d.day}</p>
+                      <div className="flex items-start gap-2 text-sm">
+                        <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                        <span>{d.morning}</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-sm">
+                        <CloudSun className="size-4 text-orange-500 mt-0.5 shrink-0" />
+                        <span>{d.afternoon}</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-sm">
+                        <Moon className="size-4 text-indigo-500 mt-0.5 shrink-0" />
+                        <span>{d.evening}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </Card>
+          </motion.section>
+        )}
+
         {/* Modules grid */}
         <h2 className="mt-10 mb-5 text-2xl font-bold tracking-tight">{t("modules")}</h2>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {MODULES.map((m, i) => (
             <motion.div
