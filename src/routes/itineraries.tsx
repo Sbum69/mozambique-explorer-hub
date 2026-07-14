@@ -71,14 +71,13 @@ function ItinerariesPage() {
   const [userItins, setUserItins] = useState<Itinerary[]>(() =>
     getUserItineraries(),
   );
-  const recommendedId = user?.preferences?.province
-    ? (
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require("@/data/destination-itinerary-map").DESTINATION_ITINERARY[user.preferences.province] as string | undefined
-      )
-    : undefined;
-  const samples = [...SAMPLE_ITINERARIES].sort((a, b) => (a.id === recommendedId ? -1 : b.id === recommendedId ? 1 : 0));
+  const provinceId = user?.preferences?.province;
+  const recommendedId = provinceId ? DESTINATION_ITINERARY[provinceId] : undefined;
+  const samples = [...SAMPLE_ITINERARIES].sort((a, b) =>
+    a.id === recommendedId ? -1 : b.id === recommendedId ? 1 : 0,
+  );
   const all = [...samples, ...userItins];
+
 
 
   const [showShareModal, setShowShareModal] = useState(false);
