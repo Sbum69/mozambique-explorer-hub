@@ -323,6 +323,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         addXP,
         visitDestination,
         registerBusiness,
+        registerUser,
+
         isGuest,
         isUser,
         isAdmin,
