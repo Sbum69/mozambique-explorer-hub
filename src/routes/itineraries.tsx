@@ -195,6 +195,12 @@ function ItinerariesPage() {
                     <Badge className={difficultyColor[it.difficulty]}>
                       {it.difficulty}
                     </Badge>
+                    {it.id === recommendedId && (
+                      <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0">
+                        ⭐ Recomendado para Ti
+                      </Badge>
+                    )}
+
                   </div>
                   <div className="absolute top-3 right-3 flex items-center gap-2">
                     <div className="flex items-center gap-1 bg-black/60 text-white px-2 py-1 rounded-md text-sm">
