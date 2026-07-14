@@ -1,19 +1,26 @@
 import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
+  MapPin, Sun, CloudSun, Moon, ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import { DESTINATIONS } from "@/data/destinations";
+import { SAMPLE_ITINERARIES } from "@/data/itineraries";
+import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
