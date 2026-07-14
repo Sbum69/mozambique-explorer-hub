@@ -51,6 +51,8 @@ import {
   type Difficulty,
 } from "@/data/itineraries";
 import { useAuth } from "@/contexts/AuthContext";
+import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+
 import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itineraries")({
