@@ -541,19 +541,28 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
           transition={{ delay: i * 0.05 }}
         >
           <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
-            <div className={`h-2 bg-gradient-to-r ${ev.gradient}`} />
-            <div className="p-5">
-              <div className="flex items-start justify-between mb-3 gap-2">
+            <div className="relative h-40 overflow-hidden">
+              <img
+                src={ev.image}
+                alt={ev.title[lang]}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+              />
+              <div className={`absolute inset-0 bg-gradient-to-t ${ev.gradient} opacity-40`} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute top-3 left-3">
                 <Badge className={`bg-gradient-to-r ${ev.gradient} text-white border-0 text-[10px]`}>
                   {ev.category[lang]}
                 </Badge>
-                <div className="text-right">
-                  <div className="text-xs font-semibold">{ev.date[lang]}</div>
-                  <div className="text-[11px] text-muted-foreground flex items-center gap-1 justify-end">
-                    <MapPin className="size-3" /> {ev.location}
-                  </div>
-                </div>
               </div>
+              <div className="absolute bottom-3 left-3 right-3 text-white">
+                <div className="flex items-center gap-1 text-[11px] font-medium opacity-95">
+                  <MapPin className="size-3" /> {ev.location}
+                </div>
+                <div className="text-xs font-semibold opacity-95">{ev.date[lang]}</div>
+              </div>
+            </div>
+            <div className="p-5">
               <h3 className="font-bold text-lg leading-tight mb-2">{ev.title[lang]}</h3>
               <p className="text-sm text-muted-foreground mb-4">{ev.description[lang]}</p>
               <div className="flex items-center justify-between pt-4 border-t">
@@ -596,10 +605,24 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
         >
-          <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-100 dark:border-blue-900 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">{w.city}</h3>
-              <WeatherIcon icon={w.icon} className="size-10" />
+          <Card className="overflow-hidden border-blue-100 dark:border-blue-900">
+            <div className="relative h-32 overflow-hidden">
+              <img
+                src={w.image}
+                alt={w.city}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-900/30 to-transparent" />
+              <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">
+                <h3 className="text-2xl font-bold drop-shadow">{w.city}</h3>
+                <WeatherIcon icon={w.icon} className="size-8 drop-shadow" />
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 p-6">
+            <div className="text-center mb-6">
+              <div className="text-6xl font-bold">{w.tempC}°</div>
+              <div className="text-muted-foreground mt-1">{w.condition[lang]}</div>
             </div>
             <div className="text-center mb-6">
               <div className="text-6xl font-bold">{w.tempC}°</div>
