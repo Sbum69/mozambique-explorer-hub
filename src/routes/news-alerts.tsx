@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
@@ -182,10 +182,73 @@ const CATEGORY_TONE: Record<NewsCategory, string> = {
   community: "bg-success/15 text-success border-success/20",
 };
 
+interface LiveNews {
+  title: string;
+  link: string;
+  description: string;
+  pubDate: string;
+  thumbnail?: string;
+  source: string;
+}
+
+function stripHtml(s: string) {
+  return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
+function useLiveNews(lang: "pt" | "en") {
+  const [items, setItems] = useState<LiveNews[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setError(null);
+      // Google News RSS for Mozambique, converted to JSON via rss2json (free, no key)
+      const q = lang === "pt" ? "Mo%C3%A7ambique" : "Mozambique";
+      const hl = lang === "pt" ? "pt-PT" : "en";
+      const rss = `https://news.google.com/rss/search?q=${q}&hl=${hl}&gl=MZ&ceid=MZ:${lang === "pt" ? "pt-150" : "en"}`;
+      const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.status !== "ok") throw new Error(data.message || "RSS error");
+        const parsed: LiveNews[] = (data.items || []).slice(0, 8).map((it: any) => {
+          const desc = stripHtml(it.description || "");
+          // Google News wraps items — source is often at the end after " - "
+          const sourceMatch = it.title.match(/ - ([^-]+)$/);
+          return {
+            title: sourceMatch ? it.title.replace(/ - [^-]+$/, "") : it.title,
+            link: it.link,
+            description: desc.length > 200 ? desc.slice(0, 200) + "…" : desc,
+            pubDate: it.pubDate,
+            thumbnail: it.thumbnail || it.enclosure?.link || undefined,
+            source: sourceMatch ? sourceMatch[1] : (data.feed?.title || "Google News"),
+          };
+        });
+        setItems(parsed);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "fetch failed");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
+
+  return { items, loading, error };
+}
+
 function NewsTab({ lang }: { lang: "pt" | "en" }) {
   const [filter, setFilter] = useState<"all" | NewsCategory>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<NewsItem | null>(null);
+  const live = useLiveNews(lang);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -205,6 +268,19 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
       month: "short",
       year: "numeric",
     });
+
+  const fmtLive = (d: string) => {
+    try {
+      return new Date(d).toLocaleString(lang === "pt" ? "pt-PT" : "en-GB", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return d;
+    }
+  };
 
   return (
     <div>
