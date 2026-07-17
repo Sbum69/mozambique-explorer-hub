@@ -10,6 +10,7 @@ export interface EventItem {
   attendees: number;
   price: { pt: string; en: string };
   gradient: string;
+  image: string;
 }
 
 export interface WeatherDay {
@@ -25,6 +26,7 @@ export interface WeatherCity {
   humidity: number;
   windKmh: number;
   forecast: WeatherDay[];
+  image: string;
 }
 
 export interface RoadAlert {
@@ -36,6 +38,7 @@ export interface RoadAlert {
   description: { pt: string; en: string };
   duration: { pt: string; en: string };
   alternative: { pt: string; en: string };
+  image: string;
 }
 
 export interface TravelTip {
