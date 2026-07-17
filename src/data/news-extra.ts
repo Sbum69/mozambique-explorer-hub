@@ -63,6 +63,7 @@ export const EVENTS: EventItem[] = [
     attendees: 500,
     price: { pt: "Gratuito", en: "Free" },
     gradient: "from-orange-500 to-red-500",
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=500&fit=crop",
   },
   {
     id: "ev2",
@@ -77,6 +78,7 @@ export const EVENTS: EventItem[] = [
     attendees: 200,
     price: { pt: "250 MZN", en: "250 MZN" },
     gradient: "from-purple-500 to-pink-500",
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=500&fit=crop",
   },
   {
     id: "ev3",
@@ -91,6 +93,7 @@ export const EVENTS: EventItem[] = [
     attendees: 1200,
     price: { pt: "Gratuito", en: "Free" },
     gradient: "from-amber-500 to-orange-600",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=500&fit=crop",
   },
   {
     id: "ev4",
@@ -105,6 +108,7 @@ export const EVENTS: EventItem[] = [
     attendees: 800,
     price: { pt: "Gratuito", en: "Free" },
     gradient: "from-blue-500 to-cyan-500",
+    image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=500&fit=crop",
   },
 ];
 
@@ -122,6 +126,7 @@ export const WEATHER: WeatherCity[] = [
       { label: { pt: "Sex", en: "Fri" }, icon: "cloud", tempC: 26 },
       { label: { pt: "Sáb", en: "Sat" }, icon: "rain", tempC: 24 },
     ],
+    image: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=500&fit=crop",
   },
   {
     city: "Inhambane",
@@ -136,6 +141,7 @@ export const WEATHER: WeatherCity[] = [
       { label: { pt: "Sex", en: "Fri" }, icon: "rain", tempC: 26 },
       { label: { pt: "Sáb", en: "Sat" }, icon: "sun", tempC: 29 },
     ],
+    image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&h=500&fit=crop",
   },
   {
     city: "Pemba",
@@ -150,6 +156,7 @@ export const WEATHER: WeatherCity[] = [
       { label: { pt: "Sex", en: "Fri" }, icon: "cloud", tempC: 31 },
       { label: { pt: "Sáb", en: "Sat" }, icon: "sun", tempC: 32 },
     ],
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=500&fit=crop",
   },
   {
     city: "Gorongosa",
@@ -164,6 +171,7 @@ export const WEATHER: WeatherCity[] = [
       { label: { pt: "Sex", en: "Fri" }, icon: "storm", tempC: 21 },
       { label: { pt: "Sáb", en: "Sat" }, icon: "cloud", tempC: 24 },
     ],
+    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&h=500&fit=crop",
   },
 ];
 
@@ -180,6 +188,7 @@ export const ROAD_ALERTS: RoadAlert[] = [
     },
     duration: { pt: "5 dias", en: "5 days" },
     alternative: { pt: "Via EN2 (Moamba)", en: "Via EN2 (Moamba)" },
+    image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&h=500&fit=crop",
   },
   {
     id: "r2",
@@ -193,6 +202,7 @@ export const ROAD_ALERTS: RoadAlert[] = [
     },
     duration: { pt: "Temporário", en: "Temporary" },
     alternative: { pt: "Atrasar partida para depois das 9h", en: "Delay departure to after 9am" },
+    image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800&h=500&fit=crop",
   },
   {
     id: "r3",
@@ -206,6 +216,7 @@ export const ROAD_ALERTS: RoadAlert[] = [
     },
     duration: { pt: "Concluído", en: "Completed" },
     alternative: { pt: "—", en: "—" },
+    image: "https://images.unsplash.com/photo-1503437313881-503a91226402?w=800&h=500&fit=crop",
   },
 ];
 
