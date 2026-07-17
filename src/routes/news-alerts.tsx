@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
@@ -182,10 +182,73 @@ const CATEGORY_TONE: Record<NewsCategory, string> = {
   community: "bg-success/15 text-success border-success/20",
 };
 
+interface LiveNews {
+  title: string;
+  link: string;
+  description: string;
+  pubDate: string;
+  thumbnail?: string;
+  source: string;
+}
+
+function stripHtml(s: string) {
+  return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
+function useLiveNews(lang: "pt" | "en") {
+  const [items, setItems] = useState<LiveNews[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setError(null);
+      // Google News RSS for Mozambique, converted to JSON via rss2json (free, no key)
+      const q = lang === "pt" ? "Mo%C3%A7ambique" : "Mozambique";
+      const hl = lang === "pt" ? "pt-PT" : "en";
+      const rss = `https://news.google.com/rss/search?q=${q}&hl=${hl}&gl=MZ&ceid=MZ:${lang === "pt" ? "pt-150" : "en"}`;
+      const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.status !== "ok") throw new Error(data.message || "RSS error");
+        const parsed: LiveNews[] = (data.items || []).slice(0, 8).map((it: any) => {
+          const desc = stripHtml(it.description || "");
+          // Google News wraps items — source is often at the end after " - "
+          const sourceMatch = it.title.match(/ - ([^-]+)$/);
+          return {
+            title: sourceMatch ? it.title.replace(/ - [^-]+$/, "") : it.title,
+            link: it.link,
+            description: desc.length > 200 ? desc.slice(0, 200) + "…" : desc,
+            pubDate: it.pubDate,
+            thumbnail: it.thumbnail || it.enclosure?.link || undefined,
+            source: sourceMatch ? sourceMatch[1] : (data.feed?.title || "Google News"),
+          };
+        });
+        setItems(parsed);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "fetch failed");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [lang]);
+
+  return { items, loading, error };
+}
+
 function NewsTab({ lang }: { lang: "pt" | "en" }) {
   const [filter, setFilter] = useState<"all" | NewsCategory>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<NewsItem | null>(null);
+  const live = useLiveNews(lang);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -205,6 +268,19 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
       month: "short",
       year: "numeric",
     });
+
+  const fmtLive = (d: string) => {
+    try {
+      return new Date(d).toLocaleString(lang === "pt" ? "pt-PT" : "en-GB", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return d;
+    }
+  };
 
   return (
     <div>
@@ -239,6 +315,89 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
         ))}
       </div>
 
+      {/* LIVE NEWS from Google News RSS (Mozambique) */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <span className="relative flex size-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full size-2.5 bg-red-600" />
+            </span>
+            {lang === "pt" ? "Últimas notícias em tempo real" : "Live news right now"}
+          </h2>
+          <span className="text-[11px] text-muted-foreground">
+            {lang === "pt" ? "Fonte: Google News" : "Source: Google News"}
+          </span>
+        </div>
+
+        {live.loading && (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[0, 1, 2, 3].map((k) => (
+              <div key={k} className="rounded-xl border bg-card p-4 animate-pulse space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-full" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!live.loading && live.error && (
+          <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+            {lang === "pt"
+              ? "Não foi possível carregar as notícias em tempo real agora. Mostrando notícias em destaque abaixo."
+              : "Couldn't load live news right now. Showing featured news below."}
+          </div>
+        )}
+
+        {!live.loading && !live.error && live.items.length > 0 && (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {live.items.map((it, idx) => (
+              <motion.a
+                key={it.link + idx}
+                href={it.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.03 }}
+                className="group flex gap-3 rounded-xl border bg-card p-3 hover:shadow-md transition-all"
+              >
+                {it.thumbnail ? (
+                  <img
+                    src={it.thumbnail}
+                    alt=""
+                    className="size-20 rounded-lg object-cover shrink-0"
+                    onError={(e) => ((e.currentTarget.style.display = "none"))}
+                  />
+                ) : (
+                  <div className="size-20 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
+                    <Newspaper className="size-8 text-white/90" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-600 mb-1">
+                    <span className="uppercase truncate">{it.source}</span>
+                    <span className="text-muted-foreground font-normal">· {fmtLive(it.pubDate)}</span>
+                  </div>
+                  <h4 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                    {it.title}
+                  </h4>
+                  {it.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                      {it.description}
+                    </p>
+                  )}
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <h2 className="text-lg font-bold mb-3">
+        {lang === "pt" ? "Notícias em destaque" : "Featured stories"}
+      </h2>
       <div className="space-y-4">
         {filtered.map((n, i) => (
           <motion.article
@@ -382,19 +541,28 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
           transition={{ delay: i * 0.05 }}
         >
           <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
-            <div className={`h-2 bg-gradient-to-r ${ev.gradient}`} />
-            <div className="p-5">
-              <div className="flex items-start justify-between mb-3 gap-2">
+            <div className="relative h-40 overflow-hidden">
+              <img
+                src={ev.image}
+                alt={ev.title[lang]}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+              />
+              <div className={`absolute inset-0 bg-gradient-to-t ${ev.gradient} opacity-40`} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute top-3 left-3">
                 <Badge className={`bg-gradient-to-r ${ev.gradient} text-white border-0 text-[10px]`}>
                   {ev.category[lang]}
                 </Badge>
-                <div className="text-right">
-                  <div className="text-xs font-semibold">{ev.date[lang]}</div>
-                  <div className="text-[11px] text-muted-foreground flex items-center gap-1 justify-end">
-                    <MapPin className="size-3" /> {ev.location}
-                  </div>
-                </div>
               </div>
+              <div className="absolute bottom-3 left-3 right-3 text-white">
+                <div className="flex items-center gap-1 text-[11px] font-medium opacity-95">
+                  <MapPin className="size-3" /> {ev.location}
+                </div>
+                <div className="text-xs font-semibold opacity-95">{ev.date[lang]}</div>
+              </div>
+            </div>
+            <div className="p-5">
               <h3 className="font-bold text-lg leading-tight mb-2">{ev.title[lang]}</h3>
               <p className="text-sm text-muted-foreground mb-4">{ev.description[lang]}</p>
               <div className="flex items-center justify-between pt-4 border-t">
@@ -437,11 +605,21 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
         >
-          <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-100 dark:border-blue-900 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">{w.city}</h3>
-              <WeatherIcon icon={w.icon} className="size-10" />
+          <Card className="overflow-hidden border-blue-100 dark:border-blue-900">
+            <div className="relative h-32 overflow-hidden">
+              <img
+                src={w.image}
+                alt={w.city}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-900/30 to-transparent" />
+              <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">
+                <h3 className="text-2xl font-bold drop-shadow">{w.city}</h3>
+                <WeatherIcon icon={w.icon} className="size-8 drop-shadow" />
+              </div>
             </div>
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 p-6">
             <div className="text-center mb-6">
               <div className="text-6xl font-bold">{w.tempC}°</div>
               <div className="text-muted-foreground mt-1">{w.condition[lang]}</div>
@@ -482,6 +660,7 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
                 ))}
               </div>
             </div>
+            </div>
           </Card>
         </motion.div>
       ))}
@@ -507,8 +686,13 @@ function RoadsTab({ lang }: { lang: "pt" | "en" }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className={cn("border-2 rounded-2xl p-5 shadow-sm", s.bg)}
+            className={cn("border-2 rounded-2xl shadow-sm overflow-hidden grid md:grid-cols-3", s.bg)}
           >
+            <div className="relative h-40 md:h-full md:col-span-1 overflow-hidden">
+              <img src={r.image} alt={r.location} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              <div className={`absolute inset-0 bg-gradient-to-t ${s.grad} opacity-30`} />
+            </div>
+            <div className="p-5 md:col-span-2">
             <div className="flex items-start gap-4">
               <div className={`size-12 bg-gradient-to-br ${s.grad} rounded-xl flex items-center justify-center text-white shrink-0`}>
                 <AlertTriangle className="size-6" />
@@ -544,6 +728,7 @@ function RoadsTab({ lang }: { lang: "pt" | "en" }) {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </motion.div>
         );
