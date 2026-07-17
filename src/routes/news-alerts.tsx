@@ -398,6 +398,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
       <h2 className="text-lg font-bold mb-3">
         {lang === "pt" ? "Notícias em destaque" : "Featured stories"}
       </h2>
+      <div className="space-y-4">
         {filtered.map((n, i) => (
           <motion.article
             key={n.id}
