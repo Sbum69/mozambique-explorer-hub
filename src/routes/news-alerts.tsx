@@ -315,7 +315,89 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
         ))}
       </div>
 
-      <div className="space-y-4">
+      {/* LIVE NEWS from Google News RSS (Mozambique) */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <span className="relative flex size-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full size-2.5 bg-red-600" />
+            </span>
+            {lang === "pt" ? "Últimas notícias em tempo real" : "Live news right now"}
+          </h2>
+          <span className="text-[11px] text-muted-foreground">
+            {lang === "pt" ? "Fonte: Google News" : "Source: Google News"}
+          </span>
+        </div>
+
+        {live.loading && (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[0, 1, 2, 3].map((k) => (
+              <div key={k} className="rounded-xl border bg-card p-4 animate-pulse space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-full" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!live.loading && live.error && (
+          <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+            {lang === "pt"
+              ? "Não foi possível carregar as notícias em tempo real agora. Mostrando notícias em destaque abaixo."
+              : "Couldn't load live news right now. Showing featured news below."}
+          </div>
+        )}
+
+        {!live.loading && !live.error && live.items.length > 0 && (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {live.items.map((it, idx) => (
+              <motion.a
+                key={it.link + idx}
+                href={it.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.03 }}
+                className="group flex gap-3 rounded-xl border bg-card p-3 hover:shadow-md transition-all"
+              >
+                {it.thumbnail ? (
+                  <img
+                    src={it.thumbnail}
+                    alt=""
+                    className="size-20 rounded-lg object-cover shrink-0"
+                    onError={(e) => ((e.currentTarget.style.display = "none"))}
+                  />
+                ) : (
+                  <div className="size-20 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
+                    <Newspaper className="size-8 text-white/90" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-600 mb-1">
+                    <span className="uppercase truncate">{it.source}</span>
+                    <span className="text-muted-foreground font-normal">· {fmtLive(it.pubDate)}</span>
+                  </div>
+                  <h4 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                    {it.title}
+                  </h4>
+                  {it.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                      {it.description}
+                    </p>
+                  )}
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <h2 className="text-lg font-bold mb-3">
+        {lang === "pt" ? "Notícias em destaque" : "Featured stories"}
+      </h2>
         {filtered.map((n, i) => (
           <motion.article
             key={n.id}
