@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LanguageToggle } from "@/components/LanguageToggle";
 
 export const Route = createFileRoute("/culture-history")({
   head: () => ({
@@ -39,7 +40,7 @@ const TOPICS: Topic[] = [
     date: "25 de Junho de 1975",
     gradient: "from-green-500 to-green-700",
     icon: Flag,
-    image: "https://images.unsplash.com/photo-1569255b1c?w=1200&h=600&fit=crop",
+    image: "https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=1200&h=600&fit=crop",
     short: "O dia em que Moçambique conquistou a sua liberdade após séculos de colonização portuguesa.",
     sections: [
       { heading: "Contexto Histórico", body: "Após mais de 470 anos sob domínio português, Moçambique conquistou a independência a 25 de Junho de 1975, dia que hoje é celebrado como feriado nacional." },
@@ -150,8 +151,8 @@ function CultureHistoryPage() {
           >
             <ArrowLeft className="size-4" /> Voltar
           </button>
-          <h1 className="font-bold text-sm sm:text-base">🇲🇿 Cultura e História de Moçambique</h1>
-          <div className="w-16" />
+          <h1 className="font-bold text-sm sm:text-base truncate">🇲🇿 Cultura e História</h1>
+          <LanguageToggle />
         </div>
       </header>
 
