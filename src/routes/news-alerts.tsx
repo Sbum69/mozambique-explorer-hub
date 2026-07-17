@@ -686,8 +686,13 @@ function RoadsTab({ lang }: { lang: "pt" | "en" }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className={cn("border-2 rounded-2xl p-5 shadow-sm", s.bg)}
+            className={cn("border-2 rounded-2xl shadow-sm overflow-hidden grid md:grid-cols-3", s.bg)}
           >
+            <div className="relative h-40 md:h-full md:col-span-1 overflow-hidden">
+              <img src={r.image} alt={r.location} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              <div className={`absolute inset-0 bg-gradient-to-t ${s.grad} opacity-30`} />
+            </div>
+            <div className="p-5 md:col-span-2">
             <div className="flex items-start gap-4">
               <div className={`size-12 bg-gradient-to-br ${s.grad} rounded-xl flex items-center justify-center text-white shrink-0`}>
                 <AlertTriangle className="size-6" />
