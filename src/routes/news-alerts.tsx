@@ -624,10 +624,6 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
               <div className="text-6xl font-bold">{w.tempC}°</div>
               <div className="text-muted-foreground mt-1">{w.condition[lang]}</div>
             </div>
-            <div className="text-center mb-6">
-              <div className="text-6xl font-bold">{w.tempC}°</div>
-              <div className="text-muted-foreground mt-1">{w.condition[lang]}</div>
-            </div>
             <div className="grid grid-cols-2 gap-3 mb-5">
               <div className="bg-background/60 rounded-lg p-3">
                 <div className="text-xs text-muted-foreground mb-1">
@@ -663,6 +659,7 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
                   </div>
                 ))}
               </div>
+            </div>
             </div>
           </Card>
         </motion.div>
