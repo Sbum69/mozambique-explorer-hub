@@ -48,13 +48,18 @@ function ExperiencesPage() {
     CATEGORIES.some((c) => c.id === i),
   ) as ExperienceCategory | undefined;
   const [filter, setFilter] = useState<ExperienceCategory | "all">(preferredInterest ?? "all");
+  const provinceId = user?.preferences?.province;
+  const [showAllDestinations, setShowAllDestinations] = useState(!provinceId);
 
   const [booked, setBooked] = useState<Set<string>>(new Set());
 
-  const filtered = useMemo(
-    () => (filter === "all" ? EXPERIENCES : EXPERIENCES.filter((e) => e.category === filter)),
-    [filter],
-  );
+  const filtered = useMemo(() => {
+    let list = EXPERIENCES;
+    if (provinceId && !showAllDestinations) list = list.filter((e) => e.destinationId === provinceId);
+    if (filter !== "all") list = list.filter((e) => e.category === filter);
+    return list;
+  }, [filter, provinceId, showAllDestinations]);
+
 
   const handleBook = (exp: Experience) => {
     if (booked.has(exp.id)) return;
