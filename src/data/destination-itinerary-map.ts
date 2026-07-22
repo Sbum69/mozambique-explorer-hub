@@ -7,3 +7,12 @@ export const DESTINATION_ITINERARY: Record<string, string> = {
   pemba: "baz003",
   gorongosa: "inh001",
 };
+
+// Inverse mapping: which destinations each itinerary covers.
+export const ITINERARY_DESTINATIONS: Record<string, string[]> = Object.entries(
+  DESTINATION_ITINERARY,
+).reduce<Record<string, string[]>>((acc, [dest, itin]) => {
+  (acc[itin] ||= []).push(dest);
+  return acc;
+}, {});
+
