@@ -47,6 +47,10 @@ function MapPage() {
   const preferredId = user?.preferences?.province;
   const initialDest = DESTINATIONS.find((d) => d.id === preferredId) ?? DESTINATIONS[0];
   const [selected, setSelected] = useState<Destination | null>(initialDest);
+  const [showAllDestinations, setShowAllDestinations] = useState(!preferredId);
+  const visibleDestinations = preferredId && !showAllDestinations
+    ? DESTINATIONS.filter((d) => d.id === preferredId)
+    : DESTINATIONS;
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
@@ -54,6 +58,7 @@ function MapPage() {
   const [mode, setMode] = useState<TravelMode>("car");
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [directionsOpen, setDirectionsOpen] = useState(false);
+
 
   const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
 
@@ -204,10 +209,22 @@ function MapPage() {
 
           {/* Sidebar list */}
           <div className="space-y-3 lg:max-h-[640px] lg:overflow-y-auto pr-1">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground px-1">
-              {DESTINATIONS.length} {lang === "pt" ? "destinos" : "destinations"}
-            </h2>
-            {DESTINATIONS.map((d, i) => (
+            <div className="flex items-center justify-between gap-2 px-1">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                {visibleDestinations.length} {lang === "pt" ? "destinos" : "destinations"}
+              </h2>
+              {preferredId && (
+                <button
+                  onClick={() => setShowAllDestinations((s) => !s)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  {showAllDestinations
+                    ? (lang === "pt" ? "Só o meu destino" : "Only my destination")
+                    : (lang === "pt" ? "Ver todos" : "Show all")}
+                </button>
+              )}
+            </div>
+            {visibleDestinations.map((d, i) => (
               <motion.div
                 key={d.id}
                 initial={{ opacity: 0, x: 20 }}
@@ -244,6 +261,7 @@ function MapPage() {
             ))}
           </div>
         </div>
+
 
         {/* Selected detail */}
         {selected && (

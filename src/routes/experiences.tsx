@@ -48,13 +48,18 @@ function ExperiencesPage() {
     CATEGORIES.some((c) => c.id === i),
   ) as ExperienceCategory | undefined;
   const [filter, setFilter] = useState<ExperienceCategory | "all">(preferredInterest ?? "all");
+  const provinceId = user?.preferences?.province;
+  const [showAllDestinations, setShowAllDestinations] = useState(!provinceId);
 
   const [booked, setBooked] = useState<Set<string>>(new Set());
 
-  const filtered = useMemo(
-    () => (filter === "all" ? EXPERIENCES : EXPERIENCES.filter((e) => e.category === filter)),
-    [filter],
-  );
+  const filtered = useMemo(() => {
+    let list = EXPERIENCES;
+    if (provinceId && !showAllDestinations) list = list.filter((e) => e.destinationId === provinceId);
+    if (filter !== "all") list = list.filter((e) => e.category === filter);
+    return list;
+  }, [filter, provinceId, showAllDestinations]);
+
 
   const handleBook = (exp: Experience) => {
     if (booked.has(exp.id)) return;
@@ -93,6 +98,22 @@ function ExperiencesPage() {
           </h1>
           <p className="text-muted-foreground mt-2">{t("expSub")}</p>
         </motion.div>
+
+        {provinceId && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 to-orange-500/10 px-4 py-3 flex-wrap">
+            <p className="text-sm">
+              <Sparkles className="inline size-4 text-primary mr-1" />
+              {showAllDestinations
+                ? (lang === "pt" ? "A mostrar experiências de todos os destinos" : "Showing experiences from all destinations")
+                : (lang === "pt" ? `A mostrar apenas experiências em ${provinceId}` : `Showing only experiences in ${provinceId}`)}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => setShowAllDestinations((s) => !s)}>
+              {showAllDestinations
+                ? (lang === "pt" ? "Filtrar pelo meu destino" : "Filter by my destination")
+                : (lang === "pt" ? "Ver todos os destinos" : "Show all destinations")}
+            </Button>
+          </div>
+        )}
 
         {/* Category filter */}
         <div className="flex flex-wrap gap-2 mb-8">

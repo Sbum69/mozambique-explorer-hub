@@ -358,6 +358,15 @@ export function addUserItinerary(it: Itinerary) {
   saveUserItineraries([it, ...list.filter((x) => x.id !== it.id)]);
 }
 
+export function updateUserItinerary(it: Itinerary) {
+  const list = getUserItineraries().map((x) => (x.id === it.id ? it : x));
+  saveUserItineraries(list);
+}
+
+export function deleteUserItinerary(id: string) {
+  saveUserItineraries(getUserItineraries().filter((x) => x.id !== id));
+}
+
 export function findItineraryByCode(code: string): Itinerary | undefined {
   const all = [...SAMPLE_ITINERARIES, ...getUserItineraries()];
   return all.find((i) => i.code.toUpperCase() === code.toUpperCase());
