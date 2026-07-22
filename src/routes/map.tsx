@@ -47,6 +47,10 @@ function MapPage() {
   const preferredId = user?.preferences?.province;
   const initialDest = DESTINATIONS.find((d) => d.id === preferredId) ?? DESTINATIONS[0];
   const [selected, setSelected] = useState<Destination | null>(initialDest);
+  const [showAllDestinations, setShowAllDestinations] = useState(!preferredId);
+  const visibleDestinations = preferredId && !showAllDestinations
+    ? DESTINATIONS.filter((d) => d.id === preferredId)
+    : DESTINATIONS;
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
@@ -54,6 +58,7 @@ function MapPage() {
   const [mode, setMode] = useState<TravelMode>("car");
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [directionsOpen, setDirectionsOpen] = useState(false);
+
 
   const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
 
