@@ -42,11 +42,12 @@ function FitRoute({ coords }: { coords: [number, number][] | null }) {
 
 interface Props {
   onSelect?: (d: Destination) => void;
+  onDirections?: (d: Destination) => void;
   routeCoords?: [number, number][] | null;
   origin?: [number, number] | null;
 }
 
-export function InteractiveMap({ onSelect, routeCoords, origin }: Props) {
+export function InteractiveMap({ onSelect, onDirections, routeCoords, origin }: Props) {
   const { lang } = useLang();
 
   return (
