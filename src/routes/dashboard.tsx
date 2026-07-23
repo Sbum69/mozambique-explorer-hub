@@ -127,14 +127,14 @@ function DashboardPage() {
                 {province ? (
                   <>
                     <p className="mt-2 text-sm opacity-90">
-                      A explorar <strong>{province.name}</strong> · {tripDays} {t("days")}
+                      {lang === "pt" ? "A explorar" : "Exploring"} <strong>{province.name}</strong> · {tripDays} {t("days")}
                       {user.preferences?.interests?.length ? ` · ${user.preferences.interests.slice(0, 3).join(", ")}` : ""}
                     </p>
                     <button
                       onClick={() => setShowChangeDest(true)}
                       className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
                     >
-                      <MapPin className="size-3.5" /> Mudar destino
+                      <MapPin className="size-3.5" /> {lang === "pt" ? "Mudar destino" : "Change destination"}
                     </button>
                   </>
                 ) : (
@@ -142,9 +142,10 @@ function DashboardPage() {
                     onClick={() => setShowChangeDest(true)}
                     className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
                   >
-                    <MapPin className="size-3.5" /> Escolher destino
+                    <MapPin className="size-3.5" /> {lang === "pt" ? "Escolher destino" : "Choose destination"}
                   </button>
                 )}
+
               </div>
 
               <div className="grid grid-cols-3 gap-4 text-center">
@@ -175,16 +176,22 @@ function DashboardPage() {
           >
             <div className="flex items-end justify-between mb-4 gap-3 flex-wrap">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight">O Teu Itinerário</h2>
+                <h2 className="text-2xl font-bold tracking-tight">
+                  {lang === "pt" ? "O Teu Itinerário" : "Your Itinerary"}
+                </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Itinerário para {tripDays} dias em {province.name}
+                  {lang === "pt"
+                    ? `Itinerário para ${tripDays} dias em ${province.name}`
+                    : `Itinerary for ${tripDays} days in ${province.name}`}
                   {user.preferences?.interests?.length
-                    ? ` · baseado em ${user.preferences.interests.slice(0, 3).join(", ")}`
+                    ? `${lang === "pt" ? " · baseado em " : " · based on "}${user.preferences.interests.slice(0, 3).join(", ")}`
                     : ""}
                 </p>
               </div>
               <Button asChild variant="outline" className="gap-2">
-                <Link to="/itineraries">Ver completo <ArrowRight className="size-4" /></Link>
+                <Link to="/itineraries">
+                  {lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" />
+                </Link>
               </Button>
             </div>
             <Card className="p-5 sm:p-6 border-0 shadow-[var(--shadow-soft)]">
@@ -204,7 +211,8 @@ function DashboardPage() {
                       {i < daySlices.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
                     </div>
                     <div className="flex-1 pb-4 space-y-1.5">
-                      <p className="text-sm font-semibold">Dia {d.day}</p>
+                      <p className="text-sm font-semibold">{lang === "pt" ? "Dia" : "Day"} {d.day}</p>
+
                       <div className="flex items-start gap-2 text-sm">
                         <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
                         <span>{d.morning}</span>
