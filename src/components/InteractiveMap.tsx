@@ -107,6 +107,29 @@ export function InteractiveMap({ onSelect, onDirections, routeCoords, origin }: 
                   {lang === "pt" ? "Ver detalhes" : "View details"}
                 </button>
               )}
+              {onDirections && (
+                <button
+                  onClick={() => onDirections(d)}
+                  style={{
+                    width: "100%",
+                    marginTop: 6,
+                    padding: "6px 12px",
+                    background: "white",
+                    color: "oklch(0.55 0.19 45)",
+                    border: "1px solid oklch(0.68 0.19 45)",
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                >
+                  🧭 {lang === "pt" ? "Como chegar" : "Get directions"}
+                </button>
+              )}
             </div>
           </Popup>
         </Marker>
