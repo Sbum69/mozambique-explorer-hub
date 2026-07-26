@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Store,
@@ -20,9 +20,17 @@ import {
   BarChart3,
   MapPin,
   TrendingUp,
+  Check,
+  X,
+  Users,
+  Phone,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { getBookings, updateBookingStatus, type Booking } from "@/data/bookings";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/business-dashboard")({
   head: () => ({ meta: [{ title: "Painel do Negócio — Ekaya Explore" }] }),
@@ -33,12 +41,36 @@ function BusinessDashboardPage() {
   const navigate = useNavigate();
   const { user, isBusiness, isBusinessLarge, isBusinessSmall, logout } = useAuth();
 
+  const [bookings, setBookings] = useState<Booking[]>([]);
   useEffect(() => {
-    if (!isBusiness) navigate({ to: "/login" });
-  }, [isBusiness, navigate]);
+    const load = () => setBookings(getBookings());
+    load();
+    window.addEventListener("ekaya:bookings-changed", load);
+    return () => window.removeEventListener("ekaya:bookings-changed", load);
+  }, []);
 
-  if (!user || !isBusiness || !user.businessInfo) return null;
-  const businessInfo = user.businessInfo;
+  const handleBookingAction = (b: Booking, status: "confirmed" | "rejected") => {
+    updateBookingStatus(b.id, status);
+    toast.success(
+      status === "confirmed"
+        ? `Reserva ${b.code} confirmada`
+        : `Reserva ${b.code} rejeitada`,
+    );
+  };
+
+  // Allow viewing this dashboard even from a customer flow to see incoming requests
+  if (!user) {
+    navigate({ to: "/login" });
+    return null;
+  }
+  const isDemoView = !isBusiness || !user.businessInfo;
+  const businessInfo = user.businessInfo ?? {
+    businessName: "Ekaya Host (demo)",
+    category: "Experiências comunitárias",
+    location: "Moçambique",
+    contact: "—",
+    verified: false,
+  };
 
   const headerGradient = isBusinessLarge ? "from-blue-500 to-blue-700" : "from-orange-500 to-orange-700";
   const bannerGradient = isBusinessLarge ? "from-blue-600 to-blue-800" : "from-orange-500 to-orange-700";
