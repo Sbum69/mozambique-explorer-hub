@@ -57,6 +57,17 @@ function ExperiencesPage() {
   const [showAllDestinations, setShowAllDestinations] = useState(!provinceId);
 
   const [booked, setBooked] = useState<Set<string>>(new Set());
+  const [openExp, setOpenExp] = useState<Experience | null>(null);
+  const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
+  const [form, setForm] = useState({
+    date: "",
+    time: "09:00",
+    people: 2,
+    name: user?.name ?? "",
+    phone: "",
+    email: "",
+    notes: "",
+  });
 
   const filtered = useMemo(() => {
     let list = EXPERIENCES;
@@ -66,12 +77,54 @@ function ExperiencesPage() {
   }, [filter, provinceId, showAllDestinations]);
 
 
-  const handleBook = (exp: Experience) => {
+  const openBookingModal = (exp: Experience) => {
     if (booked.has(exp.id)) return;
-    setBooked((s) => new Set(s).add(exp.id));
+    setForm({
+      date: "",
+      time: "09:00",
+      people: 2,
+      name: user?.name ?? "",
+      phone: "",
+      email: "",
+      notes: "",
+    });
+    setOpenExp(exp);
+  };
+
+  const submitBooking = () => {
+    if (!openExp) return;
+    if (!form.date || !form.name || !form.phone) {
+      toast.error(lang === "pt" ? "Preenche data, nome e telefone" : "Fill in date, name and phone");
+      return;
+    }
+    const booking: Booking = {
+      id: crypto.randomUUID(),
+      experienceId: openExp.id,
+      experienceTitle: openExp.title,
+      host: openExp.host,
+      location: openExp.location,
+      image: openExp.image,
+      priceMzn: openExp.priceMzn,
+      durationHours: openExp.durationHours,
+      date: form.date,
+      time: form.time,
+      people: form.people,
+      customerName: form.name,
+      customerPhone: form.phone,
+      customerEmail: form.email || undefined,
+      notes: form.notes || undefined,
+      totalMzn: openExp.priceMzn * form.people,
+      status: "pending",
+      createdAt: Date.now(),
+      code: generateBookingCode(),
+    };
+    addBooking(booking);
+    setBooked((s) => new Set(s).add(openExp.id));
     const result = addXP(50);
+    setOpenExp(null);
+    setConfirmedBooking(booking);
     toast.success(t("bookingConfirmed"), {
-      description: `${exp.title[lang]} — +50 XP`,
+      description: `${booking.experienceTitle[lang]} — +50 XP`,
       icon: <Sparkles className="size-4" />,
     });
     if (result.leveledUp) {
