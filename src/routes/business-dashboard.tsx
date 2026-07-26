@@ -188,6 +188,57 @@ function BusinessDashboardPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left col */}
           <div className="lg:col-span-2 space-y-6">
+            <Card title={`Pedidos de Reserva${bookings.filter((b) => b.status === "pending").length ? ` (${bookings.filter((b) => b.status === "pending").length} pendente${bookings.filter((b) => b.status === "pending").length > 1 ? "s" : ""})` : ""}`}>
+              {bookings.length === 0 ? (
+                <div className="text-center py-8 text-sm text-gray-500">
+                  <Calendar className="size-8 mx-auto mb-2 opacity-40" />
+                  Ainda não recebeste pedidos de reserva.
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {bookings.slice(0, 8).map((b) => (
+                    <li key={b.id} className="rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition">
+                      <div className="flex gap-3">
+                        <img src={b.image} alt="" className="size-16 rounded-lg object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 flex-wrap">
+                            <div className="min-w-0">
+                              <p className="font-semibold truncate">{b.experienceTitle.pt}</p>
+                              <p className="text-xs text-gray-500 font-mono">{b.code}</p>
+                            </div>
+                            {b.status === "pending" && <Badge className="bg-amber-100 text-amber-700 border-0">Pendente</Badge>}
+                            {b.status === "confirmed" && <Badge className="bg-emerald-100 text-emerald-700 border-0">Confirmada</Badge>}
+                            {b.status === "rejected" && <Badge className="bg-rose-100 text-rose-700 border-0">Rejeitada</Badge>}
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-xs text-gray-600">
+                            <span className="flex items-center gap-1"><Calendar className="size-3" />{b.date} · {b.time}</span>
+                            <span className="flex items-center gap-1"><Users className="size-3" />{b.people} pessoa{b.people > 1 ? "s" : ""}</span>
+                            <span className="flex items-center gap-1 truncate"><MessageSquare className="size-3" />{b.customerName}</span>
+                            <span className="flex items-center gap-1 truncate"><Phone className="size-3" />{b.customerPhone}</span>
+                            {b.customerEmail && <span className="col-span-2 truncate">✉ {b.customerEmail}</span>}
+                            {b.notes && <span className="col-span-2 italic text-gray-500 truncate">"{b.notes}"</span>}
+                          </div>
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                            <span className="text-sm"><span className="text-gray-500">Total:</span> <span className="font-bold text-primary">{b.totalMzn.toLocaleString()} MZN</span></span>
+                            {b.status === "pending" && (
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => handleBookingAction(b, "rejected")}>
+                                  <X className="size-4" /> Rejeitar
+                                </Button>
+                                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleBookingAction(b, "confirmed")}>
+                                  <Check className="size-4" /> Confirmar
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
             <Card title="Ações Rápidas">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {quickActions.map((a) => (
