@@ -64,6 +64,7 @@ const difficultyColor: Record<Difficulty, string> = {
 
 function ItineraryDetailPage() {
   const it = Route.useLoaderData() as Itinerary;
+  const { lang } = useLang();
   const [expandedStory, setExpandedStory] = useState<number | null>(null);
   const [completedStops, setCompletedStops] = useState<number[]>([]);
 
