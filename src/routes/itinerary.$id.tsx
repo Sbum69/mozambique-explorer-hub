@@ -28,6 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { findItineraryById, type Difficulty, type Itinerary } from "@/data/itineraries";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ItineraryMap } from "@/components/ItineraryMap";
+import { useLang } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/itinerary/$id")({
   head: ({ params }) => ({
@@ -62,6 +64,7 @@ const difficultyColor: Record<Difficulty, string> = {
 
 function ItineraryDetailPage() {
   const it = Route.useLoaderData() as Itinerary;
+  const { lang } = useLang();
   const [expandedStory, setExpandedStory] = useState<number | null>(null);
   const [completedStops, setCompletedStops] = useState<number[]>([]);
 
@@ -87,10 +90,6 @@ function ItineraryDetailPage() {
     [it],
   );
 
-  // Build SVG path between stops
-  const pathD = it.route
-    .map((s, i) => `${i === 0 ? "M" : "L"} ${s.x} ${s.y}`)
-    .join(" ");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -156,59 +155,23 @@ function ItineraryDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {/* Visual map */}
-            <Card className="overflow-hidden">
-              <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-100 via-emerald-100 to-amber-100">
-                <svg
-                  viewBox="0 0 100 100"
-                  className="absolute inset-0 w-full h-full"
-                  preserveAspectRatio="none"
-                >
-                  <motion.path
-                    d={pathD}
-                    stroke="#f97316"
-                    strokeWidth="0.6"
-                    strokeDasharray="2,1.5"
-                    fill="none"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 2, ease: "easeInOut" }}
-                  />
-                </svg>
-                {it.route.map((s, i) => {
-                  const color =
-                    s.type === "business"
-                      ? "bg-blue-500"
-                      : s.type === "waypoint"
-                        ? "bg-purple-500"
-                        : "bg-orange-500";
-                  return (
-                    <motion.div
-                      key={s.id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{
-                        delay: 0.3 + i * 0.15,
-                        type: "spring",
-                        stiffness: 200,
-                      }}
-                      className={`absolute -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full ${color} text-white text-sm font-bold flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform ${
-                        s.sponsored ? "ring-4 ring-yellow-400" : ""
-                      } group`}
-                      style={{ left: `${s.x}%`, top: `${s.y}%` }}
-                    >
-                      {i + 1}
-                      <div className="absolute bottom-full mb-2 px-2 py-1 bg-black text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        {s.name ?? s.title}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-                <div className="absolute bottom-3 left-3 bg-white/90 rounded-full w-12 h-12 flex flex-col items-center justify-center shadow-md">
-                  <Compass className="h-4 w-4 text-foreground" />
-                  <span className="text-[10px] font-bold">N</span>
+            {/* Real interactive map with GPS */}
+            <Card className="overflow-hidden p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h2 className="font-bold text-lg flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    {lang === "pt" ? "Mapa do Roteiro" : "Itinerary Map"}
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {lang === "pt"
+                      ? "GPS real · escolhe o modo de transporte para traçar a rota"
+                      : "Real GPS · pick a travel mode to draw the route"}
+                  </p>
                 </div>
+                <Compass className="h-5 w-5 text-muted-foreground" />
               </div>
+              <ItineraryMap itinerary={it} lang={lang} />
             </Card>
 
             {/* Stops list */}
