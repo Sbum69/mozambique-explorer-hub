@@ -279,6 +279,150 @@ function ExperiencesPage() {
           })}
         </div>
       </main>
+
+      {/* Booking details modal */}
+      <Dialog open={!!openExp} onOpenChange={(o) => !o && setOpenExp(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          {openExp && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Calendar className="size-5 text-primary" />
+                  {lang === "pt" ? "Detalhes da reserva" : "Booking details"}
+                </DialogTitle>
+                <DialogDescription>{openExp.title[lang]} — {openExp.host}</DialogDescription>
+              </DialogHeader>
+
+              <div className="rounded-lg overflow-hidden border mb-2">
+                <img src={openExp.image} alt="" className="w-full h-32 object-cover" />
+                <div className="p-3 bg-muted/30 text-sm flex items-center justify-between">
+                  <span className="flex items-center gap-1 text-muted-foreground"><MapPin className="size-3" />{openExp.location}</span>
+                  <span className="flex items-center gap-1 text-muted-foreground"><Clock className="size-3" />{openExp.durationHours}h</span>
+                  <span className="font-semibold text-primary">{openExp.priceMzn.toLocaleString()} MZN</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>{lang === "pt" ? "Data" : "Date"} *</Label>
+                  <Input type="date" value={form.date} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>{lang === "pt" ? "Hora" : "Time"}</Label>
+                  <Input type="time" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>{lang === "pt" ? "Pessoas" : "People"}</Label>
+                  <Input type="number" min={1} max={20} value={form.people} onChange={(e) => setForm((f) => ({ ...f, people: Math.max(1, Number(e.target.value) || 1) }))} />
+                </div>
+                <div>
+                  <Label>{lang === "pt" ? "Nome" : "Name"} *</Label>
+                  <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>{lang === "pt" ? "Telefone" : "Phone"} *</Label>
+                  <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+258..." />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                </div>
+                <div className="col-span-2">
+                  <Label>{lang === "pt" ? "Notas (opcional)" : "Notes (optional)"}</Label>
+                  <Textarea rows={2} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-gradient-to-r from-warning/10 to-primary/10 p-3">
+                <span className="text-sm text-muted-foreground">{lang === "pt" ? "Total estimado" : "Estimated total"}</span>
+                <span className="text-xl font-bold text-primary">{(openExp.priceMzn * form.people).toLocaleString()} MZN</span>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpenExp(null)}>{t("back")}</Button>
+                <Button className="bg-gradient-to-r from-warning to-primary text-white border-0" onClick={submitBooking}>
+                  {lang === "pt" ? "Enviar pedido de reserva" : "Send booking request"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation modal */}
+      <Dialog open={!!confirmedBooking} onOpenChange={(o) => !o && setConfirmedBooking(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          {confirmedBooking && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-emerald-600">
+                  <CheckCircle2 className="size-6" />
+                  {lang === "pt" ? "Pedido enviado!" : "Request sent!"}
+                </DialogTitle>
+                <DialogDescription>
+                  {lang === "pt"
+                    ? "O anfitrião foi notificado e vai confirmar em breve."
+                    : "The host has been notified and will confirm shortly."}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="rounded-xl border bg-gradient-to-br from-warning/5 to-primary/5 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">{lang === "pt" ? "Código" : "Code"}</span>
+                  <span className="font-mono font-bold text-primary">{confirmedBooking.code}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">{lang === "pt" ? "Estado" : "Status"}</span>
+                  <Badge className="bg-amber-100 text-amber-700 border-0">{lang === "pt" ? "Aguarda confirmação" : "Awaiting confirmation"}</Badge>
+                </div>
+                <div className="border-t pt-3 space-y-2 text-sm">
+                  <DetailRow icon={<Compass className="size-4" />} label={lang === "pt" ? "Experiência" : "Experience"} value={confirmedBooking.experienceTitle[lang]} />
+                  <DetailRow icon={<Store className="size-4" />} label={lang === "pt" ? "Anfitrião" : "Host"} value={confirmedBooking.host} />
+                  <DetailRow icon={<MapPin className="size-4" />} label={lang === "pt" ? "Local" : "Location"} value={confirmedBooking.location} />
+                  <DetailRow icon={<Calendar className="size-4" />} label={lang === "pt" ? "Data e hora" : "Date & time"} value={`${confirmedBooking.date} · ${confirmedBooking.time}`} />
+                  <DetailRow icon={<Users className="size-4" />} label={lang === "pt" ? "Pessoas" : "People"} value={String(confirmedBooking.people)} />
+                  <DetailRow icon={<Clock className="size-4" />} label={lang === "pt" ? "Duração" : "Duration"} value={`${confirmedBooking.durationHours}h`} />
+                  <DetailRow icon={<UserIcon className="size-4" />} label={lang === "pt" ? "Reservado por" : "Booked by"} value={confirmedBooking.customerName} />
+                  <DetailRow icon={<Phone className="size-4" />} label={lang === "pt" ? "Contacto" : "Phone"} value={confirmedBooking.customerPhone} />
+                  {confirmedBooking.customerEmail && <DetailRow icon={<Mail className="size-4" />} label="Email" value={confirmedBooking.customerEmail} />}
+                  {confirmedBooking.notes && <DetailRow icon={<FileText className="size-4" />} label={lang === "pt" ? "Notas" : "Notes"} value={confirmedBooking.notes} />}
+                </div>
+                <div className="border-t pt-3 flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{lang === "pt" ? "Total" : "Total"}</span>
+                  <span className="text-2xl font-bold text-primary">{confirmedBooking.totalMzn.toLocaleString()} MZN</span>
+                </div>
+              </div>
+
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="outline" onClick={() => setConfirmedBooking(null)}>
+                  {lang === "pt" ? "Continuar a explorar" : "Keep exploring"}
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-warning to-primary text-white border-0"
+                  onClick={() => {
+                    setConfirmedBooking(null);
+                    navigate({ to: "/business-dashboard" });
+                  }}
+                >
+                  <Store className="size-4" /> {lang === "pt" ? "Ir ao painel do anfitrião" : "Go to host's dashboard"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="text-muted-foreground mt-0.5">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="font-medium truncate">{value}</p>
+      </div>
     </div>
   );
 }
