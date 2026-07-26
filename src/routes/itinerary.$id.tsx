@@ -90,10 +90,6 @@ function ItineraryDetailPage() {
     [it],
   );
 
-  // Build SVG path between stops
-  const pathD = it.route
-    .map((s, i) => `${i === 0 ? "M" : "L"} ${s.x} ${s.y}`)
-    .join(" ");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
