@@ -28,6 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { findItineraryById, type Difficulty, type Itinerary } from "@/data/itineraries";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ItineraryMap } from "@/components/ItineraryMap";
+import { useLang } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/itinerary/$id")({
   head: ({ params }) => ({
