@@ -260,7 +260,7 @@ function ExperiencesPage() {
                         <p className="text-[11px] text-muted-foreground">{t("perPerson")}</p>
                       </div>
                       <Button
-                        onClick={() => handleBook(exp)}
+                        onClick={() => openBookingModal(exp)}
                         disabled={isBooked}
                         className={isBooked ? "" : "bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"}
                         variant={isBooked ? "outline" : "default"}
