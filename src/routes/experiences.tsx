@@ -1,12 +1,16 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Compass, Clock, Star, MapPin, Users, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, Compass, Clock, Star, MapPin, Users, Check, Sparkles, Calendar, Phone, Mail, User as UserIcon, Store, FileText, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -14,6 +18,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { EXPERIENCES, type Experience, type ExperienceCategory } from "@/data/experiences";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { addBooking, generateBookingCode, type Booking } from "@/data/bookings";
 
 export const Route = createFileRoute("/experiences")({
   head: () => ({
