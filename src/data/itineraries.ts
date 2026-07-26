@@ -27,6 +27,8 @@ export interface ItineraryStop {
   rating?: number;
   x: number;
   y: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface Itinerary {
