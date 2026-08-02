@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
+
 
 export const Route = createFileRoute("/games")({
   head: () => ({
@@ -446,12 +448,16 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
 function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: () => void; onConfirm: () => void }) {
   const [success, setSuccess] = useState(false);
   const [note, setNote] = useState("");
+  const [photo, setPhoto] = useState<string | null>(null);
   const pct = (game.progress / game.total) * 100;
+  const requiresPhoto = game.category === "foto" || game.id === "g17";
 
   const handleConfirm = () => {
+    if (requiresPhoto && !photo) return;
     setSuccess(true);
     setTimeout(() => onConfirm(), 1300);
   };
+
 
   return (
     <motion.div
@@ -535,9 +541,18 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
                 </div>
               )}
 
-              <Button onClick={handleConfirm} className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90`}>
-                Confirmar conquista
+              {requiresPhoto && (
+                <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
+              )}
+
+              <Button
+                onClick={handleConfirm}
+                disabled={requiresPhoto && !photo}
+                className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
+              >
+                {requiresPhoto && !photo ? "Tira a foto para confirmar" : "Confirmar conquista"}
               </Button>
+
             </>
           )}
         </div>
