@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
+
 
 export const Route = createFileRoute("/games")({
   head: () => ({
