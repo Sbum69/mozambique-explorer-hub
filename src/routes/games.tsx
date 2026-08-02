@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
+import { TreasureStopPicker } from "@/components/TreasureStopPicker";
+import { getCheckedStops, saveCheckedStops } from "@/data/treasure-stops";
+
 
 
 export const Route = createFileRoute("/games")({
