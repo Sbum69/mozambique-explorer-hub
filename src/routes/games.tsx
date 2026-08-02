@@ -555,17 +555,31 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
                 </div>
               )}
 
-              {requiresPhoto && (
+              {isTreasure && (
+                <TreasureStopPicker
+                  gameId={game.id}
+                  doneIds={doneStops}
+                  selectedId={selectedStop}
+                  onSelect={setSelectedStop}
+                />
+              )}
+
+              {requiresPhoto && (!isTreasure || selectedStop) && (
                 <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
               )}
 
               <Button
                 onClick={handleConfirm}
-                disabled={requiresPhoto && !photo}
+                disabled={missingStop || (requiresPhoto && !photo)}
                 className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
               >
-                {requiresPhoto && !photo ? "Tira a foto para confirmar" : "Confirmar conquista"}
+                {missingStop
+                  ? "Seleciona a paragem"
+                  : requiresPhoto && !photo
+                    ? "Tira a foto para confirmar"
+                    : "Confirmar conquista"}
               </Button>
+
 
             </>
           )}
