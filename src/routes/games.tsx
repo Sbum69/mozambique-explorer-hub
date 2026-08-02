@@ -446,12 +446,16 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
 function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: () => void; onConfirm: () => void }) {
   const [success, setSuccess] = useState(false);
   const [note, setNote] = useState("");
+  const [photo, setPhoto] = useState<string | null>(null);
   const pct = (game.progress / game.total) * 100;
+  const requiresPhoto = game.category === "foto" || game.id === "g17";
 
   const handleConfirm = () => {
+    if (requiresPhoto && !photo) return;
     setSuccess(true);
     setTimeout(() => onConfirm(), 1300);
   };
+
 
   return (
     <motion.div
