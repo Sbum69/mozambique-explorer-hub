@@ -539,9 +539,18 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
                 </div>
               )}
 
-              <Button onClick={handleConfirm} className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90`}>
-                Confirmar conquista
+              {requiresPhoto && (
+                <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
+              )}
+
+              <Button
+                onClick={handleConfirm}
+                disabled={requiresPhoto && !photo}
+                className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
+              >
+                {requiresPhoto && !photo ? "Tira a foto para confirmar" : "Confirmar conquista"}
               </Button>
+
             </>
           )}
         </div>
