@@ -449,14 +449,25 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
   const [success, setSuccess] = useState(false);
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
+  const isTreasure = game.category === "tesouro";
+  const [doneStops, setDoneStops] = useState<string[]>(() => (isTreasure ? getCheckedStops(game.id) : []));
+  const [selectedStop, setSelectedStop] = useState<string | null>(null);
   const pct = (game.progress / game.total) * 100;
-  const requiresPhoto = game.category === "foto" || game.id === "g17";
+  const requiresPhoto = game.category === "foto" || game.id === "g17" || isTreasure;
+  const missingStop = isTreasure && !selectedStop;
 
   const handleConfirm = () => {
     if (requiresPhoto && !photo) return;
+    if (missingStop) return;
+    if (isTreasure && selectedStop) {
+      const next = [...doneStops, selectedStop];
+      saveCheckedStops(game.id, next);
+      setDoneStops(next);
+    }
     setSuccess(true);
     setTimeout(() => onConfirm(), 1300);
   };
+
 
 
   return (
