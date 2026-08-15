@@ -550,7 +550,6 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
                 src={ev.image}
                 alt={ev.title[lang]}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                loading="lazy"
               />
               <div className={`absolute inset-0 bg-gradient-to-t ${ev.gradient} opacity-40`} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
@@ -615,7 +614,6 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
                 src={w.image}
                 alt={w.city}
                 className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-900/30 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">
