@@ -12,6 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
 import { TreasureStopPicker } from "@/components/TreasureStopPicker";
 import { getCheckedStops, saveCheckedStops } from "@/data/treasure-stops";
+import { getGameTask, getGameLogs, addGameLog } from "@/data/game-tasks";
+import {
+  ExperienceTask, ItineraryTask, TimeOfDayTask, EventTask, ShareTask, WordTask,
+} from "@/components/GameTaskFields";
 
 
 
