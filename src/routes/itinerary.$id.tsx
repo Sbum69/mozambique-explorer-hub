@@ -32,9 +32,21 @@ import { ItineraryMap } from "@/components/ItineraryMap";
 import { useLang } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/itinerary/$id")({
-  head: ({ params }) => ({
-    meta: [{ title: `Roteiro ${params.id} — Ekaya Explore` }],
-  }),
+  head: ({ params }) => {
+    const title = `Roteiro ${params.id} — Ekaya Explore`;
+    const description =
+      "Segue o roteiro paragem a paragem com GPS, histórias locais e negócios comunitários em Moçambique.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
   loader: ({ params }) => {
     const it = findItineraryById(params.id);
     if (!it) throw notFound();
