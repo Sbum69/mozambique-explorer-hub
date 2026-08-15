@@ -367,7 +367,7 @@ function FavoriteCard({
     return (
       <Card className="p-3 sm:p-4 flex gap-4 hover:shadow-md transition-shadow">
         {image && (
-          <img
+          <img loading="lazy" decoding="async"
             src={image}
             alt={title}
             className="size-20 sm:size-24 rounded-lg object-cover shrink-0"
@@ -416,7 +416,7 @@ function FavoriteCard({
     <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full flex flex-col">
       {image && (
         <div className="relative h-44 overflow-hidden">
-          <img
+          <img loading="lazy" decoding="async"
             src={image}
             alt={title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"

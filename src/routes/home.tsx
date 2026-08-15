@@ -161,7 +161,7 @@ function HomePage() {
       {/* ============ HERO ============ */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={hero} alt="" className="size-full object-cover" />
+          <img src={hero} alt="" className="size-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-b from-foreground/75 via-foreground/55 to-background" />
         </div>
 
@@ -343,7 +343,7 @@ function HomePage() {
             >
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="relative aspect-[16/10]">
-                  <img src={it.image} alt={it.name} className="size-full object-cover" />
+                  <img src={it.image} alt={it.name} className="size-full object-cover" loading="lazy" decoding="async" />
                   <Badge className="absolute top-3 left-3">{it.difficulty}</Badge>
                 </div>
                 <CardContent className="p-4">
@@ -392,7 +392,7 @@ function HomePage() {
             >
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="relative aspect-[16/10]">
-                  <img src={e.image} alt={e.title[lang as Lang]} className="size-full object-cover" />
+                  <img src={e.image} alt={e.title[lang as Lang]} className="size-full object-cover" loading="lazy" decoding="async" />
                   <Badge variant="secondary" className="absolute top-3 left-3 capitalize">
                     {e.category}
                   </Badge>
