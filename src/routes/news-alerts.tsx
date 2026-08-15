@@ -370,7 +370,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                 {it.thumbnail ? (
                   <img loading="lazy" decoding="async"
                     src={it.thumbnail}
-                    alt=""
+                    alt={it.title}
                     className="size-20 rounded-lg object-cover shrink-0"
                     onError={(e) => ((e.currentTarget.style.display = "none"))}
                   />
