@@ -18,6 +18,10 @@ export const Route = createFileRoute("/impact")({
     meta: [
       { title: "Impacto Social — Ekaya Explore" },
       { name: "description", content: "Métricas e impacto social do turismo comunitário em Moçambique." },
+      { property: "og:title", content: "Impacto Social — Ekaya Explore" },
+      { property: "og:description", content: "Métricas e impacto social do turismo comunitário em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ImpactPage,

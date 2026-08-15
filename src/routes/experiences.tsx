@@ -25,6 +25,10 @@ export const Route = createFileRoute("/experiences")({
     meta: [
       { title: "Experiências — Ekaya Explore" },
       { name: "description", content: "Reserva experiências comunitárias autênticas em Moçambique." },
+      { property: "og:title", content: "Experiências — Ekaya Explore" },
+      { property: "og:description", content: "Reserva experiências comunitárias autênticas em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   beforeLoad: () => {
@@ -204,7 +208,7 @@ function ExperiencesPage() {
               >
                 <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full flex flex-col">
                   <div className="relative h-48 overflow-hidden">
-                    <img src={exp.image} alt={exp.title[lang]} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                    <img src={exp.image} alt={exp.title[lang]} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
                     <div className="absolute top-3 left-3">
                       <Badge className="bg-background/95 text-foreground backdrop-blur">
                         <Star className="size-3 mr-1 fill-warning text-warning" />
@@ -294,7 +298,7 @@ function ExperiencesPage() {
               </DialogHeader>
 
               <div className="rounded-lg overflow-hidden border mb-2">
-                <img src={openExp.image} alt="" className="w-full h-32 object-cover" />
+                <img src={openExp.image} alt="" className="w-full h-32 object-cover" loading="lazy" decoding="async" />
                 <div className="p-3 bg-muted/30 text-sm flex items-center justify-between">
                   <span className="flex items-center gap-1 text-muted-foreground"><MapPin className="size-3" />{openExp.location}</span>
                   <span className="flex items-center gap-1 text-muted-foreground"><Clock className="size-3" />{openExp.durationHours}h</span>

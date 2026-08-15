@@ -14,6 +14,10 @@ export const Route = createFileRoute("/culture-history")({
     meta: [
       { title: "Cultura e História — Ekaya Explore" },
       { name: "description", content: "Descubra a rica história e cultura de Moçambique." },
+      { property: "og:title", content: "Cultura e História — Ekaya Explore" },
+      { property: "og:description", content: "Descubra a rica história e cultura de Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: CultureHistoryPage,
@@ -158,7 +162,7 @@ function CultureHistoryPage() {
 
       {/* Hero */}
       <section className="relative h-96 overflow-hidden">
-        <img
+        <img loading="lazy" decoding="async"
           src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&h=900&fit=crop"
           alt="Moçambique"
           className="absolute inset-0 w-full h-full object-cover"
@@ -206,7 +210,7 @@ function CultureHistoryPage() {
               className="text-left rounded-3xl overflow-hidden bg-card border shadow-lg transition-all"
             >
               <div className="relative h-56 overflow-hidden">
-                <img src={topic.image} alt={topic.title} className="absolute inset-0 w-full h-full object-cover" />
+                <img src={topic.image} alt={topic.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${topic.gradient} opacity-80`} />
                 <div className="absolute top-4 right-4 size-11 rounded-2xl bg-white shadow-lg flex items-center justify-center">
                   <topic.icon className="size-5 text-foreground" />
@@ -250,7 +254,7 @@ function CultureHistoryPage() {
               className="bg-card rounded-3xl overflow-hidden w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
               <div className="relative h-80 shrink-0">
-                <img src={selected.image} alt={selected.title} className="absolute inset-0 w-full h-full object-cover" />
+                <img src={selected.image} alt={selected.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`} />
                 <motion.button
                   whileHover={{ rotate: 90 }}

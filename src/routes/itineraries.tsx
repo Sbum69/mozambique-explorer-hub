@@ -70,7 +70,14 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
-    meta: [{ title: "Roteiros — Ekaya Explore" }],
+    meta: [
+      { title: "Roteiros — Ekaya Explore" },
+      { name: "description", content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique." },
+      { property: "og:title", content: "Roteiros — Ekaya Explore" },
+      { property: "og:description", content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
   }),
   component: ItinerariesPage,
 });
@@ -295,7 +302,7 @@ function ItinerariesPage() {
             >
               <Card className="overflow-hidden h-full flex flex-col">
                 <div className="relative h-48 overflow-hidden">
-                  <img src={it.image} alt={it.name} className="w-full h-full object-cover" />
+                  <img src={it.image} alt={it.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   <div className={`absolute inset-0 bg-gradient-to-t ${it.gradient} opacity-40`} />
                   <div className="absolute top-3 left-3 flex gap-2">
                     <Badge className={difficultyColor[it.difficulty]}>{it.difficulty}</Badge>
@@ -442,7 +449,7 @@ function ItinerariesPage() {
           {selectedRoute && (
             <>
               <div className="rounded-lg border bg-muted/50 p-3 flex items-center gap-3">
-                <img src={selectedRoute.image} alt="" className="size-12 rounded object-cover" />
+                <img src={selectedRoute.image} alt="" className="size-12 rounded object-cover" loading="lazy" decoding="async" />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{selectedRoute.name}</p>
                   <p className="text-xs text-muted-foreground">{lang === "pt" ? "Código" : "Code"}: <span className="font-mono">{selectedRoute.code}</span></p>

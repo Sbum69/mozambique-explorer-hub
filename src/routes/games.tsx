@@ -24,6 +24,10 @@ export const Route = createFileRoute("/games")({
     meta: [
       { title: "Jogos & Desafios — Ekaya Explore" },
       { name: "description", content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique." },
+      { property: "og:title", content: "Jogos & Desafios — Ekaya Explore" },
+      { property: "og:description", content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: GamesPage,

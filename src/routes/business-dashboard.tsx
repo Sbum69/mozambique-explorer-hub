@@ -33,7 +33,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/business-dashboard")({
-  head: () => ({ meta: [{ title: "Painel do Negócio — Ekaya Explore" }] }),
+  head: () => ({
+    meta: [
+      { title: "Painel do Negócio — Ekaya Explore" },
+      { name: "description", content: "Gere reservas, perfil e desempenho do teu negócio turístico em Moçambique." },
+      { property: "og:title", content: "Painel do Negócio — Ekaya Explore" },
+      { property: "og:description", content: "Gere reservas, perfil e desempenho do teu negócio turístico em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: BusinessDashboardPage,
 });
 

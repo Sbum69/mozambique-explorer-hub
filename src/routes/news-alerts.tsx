@@ -67,6 +67,10 @@ export const Route = createFileRoute("/news-alerts")({
         content:
           "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique.",
       },
+      { property: "og:title", content: "Notícias & Avisos — Ekaya Explore" },
+      { property: "og:description", content: "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: NewsAlertsPage,
@@ -364,9 +368,9 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                 className="group flex gap-3 rounded-xl border bg-card p-3 hover:shadow-md transition-all"
               >
                 {it.thumbnail ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={it.thumbnail}
-                    alt=""
+                    alt={it.title}
                     className="size-20 rounded-lg object-cover shrink-0"
                     onError={(e) => ((e.currentTarget.style.display = "none"))}
                   />
@@ -409,7 +413,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
           >
             <div className="relative h-48 md:h-auto bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-950/40 dark:to-orange-950/40">
               {n.image ? (
-                <img src={n.image} alt={n.title[lang]} className="w-full h-full object-cover" />
+                <img src={n.image} alt={n.title[lang]} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Newspaper className="size-16 text-red-300" />
@@ -542,11 +546,10 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
         >
           <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
             <div className="relative h-40 overflow-hidden">
-              <img
+              <img loading="lazy" decoding="async"
                 src={ev.image}
                 alt={ev.title[lang]}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                loading="lazy"
               />
               <div className={`absolute inset-0 bg-gradient-to-t ${ev.gradient} opacity-40`} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
@@ -607,11 +610,10 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
         >
           <Card className="overflow-hidden border-blue-100 dark:border-blue-900">
             <div className="relative h-32 overflow-hidden">
-              <img
+              <img loading="lazy" decoding="async"
                 src={w.image}
                 alt={w.city}
                 className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-900/30 to-transparent" />
               <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between text-white">

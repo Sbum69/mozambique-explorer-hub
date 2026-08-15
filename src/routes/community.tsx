@@ -22,6 +22,10 @@ export const Route = createFileRoute("/community")({
     meta: [
       { title: "Comunidade — Ekaya Explore" },
       { name: "description", content: "Partilha a tua experiência em Moçambique com a comunidade Ekaya." },
+      { property: "og:title", content: "Comunidade — Ekaya Explore" },
+      { property: "og:description", content: "Partilha a tua experiência em Moçambique com a comunidade Ekaya." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: CommunityPage,

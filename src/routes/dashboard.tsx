@@ -27,6 +27,10 @@ export const Route = createFileRoute("/dashboard")({
     meta: [
       { title: "Painel — Ekaya Explore" },
       { name: "description", content: "Hub central com mapa, roteiros, experiências, gamificação e impacto." },
+      { property: "og:title", content: "Painel — Ekaya Explore" },
+      { property: "og:description", content: "Hub central com mapa, roteiros, experiências, gamificação e impacto." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   beforeLoad: () => {

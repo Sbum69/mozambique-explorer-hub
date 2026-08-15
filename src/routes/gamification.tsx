@@ -21,6 +21,10 @@ export const Route = createFileRoute("/gamification")({
     meta: [
       { title: "Conquistas — Ekaya Explore" },
       { name: "description", content: "Ganha XP, desbloqueia conquistas e recompensas autênticas em Moçambique." },
+      { property: "og:title", content: "Conquistas — Ekaya Explore" },
+      { property: "og:description", content: "Ganha XP, desbloqueia conquistas e recompensas autênticas em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   beforeLoad: () => {
