@@ -27,6 +27,10 @@ export const Route = createFileRoute("/map")({
     meta: [
       { title: "Mapa Interativo — Ekaya Explore" },
       { name: "description", content: "Mapa interativo de Moçambique com destinos comunitários autênticos." },
+      { property: "og:title", content: "Mapa Interativo — Ekaya Explore" },
+      { property: "og:description", content: "Mapa interativo de Moçambique com destinos comunitários autênticos." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   ssr: false,

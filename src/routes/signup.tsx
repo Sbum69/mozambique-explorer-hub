@@ -12,6 +12,10 @@ export const Route = createFileRoute("/signup")({
     meta: [
       { title: "Criar Conta — Ekaya Explore" },
       { name: "description", content: "Cria a tua conta Ekaya Explore e começa a descobrir Moçambique." },
+      { property: "og:title", content: "Criar Conta — Ekaya Explore" },
+      { property: "og:description", content: "Cria a tua conta Ekaya Explore e começa a descobrir Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   beforeLoad: () => {

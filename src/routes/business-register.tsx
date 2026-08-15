@@ -21,7 +21,16 @@ import { toast } from "sonner";
 import { useAuth, type BusinessInfo } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/business-register")({
-  head: () => ({ meta: [{ title: "Registar negócio — Ekaya Explore" }] }),
+  head: () => ({
+    meta: [
+      { title: "Registar negócio — Ekaya Explore" },
+      { name: "description", content: "Registra a tua banca, lodge ou serviço turístico e chega a viajantes em Moçambique." },
+      { property: "og:title", content: "Registar negócio — Ekaya Explore" },
+      { property: "og:description", content: "Registra a tua banca, lodge ou serviço turístico e chega a viajantes em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: BusinessRegisterPage,
 });
 

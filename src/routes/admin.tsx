@@ -37,7 +37,16 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Painel de Administração — Ekaya Explore" }] }),
+  head: () => ({
+    meta: [
+      { title: "Painel de Administração — Ekaya Explore" },
+      { name: "description", content: "Gestão de utilizadores, negócios e métricas globais da plataforma Ekaya Explore." },
+      { property: "og:title", content: "Painel de Administração — Ekaya Explore" },
+      { property: "og:description", content: "Gestão de utilizadores, negócios e métricas globais da plataforma Ekaya Explore." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: AdminPage,
 });
 

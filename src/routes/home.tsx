@@ -48,6 +48,10 @@ export const Route = createFileRoute("/home")({
         content:
           "Escolhe destino, dias e tipo de experiência. Ekaya recomenda roteiros, atividades e locais únicos em Moçambique.",
       },
+      { property: "og:title", content: "Ekaya — Explora Moçambique para além da superfície" },
+      { property: "og:description", content: "Escolhe destino, dias e tipo de experiência. Ekaya recomenda roteiros, atividades e locais únicos em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   beforeLoad: () => {

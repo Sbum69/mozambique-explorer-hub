@@ -67,6 +67,10 @@ export const Route = createFileRoute("/news-alerts")({
         content:
           "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique.",
       },
+      { property: "og:title", content: "Notícias & Avisos — Ekaya Explore" },
+      { property: "og:description", content: "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: NewsAlertsPage,

@@ -15,6 +15,10 @@ export const Route = createFileRoute("/useful-info")({
     meta: [
       { title: "Informações Úteis — Ekaya Explore" },
       { name: "description", content: "Guia completo para visitar Moçambique." },
+      { property: "og:title", content: "Informações Úteis — Ekaya Explore" },
+      { property: "og:description", content: "Guia completo para visitar Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: UsefulInfoPage,

@@ -25,6 +25,10 @@ export const Route = createFileRoute("/experiences")({
     meta: [
       { title: "Experiências — Ekaya Explore" },
       { name: "description", content: "Reserva experiências comunitárias autênticas em Moçambique." },
+      { property: "og:title", content: "Experiências — Ekaya Explore" },
+      { property: "og:description", content: "Reserva experiências comunitárias autênticas em Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   beforeLoad: () => {

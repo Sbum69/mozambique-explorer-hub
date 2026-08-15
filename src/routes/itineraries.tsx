@@ -70,7 +70,14 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
-    meta: [{ title: "Roteiros — Ekaya Explore" }],
+    meta: [
+      { title: "Roteiros — Ekaya Explore" },
+      { name: "description", content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique." },
+      { property: "og:title", content: "Roteiros — Ekaya Explore" },
+      { property: "og:description", content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
   }),
   component: ItinerariesPage,
 });

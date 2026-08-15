@@ -14,6 +14,10 @@ export const Route = createFileRoute("/voucher/$rewardId")({
     meta: [
       { title: "Voucher resgatado — Ekaya Explore" },
       { name: "description", content: "A tua recompensa Ekaya foi resgatada com sucesso." },
+      { property: "og:title", content: "Voucher resgatado — Ekaya Explore" },
+      { property: "og:description", content: "A tua recompensa Ekaya foi resgatada com sucesso." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: VoucherPage,
