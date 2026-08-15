@@ -12,6 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
 import { TreasureStopPicker } from "@/components/TreasureStopPicker";
 import { getCheckedStops, saveCheckedStops } from "@/data/treasure-stops";
+import { getGameTask, getGameLogs, addGameLog } from "@/data/game-tasks";
+import {
+  ExperienceTask, ItineraryTask, TimeOfDayTask, EventTask, ShareTask, WordTask,
+} from "@/components/GameTaskFields";
 
 
 
@@ -452,26 +456,50 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
   const [success, setSuccess] = useState(false);
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
-  const isTreasure = game.category === "tesouro";
+  const task = getGameTask(game.id);
+  const isTreasure = !!task.stops;
   const [doneStops, setDoneStops] = useState<string[]>(() => (isTreasure ? getCheckedStops(game.id) : []));
   const [selectedStop, setSelectedStop] = useState<string | null>(null);
+  const [experienceId, setExperienceId] = useState<string | null>(null);
+  const [itinerarySel, setItinerarySel] = useState<{ itineraryId: string; stopId: number } | null>(null);
+  const [timeOfDay, setTimeOfDay] = useState<{ moment: "sunrise" | "sunset"; time: string } | null>(null);
+  const [eventInfo, setEventInfo] = useState<{ name: string; date: string } | null>(null);
+  const [shared, setShared] = useState(false);
+  const [word, setWord] = useState<{ word: string; meaning: string } | null>(null);
+  const [labels, setLabels] = useState<Record<string, string>>({});
   const pct = (game.progress / game.total) * 100;
-  const requiresPhoto = game.category === "foto" || game.id === "g17" || isTreasure;
-  const missingStop = isTreasure && !selectedStop;
+  const requiresPhoto = !!task.photo;
+  const logs = getGameLogs(game.id);
+
+  const setLabel = (k: string, v?: string) => setLabels((p) => ({ ...p, [k]: v ?? "" }));
+
+  const missing: string | null = (() => {
+    if (task.stops && !selectedStop) return "Seleciona a paragem";
+    if (task.experience && !experienceId) return "Escolhe a experiência";
+    if (task.itinerary && !itinerarySel) return "Escolhe o roteiro e a paragem";
+    if (task.timeOfDay && !timeOfDay) return "Regista o momento do dia";
+    if (task.event && !eventInfo) return "Preenche o evento e a data";
+    if (task.word && !word) return "Escreve a palavra e o significado";
+    if (task.note && note.trim().length < task.note) return `Escreve pelo menos ${task.note} caracteres`;
+    if (task.share && !shared) return "Partilha para validar";
+    if (requiresPhoto && !photo) return "Tira a foto para confirmar";
+    return null;
+  })();
 
   const handleConfirm = () => {
-    if (requiresPhoto && !photo) return;
-    if (missingStop) return;
+    if (missing) return;
     if (isTreasure && selectedStop) {
       const next = [...doneStops, selectedStop];
       saveCheckedStops(game.id, next);
       setDoneStops(next);
     }
+    const detailLabel = [labels.experience, labels.itinerary, labels.timeOfDay, labels.event, labels.word]
+      .filter(Boolean)
+      .join(" · ");
+    addGameLog(game.id, detailLabel || note.trim() || game.title);
     setSuccess(true);
     setTimeout(() => onConfirm(), 1300);
   };
-
-
 
   return (
     <motion.div
@@ -530,28 +558,67 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
                 <p className="text-sm"><span className="text-muted-foreground">Selo:</span> <strong>{game.badge}</strong></p>
               </div>
 
-              {game.special === "aprende-palavra" && (
-                <div>
-                  <label className="text-sm font-medium">Palavra aprendida</label>
-                  <input
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="ex: Kanimambo (Obrigado)"
-                    className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
-                  />
+              {logs.length > 0 && (
+                <div className="rounded-xl border p-3">
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-1">Registos anteriores</p>
+                  <ul className="space-y-1">
+                    {logs.slice(-4).map((l, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-center gap-1">
+                        <CheckCircle className="size-3 text-green-600 shrink-0" /> {l.label}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
-              {game.special === "conta-historia" && (
+              {task.word && (
+                <WordTask value={word} onChange={(v, label) => { setWord(v); setLabel("word", label); }} />
+              )}
+
+              {task.experience && (
+                <ExperienceTask
+                  value={experienceId}
+                  onChange={(id, label) => { setExperienceId(id); setLabel("experience", label); }}
+                />
+              )}
+
+              {task.itinerary && (
+                <ItineraryTask
+                  value={itinerarySel}
+                  onChange={(v, label) => { setItinerarySel(v); setLabel("itinerary", label); }}
+                />
+              )}
+
+              {task.timeOfDay && (
+                <TimeOfDayTask value={timeOfDay} onChange={(v, label) => { setTimeOfDay(v); setLabel("timeOfDay", label); }} />
+              )}
+
+              {task.event && (
+                <EventTask value={eventInfo} onChange={(v, label) => { setEventInfo(v); setLabel("event", label); }} />
+              )}
+
+              {task.share && (
+                <ShareTask
+                  title={game.title}
+                  text={`Estou a fazer o desafio "${game.title}" na Ekaya Explore!`}
+                  done={shared}
+                  onDone={() => setShared(true)}
+                />
+              )}
+
+              {task.note && (
                 <div>
-                  <label className="text-sm font-medium">A tua nota</label>
+                  <label className="text-sm font-medium">
+                    {game.special === "conta-historia" ? "A tua história" : "Descreve o momento"}
+                  </label>
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    placeholder="Escreve a tua história..."
+                    placeholder="Escreve aqui..."
                     rows={4}
                     className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">{note.trim().length}/{task.note} caracteres</p>
                 </div>
               )}
 
@@ -570,15 +637,12 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
 
               <Button
                 onClick={handleConfirm}
-                disabled={missingStop || (requiresPhoto && !photo)}
+                disabled={!!missing}
                 className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
               >
-                {missingStop
-                  ? "Seleciona a paragem"
-                  : requiresPhoto && !photo
-                    ? "Tira a foto para confirmar"
-                    : "Confirmar conquista"}
+                {missing ?? "Confirmar conquista"}
               </Button>
+
 
 
             </>
