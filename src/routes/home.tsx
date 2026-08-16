@@ -225,7 +225,17 @@ function HomePage() {
                 ? "Escolhe o destino, os dias e o tipo de experiência. Nós tratamos do resto."
                 : "Pick a destination, your days and the kind of experience you want. We handle the rest."}
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="gap-2 shadow-xl">
+                <Link to="/dashboard">
+                  <LayoutDashboard className="size-5" />
+                  {lang === "pt" ? "Abrir o meu Painel" : "Open my Dashboard"}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
           </motion.div>
+
 
           {/* Quick selector card */}
           <motion.div
