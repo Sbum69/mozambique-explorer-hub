@@ -13,6 +13,8 @@ import {
   Star,
   Clock,
   Newspaper,
+  LayoutDashboard,
+
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -183,13 +185,16 @@ function HomePage() {
             <LanguageToggle />
             <Button
               asChild
-              variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/10 hover:text-white"
+              className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
             >
-              <Link to="/dashboard">{t("dashboard")}</Link>
+              <Link to="/dashboard">
+                <LayoutDashboard className="size-4" />
+                {t("dashboard")}
+              </Link>
             </Button>
             <Button
+
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 hover:text-white"
@@ -220,7 +225,17 @@ function HomePage() {
                 ? "Escolhe o destino, os dias e o tipo de experiência. Nós tratamos do resto."
                 : "Pick a destination, your days and the kind of experience you want. We handle the rest."}
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="gap-2 shadow-xl">
+                <Link to="/dashboard">
+                  <LayoutDashboard className="size-5" />
+                  {lang === "pt" ? "Abrir o meu Painel" : "Open my Dashboard"}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
           </motion.div>
+
 
           {/* Quick selector card */}
           <motion.div
