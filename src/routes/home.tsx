@@ -185,13 +185,16 @@ function HomePage() {
             <LanguageToggle />
             <Button
               asChild
-              variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/10 hover:text-white"
+              className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
             >
-              <Link to="/dashboard">{t("dashboard")}</Link>
+              <Link to="/dashboard">
+                <LayoutDashboard className="size-4" />
+                {t("dashboard")}
+              </Link>
             </Button>
             <Button
+
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 hover:text-white"
