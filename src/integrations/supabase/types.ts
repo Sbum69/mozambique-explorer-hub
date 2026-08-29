@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      businesses: {
+        Row: {
+          category: string | null
+          contact: Json | null
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          location: Json | null
+          name: string
+          owner_id: string
+          province: string | null
+          slug: string
+          status: Database["public"]["Enums"]["business_status"]
+          type: string | null
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          category?: string | null
+          contact?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          location?: Json | null
+          name: string
+          owner_id: string
+          province?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["business_status"]
+          type?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          category?: string | null
+          contact?: Json | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          location?: Json | null
+          name?: string
+          owner_id?: string
+          province?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["business_status"]
+          type?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -97,6 +159,7 @@ export type Database = {
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"
+      business_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -225,6 +288,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["tourist", "business_small", "business_large", "admin"],
+      business_status: ["pending", "approved", "rejected", "suspended"],
     },
   },
 } as const
