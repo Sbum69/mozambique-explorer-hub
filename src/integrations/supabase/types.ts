@@ -76,6 +76,120 @@ export type Database = {
           },
         ]
       }
+      destinations: {
+        Row: {
+          category: string | null
+          created_at: string
+          description_en: string | null
+          description_pt: string | null
+          id: string
+          images: string[] | null
+          lat: number | null
+          lng: number | null
+          name: string
+          province: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          id?: string
+          images?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          province: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          id?: string
+          images?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          province?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      experiences: {
+        Row: {
+          active: boolean
+          business_id: string
+          capacity: number | null
+          created_at: string
+          description_en: string | null
+          description_pt: string | null
+          destination_id: string | null
+          duration_hours: number | null
+          id: string
+          images: string[] | null
+          price_mzn: number
+          province: string | null
+          title_en: string | null
+          title_pt: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          business_id: string
+          capacity?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          destination_id?: string | null
+          duration_hours?: number | null
+          id?: string
+          images?: string[] | null
+          price_mzn?: number
+          province?: string | null
+          title_en?: string | null
+          title_pt: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string
+          capacity?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          destination_id?: string | null
+          duration_hours?: number | null
+          id?: string
+          images?: string[] | null
+          price_mzn?: number
+          province?: string | null
+          title_en?: string | null
+          title_pt?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiences_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiences_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -156,6 +270,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      owns_business: { Args: { _business_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"
