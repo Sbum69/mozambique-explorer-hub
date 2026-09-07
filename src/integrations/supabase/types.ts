@@ -14,6 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          business_id: string
+          code: string
+          created_at: string
+          customer_email: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string | null
+          date: string
+          experience_id: string
+          id: string
+          notes: string | null
+          people: number
+          status: Database["public"]["Enums"]["booking_status"]
+          time: string
+          total_mzn: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          code: string
+          created_at?: string
+          customer_email?: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone?: string | null
+          date: string
+          experience_id: string
+          id?: string
+          notes?: string | null
+          people: number
+          status?: Database["public"]["Enums"]["booking_status"]
+          time: string
+          total_mzn?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          code?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string
+          customer_name?: string
+          customer_phone?: string | null
+          date?: string
+          experience_id?: string
+          id?: string
+          notes?: string | null
+          people?: number
+          status?: Database["public"]["Enums"]["booking_status"]
+          time?: string
+          total_mzn?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           category: string | null
@@ -263,6 +342,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_booking_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -274,6 +354,12 @@ export type Database = {
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "rejected"
+        | "cancelled"
+        | "completed"
       business_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
@@ -403,6 +489,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["tourist", "business_small", "business_large", "admin"],
+      booking_status: [
+        "pending",
+        "confirmed",
+        "rejected",
+        "cancelled",
+        "completed",
+      ],
       business_status: ["pending", "approved", "rejected", "suspended"],
     },
   },
