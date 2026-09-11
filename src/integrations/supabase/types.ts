@@ -200,6 +200,50 @@ export type Database = {
         }
         Relationships: []
       }
+      experience_availability: {
+        Row: {
+          active: boolean
+          capacity: number
+          created_at: string
+          day_of_week: number
+          end_time: string
+          experience_id: string
+          id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          capacity: number
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          experience_id: string
+          id?: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          capacity?: number
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          experience_id?: string
+          id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_availability_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           active: boolean
@@ -342,7 +386,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      booked_people: {
+        Args: { _date: string; _experience_id: string; _time: string }
+        Returns: number
+      }
       generate_booking_code: { Args: never; Returns: string }
+      get_experience_availability: {
+        Args: { _date: string; _experience_id: string }
+        Returns: {
+          available: boolean
+          booked_people: number
+          capacity: number
+          date: string
+          end_time: string
+          experience_id: string
+          remaining_capacity: number
+          start_time: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -351,6 +412,7 @@ export type Database = {
         Returns: boolean
       }
       owns_business: { Args: { _business_id: string }; Returns: boolean }
+      owns_experience: { Args: { _experience_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"
