@@ -35,7 +35,6 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  ssr: false,
   beforeLoad: requireAuthenticatedUser,
   component: MapPage,
 });
