@@ -1,20 +1,25 @@
 import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Lock, ShieldCheck, User as UserIcon, Store, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Lock, ShieldCheck, Mail, Store, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { toast } from "sonner";
 
 import hero from "@/assets/hero-mozambique.jpg";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
+  ssr: false,
+  beforeLoad: async () => {
+    const user = await getAuthenticatedUser();
+    if (user) throw redirect({ to: "/home" });
+  },
   head: () => ({
     meta: [
       { title: "Entrar — Ekaya Explore" },
@@ -25,26 +30,14 @@ export const Route = createFileRoute("/login")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/home" });
-    }
-  },
   component: LoginPage,
 });
-
-const DEMOS = [
-  { role: "Admin", username: "admin", code: "admin123" },
-  { role: "Utilizador", username: "user", code: "user123" },
-  { role: "Negócio Pequeno", username: "banca_maria", code: "banca123" },
-  { role: "Negócio Grande", username: "lodge_bazaruto", code: "lodge123" },
-];
 
 function LoginPage() {
   const navigate = useNavigate();
   const { login, loginAsGuest } = useAuth();
   const { t } = useLang();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,18 +45,16 @@ function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 500));
-    const result = login(username.trim(), password);
+    const result = await login(email, password);
     setLoading(false);
     if (!result.ok) {
-      toast.error(t("invalidCredentials"));
+      toast.error(result.error ?? t("invalidCredentials"));
       return;
     }
     toast.success(t("welcomeBack"));
-    const key = username.trim().toLowerCase();
-    if (key === "admin") {
+    if (result.role === "admin") {
       navigate({ to: "/admin" });
-    } else if (key === "banca_maria" || key === "lodge_bazaruto" || key.includes("business") || key.includes("negocio")) {
+    } else if (result.role === "business-small" || result.role === "business-large") {
       navigate({ to: "/business-dashboard" });
     } else {
       navigate({ to: "/home" });
@@ -72,12 +63,7 @@ function LoginPage() {
 
   const handleGuest = () => {
     loginAsGuest();
-    navigate({ to: "/home" });
-  };
-
-  const fillDemo = (u: string, p: string) => {
-    setUsername(u);
-    setPassword(p);
+    navigate({ to: "/news-alerts" });
   };
 
   return (
@@ -134,15 +120,16 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">{t("username")}</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 h-11"
-                  autoComplete="username"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -213,29 +200,6 @@ function LoginPage() {
             <UserPlus className="size-4" />
             Não tens conta? Criar Conta Gratuita
           </Link>
-
-
-          {/* Demo credentials */}
-          <Card className="mt-6 p-4 bg-muted/40 border-dashed">
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">
-              {t("demoCredentials")}
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {DEMOS.map((d) => (
-                <button
-                  key={d.username}
-                  type="button"
-                  onClick={() => fillDemo(d.username, d.code)}
-                  className="text-left rounded-md p-2 bg-card hover:bg-accent/40 border border-border/50 transition-colors"
-                >
-                  <p className="text-xs font-semibold">{d.role}</p>
-                  <p className="text-[10px] text-muted-foreground font-mono truncate">
-                    {d.username} / {d.code}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </Card>
         </motion.div>
       </div>
     </div>

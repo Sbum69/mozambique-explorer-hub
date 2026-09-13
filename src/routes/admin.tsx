@@ -35,8 +35,11 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { requireRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin")({
+  ssr: false,
+  beforeLoad: () => requireRole(["admin"]),
   head: () => ({
     meta: [
       { title: "Painel de Administração — Ekaya Explore" },
@@ -134,8 +137,7 @@ function AdminPage() {
             <span className="hidden sm:inline text-sm text-white/80">{user.displayName ?? user.username}</span>
             <button
               onClick={() => {
-                logout();
-                navigate({ to: "/login" });
+                void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
             >

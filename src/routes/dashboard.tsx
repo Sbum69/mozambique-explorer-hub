@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -20,6 +20,7 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { DESTINATIONS } from "@/data/destinations";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 
 export const Route = createFileRoute("/dashboard")({
@@ -33,11 +34,8 @@ export const Route = createFileRoute("/dashboard")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: DashboardPage,
 });
 
@@ -113,7 +111,7 @@ function DashboardPage() {
               </span>
               <span className="font-medium">{user.displayName}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { logout(); navigate({ to: "/login" }); }}>
+            <Button variant="ghost" size="sm" onClick={() => { void logout().then(() => navigate({ to: "/login", replace: true })); }}>
               {t("logout")}
             </Button>
           </div>

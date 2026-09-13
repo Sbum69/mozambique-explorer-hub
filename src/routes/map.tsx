@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
 import { ArrowLeft, MapPin, Users, Award, Check, Sparkles, Navigation, Car, Bike, Footprints, X, Loader2 } from "lucide-react";
@@ -14,6 +14,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
@@ -23,6 +24,7 @@ type TravelMode = "car" | "bike" | "foot";
 const OSRM_PROFILE: Record<TravelMode, string> = { car: "driving", bike: "cycling", foot: "walking" };
 
 export const Route = createFileRoute("/map")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Mapa Interativo — Ekaya Explore" },
@@ -33,12 +35,7 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  ssr: false,
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  beforeLoad: requireAuthenticatedUser,
   component: MapPage,
 });
 
