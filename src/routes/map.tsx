@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, lazy, Suspense } from "react";
 import { ArrowLeft, MapPin, Users, Award, Check, Sparkles, Navigation, Car, Bike, Footprints, X, Loader2 } from "lucide-react";

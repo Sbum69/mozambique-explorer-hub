@@ -12,8 +12,14 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { toast } from "sonner";
 
 import hero from "@/assets/hero-mozambique.jpg";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
+  ssr: false,
+  beforeLoad: async () => {
+    const user = await getAuthenticatedUser();
+    if (user) throw redirect({ to: "/home" });
+  },
   head: () => ({
     meta: [
       { title: "Entrar — Ekaya Explore" },
@@ -57,7 +63,7 @@ function LoginPage() {
 
   const handleGuest = () => {
     loginAsGuest();
-    navigate({ to: "/home" });
+    navigate({ to: "/news-alerts" });
   };
 
   return (

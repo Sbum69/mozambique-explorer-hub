@@ -155,8 +155,7 @@ function BusinessDashboardPage() {
             </button>
             <button
               onClick={() => {
-                logout();
-                navigate({ to: "/login" });
+                void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
               className="size-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
               aria-label="Sair"

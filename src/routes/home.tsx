@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -197,8 +197,7 @@ function HomePage() {
               size="sm"
               className="text-white hover:bg-white/10 hover:text-white"
               onClick={() => {
-                logout();
-                navigate({ to: "/login" });
+                void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
             >
               {t("logout")}

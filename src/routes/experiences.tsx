@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { ArrowLeft, Compass, Clock, Star, MapPin, Users, Check, Sparkles, Calendar, Phone, Mail, User as UserIcon, Store, FileText, CheckCircle2 } from "lucide-react";

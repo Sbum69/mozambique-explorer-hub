@@ -235,9 +235,8 @@ export function AppSidebar() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                logout();
                 close();
-                navigate({ to: "/login" });
+                void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
             >
               <LogOut className="size-4" />

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, Mail, Lock, User as UserIcon, Loader2, Check, Eye, EyeOff, ArrowLeft } from "lucide-react";
@@ -6,8 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/signup")({
+  ssr: false,
+  beforeLoad: async () => {
+    const user = await getAuthenticatedUser();
+    if (user) throw redirect({ to: "/home" });
+  },
   head: () => ({
     meta: [
       { title: "Criar Conta — Ekaya Explore" },

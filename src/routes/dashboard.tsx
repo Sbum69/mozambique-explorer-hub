@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -111,7 +111,7 @@ function DashboardPage() {
               </span>
               <span className="font-medium">{user.displayName}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { logout(); navigate({ to: "/login" }); }}>
+            <Button variant="ghost" size="sm" onClick={() => { void logout().then(() => navigate({ to: "/login", replace: true })); }}>
               {t("logout")}
             </Button>
           </div>
