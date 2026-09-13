@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void supabase.auth.getSession().then(({ data }) => loadAuthenticatedUser(data.session?.user ?? null));
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "TOKEN_REFRESHED") return;
-      void loadAuthenticatedUser(session?.user ?? null);
+      queueMicrotask(() => void loadAuthenticatedUser(session?.user ?? null));
     });
     return () => listener.subscription.unsubscribe();
   }, [loadAuthenticatedUser]);

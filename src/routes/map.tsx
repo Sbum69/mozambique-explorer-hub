@@ -24,6 +24,7 @@ type TravelMode = "car" | "bike" | "foot";
 const OSRM_PROFILE: Record<TravelMode, string> = { car: "driving", bike: "cycling", foot: "walking" };
 
 export const Route = createFileRoute("/map")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Mapa Interativo — Ekaya Explore" },
