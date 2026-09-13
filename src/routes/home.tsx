@@ -40,6 +40,7 @@ import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
 import hero from "@/assets/hero-mozambique.jpg";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/home")({
   head: () => ({
@@ -56,11 +57,8 @@ export const Route = createFileRoute("/home")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: HomePage,
 });
 

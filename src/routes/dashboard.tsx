@@ -20,6 +20,7 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { DESTINATIONS } from "@/data/destinations";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 
 export const Route = createFileRoute("/dashboard")({
@@ -33,11 +34,8 @@ export const Route = createFileRoute("/dashboard")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: DashboardPage,
 });
 

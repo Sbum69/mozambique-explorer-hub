@@ -19,6 +19,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { EXPERIENCES, type Experience, type ExperienceCategory } from "@/data/experiences";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { addBooking, generateBookingCode, type Booking } from "@/data/bookings";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/experiences")({
   head: () => ({
@@ -31,11 +32,8 @@ export const Route = createFileRoute("/experiences")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: ExperiencesPage,
 });
 

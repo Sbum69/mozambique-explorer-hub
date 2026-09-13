@@ -14,6 +14,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DESTINATIONS, type Destination } from "@/data/destinations";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
@@ -34,11 +35,7 @@ export const Route = createFileRoute("/map")({
     ],
   }),
   ssr: false,
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  beforeLoad: requireAuthenticatedUser,
   component: MapPage,
 });
 

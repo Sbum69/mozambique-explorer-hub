@@ -1,4 +1,8 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
+
+import { supabase } from "@/integrations/supabase/client";
+import type { AppRole } from "@/lib/auth";
 
 export type UserRole = "guest" | "user" | "admin" | "business-small" | "business-large";
 
@@ -43,92 +47,20 @@ export function computeLevel(xp: number) {
   return 1;
 }
 
-const DEMO_USERS: Record<string, { password: string; user: AppUser }> = {
-  user: {
-    password: "user123",
-    user: {
-      username: "user",
-      role: "user",
-      displayName: "Explorador",
-      xp: 1050,
-      level: 2,
-      visitedPlaces: 12,
-      completedItineraries: 3,
-      kmExplored: 78,
-    },
-  },
-  admin: {
-    password: "admin123",
-    user: {
-      username: "admin",
-      role: "admin",
-      displayName: "Administrador",
-      xp: 5000,
-      level: 5,
-      visitedPlaces: 45,
-      completedItineraries: 12,
-      kmExplored: 350,
-    },
-  },
-  banca_maria: {
-    password: "banca123",
-    user: {
-      username: "banca_maria",
-      role: "business-small",
-      displayName: "Banca da Maria",
-      xp: 200,
-      level: 1,
-      visitedPlaces: 0,
-      completedItineraries: 0,
-      kmExplored: 0,
-      businessInfo: {
-        businessName: "Banca da Maria",
-        businessType: "small",
-        category: "Artesanato Local",
-        location: "Mercado Central, Maputo",
-        description:
-          "Artesanato tradicional moçambicano feito à mão. Cestos, esculturas em madeira, e tecidos coloridos.",
-        contact: "+258 84 123 4567",
-        verified: true,
-      },
-    },
-  },
-  lodge_bazaruto: {
-    password: "lodge123",
-    user: {
-      username: "lodge_bazaruto",
-      role: "business-large",
-      displayName: "Bazaruto Paradise Lodge",
-      xp: 800,
-      level: 3,
-      visitedPlaces: 0,
-      completedItineraries: 0,
-      kmExplored: 0,
-      businessInfo: {
-        businessName: "Bazaruto Paradise Lodge",
-        businessType: "large",
-        category: "Alojamento e Hospedagem",
-        location: "Arquipélago de Bazaruto, Inhambane",
-        description:
-          "Lodge de luxo com vista para o mar. Inclui restaurante, spa e atividades aquáticas.",
-        contact: "+258 84 987 6543",
-        verified: true,
-      },
-    },
-  },
-};
-
 interface AuthContextValue {
   user: AppUser | null;
-  login: (username: string, password: string) => { ok: boolean; error?: string };
+  authUser: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: UserRole }>;
   loginAsGuest: () => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   setPreferences: (prefs: UserPreferences) => void;
   needsOnboarding: boolean;
   addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
   visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
   registerBusiness: (businessData: BusinessInfo, username: string, code: string) => { ok: boolean; error?: string };
-  registerUser: (data: { username: string; password: string; displayName: string; email: string }) => { ok: boolean; error?: string };
+  registerUser: (data: { username: string; password: string; displayName: string; email: string }) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
 
   isGuest: boolean;
   isUser: boolean;
@@ -139,65 +71,103 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const STORAGE_KEY = "ekaya.auth.user";
+const LOCAL_STATE_PREFIX = "ekaya.user-state:";
+
+const rolePriority: AppRole[] = ["admin", "business_large", "business_small", "tourist"];
+
+function toLegacyRole(roles: AppRole[]): UserRole {
+  const role = rolePriority.find((candidate) => roles.includes(candidate)) ?? "tourist";
+  if (role === "business_large") return "business-large";
+  if (role === "business_small") return "business-small";
+  if (role === "tourist") return "user";
+  return role;
+}
+
+function authErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("invalid login credentials")) return "Email ou palavra-passe incorretos.";
+  if (normalized.includes("email not confirmed")) return "Confirma primeiro o teu email para entrar.";
+  if (normalized.includes("already registered") || normalized.includes("already been registered")) return "Este email já está registado.";
+  if (normalized.includes("valid email")) return "Introduz um email válido.";
+  if (normalized.includes("password") && normalized.includes("characters")) return "A palavra-passe é demasiado curta.";
+  if (normalized.includes("network") || normalized.includes("fetch")) return "Sem ligação. Verifica a internet e tenta novamente.";
+  return "Não foi possível concluir. Tenta novamente.";
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
-  // In-memory registry of dynamically registered businesses (session-only)
-  const registeredBusinesses = useRef<Map<string, AppUser>>(new Map());
-  // Registered end-users (persisted in localStorage)
-  const registeredUsers = useRef<Map<string, { password: string; user: AppUser }>>(new Map());
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw));
-      const usersRaw = localStorage.getItem("ekaya.registeredUsers");
-      if (usersRaw) {
-        const parsed = JSON.parse(usersRaw) as Record<string, { password: string; user: AppUser }>;
-        registeredUsers.current = new Map(Object.entries(parsed));
-      }
-    } catch {
-      /* ignore */
+  const loadAuthenticatedUser = useCallback(async (currentAuthUser: User | null) => {
+    setAuthUser(currentAuthUser);
+    if (!currentAuthUser) {
+      setUser(null);
+      setIsLoading(false);
+      return;
     }
+
+    const [{ data: profile }, { data: roleRows }] = await Promise.all([
+      supabase.from("profiles").select("display_name, avatar_url, phone, locale, province, duration_days, interests").eq("id", currentAuthUser.id).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", currentAuthUser.id),
+    ]);
+    const roles = (roleRows ?? []).map(({ role }) => role) as AppRole[];
+    const localKey = `${LOCAL_STATE_PREFIX}${currentAuthUser.id}`;
+    let local: Partial<AppUser> = {};
+    try {
+      local = JSON.parse(localStorage.getItem(localKey) ?? "{}");
+    } catch {
+      local = {};
+    }
+
+    const email = currentAuthUser.email ?? "";
+    const appUser: AppUser = {
+      username: String(currentAuthUser.user_metadata?.username ?? email.split("@")[0] ?? "explorador"),
+      role: toLegacyRole(roles),
+      displayName: profile?.display_name ?? String(currentAuthUser.user_metadata?.display_name ?? email.split("@")[0] ?? "Explorador"),
+      email,
+      xp: local.xp ?? 0,
+      level: local.level ?? 1,
+      visitedPlaces: local.visitedPlaces ?? 0,
+      completedItineraries: local.completedItineraries ?? 0,
+      kmExplored: local.kmExplored ?? 0,
+      visitedIds: local.visitedIds ?? [],
+      businessInfo: local.businessInfo,
+      preferences: {
+        province: profile?.province ?? local.preferences?.province,
+        durationDays: profile?.duration_days ?? local.preferences?.durationDays,
+        interests: profile?.interests ?? local.preferences?.interests,
+      },
+    };
+    setUser(appUser);
+    setIsLoading(false);
   }, []);
 
-  const persistRegisteredUsers = () => {
-    const obj: Record<string, { password: string; user: AppUser }> = {};
-    registeredUsers.current.forEach((v, k) => { obj[k] = v; });
-    localStorage.setItem("ekaya.registeredUsers", JSON.stringify(obj));
-  };
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => loadAuthenticatedUser(data.session?.user ?? null));
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "TOKEN_REFRESHED") return;
+      void loadAuthenticatedUser(session?.user ?? null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, [loadAuthenticatedUser]);
 
-
-  const persist = (u: AppUser | null) => {
+  const persistLocalState = (u: AppUser | null) => {
     setUser(u);
-    if (u) localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-    else localStorage.removeItem(STORAGE_KEY);
+    if (u && authUser) localStorage.setItem(`${LOCAL_STATE_PREFIX}${authUser.id}`, JSON.stringify(u));
   };
 
-  const login: AuthContextValue["login"] = (username, password) => {
-    const key = username.trim().toLowerCase();
-    const entry = DEMO_USERS[key];
-    if (entry && entry.password === password) {
-      persist({ ...entry.user });
-      return { ok: true };
-    }
-    const reg = registeredUsers.current.get(key);
-    if (reg && reg.password === password) {
-      persist({ ...reg.user });
-      return { ok: true };
-    }
-    const dyn = registeredBusinesses.current.get(`${key}:${password}`);
-    if (dyn) {
-      persist({ ...dyn });
-      return { ok: true };
-    }
-    return { ok: false, error: "Credenciais inválidas" };
+  const login: AuthContextValue["login"] = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error || !data.user) return { ok: false, error: authErrorMessage(error?.message ?? "") };
+    await loadAuthenticatedUser(data.user);
+    const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
+    return { ok: true, role: toLegacyRole((roleRows ?? []).map(({ role }) => role) as AppRole[]) };
   };
 
 
   const loginAsGuest = () => {
-    persist({
+    setUser({
       username: "Convidado",
       role: "guest",
       displayName: "Convidado",
@@ -209,11 +179,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const logout = () => persist(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setAuthUser(null);
+    setUser(null);
+  };
 
   const setPreferences = (prefs: UserPreferences) => {
     if (!user) return;
-    persist({ ...user, preferences: { ...user.preferences, ...prefs } });
+    const next = { ...user, preferences: { ...user.preferences, ...prefs } };
+    persistLocalState(next);
+    if (authUser) {
+      void supabase.from("profiles").update({
+        province: next.preferences?.province,
+        duration_days: next.preferences?.durationDays,
+        interests: next.preferences?.interests,
+      }).eq("id", authUser.id);
+    }
   };
 
   const addXP: AuthContextValue["addXP"] = (amount) => {
@@ -221,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const newXp = user.xp + amount;
     const newLevel = computeLevel(newXp);
     const leveledUp = newLevel > user.level;
-    persist({ ...user, xp: newXp, level: newLevel });
+    persistLocalState({ ...user, xp: newXp, level: newLevel });
     return { newXp, leveledUp, newLevel };
   };
 
@@ -236,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const newXp = user.xp + gained;
     const newLevel = computeLevel(newXp);
     const leveledUp = newLevel > user.level;
-    persist({
+    persistLocalState({
       ...user,
       xp: newXp,
       level: newLevel,
@@ -248,54 +230,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const registerBusiness: AuthContextValue["registerBusiness"] = (businessData, username, code) => {
-    const key = username.trim().toLowerCase();
-    if (!key || !code) return { ok: false, error: "Credenciais em falta" };
-    if (DEMO_USERS[key]) return { ok: false, error: "Utilizador já existe" };
-    for (const stored of registeredBusinesses.current.keys()) {
-      if (stored.startsWith(`${key}:`)) return { ok: false, error: "Utilizador já existe" };
-    }
-    const role: UserRole = businessData.businessType === "large" ? "business-large" : "business-small";
-    const newUser: AppUser = {
-      username: key,
-      role,
-      displayName: businessData.businessName,
-      xp: 0,
-      level: 1,
-      visitedPlaces: 0,
-      completedItineraries: 0,
-      kmExplored: 0,
-      businessInfo: { ...businessData, verified: false },
-    };
-    registeredBusinesses.current.set(`${key}:${code}`, newUser);
-    persist(newUser);
-    return { ok: true };
+    void businessData;
+    void username;
+    void code;
+    return { ok: false, error: "Cria primeiro uma conta pessoal. O registo de negócios será ligado numa próxima fase." };
   };
 
-  const registerUser: AuthContextValue["registerUser"] = ({ username, password, displayName, email }) => {
+  const registerUser: AuthContextValue["registerUser"] = async ({ username, password, displayName, email }) => {
     const key = username.trim().toLowerCase();
     if (!key) return { ok: false, error: "Escolhe um nome de utilizador" };
     if (/\s/.test(key)) return { ok: false, error: "Sem espaços no nome de utilizador" };
-    if (DEMO_USERS[key] || registeredUsers.current.has(key)) {
-      return { ok: false, error: "Este nome já está em uso" };
-    }
-    for (const stored of registeredBusinesses.current.keys()) {
-      if (stored.startsWith(`${key}:`)) return { ok: false, error: "Este nome já está em uso" };
-    }
-    const newUser: AppUser = {
-      username: key,
-      role: "user",
-      displayName: displayName.trim() || key,
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
-      xp: 0,
-      level: 1,
-      visitedPlaces: 0,
-      completedItineraries: 0,
-      kmExplored: 0,
-    };
-    registeredUsers.current.set(key, { password, user: newUser });
-    persistRegisteredUsers();
-    persist(newUser);
-    return { ok: true };
+      password,
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: { display_name: displayName.trim(), username: key },
+      },
+    });
+    if (error) return { ok: false, error: authErrorMessage(error.message) };
+    if (data.session && data.user) await loadAuthenticatedUser(data.user);
+    return { ok: true, needsConfirmation: data.session === null };
   };
 
 
@@ -315,6 +270,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        authUser,
+        isAuthenticated: !!authUser,
+        isLoading,
         login,
         loginAsGuest,
         logout,

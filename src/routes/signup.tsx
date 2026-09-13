@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, Mail, Lock, User as UserIcon, Loader2, Check, Eye, EyeOff, ArrowLeft } from "lucide-react";
@@ -18,11 +18,6 @@ export const Route = createFileRoute("/signup")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/home" });
-    }
-  },
   component: SignupPage,
 });
 
@@ -46,6 +41,7 @@ function SignupPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const validate = (): FieldErrors => {
@@ -67,15 +63,15 @@ function SignupPage() {
     setErrors(v);
     if (Object.keys(v).length > 0) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 500));
-    const res = registerUser({ username, password, displayName, email });
+    const res = await registerUser({ username, password, displayName, email });
     setLoading(false);
     if (!res.ok) {
-      setErrors({ username: res.error });
+      setErrors({ email: res.error });
       return;
     }
     setSuccess(true);
-    setTimeout(() => navigate({ to: "/home" }), 1500);
+    setNeedsConfirmation(!!res.needsConfirmation);
+    if (!res.needsConfirmation) setTimeout(() => navigate({ to: "/home" }), 1500);
   };
 
   return (
@@ -103,7 +99,16 @@ function SignupPage() {
                 </motion.div>
                 <h2 className="mt-6 text-2xl font-bold">Conta criada com sucesso!</h2>
                 <p className="mt-2 text-muted-foreground">Bem-vindo/a, {displayName}!</p>
-                <p className="mt-4 text-sm text-muted-foreground">A preparar a tua experiência…</p>
+                <p className="mt-4 text-sm text-muted-foreground">
+                  {needsConfirmation
+                    ? "Enviámos uma ligação para o teu email. Confirma a conta antes de entrar."
+                    : "A preparar a tua experiência…"}
+                </p>
+                {needsConfirmation && (
+                  <Link to="/login" className="mt-6 inline-flex font-semibold text-primary hover:underline">
+                    Voltar ao login
+                  </Link>
+                )}
               </motion.div>
             ) : (
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

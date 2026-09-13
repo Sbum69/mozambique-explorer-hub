@@ -31,8 +31,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getBookings, updateBookingStatus, type Booking } from "@/data/bookings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { requireRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/business-dashboard")({
+  ssr: false,
+  beforeLoad: () => requireRole(["business_small", "business_large"]),
   head: () => ({
     meta: [
       { title: "Painel do Negócio — Ekaya Explore" },
