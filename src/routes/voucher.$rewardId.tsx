@@ -8,8 +8,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/contexts/LanguageContext";
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/voucher/$rewardId")({
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   head: () => ({
     meta: [
       { title: "Voucher resgatado — Ekaya Explore" },
