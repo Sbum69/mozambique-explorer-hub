@@ -34,7 +34,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
-import { DESTINATIONS } from "@/data/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 import { EXPERIENCES, type ExperienceCategory } from "@/data/experiences";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
@@ -115,6 +115,7 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
