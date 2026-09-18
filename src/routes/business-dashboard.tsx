@@ -250,6 +250,41 @@ function BusinessDashboardPage() {
               )}
             </Card>
 
+            <Card title="As Minhas Experiências">
+              {loadingOwn ? (
+                <div className="space-y-3">
+                  {[0, 1].map((i) => (
+                    <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+                  ))}
+                </div>
+              ) : ownError ? (
+                <div className="text-center py-8 text-sm text-gray-500">
+                  Não foi possível carregar as tuas experiências. Tenta novamente mais tarde.
+                </div>
+              ) : ownExperiences.length === 0 ? (
+                <div className="text-center py-8 text-sm text-gray-500">
+                  <Package className="size-8 mx-auto mb-2 opacity-40" />
+                  Ainda não tens experiências publicadas no teu negócio.
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {ownExperiences.map((exp) => (
+                    <li key={exp.id} className="rounded-xl border border-gray-200 p-4 flex gap-3 items-center">
+                      {exp.image && <img src={exp.image} alt="" className="size-14 rounded-lg object-cover shrink-0" loading="lazy" />}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold truncate">{exp.title.pt}</p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {exp.location} · {exp.durationHours}h · {exp.priceMzn.toLocaleString()} MZN
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+
+
             <Card title="Ações Rápidas">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {quickActions.map((a) => (
