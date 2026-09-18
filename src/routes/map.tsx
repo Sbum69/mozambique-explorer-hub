@@ -47,12 +47,17 @@ function MapPage() {
   const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
   const preferredId = user?.preferences?.province;
-  const initialDest = DESTINATIONS.find((d) => d.id === preferredId) ?? DESTINATIONS[0];
-  const [selected, setSelected] = useState<Destination | null>(initialDest);
+  const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
+  const [selected, setSelected] = useState<Destination | null>(null);
   const [showAllDestinations, setShowAllDestinations] = useState(!preferredId);
   const visibleDestinations = preferredId && !showAllDestinations
-    ? DESTINATIONS.filter((d) => d.id === preferredId)
-    : DESTINATIONS;
+    ? destinations.filter((d) => d.slug === preferredId)
+    : destinations;
+
+  useEffect(() => {
+    if (!destinations.length) return;
+    setSelected((current) => current ?? destinations.find((d) => d.slug === preferredId) ?? destinations[0]);
+  }, [destinations, preferredId]);
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
