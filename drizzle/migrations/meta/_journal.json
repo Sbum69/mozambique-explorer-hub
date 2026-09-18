@@ -15,6 +15,13 @@
       "when": 1789753629811,
       "tag": "0001_seed_experiences_catalogue",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789753921809,
+      "tag": "0002_align_businesses_guard_with_no_session",
+      "breakpoints": true
     }
   ]
 }
