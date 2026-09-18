@@ -264,6 +264,18 @@ function HomePage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {loadingDestinations && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+                  </p>
+                )}
+                {destinationsError && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {lang === "pt"
+                      ? "Não foi possível carregar os destinos. Tenta novamente mais tarde."
+                      : "We couldn't load the destinations. Please try again later."}
+                  </p>
+                )}
               </div>
 
               {/* Days */}
