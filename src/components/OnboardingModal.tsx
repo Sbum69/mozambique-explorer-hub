@@ -105,9 +105,31 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                 <h3 className="text-xl font-semibold mb-5 flex items-center gap-2">
                   <MapPin className="size-5 text-primary" /> {t("chooseDestination")}
                 </h3>
+                {loadingDestinations && (
+                  <p className="text-sm text-muted-foreground animate-pulse">
+                    {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+                  </p>
+                )}
+                {destinationsError && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      {lang === "pt"
+                        ? "Não foi possível carregar os destinos. Verifica a ligação e tenta novamente."
+                        : "We couldn't load the destinations. Check your connection and try again."}
+                    </p>
+                    <Button size="sm" variant="outline" onClick={() => void reload()}>
+                      {lang === "pt" ? "Tentar novamente" : "Try again"}
+                    </Button>
+                  </div>
+                )}
+                {isEmpty && (
+                  <p className="text-sm text-muted-foreground">
+                    {lang === "pt" ? "Ainda não existem destinos disponíveis." : "No destinations available yet."}
+                  </p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {DESTINATIONS.map((d, i) => {
-                    const selected = province === d.id;
+                  {destinations.map((d, i) => {
+                    const selected = province === d.slug;
                     return (
                       <motion.button
                         key={d.id}
@@ -116,7 +138,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
                         whileHover={{ y: -4 }}
-                        onClick={() => setProvince(d.id)}
+                        onClick={() => setProvince(d.slug)}
                         className={cn(
                           "group relative text-left rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-card",
                           selected
