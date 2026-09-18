@@ -201,6 +201,41 @@ function ExperiencesPage() {
           ))}
         </div>
 
+        {loading && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {[0, 1, 2].map((i) => (
+              <Card key={i} className="h-72 animate-pulse border-0 shadow-[var(--shadow-soft)] bg-muted/40" />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              {lang === "pt"
+                ? "Não foi possível carregar as experiências. Verifica a ligação e tenta novamente."
+                : "We couldn't load the experiences. Check your connection and try again."}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void reload()}>
+              {lang === "pt" ? "Tentar novamente" : "Try again"}
+            </Button>
+          </Card>
+        )}
+
+        {isEmpty && (
+          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
+            {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+          </Card>
+        )}
+
+        {!loading && !error && !isEmpty && filtered.length === 0 && (
+          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
+            {lang === "pt"
+              ? "Nenhuma experiência corresponde a estes filtros."
+              : "No experience matches these filters."}
+          </Card>
+        )}
+
         {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((exp, i) => {
