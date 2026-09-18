@@ -27,6 +27,7 @@ import { Route as CultureHistoryRouteImport } from './routes/culture-history'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as BusinessRegisterRouteImport } from './routes/business-register'
 import { Route as BusinessDashboardRouteImport } from './routes/business-dashboard'
+import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
@@ -122,6 +123,11 @@ const BusinessDashboardRoute = BusinessDashboardRouteImport.update({
   path: '/business-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -146,6 +152,7 @@ const ItineraryIdRoute = ItineraryIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
   '/community': typeof CommunityRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
   '/community': typeof CommunityRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
   '/community': typeof CommunityRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/bookings'
     | '/business-dashboard'
     | '/business-register'
     | '/community'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/bookings'
     | '/business-dashboard'
     | '/business-register'
     | '/community'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/bookings'
     | '/business-dashboard'
     | '/business-register'
     | '/community'
@@ -294,6 +306,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  BookingsRoute: typeof BookingsRoute
   BusinessDashboardRoute: typeof BusinessDashboardRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
   CommunityRoute: typeof CommunityRoute
@@ -444,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -478,6 +498,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  BookingsRoute: BookingsRoute,
   BusinessDashboardRoute: BusinessDashboardRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
   CommunityRoute: CommunityRoute,

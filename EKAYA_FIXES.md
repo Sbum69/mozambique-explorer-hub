@@ -384,3 +384,63 @@ Sem alterações de RLS: as políticas existentes já cobriam o necessário (`an
 - Teste 7 confirmado por código/políticas, não em sessão real (email por confirmar).
 
 **Estado:** Bloco 6C.5 concluído.
+
+## Block 6D — Reservas reais (Supabase)
+
+**Data:** 2026-09-18
+
+### Estado anterior
+- `src/data/bookings.ts` guardava as reservas em `localStorage` (`ekaya.bookings`) e era a fonte de verdade.
+- O código da reserva era gerado no browser (`generateBookingCode`), o preço era calculado no frontend e o horário era um campo de texto livre (`09:00`).
+- O painel do negócio lia as mesmas reservas locais através do evento `ekaya:bookings-changed`.
+- O turista não tinha histórico de reservas.
+
+### Migração de localStorage/mock para Supabase
+- `src/data/bookings.ts` **eliminado**. Nenhuma reserva é guardada no browser (`rg` confirma 0 referências a `ekaya.bookings`/`getBookings`).
+- Novo serviço `src/lib/bookings.ts`: `createBooking`, `fetchMyBookings`, `fetchBusinessBookings`, `updateBookingStatus`, `fetchAvailableWeekdays`, `translateBookingError`, tipos `Booking`/`BookingStatus`.
+- O cliente só envia `experience_id`, data, hora, pessoas e contactos. `customer_id` vem da sessão, `business_id` e o preço são lidos da tabela `experiences` (snapshot em `bookings.total_mzn`), o `code` é gerado pelo trigger.
+
+### Componentes alterados
+- `src/routes/experiences.tsx` — modal de reserva real: data (limitada aos dias da semana com disponibilidade), lista de horários vindos de `get_experience_availability` com lugares restantes/sem lugares, seletor de pessoas (− 1 +) limitado pelos lugares livres, total, confirmação com dados reais (código, estado, destino, anfitrião).
+- `src/routes/bookings.tsx` — **nova** página "As minhas reservas" (loading, erro com repetição, vazio amigável, código, estado, data/hora, pessoas, destino, total).
+- `src/components/AppSidebar.tsx` — entrada "Minhas Reservas / My Bookings".
+- `src/routes/business-dashboard.tsx` — Pedidos de Reserva reais via RLS (`owns_business`), com loading/erro e Confirmar/Rejeitar a escrever na base de dados.
+
+### Tabelas, funções e políticas usadas (sem migrations novas)
+- Tabelas: `bookings`, `experience_availability`, `experiences`, `businesses`, `profiles`, `user_roles`.
+- Funções reutilizadas: `bookings_validate_insert` (código, estado `pending`, data no passado, janela de disponibilidade, `pg_advisory_xact_lock`, capacidade), `bookings_guard_update`, `generate_booking_code` (`EK-XXXXXX`), `booked_people`, `get_experience_availability`.
+- Políticas já existentes (não alteradas): turista cria/lê só as próprias reservas (`customer_id = auth.uid()`, `status = 'pending'`); negócio lê/atualiza as das suas experiências (`owns_business`); admin lê/atualiza tudo. Nenhum acesso anónimo (401 confirmado).
+- **Nenhuma migration criada neste bloco.** Nenhuma chave de serviço usada no frontend.
+
+### Testes
+| # | Teste | Resultado |
+|---|---|---|
+| 1 | Abrir experiência real e iniciar reserva | PASS (8 experiências reais, modal abre) |
+| 2 | Selecionar data válida | PASS (2026-09-21; dias sem horários são recusados com aviso) |
+| 3 | Selecionar horário real | PASS (09:00–15:00 vindo de `experience_availability`) |
+| 4 | 1 participante | PASS |
+| 5 | Mais participantes | PASS (3 pessoas) |
+| 6 | Acima da capacidade | PASS (botão + bloqueado nos lugares restantes) |
+| 7 | Disponibilidade real no frontend | PASS (lugares restantes vindos da função da BD) |
+| 8 | Criar reserva com conta real | PASS (linha real em `bookings`) |
+| 9 | Associada ao utilizador correto | PASS (`customer_id` = utilizador da sessão) |
+| 10 | Código real e único | PASS (`EK-D8BJCP`, gerado na BD) |
+| 11 | Histórico mostra a reserva | PASS |
+| 12 | Refresh mantém a reserva | PASS (lida da BD, não do browser) |
+| 13 | Logout/login mantém o histórico | PASS (dados na BD; verificado com sessão real recarregada) |
+| 14 | Outro turista não vê a reserva | PASS por política (`customer_id = auth.uid()`); não testado em sessão de segundo turista (sem conta confirmada disponível) |
+| 15 | Negócio vê as reservas das suas experiências | BLOCKED (as 8 empresas semeadas no 6C não têm proprietário e a empresa criada no 6C.5 ainda não confirmou o email) |
+| 16 | Empresa diferente não vê a reserva | PASS por política (`owns_business`); não testado em sessão |
+| 17 | Admin consulta a informação necessária | PASS |
+| 18 | Overbooking rejeitado | PASS (`Capacity exceeded: 3 of 10 seats already booked`) |
+| 19 | Concorrência (duas reservas simultâneas) | BLOCKED (sem acesso a duas ligações diretas à BD; a proteção usa `pg_advisory_xact_lock` por experiência+data+hora) |
+| 20 | Reservas já não dependem de localStorage | PASS (`src/data/bookings.ts` eliminado) |
+| 21 | Login/logout/confirmação/password | PASS (inalterados) |
+| 22 | Onboarding dos turistas | PASS (inalterado) |
+| 23 | Empresa do 6C.5 associada ao utilizador | PASS |
+| 24 | Admin → Utilizadores com dados reais | PASS |
+
+### Limitações
+- Cancelamento pelo turista não implementado: o guard atual só permite ao negócio `confirmed/rejected/completed` e não existe política de cancelamento definida. Trabalho futuro.
+- Capacidade 10 e horário 09:00 das experiências semeadas no 6C continuam provisórios, a confirmar com os anfitriões.
+- Verificação em sessão real do painel do negócio depende de uma conta de empresa com email confirmado (a confirmação de email não foi desativada).
