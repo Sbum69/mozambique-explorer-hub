@@ -35,7 +35,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
 import { useDestinations } from "@/hooks/useDestinations";
-import { EXPERIENCES, type ExperienceCategory } from "@/data/experiences";
+import { type ExperienceCategory } from "@/lib/experiences";
+import { useExperiences } from "@/hooks/useExperiences";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
@@ -143,15 +144,15 @@ function HomePage() {
   }, [maxDays]);
 
   const recoExperiences = useMemo(() => {
-    const pool = EXPERIENCES.filter((e) => {
+    const pool = experiences.filter((e) => {
       const matchDest = applied.destId === "any" || e.destinationId === applied.destId;
       const matchInt =
         applied.interests.length === 0 ||
         applied.interests.includes(e.category as Interest);
       return matchDest && matchInt;
     });
-    return (pool.length ? pool : EXPERIENCES).slice(0, 4);
-  }, [applied]);
+    return (pool.length ? pool : experiences).slice(0, 4);
+  }, [applied, experiences]);
 
   const recoStories = STORY_STOPS.slice(0, 3);
 
