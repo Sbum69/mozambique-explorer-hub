@@ -50,7 +50,9 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
   };
 
   const handleSkip = () => {
-    void savePrefs({ province: province ?? "maputo", durationDays: 3, interests: [] });
+    const fallback = province ?? destinations[0]?.slug;
+    if (!fallback) return;
+    void savePrefs({ province: fallback, durationDays: 3, interests: [] });
   };
 
   const toggleInterest = (id: string) => {
