@@ -157,46 +157,61 @@ export type Database = {
       }
       destinations: {
         Row: {
+          badges: string[]
           category: string | null
           created_at: string
           description_en: string | null
           description_pt: string | null
+          highlights: Json
           id: string
           images: string[] | null
           lat: number | null
           lng: number | null
           name: string
           province: string
+          region_en: string | null
+          region_pt: string | null
           slug: string
           updated_at: string
+          visitors_k: number
         }
         Insert: {
+          badges?: string[]
           category?: string | null
           created_at?: string
           description_en?: string | null
           description_pt?: string | null
+          highlights?: Json
           id?: string
           images?: string[] | null
           lat?: number | null
           lng?: number | null
           name: string
           province: string
+          region_en?: string | null
+          region_pt?: string | null
           slug: string
           updated_at?: string
+          visitors_k?: number
         }
         Update: {
+          badges?: string[]
           category?: string | null
           created_at?: string
           description_en?: string | null
           description_pt?: string | null
+          highlights?: Json
           id?: string
           images?: string[] | null
           lat?: number | null
           lng?: number | null
           name?: string
           province?: string
+          region_en?: string | null
+          region_pt?: string | null
           slug?: string
           updated_at?: string
+          visitors_k?: number
         }
         Relationships: []
       }
