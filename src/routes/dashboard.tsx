@@ -17,7 +17,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
-import { DESTINATIONS } from "@/data/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
 import { requireAuthenticatedUser } from "@/lib/auth";
@@ -64,15 +64,16 @@ function DashboardPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
   const [showChangeDest, setShowChangeDest] = useState(false);
+  const { destinations } = useDestinations();
 
   if (!user) return null;
 
-  const province = DESTINATIONS.find((d) => d.id === user.preferences?.province);
+  const province = destinations.find((d) => d.slug === user.preferences?.province);
   const xpToNext = (user.level + 1) * 1000;
   const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
 
   const recommendedItinerary = province
-    ? SAMPLE_ITINERARIES.find((it) => it.id === DESTINATION_ITINERARY[province.id])
+    ? SAMPLE_ITINERARIES.find((it) => it.id === DESTINATION_ITINERARY[province.slug])
     : null;
   const tripDays = user.preferences?.durationDays ?? 3;
   const daySlices = recommendedItinerary
