@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { DESTINATIONS, type Destination } from "@/data/destinations";
+import { type Destination } from "@/lib/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { requireAuthenticatedUser } from "@/lib/auth";
 
