@@ -32,6 +32,7 @@ import { getBookings, updateBookingStatus, type Booking } from "@/data/bookings"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth";
+import { fetchOwnExperiences, type Experience } from "@/lib/experiences";
 
 export const Route = createFileRoute("/business-dashboard")({
   ssr: false,
@@ -59,6 +60,21 @@ function BusinessDashboardPage() {
     load();
     window.addEventListener("ekaya:bookings-changed", load);
     return () => window.removeEventListener("ekaya:bookings-changed", load);
+  }, []);
+
+  // Own experiences, straight from the database (RLS only returns the ones of this owner's businesses).
+  const [ownExperiences, setOwnExperiences] = useState<Experience[]>([]);
+  const [loadingOwn, setLoadingOwn] = useState(true);
+  const [ownError, setOwnError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    fetchOwnExperiences()
+      .then((list) => active && setOwnExperiences(list))
+      .catch(() => active && setOwnError(true))
+      .finally(() => active && setLoadingOwn(false));
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleBookingAction = (b: Booking, status: "confirmed" | "rejected") => {
