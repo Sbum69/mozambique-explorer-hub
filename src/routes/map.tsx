@@ -210,7 +210,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap onSelect={setSelected} onDirections={computeDirections} routeCoords={routeCoords} origin={origin} />
+              <InteractiveMap destinations={visibleDestinations} onSelect={setSelected} onDirections={computeDirections} routeCoords={routeCoords} origin={origin} />
             </Suspense>
           </Card>
 
@@ -231,6 +231,28 @@ function MapPage() {
                 </button>
               )}
             </div>
+            {loadingDestinations && (
+              <Card className="border-0 shadow-[var(--shadow-soft)] p-4 text-sm text-muted-foreground animate-pulse">
+                {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+              </Card>
+            )}
+            {destinationsError && (
+              <Card className="border-0 shadow-[var(--shadow-soft)] p-4 space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {lang === "pt"
+                    ? "Não foi possível carregar os destinos. Verifica a ligação e tenta novamente."
+                    : "We couldn't load the destinations. Check your connection and try again."}
+                </p>
+                <Button size="sm" variant="outline" onClick={() => void reload()}>
+                  {lang === "pt" ? "Tentar novamente" : "Try again"}
+                </Button>
+              </Card>
+            )}
+            {isEmpty && (
+              <Card className="border-0 shadow-[var(--shadow-soft)] p-4 text-sm text-muted-foreground">
+                {lang === "pt" ? "Ainda não existem destinos disponíveis." : "No destinations available yet."}
+              </Card>
+            )}
             {visibleDestinations.map((d, i) => (
               <motion.div
                 key={d.id}
