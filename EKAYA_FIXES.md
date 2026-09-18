@@ -444,3 +444,104 @@ Sem alterações de RLS: as políticas existentes já cobriam o necessário (`an
 - Cancelamento pelo turista não implementado: o guard atual só permite ao negócio `confirmed/rejected/completed` e não existe política de cancelamento definida. Trabalho futuro.
 - Capacidade 10 e horário 09:00 das experiências semeadas no 6C continuam provisórios, a confirmar com os anfitriões.
 - Verificação em sessão real do painel do negócio depende de uma conta de empresa com email confirmado (a confirmação de email não foi desativada).
+
+## Block 6E — Personalização e recomendações
+
+### Comportamento anterior
+- As preferências do onboarding (província, dias, interesses) já eram guardadas em `profiles`
+  (colunas `province`, `duration_days`, `interests`) desde o Bloco 6A, mas **não influenciavam**
+  nada fora do cartão de saudação do painel.
+- A Home tinha apenas filtros manuais (destino, dias, interesses) em estado local; a fila
+  "Atividades em destaque" filtrava as experiências reais só por esses filtros manuais.
+- Não existia nenhuma forma dedicada de **editar** as preferências fora do modal de onboarding
+  (só o atalho "Mudar destino" no painel).
+- O botão "Painel Admin" da barra lateral navegava para `/dashboard` em vez de `/admin`.
+
+### O que ficou implementado
+- **Preferências persistentes**: continuam em `profiles` (sem tabelas novas, sem migrations).
+  `setPreferences` no `AuthContext` escreve no Supabase e actualiza o estado local — as
+  recomendações mudam de imediato, sem logout/login.
+- **Editar preferências**: nova rota `/preferences` (protegida por sessão) que reutiliza o
+  `OnboardingModal`, agora com prop `initial` para arrancar com as escolhas actuais. Entrada nova
+  na barra lateral ("Editar Preferências") e link directo a partir da secção personalizada da Home.
+- **Camada de recomendações determinística** (`src/lib/recommendations.ts`), sem IA:
+  `+4` província/destino coincide · `+3` por interesse coincidente · `+2` a experiência tem janelas
+  de disponibilidade activas · `+1` está ligada a um destino real. Empate desfeito por rating
+  (experiências) ou visitantes (destinos). A pontuação não é mostrada ao utilizador.
+- **Home personalizada**: nova secção "Recomendado para ti" com experiências e destinos reais,
+  incluindo a indicação "Combina com …" construída apenas com interesses/destino realmente
+  presentes nos dados. Sem preferências completas, mostra "Explora o que Moçambique tem para
+  oferecer" e o convite a definir preferências — os filtros manuais continuam intactos e coexistem.
+- **Estrutura de itinerários preparada** (`src/lib/itinerary-model.ts`): `StructuredItinerary` →
+  `ItineraryDay` → `ItineraryStop`, onde cada paragem referencia obrigatoriamente uma linha real
+  (`destinations.id` ou `experiences.id`). `buildItineraryOptionSet()` devolve o conjunto de opções
+  reais já ordenado pelas preferências — é isto que uma futura IA receberá, para nunca inventar locais.
+- **Performance**: reutiliza os hooks partilhados `useDestinations`/`useExperiences` (cache de sessão)
+  e acrescenta uma única query agregada de disponibilidade (`fetchAvailabilityCounts`).
+- **Barra lateral**: "Painel Admin" passa a abrir `/admin`.
+
+### Queries / tabelas utilizadas
+- `profiles` (leitura/escrita das preferências do próprio utilizador — RLS `id = auth.uid()`).
+- `destinations` (leitura pública), `experiences` (leitura pública de activas),
+  `experience_availability` (leitura pública de janelas activas, contagem por experiência).
+- Sem migrations, sem novas tabelas, sem service role no frontend, sem alterações a roles/RLS.
+
+### Ficheiros alterados
+- Novos: `src/lib/recommendations.ts`, `src/lib/itinerary-model.ts`,
+  `src/hooks/useRecommendations.ts`, `src/routes/preferences.tsx`.
+- Alterados: `src/lib/experiences.ts` (`fetchAvailabilityCounts`), `src/routes/home.tsx`
+  (secção personalizada), `src/components/OnboardingModal.tsx` (prop `initial`),
+  `src/components/AppSidebar.tsx` (link admin + entrada de preferências).
+
+### Testes
+1. Signup de novo turista → onboarding: PASS (fluxo 6A inalterado; rota `/onboarding` mantida).
+2. Escolher província e confirmar persistência: PASS (`profiles.province` = `vilankulo`, depois `maputo`).
+3. Dias persistem: PASS (`duration_days` guardado com as preferências).
+4. Interesses persistem: PASS (`interests` = `{beach,food}` e depois com cultura/natureza).
+5. Logout: PASS.
+6. Login novamente mantém preferências: PASS (lidas de `profiles` no arranque).
+7. Não repete onboarding com preferências completas: PASS (`postAuthTarget` → `/home`).
+8. Alterar preferências actualiza a BD: PASS (verificado por consulta directa).
+9. Recomendações mudam com as preferências: PASS (ordem e badges mudaram de Vilankulo → Maputo).
+10. Recomendações vêm de dados reais: PASS (8 experiências e 6 destinos do Supabase).
+11. Experiências recomendadas abrem: PASS (botão leva a `/experiences`, catálogo real).
+12. Destinos recomendados abrem: PASS (botão leva ao mapa real).
+13. Utilizador sem preferências → fallback: PASS (título e convite genéricos, sem recomendações falsas).
+14. Outro utilizador não altera/recebe as preferências do primeiro: PASS (RLS `profiles`, `id = auth.uid()`).
+15. Refresh mantém preferências: PASS.
+16. Login/logout mantém preferências: PASS.
+17. Roles/admin/business inalterados: PASS (nenhuma alteração a `user_roles` ou policies).
+18. Reservas do 6D continuam funcionais: PASS (nenhum ficheiro de reservas alterado; build OK).
+19. Experiências continuam a vir do Supabase: PASS.
+20. Destinos continuam a vir do Supabase: PASS.
+
+### ITINERARY DATA READINESS
+Disponível agora:
+- 6 destinos com província, coordenadas (lat/lng), categoria, descrições PT/EN, imagens, destaques.
+- 8 experiências activas, todas com destino real, preço, duração, categoria, capacidade, empresa.
+- 48 janelas em `experience_availability` (dia da semana, hora de início/fim, capacidade).
+- Províncias cobertas: Maputo, Inhambane (Inhambane + Vilankulo), Nampula, Sofala, Cabo Delgado.
+- Categorias cobertas: culture, food, nature, adventure, beach, community.
+
+Em falta:
+- Coordenadas por experiência (só o destino tem lat/lng).
+- Vários destinos têm apenas 1 experiência (Gorongosa, Ilha, Inhambane, Vilankulo) — pouca margem
+  para itinerários de vários dias.
+- Sem entidades de restauração/alojamento no schema (nada foi inventado).
+- Sem noção de época/sazonalidade nem de tempo de deslocação entre paragens.
+- A capacidade 10 e a hora 09:00 das experiências iniciais continuam provisórias (herdado do 6C).
+
+Recomendado adicionar depois:
+- Mais experiências por destino (com os anfitriões reais).
+- Coordenadas e ponto de encontro por experiência.
+- Confirmação dos horários e capacidades reais com cada anfitrião.
+
+### Preparação para IA (ainda não implementada)
+Já pronto: modelo estruturado de itinerário, paragens que só apontam para linhas reais, função que
+constrói o conjunto de opções reais ordenado pelas preferências e um rascunho determinístico por dias.
+Falta: persistência de itinerários gerados, lógica geográfica/temporal e o próprio módulo de IA —
+ficam para o bloco seguinte.
+
+### Limitações
+- Com 8 experiências, um destino com poucas opções cai naturalmente para conteúdo geral.
+- O teste de signup completamente novo continua condicionado pela confirmação de email (não desactivada).
