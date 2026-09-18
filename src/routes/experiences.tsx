@@ -16,7 +16,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { EXPERIENCES, type Experience, type ExperienceCategory } from "@/data/experiences";
+import { type Experience, type ExperienceCategory } from "@/lib/experiences";
+import { useAvailability, useExperiences } from "@/hooks/useExperiences";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { addBooking, generateBookingCode, type Booking } from "@/data/bookings";
 import { requireAuthenticatedUser } from "@/lib/auth";
@@ -71,12 +72,14 @@ function ExperiencesPage() {
     notes: "",
   });
 
+  const { experiences, loading, error, isEmpty, reload } = useExperiences();
+
   const filtered = useMemo(() => {
-    let list = EXPERIENCES;
+    let list = experiences;
     if (provinceId && !showAllDestinations) list = list.filter((e) => e.destinationId === provinceId);
     if (filter !== "all") list = list.filter((e) => e.category === filter);
     return list;
-  }, [filter, provinceId, showAllDestinations]);
+  }, [experiences, filter, provinceId, showAllDestinations]);
 
 
   const openBookingModal = (exp: Experience) => {
