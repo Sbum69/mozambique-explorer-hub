@@ -117,6 +117,7 @@ function HomePage() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
+  const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
