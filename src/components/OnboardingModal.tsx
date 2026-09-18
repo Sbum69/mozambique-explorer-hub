@@ -276,7 +276,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
           </Button>
           <Button
             onClick={handleNext}
-            disabled={!canNext}
+            disabled={!canNext || saving}
             size="lg"
             className="gap-1.5 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95 transition-all"
           >
