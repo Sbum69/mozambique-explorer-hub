@@ -257,8 +257,8 @@ function HomePage() {
                     <SelectItem value="any">
                       {lang === "pt" ? "Qualquer destino" : "Any destination"}
                     </SelectItem>
-                    {DESTINATIONS.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
+                    {destinations.map((d) => (
+                      <SelectItem key={d.id} value={d.slug}>
                         {d.name}
                       </SelectItem>
                     ))}
