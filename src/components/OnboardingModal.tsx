@@ -27,18 +27,28 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
 
   const canNext = step === 0 ? !!province : step === 1 ? days >= 1 : interests.length >= 2;
 
+  const [saving, setSaving] = useState(false);
+
+  const savePrefs = async (prefs: { province: string; durationDays: number; interests: string[] }) => {
+    setSaving(true);
+    try {
+      await setPreferences(prefs);
+    } finally {
+      setSaving(false);
+    }
+    onComplete();
+  };
+
   const handleNext = () => {
     if (step < totalSteps - 1) {
       setStep((s) => s + 1);
     } else {
-      setPreferences({ province: province!, durationDays: days, interests });
-      onComplete();
+      void savePrefs({ province: province!, durationDays: days, interests });
     }
   };
 
   const handleSkip = () => {
-    setPreferences({ province: province ?? "maputo", durationDays: 3, interests: [] });
-    onComplete();
+    void savePrefs({ province: province ?? "maputo", durationDays: 3, interests: [] });
   };
 
   const toggleInterest = (id: string) => {
