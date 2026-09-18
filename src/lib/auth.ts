@@ -25,6 +25,18 @@ export async function getAuthenticatedRoles(userId: string): Promise<AppRole[]> 
   return data.map(({ role }) => role);
 }
 
+/** Onboarding is considered complete once the profile has a chosen province. */
+export async function hasCompletedOnboarding(userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("province")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) return true; // never block the user because of a read failure
+  return !!data?.province;
+}
+
 export async function requireRole(allowed: AppRole[]) {
   const user = await requireAuthenticatedUser();
   const roles = await getAuthenticatedRoles(user.id);
@@ -32,4 +44,9 @@ export async function requireRole(allowed: AppRole[]) {
     throw redirect({ to: "/dashboard" });
   }
   return { user, roles };
+}
+
+/** Where an authenticated user should land: onboarding first, then the app. */
+export async function postAuthTarget(userId: string): Promise<"/onboarding" | "/home"> {
+  return (await hasCompletedOnboarding(userId)) ? "/home" : "/onboarding";
 }

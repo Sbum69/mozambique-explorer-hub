@@ -12,13 +12,13 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { toast } from "sonner";
 
 import hero from "@/assets/hero-mozambique.jpg";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
   beforeLoad: async () => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: "/home" });
+    if (user) throw redirect({ to: await postAuthTarget(user.id) });
   },
   head: () => ({
     meta: [
@@ -54,11 +54,14 @@ function LoginPage() {
     toast.success(t("welcomeBack"));
     if (result.role === "admin") {
       navigate({ to: "/admin" });
-    } else if (result.role === "business-small" || result.role === "business-large") {
-      navigate({ to: "/business-dashboard" });
-    } else {
-      navigate({ to: "/home" });
+      return;
     }
+    if (result.role === "business-small" || result.role === "business-large") {
+      navigate({ to: "/business-dashboard" });
+      return;
+    }
+    const authenticated = await getAuthenticatedUser();
+    navigate({ to: authenticated ? await postAuthTarget(authenticated.id) : "/home" });
   };
 
   const handleGuest = () => {

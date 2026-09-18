@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsefulInfoRouteImport } from './routes/useful-info'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as LoginRouteImport } from './routes/login'
@@ -39,6 +40,11 @@ const UsefulInfoRoute = UsefulInfoRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsAlertsRoute = NewsAlertsRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
+  '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/itinerary/$id': typeof ItineraryIdRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
+  '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/itinerary/$id': typeof ItineraryIdRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
+  '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/itinerary/$id': typeof ItineraryIdRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/map'
     | '/news-alerts'
+    | '/onboarding'
     | '/signup'
     | '/useful-info'
     | '/itinerary/$id'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/map'
     | '/news-alerts'
+    | '/onboarding'
     | '/signup'
     | '/useful-info'
     | '/itinerary/$id'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/map'
     | '/news-alerts'
+    | '/onboarding'
     | '/signup'
     | '/useful-info'
     | '/itinerary/$id'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MapRoute: typeof MapRoute
   NewsAlertsRoute: typeof NewsAlertsRoute
+  OnboardingRoute: typeof OnboardingRoute
   SignupRoute: typeof SignupRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
@@ -317,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/news-alerts': {
@@ -473,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MapRoute: MapRoute,
   NewsAlertsRoute: NewsAlertsRoute,
+  OnboardingRoute: OnboardingRoute,
   SignupRoute: SignupRoute,
   UsefulInfoRoute: UsefulInfoRoute,
   ItineraryIdRoute: ItineraryIdRoute,
