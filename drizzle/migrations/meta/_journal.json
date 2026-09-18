@@ -22,6 +22,20 @@
       "when": 1789753921809,
       "tag": "0002_align_businesses_guard_with_no_session",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789756924091,
+      "tag": "0003_grant_admin_role_to_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789757247579,
+      "tag": "0004_move_admin_role_to_verified_owner",
+      "breakpoints": true
     }
   ]
 }

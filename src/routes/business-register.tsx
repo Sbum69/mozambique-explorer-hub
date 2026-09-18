@@ -13,12 +13,14 @@ import {
   Phone,
   User as UserIcon,
   Lock,
+  Mail,
   Check,
   Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { useAuth, type BusinessInfo } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { registerBusinessAccount } from "@/lib/business-registration.functions";
 
 export const Route = createFileRoute("/business-register")({
   head: () => ({
@@ -56,10 +58,11 @@ const CATEGORIES_SMALL = [
 
 function BusinessRegisterPage() {
   const navigate = useNavigate();
-  const { registerBusiness } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [businessType, setBusinessType] = useState<"small" | "large" | null>(null);
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   // form state
   const [businessName, setBusinessName] = useState("");
@@ -67,7 +70,8 @@ function BusinessRegisterPage() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [contact, setContact] = useState("");
-  const [username, setUsername] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -82,10 +86,10 @@ function BusinessRegisterPage() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!businessType) return;
-    if (!businessName || !category || !location || !description || !contact || !username || !password) {
+    if (!businessName || !category || !location || !description || !contact || !ownerName || !email || !password) {
       toast.error("Preenche todos os campos obrigatórios");
       return;
     }
@@ -98,21 +102,33 @@ function BusinessRegisterPage() {
       return;
     }
 
-    const businessData: BusinessInfo = {
-      businessName,
-      businessType,
-      category,
-      location,
-      description,
-      contact,
-      verified: false,
-    };
+    setSubmitting(true);
+    const result = await registerBusinessAccount({
+      data: {
+        businessName,
+        businessType,
+        category,
+        location,
+        description,
+        contact,
+        displayName: ownerName,
+        email,
+        password,
+      },
+    }).catch(() => ({ ok: false, error: "Sem ligação. Tenta novamente." }) as const);
 
-    const result = registerBusiness(businessData, username, password);
     if (!result.ok) {
+      setSubmitting(false);
       toast.error(result.error ?? "Não foi possível registar");
       return;
     }
+
+    // The password only ever reaches Supabase Auth; here it just opens the session.
+    if (!result.needsConfirmation) {
+      await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    }
+    setNeedsConfirmation(!!result.needsConfirmation);
+    setSubmitting(false);
     setDone(true);
   };
 
@@ -140,17 +156,18 @@ function BusinessRegisterPage() {
             <div>
               <p className="font-semibold text-blue-900">Aguardando Verificação</p>
               <p className="text-sm text-blue-800 mt-1">
-                Um administrador irá rever e aprovar o teu negócio em breve. Podes começar a
-                configurar o teu perfil enquanto isso.
+                {needsConfirmation
+                  ? "Enviámos uma ligação para o teu email: confirma a conta para entrares. Um administrador irá rever e aprovar o teu negócio em breve."
+                  : "Um administrador irá rever e aprovar o teu negócio em breve. Podes começar a configurar o teu perfil enquanto isso."}
               </p>
             </div>
           </div>
 
           <button
-            onClick={() => navigate({ to: "/business-dashboard" })}
+            onClick={() => navigate({ to: needsConfirmation ? "/login" : "/business-dashboard" })}
             className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold shadow-lg hover:opacity-95 transition"
           >
-            Ir para Dashboard
+            {needsConfirmation ? "Ir para o login" : "Ir para Dashboard"}
           </button>
         </motion.div>
       </div>
@@ -286,22 +303,26 @@ function BusinessRegisterPage() {
               </div>
 
               <div className="grid gap-4">
-                <Field icon={<UserIcon className="size-4" />} label="Nome de Utilizador *">
-                  <input value={username} onChange={(e) => setUsername(e.target.value)} className={inputClass} required />
+                <Field icon={<UserIcon className="size-4" />} label="Nome do Responsável *">
+                  <input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} className={inputClass} required />
+                </Field>
+                <Field icon={<Mail className="size-4" />} label="Email *">
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} autoComplete="email" required />
                 </Field>
                 <Field icon={<Lock className="size-4" />} label="Palavra-passe (mín. 6) *">
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} required minLength={6} />
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} autoComplete="new-password" required minLength={6} />
                 </Field>
                 <Field icon={<Lock className="size-4" />} label="Confirmar Palavra-passe *">
-                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} required minLength={6} />
+                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} autoComplete="new-password" required minLength={6} />
                 </Field>
               </div>
 
               <button
                 type="submit"
-                className={`mt-8 w-full py-4 rounded-xl bg-gradient-to-r ${gradient} text-white font-semibold shadow-lg hover:opacity-95 transition`}
+                disabled={submitting}
+                className={`mt-8 w-full py-4 rounded-xl bg-gradient-to-r ${gradient} text-white font-semibold shadow-lg hover:opacity-95 transition disabled:opacity-70`}
               >
-                Registar Negócio
+                {submitting ? "A registar..." : "Registar Negócio"}
               </button>
             </motion.form>
           )}

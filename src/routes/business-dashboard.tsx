@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth";
 import { fetchOwnExperiences, type Experience } from "@/lib/experiences";
+import { fetchOwnBusiness, type OwnBusiness } from "@/lib/businesses";
 
 export const Route = createFileRoute("/business-dashboard")({
   ssr: false,
@@ -60,6 +61,20 @@ function BusinessDashboardPage() {
     load();
     window.addEventListener("ekaya:bookings-changed", load);
     return () => window.removeEventListener("ekaya:bookings-changed", load);
+  }, []);
+
+  // The business owned by the authenticated user (RLS scopes it to them).
+  const [ownBusiness, setOwnBusiness] = useState<OwnBusiness | null>(null);
+  const [loadingBusiness, setLoadingBusiness] = useState(true);
+  useEffect(() => {
+    let active = true;
+    fetchOwnBusiness()
+      .then((b) => active && setOwnBusiness(b))
+      .catch(() => active && setOwnBusiness(null))
+      .finally(() => active && setLoadingBusiness(false));
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Own experiences, straight from the database (RLS only returns the ones of this owner's businesses).
@@ -91,14 +106,22 @@ function BusinessDashboardPage() {
     navigate({ to: "/login" });
     return null;
   }
-  const isDemoView = !isBusiness || !user.businessInfo;
-  const businessInfo = user.businessInfo ?? {
-    businessName: "Ekaya Host (demo)",
-    category: "Experiências comunitárias",
-    location: "Moçambique",
-    contact: "—",
-    verified: false,
-  };
+  const isDemoView = !isBusiness || !ownBusiness;
+  const businessInfo = ownBusiness
+    ? {
+        businessName: ownBusiness.name,
+        category: ownBusiness.category,
+        location: ownBusiness.location || "Moçambique",
+        contact: ownBusiness.contact || "—",
+        verified: ownBusiness.verified,
+      }
+    : {
+        businessName: loadingBusiness ? "A carregar…" : "Ekaya Host (demo)",
+        category: "Experiências comunitárias",
+        location: "Moçambique",
+        contact: "—",
+        verified: false,
+      };
 
   const headerGradient = isBusinessLarge ? "from-blue-500 to-blue-700" : "from-orange-500 to-orange-700";
   const bannerGradient = isBusinessLarge ? "from-blue-600 to-blue-800" : "from-orange-500 to-orange-700";

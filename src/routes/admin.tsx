@@ -36,6 +36,7 @@ import {
 
 import { useAuth } from "@/contexts/AuthContext";
 import { requireRole } from "@/lib/auth";
+import { listPlatformUsers, type PlatformRole, type PlatformUser } from "@/lib/platform-users.functions";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -55,23 +56,26 @@ export const Route = createFileRoute("/admin")({
 
 type ModalKey = null | "users" | "addBusiness" | "reports" | "settings";
 
-interface AdminUser {
-  id: number;
-  name: string;
-  email: string;
-  type: "user" | "business-small" | "business-large";
-  status: "active" | "blocked";
-  registered: string;
-  business?: string;
-  spent?: string;
-}
+const ROLE_LABEL: Record<PlatformRole, string> = {
+  tourist: "Turista",
+  business_small: "Neg. Pequeno",
+  business_large: "Neg. Grande",
+  admin: "Administrador",
+};
 
-const INITIAL_USERS: AdminUser[] = [
-  { id: 1, name: "Carlos Tembe", email: "carlos@email.com", type: "user", status: "active", registered: "2026-01-15", spent: "$450" },
-  { id: 2, name: "Maria Costa", email: "maria@bancamaria.com", type: "business-small", status: "active", registered: "2026-02-10", business: "Banca da Maria" },
-  { id: 3, name: "João Silva", email: "joao@marazul.com", type: "business-large", status: "active", registered: "2026-01-20", business: "Restaurante Mar Azul" },
-  { id: 4, name: "Ana Santos", email: "ana@email.com", type: "user", status: "blocked", registered: "2025-12-05", spent: "$120" },
-];
+const ROLE_COLOR: Record<PlatformRole, string> = {
+  tourist: "bg-blue-500",
+  business_small: "bg-green-500",
+  business_large: "bg-purple-500",
+  admin: "bg-gray-800",
+};
+
+const BUSINESS_STATUS_LABEL: Record<string, string> = {
+  pending: "Empresa pendente",
+  approved: "Empresa aprovada",
+  rejected: "Empresa rejeitada",
+  suspended: "Empresa suspensa",
+};
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -383,34 +387,36 @@ function ModalShell({
 /* ---------- Users modal ---------- */
 
 function UsersModal({ onClose }: { onClose: () => void }) {
-  const [users, setUsers] = useState<AdminUser[]>(INITIAL_USERS);
+  const [users, setUsers] = useState<PlatformUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "user" | "business-small" | "business-large">("all");
+  const [filter, setFilter] = useState<"all" | PlatformRole>("all");
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(false);
+    listPlatformUsers()
+      .then((list) => active && setUsers(list))
+      .catch(() => active && setError(true))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
 
   const filtered = users.filter((u) => {
-    if (filter !== "all" && u.type !== filter) return false;
+    if (filter !== "all" && u.primaryRole !== filter) return false;
     if (!query) return true;
     const q = query.toLowerCase();
-    return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.business ?? "").toLowerCase().includes(q);
+    return (
+      u.displayName.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      (u.businessName ?? "").toLowerCase().includes(q)
+    );
   });
-
-  const toggleStatus = (id: number) =>
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, status: u.status === "active" ? "blocked" : "active" } : u)));
-
-  const remove = (id: number) => {
-    if (confirm("Eliminar utilizador?")) setUsers((prev) => prev.filter((u) => u.id !== id));
-  };
-
-  const typeColor: Record<AdminUser["type"], string> = {
-    user: "bg-blue-500",
-    "business-small": "bg-green-500",
-    "business-large": "bg-purple-500",
-  };
-  const typeLabel: Record<AdminUser["type"], string> = {
-    user: "Turista",
-    "business-small": "Neg. Pequeno",
-    "business-large": "Neg. Grande",
-  };
 
   return (
     <ModalShell
@@ -435,9 +441,10 @@ function UsersModal({ onClose }: { onClose: () => void }) {
               className="rounded-lg bg-white/20 text-white px-3 py-2 outline-none"
             >
               <option value="all" className="text-gray-900">Todos</option>
-              <option value="user" className="text-gray-900">Turistas</option>
-              <option value="business-small" className="text-gray-900">Negócios Pequenos</option>
-              <option value="business-large" className="text-gray-900">Negócios Grandes</option>
+              <option value="tourist" className="text-gray-900">Turistas</option>
+              <option value="business_small" className="text-gray-900">Negócios Pequenos</option>
+              <option value="business_large" className="text-gray-900">Negócios Grandes</option>
+              <option value="admin" className="text-gray-900">Administradores</option>
             </select>
           </div>
         </>
@@ -448,48 +455,53 @@ function UsersModal({ onClose }: { onClose: () => void }) {
         </button>
       }
     >
-      <ul className="space-y-3">
-        {filtered.map((u) => (
-          <li key={u.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50">
-            <span className={`size-10 rounded-full ${typeColor[u.type]} text-white font-bold flex items-center justify-center shrink-0`}>
-              {u.name.charAt(0)}
-            </span>
-            <div className="flex-1 min-w-[200px]">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-semibold text-sm">{u.name}</p>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{typeLabel[u.type]}</span>
-                {u.status === "active" ? (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Ativo</span>
-                ) : (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Bloqueado</span>
+      {loading && <p className="text-center text-sm text-gray-500 py-8">A carregar utilizadores...</p>}
+      {!loading && error && (
+        <div className="text-center py-8">
+          <p className="text-sm text-gray-600">Não foi possível carregar os utilizadores.</p>
+          <button
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="mt-3 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
+      {!loading && !error && (
+        <ul className="space-y-3">
+          {filtered.map((u) => (
+            <li key={u.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50">
+              <span className={`size-10 rounded-full ${ROLE_COLOR[u.primaryRole]} text-white font-bold flex items-center justify-center shrink-0`}>
+                {u.displayName.charAt(0).toUpperCase()}
+              </span>
+              <div className="flex-1 min-w-[200px]">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-sm">{u.displayName}</p>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{ROLE_LABEL[u.primaryRole]}</span>
+                  {u.confirmed ? (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Email confirmado</span>
+                  ) : (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Email por confirmar</span>
+                  )}
+                  {u.businessStatus && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                      {BUSINESS_STATUS_LABEL[u.businessStatus] ?? u.businessStatus}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-600 flex items-center gap-1 mt-1"><Mail className="size-3" /> {u.email}</p>
+                {u.businessName && (
+                  <p className="text-xs text-gray-600 flex items-center gap-1"><Store className="size-3" /> {u.businessName}</p>
                 )}
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Registado em {new Date(u.createdAt).toLocaleDateString("pt-PT")}
+                </p>
               </div>
-              <p className="text-xs text-gray-600 flex items-center gap-1 mt-1"><Mail className="size-3" /> {u.email}</p>
-              {u.business && (
-                <p className="text-xs text-gray-600 flex items-center gap-1"><Store className="size-3" /> {u.business}</p>
-              )}
-              <p className="text-xs text-gray-500 mt-0.5">
-                {u.registered}{u.spent ? ` · Gasto: ${u.spent}` : ""}
-              </p>
-            </div>
-            <div className="flex items-center gap-1">
-              <button className="size-8 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center" aria-label="Ver"><Eye className="size-4" /></button>
-              <button className="size-8 rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 flex items-center justify-center" aria-label="Editar"><Edit className="size-4" /></button>
-              <button
-                onClick={() => toggleStatus(u.id)}
-                className={`size-8 rounded-lg flex items-center justify-center ${u.status === "active" ? "bg-red-100 text-red-700 hover:bg-red-200" : "bg-green-100 text-green-700 hover:bg-green-200"}`}
-                aria-label="Toggle"
-              >
-                {u.status === "active" ? <Ban className="size-4" /> : <CheckCircle className="size-4" />}
-              </button>
-              <button onClick={() => remove(u.id)} className="size-8 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 flex items-center justify-center" aria-label="Eliminar">
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-          </li>
-        ))}
-        {filtered.length === 0 && <p className="text-center text-sm text-gray-500 py-8">Nenhum utilizador encontrado.</p>}
-      </ul>
+            </li>
+          ))}
+          {filtered.length === 0 && <p className="text-center text-sm text-gray-500 py-8">Nenhum utilizador encontrado.</p>}
+        </ul>
+      )}
     </ModalShell>
   );
 }

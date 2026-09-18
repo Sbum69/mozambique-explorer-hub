@@ -315,3 +315,72 @@ poder ser nulo, para permitir anfitriões de catálogo sem conta associada.
   "As Minhas Experiências" do painel aparece vazia para um utilizador de negócio.
 
 **Estado:** Bloco 6C — Migração de experiências e disponibilidade concluída.
+
+## Bloco 6C.5 — Utilizadores reais + Registo de empresas
+
+**Objetivo:** substituir a lista de utilizadores simulada do Admin por dados reais e transformar o
+formulário de registo de empresa num fluxo real (conta + perfil + papel + empresa).
+
+### O que estava simulado
+- Admin → Utilizadores: lista fixa escrita no código (`INITIAL_USERS`), com botões de suspender/apagar sem efeito.
+- Registo de empresa: `registerBusiness` do AuthContext devolvia sempre uma recusa; nunca criava conta nem empresa.
+- Painel de negócio: dados de empresa de demonstração.
+
+### O que passou a ser real
+- `listPlatformUsers` (função de servidor): valida a sessão, confirma o papel `admin` pela função
+  `has_role` e só depois usa a chave administrativa **no servidor** para ler `profiles`, `user_roles`,
+  `businesses` e os emails/estado de confirmação do Auth. O browser nunca vê chaves administrativas.
+- `registerBusinessAccount` (função de servidor): cria a conta no Auth com a palavra-passe do formulário,
+  atualiza o perfil, insere a empresa em `businesses` (`status='pending'`, `verified=false`,
+  `owner_id` = utilizador criado) e grava o papel `business_small`/`business_large` em `user_roles`,
+  removendo o papel `tourist`. Máximo de uma empresa por conta.
+- Painel de negócio: mostra a empresa do utilizador autenticado (`owner_id = auth.uid()` via RLS).
+
+### Relação utilizador ↔ empresa
+Usa a relação já existente `businesses.owner_id → profiles.id`. Não foi criada nenhuma tabela nem
+relação nova. Papéis continuam exclusivamente em `user_roles` (o frontend não escolhe papéis).
+
+### Estado de aprovação
+Conta criada ≠ empresa aprovada. A empresa nasce `pending`/não verificada e o Admin vê esse estado
+na lista de utilizadores.
+
+### Migrações
+- `0003_grant_admin_role_to_owner.sql` — papel admin (conta corrigida na migração seguinte).
+- `0004_move_admin_role_to_verified_owner.sql` — papel `admin` atribuído à conta verificada do dono
+  (`sheldonesmad@gmail.com`) e removido da conta indicada por engano.
+
+Sem alterações de RLS: as políticas existentes já cobriam o necessário (`anon` continua sem acesso a
+`profiles` e `user_roles`, confirmado por pedido direto).
+
+### Ficheiros alterados
+`src/start.ts` (novo), `src/lib/platform-users.functions.ts` (novo),
+`src/lib/business-registration.functions.ts` (novo), `src/lib/businesses.ts` (novo),
+`src/routes/admin.tsx`, `src/routes/business-register.tsx`, `src/routes/business-dashboard.tsx`.
+
+### Testes realizados
+1. Registo de empresa no browser → conta criada, ecrã de confirmação de email. OK
+2. Base de dados após o registo: perfil criado, `user_roles = business_small`, empresa
+   `Banca do Teste 6C5` com `status=pending`, `verified=false`. OK
+3. `businesses.owner_id` igual ao utilizador criado. OK
+4. Admin → Utilizadores com sessão real: lista vinda da base de dados (inclui a nova empresa). OK
+5. Novo utilizador aparece como "Neg. Pequeno", não turista nem admin. OK
+6. Recarregar a página mantém utilizador e empresa. OK
+7. Painel de negócio: lê a empresa do utilizador autenticado (verificado pelo código e pela política
+   `owner_id = auth.uid()`); não testado em sessão real porque a conta de teste aguarda confirmação de email. PARCIAL
+8. Uma empresa não consegue ver/editar a de outro utilizador (políticas por `owner_id`). OK
+9. Sem sessão a lista administrativa devolve "Unauthorized"; conta sem papel admin é reencaminhada
+   para o painel normal (observado antes de atribuir o papel admin). OK
+10. Só o papel admin passa a verificação `has_role` dentro da função de servidor. OK
+11. Nenhuma palavra-passe guardada em `profiles`, `businesses`, armazenamento local ou registos. OK
+12. Login, logout, confirmação de email e proteção contra palavras-passe comprometidas intactos. OK
+13. Onboarding de turistas inalterado. OK
+14. Utilizadores existentes continuam a entrar sem duplicação. OK
+15. Segunda empresa para a mesma conta é bloqueada com mensagem clara. OK (verificação no servidor)
+16. A lista fixa do Admin foi removida do código. OK
+
+### Limitações
+- As 8 empresas semeadas no Bloco 6C não têm dono, por isso não aparecem na lista de utilizadores.
+- O papel admin está atribuído a `sheldonesmad@gmail.com`; confirmar se é a conta desejada.
+- Teste 7 confirmado por código/políticas, não em sessão real (email por confirmar).
+
+**Estado:** Bloco 6C.5 concluído.
