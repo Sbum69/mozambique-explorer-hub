@@ -81,6 +81,11 @@ function ExperiencesPage() {
     return list;
   }, [experiences, filter, provinceId, showAllDestinations]);
 
+  const { slots, loading: loadingSlots, error: slotsError } = useAvailability(
+    openExp?.id ?? null,
+    form.date || null,
+  );
+
 
   const openBookingModal = (exp: Experience) => {
     if (booked.has(exp.id)) return;
