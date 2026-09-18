@@ -89,10 +89,19 @@ function authErrorMessage(message: string) {
   if (normalized.includes("email not confirmed")) return "Confirma primeiro o teu email para entrar.";
   if (normalized.includes("already registered") || normalized.includes("already been registered")) return "Este email já está registado.";
   if (normalized.includes("valid email")) return "Introduz um email válido.";
-  if (normalized.includes("password") && normalized.includes("characters")) return "A palavra-passe é demasiado curta.";
+  const tooShort = normalized.includes("at least 6 characters") || (normalized.includes("password") && normalized.includes("characters"));
+  const pwned = normalized.includes("known to be weak") || normalized.includes("easy to guess") || normalized.includes("pwned");
+  if (tooShort && pwned) {
+    return "Usa pelo menos 6 caracteres e escolhe uma palavra-passe diferente: esta aparece em fugas de dados conhecidas.";
+  }
+  if (pwned) {
+    return "Esta palavra-passe aparece em fugas de dados conhecidas. Escolhe outra (podes juntar palavras ou números que só tu saibas).";
+  }
+  if (tooShort) return "A palavra-passe precisa de pelo menos 6 caracteres.";
   if (normalized.includes("network") || normalized.includes("fetch")) return "Sem ligação. Verifica a internet e tenta novamente.";
   return "Não foi possível concluir. Tenta novamente.";
 }
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
