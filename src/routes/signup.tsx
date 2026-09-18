@@ -72,9 +72,12 @@ function SignupPage() {
     const res = await registerUser({ username, password, displayName, email });
     setLoading(false);
     if (!res.ok) {
-      setErrors({ email: res.error });
+      const msg = res.error ?? "Não foi possível concluir. Tenta novamente.";
+      const isPasswordIssue = /palavra-passe/i.test(msg) && !/incorretos/i.test(msg);
+      setErrors(isPasswordIssue ? { password: msg } : { email: msg });
       return;
     }
+
     setSuccess(true);
     setNeedsConfirmation(!!res.needsConfirmation);
     if (!res.needsConfirmation) setTimeout(() => navigate({ to: "/home" }), 1500);
