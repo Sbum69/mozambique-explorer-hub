@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { getAuthenticatedUser } from "@/lib/auth";
+import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
   ssr: false,
   beforeLoad: async () => {
     const user = await getAuthenticatedUser();
-    throw redirect({ to: user ? "/home" : "/login" });
+    throw redirect({ to: user ? await postAuthTarget(user.id) : "/login" });
   },
   component: () => null,
 });

@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/signup")({
   ssr: false,
   beforeLoad: async () => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: "/home" });
+    if (user) throw redirect({ to: await postAuthTarget(user.id) });
   },
   head: () => ({
     meta: [
@@ -80,7 +80,7 @@ function SignupPage() {
 
     setSuccess(true);
     setNeedsConfirmation(!!res.needsConfirmation);
-    if (!res.needsConfirmation) setTimeout(() => navigate({ to: "/home" }), 1500);
+    if (!res.needsConfirmation) setTimeout(() => navigate({ to: "/onboarding" }), 1500);
   };
 
   return (
@@ -111,7 +111,7 @@ function SignupPage() {
                 <p className="mt-4 text-sm text-muted-foreground">
                   {needsConfirmation
                     ? "Enviámos uma ligação para o teu email. Confirma a conta antes de entrar."
-                    : "A preparar a tua experiência…"}
+                    : "A preparar a tua experiência… vamos personalizar a tua viagem."}
                 </p>
                 {needsConfirmation && (
                   <Link to="/login" className="mt-6 inline-flex font-semibold text-primary hover:underline">
