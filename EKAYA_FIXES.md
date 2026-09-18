@@ -213,3 +213,105 @@ Data: 18 de setembro de 2026
 **Problemas encontrados:** a tabela `destinations` não tinha colunas para região, número de visitantes, etiquetas e destaques que a interface já mostrava; foram acrescentadas na mesma migração, sem alterar o conteúdo editorial.
 
 **Estado:** Bloco 6B — Migração de destinos concluída.
+
+## Bloco 6C — Migração de experiências e disponibilidade
+
+**Objetivo:** passar as experiências e a respetiva disponibilidade de dados simulados
+(`src/data/experiences.ts`) para registos reais no Supabase, ligados aos destinos reais
+migrados no Bloco 6B. As reservas continuam locais (Bloco 6D).
+
+### Experiências migradas (8)
+| Slug | Título (PT) | Destino | Preço (MZN) |
+|---|---|---|---|
+| dhow-bazaruto | Passeio de Dhow em Bazaruto | Vilankulo | 2 500 |
+| tofo-diving | Mergulho com mantas no Tofo | Inhambane | 3 200 |
+| ilha-walk | Caminhada cultural em Stone Town | Ilha de Moçambique | 800 |
+| maputo-food | Tour gastronómico no Mercado Central | Maputo | 1 200 |
+| gorongosa-safari | Safari ao nascer do sol em Gorongosa | Gorongosa | 4 500 |
+| pemba-community | Visita à comunidade pesqueira de Wimbi | Pemba | 1 800 |
+| marrabenta-night | Noite de Marrabenta em Maputo | Maputo | 1 500 |
+| quirimbas-kayak | Kayak nas Quirimbas | Pemba | 2 200 |
+
+Inserção idempotente: `slug` com índice único e `ON CONFLICT (slug) DO NOTHING`, pelo que
+reexecutar a migração não cria duplicados (verificado: 8 experiências, 8 slugs únicos).
+
+### Relações
+`experiences.destination_id` foi preenchido por JOIN com `destinations` através do `slug`
+do destino — nunca por nome, índice de array ou identificador fictício. Verificado na base
+de dados: 0 experiências sem destino e 0 com destino inexistente.
+
+Cada experiência tem também um `business_id` real: foram criados 8 negócios anfitriões
+(um por experiência, com o nome que antes estava no campo `host` do mock), com
+`status = 'approved'` e sem proprietário (`owner_id NULL`), por ainda não existirem contas
+de negócio reais.
+
+### Disponibilidade
+O mock não tinha horários; os únicos dados horários existentes eram a duração de cada
+experiência. Foram criadas 48 janelas em `experience_availability` (6 por experiência,
+segunda a sábado, início às 09:00 e fim calculado pela duração real, capacidade 10).
+**Valores inventados, assinalados como tal:** os dias da semana, a hora de início 09:00 e
+a capacidade 10 não existiam nos dados originais. A leitura no frontend é real, feita pela
+função `get_experience_availability`, que devolve capacidade, lugares ocupados, lugares
+restantes e o estado disponível/esgotado.
+
+### Frontend
+- `src/lib/experiences.ts` (novo): tipos, mapeamento base de dados → interface já usada
+  pela aplicação e leituras (todas, por identificador, por destino, disponibilidade, e as
+  do próprio negócio).
+- `src/hooks/useExperiences.ts` (novo): carregamento partilhado com estados de
+  carregamento/erro/vazio e cache de sessão, evitando consultas duplicadas; e leitura de
+  disponibilidade por experiência e data.
+- `src/routes/experiences.tsx`: catálogo, filtros por destino e categoria e modal de
+  reserva passam a usar dados reais; horários reais mostrados no modal (apresentação
+  mínima, sem alterar o fluxo de reserva).
+- `src/routes/home.tsx`: recomendações de experiências vindas da base de dados.
+- `src/components/GameTaskFields.tsx`: seletor de experiência dos jogos com dados reais.
+- `src/routes/business-dashboard.tsx`: nova secção "As Minhas Experiências", que mostra
+  apenas as experiências do negócio do próprio utilizador (RLS).
+- `src/data/experiences.ts`: deixou de conter dados; reexporta apenas os tipos.
+
+### Backend
+Tabelas `experiences`, `experience_availability`, `businesses`, `destinations`.
+Função `get_experience_availability` (já existente). Policies de leitura pública já
+existentes; nenhuma permissão foi aberta. Colunas acrescentadas a `experiences`:
+`slug` (único), `category`, `location`, `rating`, `reviews`. `businesses.owner_id` passou a
+poder ser nulo, para permitir anfitriões de catálogo sem conta associada.
+
+### Ficheiros alterados
+`src/lib/experiences.ts` (novo), `src/hooks/useExperiences.ts` (novo),
+`src/lib/destinations.ts` (exporta as imagens por destino), `src/data/experiences.ts`,
+`src/routes/experiences.tsx`, `src/routes/home.tsx`, `src/routes/business-dashboard.tsx`,
+`src/components/GameTaskFields.tsx`, `drizzle/migrations/0001_seed_experiences_catalogue.sql`,
+`drizzle/migrations/0002_align_businesses_guard_with_no_session.sql`,
+`src/integrations/supabase/types.ts` (gerado), `EKAYA_FIXES.md`.
+
+### Testes
+1. 8 experiências existentes na tabela — OK (8 registos, 8 ativas).
+2. Todas com `destination_id` válido — OK (0 nulos, 0 inválidos).
+3. Destino correto por experiência — OK (verificado par a par na leitura pública).
+4. Experiências na página principal — OK (recomendações reais visíveis).
+5. Filtros por destino e categoria — OK (filtro do meu destino e "ver todos" testados).
+6. Abertura de uma experiência pelo identificador real — OK (modal abre com dados reais).
+7. Imagens carregam — OK (mesma arte por destino usada antes da migração).
+8. Preços corretos — OK (2 500 / 1 200 / 1 500 / 2 200 conforme original).
+9. Disponibilidade vinda do Supabase — OK (09:00–15:00 · 10 lugares para 21/09/2026).
+10. Recarregar mantém as experiências — OK.
+11. Sem experiências não quebra — OK (estado vazio implementado; verificado com filtro sem resultados).
+12. Erro do Supabase tratado — OK (ligação bloqueada: mensagem e botão "Tentar novamente").
+13. Nenhuma experiência aponta para destino inexistente — OK.
+14. Login/registo/onboarding intactos — OK (sessão real usada nos testes, sem alterações).
+15. RLS ativa e sem permissões inseguras — OK (reservas continuam inacessíveis sem sessão;
+    leitura pública apenas de experiências ativas e negócios aprovados).
+
+### Problemas encontrados
+- **Anfitriões invisíveis ao público:** o gatilho `businesses_guard_privileged_fields`
+  forçava `status = 'pending'` quando não existe sessão (contexto de migração), ao contrário
+  dos gatilhos equivalentes de experiências e disponibilidade. Os 8 negócios de catálogo
+  ficaram escondidos e o nome do anfitrião não aparecia. Corrigido alinhando o gatilho
+  (ignorar quando `auth.uid()` é nulo) e marcando os 8 negócios como aprovados.
+- **Dados inexistentes no mock:** capacidade e horários de disponibilidade não existiam;
+  os valores usados são assumidos e devem ser revistos com os anfitriões reais.
+- **Negócios sem proprietário:** enquanto não existirem contas de negócio reais, a secção
+  "As Minhas Experiências" do painel aparece vazia para um utilizador de negócio.
+
+**Estado:** Bloco 6C — Migração de experiências e disponibilidade concluída.

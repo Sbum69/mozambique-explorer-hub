@@ -35,7 +35,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
 import { useDestinations } from "@/hooks/useDestinations";
-import { EXPERIENCES, type ExperienceCategory } from "@/data/experiences";
+import { type ExperienceCategory } from "@/lib/experiences";
+import { useExperiences } from "@/hooks/useExperiences";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
@@ -116,6 +117,7 @@ function HomePage() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
+  const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
@@ -143,15 +145,15 @@ function HomePage() {
   }, [maxDays]);
 
   const recoExperiences = useMemo(() => {
-    const pool = EXPERIENCES.filter((e) => {
+    const pool = experiences.filter((e) => {
       const matchDest = applied.destId === "any" || e.destinationId === applied.destId;
       const matchInt =
         applied.interests.length === 0 ||
         applied.interests.includes(e.category as Interest);
       return matchDest && matchInt;
     });
-    return (pool.length ? pool : EXPERIENCES).slice(0, 4);
-  }, [applied]);
+    return (pool.length ? pool : experiences).slice(0, 4);
+  }, [applied, experiences]);
 
   const recoStories = STORY_STOPS.slice(0, 3);
 
@@ -447,6 +449,21 @@ function HomePage() {
               </Card>
             </motion.div>
           ))}
+          {loadingExperiences && (
+            <Card className="h-56 animate-pulse bg-muted/40" />
+          )}
+          {experiencesError && (
+            <Card className="p-5 text-sm text-muted-foreground">
+              {lang === "pt"
+                ? "Não foi possível carregar as experiências agora."
+                : "We couldn't load the experiences right now."}
+            </Card>
+          )}
+          {!loadingExperiences && !experiencesError && recoExperiences.length === 0 && (
+            <Card className="p-5 text-sm text-muted-foreground">
+              {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+            </Card>
+          )}
         </RecoRow>
 
         {/* Story stops */}

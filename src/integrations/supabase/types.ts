@@ -103,7 +103,7 @@ export type Database = {
           images: string[] | null
           location: Json | null
           name: string
-          owner_id: string
+          owner_id: string | null
           province: string | null
           slug: string
           status: Database["public"]["Enums"]["business_status"]
@@ -120,7 +120,7 @@ export type Database = {
           images?: string[] | null
           location?: Json | null
           name: string
-          owner_id: string
+          owner_id?: string | null
           province?: string | null
           slug: string
           status?: Database["public"]["Enums"]["business_status"]
@@ -137,7 +137,7 @@ export type Database = {
           images?: string[] | null
           location?: Json | null
           name?: string
-          owner_id?: string
+          owner_id?: string | null
           province?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["business_status"]
@@ -264,6 +264,7 @@ export type Database = {
           active: boolean
           business_id: string
           capacity: number | null
+          category: string | null
           created_at: string
           description_en: string | null
           description_pt: string | null
@@ -271,8 +272,12 @@ export type Database = {
           duration_hours: number | null
           id: string
           images: string[] | null
+          location: string | null
           price_mzn: number
           province: string | null
+          rating: number | null
+          reviews: number
+          slug: string | null
           title_en: string | null
           title_pt: string
           updated_at: string
@@ -281,6 +286,7 @@ export type Database = {
           active?: boolean
           business_id: string
           capacity?: number | null
+          category?: string | null
           created_at?: string
           description_en?: string | null
           description_pt?: string | null
@@ -288,8 +294,12 @@ export type Database = {
           duration_hours?: number | null
           id?: string
           images?: string[] | null
+          location?: string | null
           price_mzn?: number
           province?: string | null
+          rating?: number | null
+          reviews?: number
+          slug?: string | null
           title_en?: string | null
           title_pt: string
           updated_at?: string
@@ -298,6 +308,7 @@ export type Database = {
           active?: boolean
           business_id?: string
           capacity?: number | null
+          category?: string | null
           created_at?: string
           description_en?: string | null
           description_pt?: string | null
@@ -305,8 +316,12 @@ export type Database = {
           duration_hours?: number | null
           id?: string
           images?: string[] | null
+          location?: string | null
           price_mzn?: number
           province?: string | null
+          rating?: number | null
+          reviews?: number
+          slug?: string | null
           title_en?: string | null
           title_pt?: string
           updated_at?: string

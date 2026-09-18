@@ -27,7 +27,7 @@ export interface Destination {
 }
 
 /** Bundled artwork per destination slug; images are shipped with the app, not stored in the database. */
-const IMAGE_BY_SLUG: Record<string, string> = {
+export const IMAGE_BY_SLUG: Record<string, string> = {
   maputo,
   ilha,
   inhambane,
