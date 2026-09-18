@@ -183,3 +183,22 @@ export async function fetchOwnExperiences(): Promise<Experience[]> {
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => mapExperience(row as unknown as ExperienceRow));
 }
+
+/**
+ * How many active availability windows each active experience has.
+ * One query, used by the recommendation score (no per-experience round trips).
+ */
+export async function fetchAvailabilityCounts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from("experience_availability")
+    .select("experience_id")
+    .eq("active", true);
+
+  if (error) throw new Error(error.message);
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) {
+    const id = row.experience_id as string;
+    counts[id] = (counts[id] ?? 0) + 1;
+  }
+  return counts;
+}

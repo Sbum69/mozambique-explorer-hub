@@ -37,6 +37,7 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { useDestinations } from "@/hooks/useDestinations";
 import { type ExperienceCategory } from "@/lib/experiences";
 import { useExperiences } from "@/hooks/useExperiences";
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
@@ -339,6 +340,9 @@ function HomePage() {
           </motion.div>
         </section>
       </div>
+
+      {/* ============ PERSONALISED (from saved preferences) ============ */}
+      <PersonalSection lang={lang as Lang} />
 
       {/* ============ RECOMMENDATIONS ============ */}
       <section id="reco" className="px-6 sm:px-10 py-16 max-w-6xl mx-auto">
@@ -663,5 +667,164 @@ function RecoRow({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
     </div>
+  );
+}
+
+// ---- Personalised recommendations, built from the saved profile preferences ----
+function PersonalSection({ lang }: { lang: Lang }) {
+  const {
+    personalised,
+    preferences,
+    preferredDestination,
+    recommendedExperiences,
+    recommendedDestinations,
+    loading,
+    error,
+  } = useRecommendations(4);
+
+  const interestLabel = (id: string) =>
+    INTEREST_OPTIONS.find((opt) => opt.id === (id as Interest))?.label[lang] ?? id;
+
+  return (
+    <section className="px-6 sm:px-10 pt-14 max-w-6xl mx-auto">
+      <div>
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight inline-flex items-center gap-2">
+          <Sparkles className="size-6 text-primary" />
+          {personalised
+            ? lang === "pt"
+              ? "Recomendado para ti"
+              : "Recommended for you"
+            : lang === "pt"
+              ? "Explora o que Moçambique tem para oferecer"
+              : "Explore what Mozambique has to offer"}
+        </h2>
+        <p className="mt-2 text-muted-foreground">
+          {personalised ? (
+            <>
+              {lang === "pt" ? "Com base " : "Based on "}
+              {preferredDestination
+                ? `${lang === "pt" ? "no teu destino " : "on your destination "}${preferredDestination.name}`
+                : lang === "pt"
+                  ? "nas tuas preferências"
+                  : "on your preferences"}
+              {preferences.interests?.length
+                ? ` · ${preferences.interests.map(interestLabel).slice(0, 3).join(", ")}`
+                : ""}
+              {" · "}
+              <Link to="/preferences" className="underline hover:text-foreground">
+                {lang === "pt" ? "editar preferências" : "edit preferences"}
+              </Link>
+            </>
+          ) : (
+            <>
+              {lang === "pt"
+                ? "Completa as tuas preferências para receberes sugestões à tua medida."
+                : "Complete your preferences to get suggestions tailored to you."}{" "}
+              <Link to="/preferences" className="underline hover:text-foreground">
+                {lang === "pt" ? "definir preferências" : "set preferences"}
+              </Link>
+            </>
+          )}
+        </p>
+      </div>
+
+      {loading && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Card key={i} className="h-56 animate-pulse bg-muted/40" />
+          ))}
+        </div>
+      )}
+
+      {!loading && error && (
+        <Card className="mt-6 p-5 text-sm text-muted-foreground">
+          {lang === "pt"
+            ? "Não foi possível carregar as recomendações agora. Tenta novamente."
+            : "We couldn't load the recommendations right now. Please try again."}
+        </Card>
+      )}
+
+      {!loading && !error && personalised && recommendedExperiences.length > 0 && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {recommendedExperiences.map(({ item, reasons, matchesProvince }) => (
+            <Card key={item.id} className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <div className="relative aspect-[16/10]">
+                <img
+                  src={item.image}
+                  alt={item.title[lang]}
+                  className="size-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <Badge variant="secondary" className="absolute top-3 left-3 capitalize">
+                  {item.category}
+                </Badge>
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold leading-tight">{item.title[lang]}</h3>
+                <p className="mt-1 text-xs text-muted-foreground inline-flex items-center gap-1">
+                  <MapPin className="size-3" /> {item.location}
+                </p>
+                {(reasons.length > 0 || matchesProvince) && (
+                  <p className="mt-2 text-xs text-primary font-medium">
+                    {lang === "pt" ? "Combina com " : "Matches "}
+                    {reasons.length > 0
+                      ? reasons.map(interestLabel).slice(0, 2).join(" e ")
+                      : (preferredDestination?.name ?? item.province ?? "")}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="size-3.5" /> {item.durationHours}h
+                  </span>
+                  <span className="ml-auto font-semibold text-foreground">{item.priceMzn} MZN</span>
+                </div>
+                <Button asChild size="sm" variant="outline" className="mt-4 w-full">
+                  <Link to="/experiences">{lang === "pt" ? "Ver detalhes" : "View details"}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && personalised && recommendedDestinations.length > 0 && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {recommendedDestinations.map(({ item, reasons }) => (
+            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="relative aspect-[16/9]">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="size-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold leading-tight">{item.name}</h3>
+                <p className="text-xs text-muted-foreground">{item.region[lang]}</p>
+                {reasons.length > 0 && (
+                  <p className="mt-2 text-xs text-primary font-medium">
+                    {lang === "pt" ? "Baseado nos teus interesses" : "Based on your interests"}
+                  </p>
+                )}
+                <Button asChild size="sm" variant="outline" className="mt-4 w-full">
+                  <Link to="/map">{lang === "pt" ? "Ver no mapa" : "View on map"}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && personalised && recommendedExperiences.length === 0 && (
+        <Card className="mt-6 p-5 text-sm text-muted-foreground">
+          {lang === "pt"
+            ? "Ainda não há experiências suficientes para recomendar. Explora tudo o que existe abaixo."
+            : "There aren't enough experiences to recommend yet. Explore everything below."}
+        </Card>
+      )}
+    </section>
   );
 }

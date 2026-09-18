@@ -14,16 +14,18 @@ import { cn } from "@/lib/utils";
 interface OnboardingModalProps {
   open: boolean;
   onComplete: () => void;
+  /** Current preferences, so editing starts from what the user already chose. */
+  initial?: { province?: string; durationDays?: number; interests?: string[] };
 }
 
-export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
+export function OnboardingModal({ open, onComplete, initial }: OnboardingModalProps) {
   const { setPreferences } = useAuth();
   const { t, lang } = useLang();
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const [step, setStep] = useState(0);
-  const [province, setProvince] = useState<string | null>(null);
-  const [days, setDays] = useState(7);
-  const [interests, setInterests] = useState<string[]>([]);
+  const [province, setProvince] = useState<string | null>(initial?.province ?? null);
+  const [days, setDays] = useState(initial?.durationDays ?? 7);
+  const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
 
   const totalSteps = 3;
 
