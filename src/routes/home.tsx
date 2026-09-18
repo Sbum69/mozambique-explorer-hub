@@ -34,7 +34,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
-import { DESTINATIONS } from "@/data/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 import { EXPERIENCES, type ExperienceCategory } from "@/data/experiences";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
@@ -115,6 +115,7 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
@@ -256,13 +257,25 @@ function HomePage() {
                     <SelectItem value="any">
                       {lang === "pt" ? "Qualquer destino" : "Any destination"}
                     </SelectItem>
-                    {DESTINATIONS.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
+                    {destinations.map((d) => (
+                      <SelectItem key={d.id} value={d.slug}>
                         {d.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {loadingDestinations && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+                  </p>
+                )}
+                {destinationsError && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {lang === "pt"
+                      ? "Não foi possível carregar os destinos. Tenta novamente mais tarde."
+                      : "We couldn't load the destinations. Please try again later."}
+                  </p>
+                )}
               </div>
 
               {/* Days */}

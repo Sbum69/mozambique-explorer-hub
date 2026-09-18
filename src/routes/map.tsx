@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { ArrowLeft, MapPin, Users, Award, Check, Sparkles, Navigation, Car, Bike, Footprints, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,7 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { DESTINATIONS, type Destination } from "@/data/destinations";
+import { type Destination } from "@/lib/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { requireAuthenticatedUser } from "@/lib/auth";
 
@@ -46,12 +47,17 @@ function MapPage() {
   const { user, visitDestination } = useAuth();
   const navigate = useNavigate();
   const preferredId = user?.preferences?.province;
-  const initialDest = DESTINATIONS.find((d) => d.id === preferredId) ?? DESTINATIONS[0];
-  const [selected, setSelected] = useState<Destination | null>(initialDest);
+  const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
+  const [selected, setSelected] = useState<Destination | null>(null);
   const [showAllDestinations, setShowAllDestinations] = useState(!preferredId);
   const visibleDestinations = preferredId && !showAllDestinations
-    ? DESTINATIONS.filter((d) => d.id === preferredId)
-    : DESTINATIONS;
+    ? destinations.filter((d) => d.slug === preferredId)
+    : destinations;
+
+  useEffect(() => {
+    if (!destinations.length) return;
+    setSelected((current) => current ?? destinations.find((d) => d.slug === preferredId) ?? destinations[0]);
+  }, [destinations, preferredId]);
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
@@ -147,7 +153,7 @@ function MapPage() {
 
   const handleVisit = (d: Destination) => {
     const prevXp = user?.xp ?? 0;
-    const result = visitDestination(d.id, 25);
+    const result = visitDestination(d.slug, 25);
     if (!result) return;
     if (result.alreadyVisited) {
       toast.info(t("alreadyVisited"), { description: d.name });
@@ -204,7 +210,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap onSelect={setSelected} onDirections={computeDirections} routeCoords={routeCoords} origin={origin} />
+              <InteractiveMap destinations={visibleDestinations} onSelect={setSelected} onDirections={computeDirections} routeCoords={routeCoords} origin={origin} />
             </Suspense>
           </Card>
 
@@ -225,6 +231,28 @@ function MapPage() {
                 </button>
               )}
             </div>
+            {loadingDestinations && (
+              <Card className="border-0 shadow-[var(--shadow-soft)] p-4 text-sm text-muted-foreground animate-pulse">
+                {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+              </Card>
+            )}
+            {destinationsError && (
+              <Card className="border-0 shadow-[var(--shadow-soft)] p-4 space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {lang === "pt"
+                    ? "Não foi possível carregar os destinos. Verifica a ligação e tenta novamente."
+                    : "We couldn't load the destinations. Check your connection and try again."}
+                </p>
+                <Button size="sm" variant="outline" onClick={() => void reload()}>
+                  {lang === "pt" ? "Tentar novamente" : "Try again"}
+                </Button>
+              </Card>
+            )}
+            {isEmpty && (
+              <Card className="border-0 shadow-[var(--shadow-soft)] p-4 text-sm text-muted-foreground">
+                {lang === "pt" ? "Ainda não existem destinos disponíveis." : "No destinations available yet."}
+              </Card>
+            )}
             {visibleDestinations.map((d, i) => (
               <motion.div
                 key={d.id}
@@ -245,7 +273,7 @@ function MapPage() {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{d.description[lang]}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {isVisited(d.id) && (
+                        {isVisited(d.slug) && (
                           <Badge className="text-[9px] px-1.5 py-0 bg-success text-white"><Check className="size-2.5 mr-1" />{t("alreadyVisited")}</Badge>
                         )}
                         {d.badges.includes("most-visited") && (
@@ -278,7 +306,7 @@ function MapPage() {
                   <img src={selected.image} alt={selected.name} className="w-full h-64 md:h-full object-cover" />
                   <div className="absolute top-3 right-3">
                     <FavoriteButton
-                      itemId={selected.id}
+                      itemId={selected.slug}
                       itemType="place"
                       itemData={{
                         name: selected.name,
@@ -316,10 +344,10 @@ function MapPage() {
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Button
                       onClick={() => handleVisit(selected)}
-                      disabled={isVisited(selected.id)}
+                      disabled={isVisited(selected.slug)}
                       className="bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
                     >
-                      {isVisited(selected.id) ? (
+                      {isVisited(selected.slug) ? (
                         <><Check className="size-4" /> {t("alreadyVisited")}</>
                       ) : (
                         <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>

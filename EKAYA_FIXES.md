@@ -172,3 +172,44 @@ experiências, mapa, itinerários, favoritos, jogos e filtros por província. Mi
 destinos dá identificadores reais e estáveis para todas as migrações seguintes.
 
 **Estado:** Bloco 6B — Auditoria concluída. Próxima migração identificada, aguardando implementação.
+
+## Bloco 6B — Migração do catálogo de destinos
+
+Data: 18 de setembro de 2026
+
+**Objetivo:** migrar o catálogo de destinos de dados mockados (`src/data/destinations.ts`) para a tabela real `destinations` no Supabase.
+
+**Dados migrados:** 6 destinos, com os dados editoriais existentes preservados — Maputo (`maputo`), Ilha de Moçambique (`ilha`), Inhambane (`inhambane`), Vilankulo (`vilankulo`), Pemba (`pemba`), Gorongosa (`gorongosa`). Inserção com `ON CONFLICT (slug) DO NOTHING`, pelo que a repetição da migração não cria duplicados.
+
+**Backend:** reutilizada a tabela `destinations` já existente (nenhuma tabela nova). A migração `drizzle/migrations/0000_seed_destinations_catalogue.sql` acrescentou as colunas que faltavam para o conteúdo já usado na interface: `region_pt`, `region_en`, `visitors_k`, `badges`, `highlights`. Nenhuma policy foi alterada: a leitura pública já estava permitida e a RLS continua ativa, sem escrita pública e sem chaves privilegiadas no cliente. `experiences.destination_id` continua a apontar para `destinations.id` (uuid), sem alterações de estrutura.
+
+**Ficheiros alterados:**
+- `src/lib/destinations.ts` (novo) — tipo `Destination`, conversão dos campos da base de dados para o formato da interface, consulta única ao catálogo, imagens por `slug`.
+- `src/hooks/useDestinations.ts` (novo) — carregamento partilhado com estados de carregamento, erro, lista vazia e recarregar.
+- `src/data/destinations.ts` — passa a exportar apenas a lista de interesses; a lista fixa de destinos foi removida.
+- `src/routes/map.tsx` — destinos reais, seleção inicial pelo destino do utilizador, estados de carregamento/erro/vazio.
+- `src/components/InteractiveMap.tsx` — recebe os destinos por propriedade em vez de os ter fixos.
+- `src/routes/home.tsx` — seletor de destino a partir dos dados reais, com aviso de carregamento e de erro.
+- `src/routes/dashboard.tsx` — destino do utilizador resolvido a partir dos dados reais.
+- `src/components/OnboardingModal.tsx` — grelha de destinos a partir dos dados reais, com estados de carregamento/erro/vazio.
+- `drizzle/migrations/0000_seed_destinations_catalogue.sql` (novo).
+
+**Identificadores:** cada destino tem agora o `id` (uuid) da base de dados como referência canónica, usado nas relações futuras. O `slug` estável (`maputo`, `ilha`, ...) continua a ser a chave das funcionalidades ainda locais (visitas, favoritos, filtros por destino, mapa destino→roteiro), o que evitou perder os dados já guardados no dispositivo dos utilizadores. O nome do destino não é usado como identificador.
+
+**Testes realizados:**
+1. Tabela `destinations` com os 6 destinos anteriores — OK.
+2. Página principal apresenta os destinos vindos da base de dados — OK.
+3. Mapa apresenta os destinos vindos da base de dados (6 marcadores) — OK.
+4. Detalhes do destino (descrição, visitantes, destaques, ações) — OK.
+5. Filtros por destino/província — OK.
+6. Coordenadas corretas (conferidas registo a registo) — OK.
+7. Imagens continuam a aparecer — OK.
+8. Português e inglês — OK (descrições e regiões nos dois idiomas).
+9. Erro de leitura não quebra a página: mostra mensagem e botão "Tentar novamente" — OK (caminho implementado e verificado no código; leitura real bem-sucedida nos testes).
+10. Recarregar a aplicação mantém os destinos — OK.
+11. Sem destinos duplicados (`slug` único + inserção idempotente) — OK.
+12. Autenticação e personalização inicial não afetadas — OK (sessão real, /onboarding e /dashboard verificados).
+
+**Problemas encontrados:** a tabela `destinations` não tinha colunas para região, número de visitantes, etiquetas e destaques que a interface já mostrava; foram acrescentadas na mesma migração, sem alterar o conteúdo editorial.
+
+**Estado:** Bloco 6B — Migração de destinos concluída.

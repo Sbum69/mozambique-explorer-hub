@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, CircleMarker 
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import { DESTINATIONS, type Destination } from "@/data/destinations";
+import type { Destination } from "@/lib/destinations";
 import { useLang } from "@/contexts/LanguageContext";
 
 const pinIcon = L.divIcon({
@@ -41,13 +41,14 @@ function FitRoute({ coords }: { coords: [number, number][] | null }) {
 }
 
 interface Props {
+  destinations: Destination[];
   onSelect?: (d: Destination) => void;
   onDirections?: (d: Destination) => void;
   routeCoords?: [number, number][] | null;
   origin?: [number, number] | null;
 }
 
-export function InteractiveMap({ onSelect, onDirections, routeCoords, origin }: Props) {
+export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin }: Props) {
   const { lang } = useLang();
 
   return (
@@ -81,7 +82,7 @@ export function InteractiveMap({ onSelect, onDirections, routeCoords, origin }: 
         </CircleMarker>
       )}
 
-      {DESTINATIONS.map((d) => (
+      {destinations.map((d) => (
         <Marker key={d.id} position={d.coords} icon={pinIcon}>
           <Popup>
             <div style={{ minWidth: 200 }}>
