@@ -449,6 +449,21 @@ function HomePage() {
               </Card>
             </motion.div>
           ))}
+          {loadingExperiences && (
+            <Card className="h-56 animate-pulse bg-muted/40" />
+          )}
+          {experiencesError && (
+            <Card className="p-5 text-sm text-muted-foreground">
+              {lang === "pt"
+                ? "Não foi possível carregar as experiências agora."
+                : "We couldn't load the experiences right now."}
+            </Card>
+          )}
+          {!loadingExperiences && !experiencesError && recoExperiences.length === 0 && (
+            <Card className="p-5 text-sm text-muted-foreground">
+              {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+            </Card>
+          )}
         </RecoRow>
 
         {/* Story stops */}
