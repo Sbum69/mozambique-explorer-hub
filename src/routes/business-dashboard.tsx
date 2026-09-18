@@ -28,7 +28,7 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { getBookings, updateBookingStatus, type Booking } from "@/data/bookings";
+import { fetchBusinessBookings, updateBookingStatus, type Booking } from "@/lib/bookings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth";
@@ -55,13 +55,25 @@ function BusinessDashboardPage() {
   const navigate = useNavigate();
   const { user, isBusiness, isBusinessLarge, isBusinessSmall, logout } = useAuth();
 
+  // Real bookings for this owner's experiences. RLS (owns_business) scopes the rows —
+  // no business id is sent from the browser.
   const [bookings, setBookings] = useState<Booking[]>([]);
-  useEffect(() => {
-    const load = () => setBookings(getBookings());
-    load();
-    window.addEventListener("ekaya:bookings-changed", load);
-    return () => window.removeEventListener("ekaya:bookings-changed", load);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [bookingsError, setBookingsError] = useState(false);
+  const loadBookings = useCallback(async () => {
+    setLoadingBookings(true);
+    setBookingsError(false);
+    try {
+      setBookings(await fetchBusinessBookings());
+    } catch {
+      setBookingsError(true);
+    } finally {
+      setLoadingBookings(false);
+    }
   }, []);
+  useEffect(() => {
+    void loadBookings();
+  }, [loadBookings]);
 
   // The business owned by the authenticated user (RLS scopes it to them).
   const [ownBusiness, setOwnBusiness] = useState<OwnBusiness | null>(null);
@@ -92,13 +104,18 @@ function BusinessDashboardPage() {
     };
   }, []);
 
-  const handleBookingAction = (b: Booking, status: "confirmed" | "rejected") => {
-    updateBookingStatus(b.id, status);
-    toast.success(
-      status === "confirmed"
-        ? `Reserva ${b.code} confirmada`
-        : `Reserva ${b.code} rejeitada`,
-    );
+  const handleBookingAction = async (b: Booking, status: "confirmed" | "rejected") => {
+    try {
+      await updateBookingStatus(b.id, status);
+      await loadBookings();
+      toast.success(
+        status === "confirmed"
+          ? `Reserva ${b.code} confirmada`
+          : `Reserva ${b.code} rejeitada`,
+      );
+    } catch {
+      toast.error("Não foi possível atualizar a reserva. Tenta novamente.");
+    }
   };
 
   // Allow viewing this dashboard even from a customer flow to see incoming requests
@@ -239,7 +256,18 @@ function BusinessDashboardPage() {
           {/* Left col */}
           <div className="lg:col-span-2 space-y-6">
             <Card title={`Pedidos de Reserva${bookings.filter((b) => b.status === "pending").length ? ` (${bookings.filter((b) => b.status === "pending").length} pendente${bookings.filter((b) => b.status === "pending").length > 1 ? "s" : ""})` : ""}`}>
-              {bookings.length === 0 ? (
+              {loadingBookings ? (
+                <div className="space-y-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />
+                  ))}
+                </div>
+              ) : bookingsError ? (
+                <div className="text-center py-8 text-sm text-gray-500 space-y-3">
+                  <p>Não foi possível carregar as reservas. Tenta novamente.</p>
+                  <Button size="sm" variant="outline" onClick={() => void loadBookings()}>Tentar novamente</Button>
+                </div>
+              ) : bookings.length === 0 ? (
                 <div className="text-center py-8 text-sm text-gray-500">
                   <Calendar className="size-8 mx-auto mb-2 opacity-40" />
                   Ainda não recebeste pedidos de reserva.
@@ -249,7 +277,7 @@ function BusinessDashboardPage() {
                   {bookings.slice(0, 8).map((b) => (
                     <li key={b.id} className="rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition">
                       <div className="flex gap-3">
-                        <img src={b.image} alt="" className="size-16 rounded-lg object-cover shrink-0" />
+                        {b.image && <img src={b.image} alt="" className="size-16 rounded-lg object-cover shrink-0" />}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 flex-wrap">
                             <div className="min-w-0">

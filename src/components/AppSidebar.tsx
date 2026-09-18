@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Menu, X, Home, LayoutDashboard, Bookmark, Bell, Map, Compass, Trophy,
   Activity, BookOpen, Sparkles, Heart, Users, Info, ArrowRight, Crown,
-  LogOut, LogIn, Shield, Gamepad2, type LucideIcon,
+  LogOut, LogIn, Shield, Gamepad2, CalendarCheck, type LucideIcon,
 } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -26,6 +26,7 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     items: [
       { to: "/home", icon: Home, label: { pt: "Home", en: "Home" } },
       { to: "/dashboard", icon: LayoutDashboard, label: { pt: "Painel", en: "Dashboard" } },
+      { to: "/bookings", icon: CalendarCheck, label: { pt: "Minhas Reservas", en: "My Bookings" } },
       { to: "/favorites", icon: Bookmark, label: { pt: "Favoritos", en: "Favorites" } },
       { to: "/news-alerts", icon: Bell, label: { pt: "Notícias & Avisos", en: "News & Alerts" }, badge: "NOVO" },
     ],
