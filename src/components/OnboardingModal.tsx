@@ -6,7 +6,8 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
-import { DESTINATIONS, INTERESTS } from "@/data/destinations";
+import { INTERESTS } from "@/data/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 import { Check, ChevronLeft, ChevronRight, MapPin, Star, TrendingUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ interface OnboardingModalProps {
 export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
   const { setPreferences } = useAuth();
   const { t, lang } = useLang();
+  const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const [step, setStep] = useState(0);
   const [province, setProvince] = useState<string | null>(null);
   const [days, setDays] = useState(7);
