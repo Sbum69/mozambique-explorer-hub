@@ -356,6 +356,50 @@ function ExperiencesPage() {
                   <Label>{lang === "pt" ? "Hora" : "Time"}</Label>
                   <Input type="time" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} />
                 </div>
+                {form.date && (
+                  <div className="col-span-2 rounded-lg border bg-muted/30 p-3">
+                    <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                      {lang === "pt" ? "Horários disponíveis" : "Available times"}
+                    </p>
+                    {loadingSlots && (
+                      <p className="text-xs text-muted-foreground animate-pulse">
+                        {lang === "pt" ? "A verificar disponibilidade..." : "Checking availability..."}
+                      </p>
+                    )}
+                    {slotsError && (
+                      <p className="text-xs text-muted-foreground">
+                        {lang === "pt"
+                          ? "Não foi possível verificar a disponibilidade agora."
+                          : "We couldn't check availability right now."}
+                      </p>
+                    )}
+                    {!loadingSlots && !slotsError && slots.length === 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {lang === "pt" ? "Sem horários nesta data." : "No times on this date."}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {slots.map((slot) => (
+                        <button
+                          key={slot.startTime}
+                          type="button"
+                          disabled={!slot.available}
+                          onClick={() => setForm((f) => ({ ...f, time: slot.startTime }))}
+                          className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                            form.time === slot.startTime
+                              ? "border-primary bg-primary/10 font-semibold"
+                              : "bg-background hover:bg-muted/60"
+                          } ${slot.available ? "" : "opacity-50 cursor-not-allowed"}`}
+                        >
+                          {slot.startTime}–{slot.endTime} ·{" "}
+                          {slot.available
+                            ? `${slot.remainingCapacity} ${lang === "pt" ? "lugares" : "seats"}`
+                            : lang === "pt" ? "esgotado" : "sold out"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <Label>{lang === "pt" ? "Pessoas" : "People"}</Label>
                   <Input type="number" min={1} max={20} value={form.people} onChange={(e) => setForm((f) => ({ ...f, people: Math.max(1, Number(e.target.value) || 1) }))} />
