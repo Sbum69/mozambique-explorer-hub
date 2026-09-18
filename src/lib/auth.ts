@@ -45,3 +45,8 @@ export async function requireRole(allowed: AppRole[]) {
   }
   return { user, roles };
 }
+
+/** Where an authenticated user should land: onboarding first, then the app. */
+export async function postAuthTarget(userId: string): Promise<"/onboarding" | "/home"> {
+  return (await hasCompletedOnboarding(userId)) ? "/home" : "/onboarding";
+}

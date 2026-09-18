@@ -55,7 +55,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: UserRole }>;
   loginAsGuest: () => void;
   logout: () => Promise<void>;
-  setPreferences: (prefs: UserPreferences) => void;
+  setPreferences: (prefs: UserPreferences) => Promise<void>;
   needsOnboarding: boolean;
   addXP: (amount: number) => { newXp: number; leveledUp: boolean; newLevel: number };
   visitDestination: (id: string, km?: number) => { gained: number; alreadyVisited: boolean; leveledUp: boolean; newLevel: number } | null;
@@ -194,12 +194,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const setPreferences = (prefs: UserPreferences) => {
+  const setPreferences: AuthContextValue["setPreferences"] = async (prefs) => {
     if (!user) return;
     const next = { ...user, preferences: { ...user.preferences, ...prefs } };
     persistLocalState(next);
     if (authUser) {
-      void supabase.from("profiles").update({
+      await supabase.from("profiles").update({
         province: next.preferences?.province,
         duration_days: next.preferences?.durationDays,
         interests: next.preferences?.interests,
