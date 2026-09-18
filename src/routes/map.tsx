@@ -153,7 +153,7 @@ function MapPage() {
 
   const handleVisit = (d: Destination) => {
     const prevXp = user?.xp ?? 0;
-    const result = visitDestination(d.id, 25);
+    const result = visitDestination(d.slug, 25);
     if (!result) return;
     if (result.alreadyVisited) {
       toast.info(t("alreadyVisited"), { description: d.name });
@@ -251,7 +251,7 @@ function MapPage() {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{d.description[lang]}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {isVisited(d.id) && (
+                        {isVisited(d.slug) && (
                           <Badge className="text-[9px] px-1.5 py-0 bg-success text-white"><Check className="size-2.5 mr-1" />{t("alreadyVisited")}</Badge>
                         )}
                         {d.badges.includes("most-visited") && (
@@ -284,7 +284,7 @@ function MapPage() {
                   <img src={selected.image} alt={selected.name} className="w-full h-64 md:h-full object-cover" />
                   <div className="absolute top-3 right-3">
                     <FavoriteButton
-                      itemId={selected.id}
+                      itemId={selected.slug}
                       itemType="place"
                       itemData={{
                         name: selected.name,
@@ -322,10 +322,10 @@ function MapPage() {
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Button
                       onClick={() => handleVisit(selected)}
-                      disabled={isVisited(selected.id)}
+                      disabled={isVisited(selected.slug)}
                       className="bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
                     >
-                      {isVisited(selected.id) ? (
+                      {isVisited(selected.slug) ? (
                         <><Check className="size-4" /> {t("alreadyVisited")}</>
                       ) : (
                         <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>
