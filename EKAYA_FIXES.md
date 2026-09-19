@@ -545,3 +545,43 @@ ficam para o bloco seguinte.
 ### Limitações
 - Com 8 experiências, um destino com poucas opções cai naturalmente para conteúdo geral.
 - O teste de signup completamente novo continua condicionado pela confirmação de email (não desactivada).
+
+## Block 6F — Províncias como entidade + categorias de negócio
+
+### Estado anterior
+A província era texto livre em `destinations.province` (slug minúsculo: `maputo`, `cabo-delgado`), `experiences.province` (mesmo formato), `businesses.province` (nome capitalizado: `Cabo Delgado`) e `profiles.province` (que na prática guarda o **slug do destino** escolhido no onboarding, não uma província). Não havia lista oficial, o Admin não podia acrescentar províncias, a categoria de negócio era texto livre (`adventure`, `Artesanato Local`, ...) e o turista só podia guardar uma preferência de local.
+
+### Nova arquitetura
+- `provinces` (id, code único, name_pt, name_en, active, created_at) — 11 províncias reais de Moçambique.
+- `business_categories` (code PK, name_pt, name_en, sort_order, active) — hotel, resort, hostel, restaurant, bar, shop, tour_operator, experience, other.
+- `destinations.province_id → provinces.id`; `businesses.province_id → provinces.id`; `businesses.category_code → business_categories.code`.
+- `profile_provinces` (profile_id, province_id, UNIQUE) — várias províncias por turista.
+- `experiences.province` **não** ganhou `province_id`: a província da experiência vem do destino (`experiences.destination_id → destinations.province_id`); a coluna de texto fica como valor legado de leitura.
+- As colunas de texto antigas (`destinations.province`, `businesses.province`, `profiles.province`) foram mantidas por compatibilidade — o código de destinos, recomendações e mapa ainda as usa. Remoção fica para um bloco posterior.
+
+### Migração de dados
+Migração `0005_provinces_and_business_categories.sql` (estrutura) + inserções de dados: 11 províncias, 9 categorias, 6/6 destinos ligados, 8/9 negócios ligados (o negócio de teste do 6C.5 não tinha província nem experiências — ficou sem `province_id` e com categoria `other`), 9/9 negócios com `category_code`, 2 perfis com província de preferência migrada. Destinos (6), experiências (8), disponibilidades (48), reserva (1) e negócios (9) mantidos sem alterações.
+
+### RLS
+- `provinces` e `business_categories`: leitura pública apenas das linhas activas; leitura completa, inserção, actualização e eliminação só para admin (`has_role`).
+- `profile_provinces`: cada pessoa vê/insere/apaga só as próprias linhas; admin pode ler.
+- Nenhuma política existente de `profiles`, `businesses`, `experiences` ou `bookings` foi alterada.
+
+### Frontend
+- `src/lib/provinces.ts` + `src/hooks/useProvinces.ts`: lista de províncias e de categorias, com cache de sessão.
+- `OnboardingModal`: escolha de várias províncias (chips) no passo 1, guardadas em `profile_provinces`; a província do destino escolhido é sempre incluída.
+- `preferences.tsx`: abre já com as províncias guardadas.
+- `AuthContext`: `preferences.provinces` (códigos) é lido e gravado.
+- `recommendations.ts` / `useRecommendations`: `matchesProvince` passa a aceitar várias províncias.
+- `business-register.tsx`: província e categoria passaram a listas fechadas vindas da base de dados; "Localização" passou a "Cidade / Localização" (separada da província).
+- `business-registration.functions.ts`: valida `provinceCode` e `category` contra as tabelas oficiais e grava `province_id`/`category_code`.
+- `admin.tsx`: nova acção "Gerir Províncias" com lista real, activar/desactivar e adicionar província.
+
+### Testes
+Todos os testes do bloco passaram, excepto os marcados: criação/gravação de várias províncias (Maputo + Sofala + província do destino Vilankulo → `inhambane`) confirmada na base de dados; recomendações passaram a incluir experiências de Maputo e Inhambane; registo de negócio real com Gaza + Loja gravou `province_id` e `category_code` (estado pending, dono associado); leitura pública de províncias e categorias OK; inserção anónima de província rejeitada (401); reservas, histórico, mapa e painel intactos; sem duplicados de províncias, sem destinos órfãos, sem negócios com `province_id` inválido.
+
+### Limitações
+- O negócio de teste do 6C.5 continua sem província (dados originais não a tinham).
+- `profiles.province` continua a guardar o slug do destino; a distinção "Maputo cidade" vs "Maputo província" nos dados antigos foi mantida como `maputo` e precisa de confirmação editorial.
+- Descoberta de negócios por província/categoria para turistas: estrutura pronta, página ainda não existe.
+- Gamificação, roteiros, comunidade, eventos, notificações, recompensas, notícias, cultura, informações úteis e métricas do Admin continuam por migrar (nenhum depende ainda de `province_id`, excepto futuros filtros por província).

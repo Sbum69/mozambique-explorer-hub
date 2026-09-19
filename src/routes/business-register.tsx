@@ -21,6 +21,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { registerBusinessAccount } from "@/lib/business-registration.functions";
+import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 
 export const Route = createFileRoute("/business-register")({
   head: () => ({
@@ -36,25 +37,8 @@ export const Route = createFileRoute("/business-register")({
   component: BusinessRegisterPage,
 });
 
-const CATEGORIES_LARGE = [
-  "Alojamento",
-  "Restaurante",
-  "Bar e Discoteca",
-  "Agência de Turismo",
-  "Transporte Turístico",
-  "Centro Cultural",
-  "Outro",
-];
+// Categories and provinces now come from the database (business_categories / provinces).
 
-const CATEGORIES_SMALL = [
-  "Artesanato Local",
-  "Comida de Rua",
-  "Guia Turístico Individual",
-  "Vendedor Ambulante",
-  "Banca de Mercado",
-  "Serviços Tradicionais",
-  "Outro",
-];
 
 function BusinessRegisterPage() {
   const navigate = useNavigate();
@@ -67,7 +51,10 @@ function BusinessRegisterPage() {
   // form state
   const [businessName, setBusinessName] = useState("");
   const [category, setCategory] = useState("");
+  const [provinceCode, setProvinceCode] = useState("");
   const [location, setLocation] = useState("");
+  const { provinces, loading: loadingProvinces } = useProvinces();
+  const { categories, loading: loadingCategories } = useBusinessCategories();
   const [description, setDescription] = useState("");
   const [contact, setContact] = useState("");
   const [ownerName, setOwnerName] = useState("");
@@ -89,7 +76,7 @@ function BusinessRegisterPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!businessType) return;
-    if (!businessName || !category || !location || !description || !contact || !ownerName || !email || !password) {
+    if (!businessName || !category || !provinceCode || !location || !description || !contact || !ownerName || !email || !password) {
       toast.error("Preenche todos os campos obrigatórios");
       return;
     }
@@ -108,6 +95,7 @@ function BusinessRegisterPage() {
         businessName,
         businessType,
         category,
+        provinceCode,
         location,
         description,
         contact,
@@ -281,13 +269,21 @@ function BusinessRegisterPage() {
                 </Field>
                 <Field icon={<Tag className="size-4" />} label="Categoria *">
                   <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} required>
-                    <option value="">Selecionar...</option>
-                    {(businessType === "large" ? CATEGORIES_LARGE : CATEGORIES_SMALL).map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                    <option value="">{loadingCategories ? "A carregar..." : "Selecionar..."}</option>
+                    {categories.map((c) => (
+                      <option key={c.code} value={c.code}>{c.name.pt}</option>
                     ))}
                   </select>
                 </Field>
-                <Field icon={<MapPin className="size-4" />} label="Localização *">
+                <Field icon={<MapPin className="size-4" />} label="Província *">
+                  <select value={provinceCode} onChange={(e) => setProvinceCode(e.target.value)} className={inputClass} required>
+                    <option value="">{loadingProvinces ? "A carregar..." : "Selecionar..."}</option>
+                    {provinces.map((p) => (
+                      <option key={p.id} value={p.code}>{p.name.pt}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field icon={<MapPin className="size-4" />} label="Cidade / Localização *">
                   <input value={location} onChange={(e) => setLocation(e.target.value)} className={inputClass} required />
                 </Field>
                 <Field icon={<FileText className="size-4" />} label="Descrição *">

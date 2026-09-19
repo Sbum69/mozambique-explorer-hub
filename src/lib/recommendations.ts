@@ -5,6 +5,8 @@ import type { Experience } from "@/lib/experiences";
 export interface TravelPreferences {
   /** Destination slug chosen in onboarding (profiles.province). */
   province?: string;
+  /** Province codes chosen by the tourist (profile_provinces → provinces.code). */
+  provinces?: string[];
   durationDays?: number;
   interests?: string[];
 }
@@ -29,7 +31,14 @@ function categoriesFor(interests: string[]): string[] {
 }
 
 export function hasPreferences(prefs: TravelPreferences | undefined): boolean {
-  return !!prefs?.province;
+  return !!prefs?.province || (prefs?.provinces?.length ?? 0) > 0;
+}
+
+/** Province codes the tourist cares about (several provinces are allowed). */
+function preferredProvinceCodes(prefs: TravelPreferences, preferred?: Destination | null): string[] {
+  const codes = [...(prefs.provinces ?? [])];
+  if (preferred?.province) codes.push(preferred.province);
+  return [...new Set(codes)];
 }
 
 export interface Scored<T> {
@@ -64,11 +73,13 @@ export function scoreExperience(
   const categories = categoriesFor(interests);
   const preferred = ctx.preferredDestination;
 
+  const provinceCodes = preferredProvinceCodes(prefs, preferred);
   const matchesProvince =
-    !!preferred &&
-    (experience.destinationId === preferred.slug ||
-      experience.destinationUuid === preferred.id ||
-      experience.province === preferred.province);
+    (!!preferred &&
+      (experience.destinationId === preferred.slug ||
+        experience.destinationUuid === preferred.id ||
+        experience.province === preferred.province)) ||
+    (!!experience.province && provinceCodes.includes(experience.province));
 
   const reasons = interests.filter((id) =>
     (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(experience.category),
@@ -93,7 +104,9 @@ export function scoreDestination(
   experiences: Experience[] = [],
 ): Scored<Destination> {
   const interests = prefs.interests ?? [];
-  const matchesProvince = prefs.province === destination.slug;
+  const matchesProvince =
+    prefs.province === destination.slug ||
+    (!!destination.province && (prefs.provinces ?? []).includes(destination.province));
 
   const reasons = interests.filter((id) =>
     (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(destination.category ?? ""),

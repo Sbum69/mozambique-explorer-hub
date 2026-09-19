@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { INTERESTS } from "@/data/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
+import { useProvinces } from "@/hooks/useProvinces";
 import { Check, ChevronLeft, ChevronRight, MapPin, Star, TrendingUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,15 +16,17 @@ interface OnboardingModalProps {
   open: boolean;
   onComplete: () => void;
   /** Current preferences, so editing starts from what the user already chose. */
-  initial?: { province?: string; durationDays?: number; interests?: string[] };
+  initial?: { province?: string; provinces?: string[]; durationDays?: number; interests?: string[] };
 }
 
 export function OnboardingModal({ open, onComplete, initial }: OnboardingModalProps) {
   const { setPreferences } = useAuth();
   const { t, lang } = useLang();
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
+  const { provinces, loading: loadingProvinces } = useProvinces();
   const [step, setStep] = useState(0);
   const [province, setProvince] = useState<string | null>(initial?.province ?? null);
+  const [provinceCodes, setProvinceCodes] = useState<string[]>(initial?.provinces ?? []);
   const [days, setDays] = useState(initial?.durationDays ?? 7);
   const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
 
@@ -33,14 +36,26 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
 
   const [saving, setSaving] = useState(false);
 
+  /** Province codes to store: the ones picked plus the province of the chosen destination. */
+  const resolveProvinces = (destinationSlug: string) => {
+    const chosen = destinations.find((d) => d.slug === destinationSlug);
+    const codes = [...provinceCodes];
+    if (chosen?.province) codes.push(chosen.province);
+    return [...new Set(codes)];
+  };
+
   const savePrefs = async (prefs: { province: string; durationDays: number; interests: string[] }) => {
     setSaving(true);
     try {
-      await setPreferences(prefs);
+      await setPreferences({ ...prefs, provinces: resolveProvinces(prefs.province) });
     } finally {
       setSaving(false);
     }
     onComplete();
+  };
+
+  const toggleProvince = (code: string) => {
+    setProvinceCodes((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
   };
 
   const handleNext = () => {
@@ -193,6 +208,40 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                       </motion.button>
                     );
                   })}
+                </div>
+
+                {/* Provinces: several may be chosen, from the real province list */}
+                <div className="mt-8">
+                  <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="size-4 text-primary" />
+                    {lang === "pt" ? "Províncias que queres explorar" : "Provinces you want to explore"}
+                  </h3>
+                  {loadingProvinces ? (
+                    <p className="text-sm text-muted-foreground animate-pulse">
+                      {lang === "pt" ? "A carregar províncias..." : "Loading provinces..."}
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {provinces.map((p) => {
+                        const selected = provinceCodes.includes(p.code);
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => toggleProvince(p.code)}
+                            className={cn(
+                              "rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors",
+                              selected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/40 text-muted-foreground",
+                            )}
+                          >
+                            {p.name[lang]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}

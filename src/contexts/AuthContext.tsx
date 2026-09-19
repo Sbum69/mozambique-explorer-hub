@@ -8,6 +8,8 @@ export type UserRole = "guest" | "user" | "admin" | "business-small" | "business
 
 export interface UserPreferences {
   province?: string;
+  /** Province codes (provinces.code) chosen by the tourist — several are allowed. */
+  provinces?: string[];
   durationDays?: number;
   interests?: string[];
 }
@@ -116,10 +118,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const [{ data: profile }, { data: roleRows }] = await Promise.all([
+    const [{ data: profile }, { data: roleRows }, { data: provinceRows }] = await Promise.all([
       supabase.from("profiles").select("display_name, avatar_url, phone, locale, province, duration_days, interests").eq("id", currentAuthUser.id).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", currentAuthUser.id),
+      supabase.from("profile_provinces").select("provinces(code)").eq("profile_id", currentAuthUser.id),
     ]);
+    const provinceCodes = (provinceRows ?? [])
+      .map((row) => {
+        const rel = row.provinces as { code: string } | { code: string }[] | null;
+        const one = Array.isArray(rel) ? rel[0] : rel;
+        return one?.code ?? null;
+      })
+      .filter((code): code is string => !!code);
     const roles = (roleRows ?? []).map(({ role }) => role) as AppRole[];
     const localKey = `${LOCAL_STATE_PREFIX}${currentAuthUser.id}`;
     let local: Partial<AppUser> = {};
@@ -144,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       businessInfo: local.businessInfo,
       preferences: {
         province: profile?.province ?? local.preferences?.province,
+        provinces: provinceCodes,
         durationDays: profile?.duration_days ?? local.preferences?.durationDays,
         interests: profile?.interests ?? local.preferences?.interests,
       },
@@ -204,6 +215,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         duration_days: next.preferences?.durationDays,
         interests: next.preferences?.interests,
       }).eq("id", authUser.id);
+
+      // Several provinces per tourist live in profile_provinces (RLS: own rows only).
+      if (prefs.provinces) {
+        const codes = [...new Set(prefs.provinces)];
+        const { data: rows } = await supabase.from("provinces").select("id, code").in("code", codes.length ? codes : [""]);
+        await supabase.from("profile_provinces").delete().eq("profile_id", authUser.id);
+        if (rows && rows.length) {
+          await supabase
+            .from("profile_provinces")
+            .insert(rows.map((row) => ({ profile_id: authUser.id, province_id: row.id })));
+        }
+      }
     }
   };
 

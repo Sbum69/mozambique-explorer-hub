@@ -93,9 +93,37 @@ export type Database = {
           },
         ]
       }
+      business_categories: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          name_en: string
+          name_pt: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          name_en: string
+          name_pt: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          name_en?: string
+          name_pt?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       businesses: {
         Row: {
           category: string | null
+          category_code: string | null
           contact: Json | null
           created_at: string
           description: string | null
@@ -105,6 +133,7 @@ export type Database = {
           name: string
           owner_id: string | null
           province: string | null
+          province_id: string | null
           slug: string
           status: Database["public"]["Enums"]["business_status"]
           type: string | null
@@ -113,6 +142,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          category_code?: string | null
           contact?: Json | null
           created_at?: string
           description?: string | null
@@ -122,6 +152,7 @@ export type Database = {
           name: string
           owner_id?: string | null
           province?: string | null
+          province_id?: string | null
           slug: string
           status?: Database["public"]["Enums"]["business_status"]
           type?: string | null
@@ -130,6 +161,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          category_code?: string | null
           contact?: Json | null
           created_at?: string
           description?: string | null
@@ -139,6 +171,7 @@ export type Database = {
           name?: string
           owner_id?: string | null
           province?: string | null
+          province_id?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["business_status"]
           type?: string | null
@@ -147,10 +180,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "businesses_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["code"]
+          },
+          {
             foreignKeyName: "businesses_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "businesses_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
             referencedColumns: ["id"]
           },
         ]
@@ -169,6 +216,7 @@ export type Database = {
           lng: number | null
           name: string
           province: string
+          province_id: string | null
           region_en: string | null
           region_pt: string | null
           slug: string
@@ -188,6 +236,7 @@ export type Database = {
           lng?: number | null
           name: string
           province: string
+          province_id?: string | null
           region_en?: string | null
           region_pt?: string | null
           slug: string
@@ -207,13 +256,22 @@ export type Database = {
           lng?: number | null
           name?: string
           province?: string
+          province_id?: string | null
           region_en?: string | null
           region_pt?: string | null
           slug?: string
           updated_at?: string
           visitors_k?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "destinations_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       experience_availability: {
         Row: {
@@ -343,6 +401,42 @@ export type Database = {
           },
         ]
       }
+      profile_provinces: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          province_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          province_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          province_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_provinces_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_provinces_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -379,6 +473,33 @@ export type Database = {
           phone?: string | null
           province?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      provinces: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          id: string
+          name_en: string
+          name_pt: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          name_en: string
+          name_pt: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          name_en?: string
+          name_pt?: string
         }
         Relationships: []
       }
