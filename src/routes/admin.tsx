@@ -34,7 +34,9 @@ import {
   MessageSquare,
   Compass,
   Loader2,
+  Flag,
 } from "lucide-react";
+
 
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +56,17 @@ import {
   type ItineraryRoute,
   type RouteStopKind,
 } from "@/lib/routes";
+import {
+  deleteCommunityPost,
+  fetchCommunityFeed,
+  fetchCommunityReports,
+  resolveCommunityReport,
+  setCommunityPostStatus,
+  type CommunityPost,
+  type CommunityReport,
+  type PostStatus,
+  type ReportStatus,
+} from "@/lib/community";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -71,7 +84,17 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type ModalKey = null | "users" | "routes" | "provinces" | "addBusiness" | "reports" | "settings";
+type ModalKey =
+  | null
+  | "users"
+  | "routes"
+  | "provinces"
+  | "addBusiness"
+  | "reports"
+  | "settings"
+  | "community"
+  | "communityReports";
+
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
   tourist: "Turista",
@@ -129,7 +152,10 @@ function AdminPage() {
   const quickActions = [
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users, color: "text-blue-600 bg-blue-100" },
     { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
+    { key: "community" as const, label: "Moderação da Comunidade", icon: MessageSquare, color: "text-pink-600 bg-pink-100" },
+    { key: "communityReports" as const, label: "Denúncias", icon: Flag, color: "text-red-600 bg-red-100" },
     { key: "provinces" as const, label: "Gerir Províncias", icon: MapPin, color: "text-orange-600 bg-orange-100" },
+
     { key: "addBusiness" as const, label: "Adicionar Negócio", icon: MapPin, color: "text-green-600 bg-green-100" },
     { key: "reports" as const, label: "Relatórios", icon: FileText, color: "text-purple-600 bg-purple-100" },
     { key: "settings" as const, label: "Configurações", icon: Settings, color: "text-gray-600 bg-gray-100" },
@@ -342,6 +368,9 @@ function AdminPage() {
       <AnimatePresence>
         {activeModal === "users" && <UsersModal onClose={() => setActiveModal(null)} />}
         {activeModal === "routes" && <RoutesModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "community" && <CommunityModerationModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "communityReports" && <CommunityReportsModal onClose={() => setActiveModal(null)} />}
+
 
         {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "addBusiness" && <AddBusinessModal onClose={() => setActiveModal(null)} />}
@@ -1248,3 +1277,302 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+
+/* ---------- Community moderation (real posts, admin-only through RLS) ---------- */
+
+const POST_STATUS_LABEL: Record<PostStatus, string> = {
+  pending: "Pendente",
+  published: "Publicado",
+  rejected: "Rejeitado",
+  hidden: "Oculto",
+};
+
+const POST_STATUS_COLOR: Record<PostStatus, string> = {
+  pending: "bg-orange-100 text-orange-700",
+  published: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
+  hidden: "bg-gray-200 text-gray-700",
+};
+
+function CommunityModerationModal({ onClose }: { onClose: () => void }) {
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<PostStatus | "all">("all");
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = async (next: PostStatus | "all") => {
+    setLoading(true);
+    setError(null);
+    try {
+      setPosts(await fetchCommunityFeed({ status: next }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "load-failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load(status);
+  }, [status]);
+
+  const moderate = async (id: string, next: PostStatus) => {
+    setBusy(id);
+    try {
+      await setCommunityPostStatus(id, next);
+      toast.success(`Publicação: ${POST_STATUS_LABEL[next]}`);
+      await load(status);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!window.confirm("Eliminar definitivamente esta publicação?")) return;
+    setBusy(id);
+    try {
+      await deleteCommunityPost(id);
+      toast.success("Publicação eliminada");
+      await load(status);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <ModalShell
+      headerGradient="from-pink-600 to-purple-600"
+      onClose={onClose}
+      maxWidth="max-w-4xl"
+      header={
+        <div>
+          <h3 className="text-lg font-bold">Moderação da Comunidade</h3>
+          <p className="text-xs text-white/80">{posts.length} publicações</p>
+        </div>
+      }
+    >
+      <div className="flex flex-wrap gap-2 mb-4">
+        {(["all", "published", "pending", "hidden", "rejected"] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatus(s)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+              status === s ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {s === "all" ? "Todas" : POST_STATUS_LABEL[s]}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 py-10 text-gray-500">
+          <Loader2 className="size-5 animate-spin" /> A carregar…
+        </div>
+      ) : error ? (
+        <p className="text-sm text-red-600">Não foi possível carregar as publicações.</p>
+      ) : posts.length === 0 ? (
+        <p className="text-sm text-gray-500">Sem publicações para este estado.</p>
+      ) : (
+        <ul className="space-y-3">
+          {posts.map((p) => (
+            <li key={p.id} className="rounded-xl border border-gray-100 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${POST_STATUS_COLOR[p.status]}`}>
+                  {POST_STATUS_LABEL[p.status]}
+                </span>
+                <p className="font-semibold text-sm flex-1 min-w-[180px]">{p.title}</p>
+                <span className="text-xs text-gray-500">
+                  {p.authorName} · {p.categoryName?.pt ?? "—"} · {p.provinceName?.pt ?? "—"} ·{" "}
+                  {new Date(p.createdAt).toLocaleDateString("pt-PT")}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-gray-600 line-clamp-2">{p.content}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  disabled={busy === p.id}
+                  onClick={() => void moderate(p.id, "published")}
+                  className="px-3 py-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <CheckCircle className="size-3" /> Aprovar
+                </button>
+                <button
+                  disabled={busy === p.id}
+                  onClick={() => void moderate(p.id, "rejected")}
+                  className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <XCircle className="size-3" /> Rejeitar
+                </button>
+                <button
+                  disabled={busy === p.id}
+                  onClick={() => void moderate(p.id, "hidden")}
+                  className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <Ban className="size-3" /> Ocultar
+                </button>
+                <button
+                  disabled={busy === p.id}
+                  onClick={() => void remove(p.id)}
+                  className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <Trash2 className="size-3" /> Eliminar
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </ModalShell>
+  );
+}
+
+/* ---------- Community reports (real denúncias) ---------- */
+
+const REPORT_REASON_LABEL: Record<string, string> = {
+  spam: "Spam",
+  inappropriate: "Conteúdo inapropriado",
+  misleading: "Informação enganosa",
+  offensive: "Conteúdo ofensivo",
+  other: "Outro",
+};
+
+const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
+  pending: "Pendente",
+  reviewed: "Analisada",
+  dismissed: "Arquivada",
+  action_taken: "Ação tomada",
+};
+
+function CommunityReportsModal({ onClose }: { onClose: () => void }) {
+  const [reports, setReports] = useState<CommunityReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<ReportStatus | "all">("pending");
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = async (next: ReportStatus | "all") => {
+    setLoading(true);
+    setError(null);
+    try {
+      setReports(await fetchCommunityReports(next));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "load-failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load(status);
+  }, [status]);
+
+  const resolve = async (id: string, next: ReportStatus) => {
+    setBusy(id);
+    try {
+      await resolveCommunityReport(id, next);
+      toast.success(`Denúncia: ${REPORT_STATUS_LABEL[next]}`);
+      await load(status);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const hidePost = async (postId: string, reportId: string) => {
+    setBusy(reportId);
+    try {
+      await setCommunityPostStatus(postId, "hidden");
+      await resolveCommunityReport(reportId, "action_taken");
+      toast.success("Publicação ocultada e denúncia resolvida");
+      await load(status);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <ModalShell
+      headerGradient="from-red-600 to-orange-600"
+      onClose={onClose}
+      maxWidth="max-w-3xl"
+      header={
+        <div>
+          <h3 className="text-lg font-bold">Denúncias</h3>
+          <p className="text-xs text-white/80">{reports.length} registos</p>
+        </div>
+      }
+    >
+      <div className="flex flex-wrap gap-2 mb-4">
+        {(["pending", "reviewed", "action_taken", "dismissed", "all"] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatus(s)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+              status === s ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {s === "all" ? "Todas" : REPORT_STATUS_LABEL[s]}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 py-10 text-gray-500">
+          <Loader2 className="size-5 animate-spin" /> A carregar…
+        </div>
+      ) : error ? (
+        <p className="text-sm text-red-600">Não foi possível carregar as denúncias.</p>
+      ) : reports.length === 0 ? (
+        <p className="text-sm text-gray-500">Sem denúncias para este estado.</p>
+      ) : (
+        <ul className="space-y-3">
+          {reports.map((r) => (
+            <li key={r.id} className="rounded-xl border border-gray-100 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-orange-100 text-orange-700">
+                  {REPORT_STATUS_LABEL[r.status]}
+                </span>
+                <p className="font-semibold text-sm flex-1 min-w-[160px]">{r.postTitle ?? "—"}</p>
+                <span className="text-xs text-gray-500">
+                  {REPORT_REASON_LABEL[r.reason] ?? r.reason} · {new Date(r.createdAt).toLocaleDateString("pt-PT")}
+                </span>
+              </div>
+              {r.description && <p className="mt-2 text-xs text-gray-600">{r.description}</p>}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  disabled={busy === r.id}
+                  onClick={() => void resolve(r.id, "reviewed")}
+                  className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <Eye className="size-3" /> Marcar analisada
+                </button>
+                <button
+                  disabled={busy === r.id}
+                  onClick={() => void resolve(r.id, "dismissed")}
+                  className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <XCircle className="size-3" /> Arquivar
+                </button>
+                <button
+                  disabled={busy === r.id}
+                  onClick={() => void hidePost(r.postId, r.id)}
+                  className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold inline-flex items-center gap-1"
+                >
+                  <Ban className="size-3" /> Ocultar publicação
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </ModalShell>
+  );
+}

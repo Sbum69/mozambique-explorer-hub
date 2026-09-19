@@ -33,6 +33,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
+import { Route as CommunityPostIdRouteImport } from './routes/community.$postId'
 
 const UsefulInfoRoute = UsefulInfoRouteImport.update({
   id: '/useful-info',
@@ -154,6 +155,11 @@ const ItineraryIdRoute = ItineraryIdRouteImport.update({
   path: '/itinerary/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityPostIdRoute = CommunityPostIdRouteImport.update({
+  id: '/$postId',
+  path: '/$postId',
+  getParentRoute: () => CommunityRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -161,7 +167,7 @@ export interface FileRoutesByFullPath {
   '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
-  '/community': typeof CommunityRoute
+  '/community': typeof CommunityRouteWithChildren
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/community/$postId': typeof CommunityPostIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -187,7 +194,7 @@ export interface FileRoutesByTo {
   '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
-  '/community': typeof CommunityRoute
+  '/community': typeof CommunityRouteWithChildren
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/community/$postId': typeof CommunityPostIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -214,7 +222,7 @@ export interface FileRoutesById {
   '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
-  '/community': typeof CommunityRoute
+  '/community': typeof CommunityRouteWithChildren
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/community/$postId': typeof CommunityPostIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/community/$postId'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   fileRoutesByTo: FileRoutesByTo
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/community/$postId'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   id:
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/community/$postId'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   fileRoutesById: FileRoutesById
@@ -321,7 +333,7 @@ export interface RootRouteChildren {
   BookingsRoute: typeof BookingsRoute
   BusinessDashboardRoute: typeof BusinessDashboardRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
-  CommunityRoute: typeof CommunityRoute
+  CommunityRoute: typeof CommunityRouteWithChildren
   CultureHistoryRoute: typeof CultureHistoryRoute
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
@@ -512,8 +524,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItineraryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community/$postId': {
+      id: '/community/$postId'
+      path: '/$postId'
+      fullPath: '/community/$postId'
+      preLoaderRoute: typeof CommunityPostIdRouteImport
+      parentRoute: typeof CommunityRoute
+    }
   }
 }
+
+interface CommunityRouteChildren {
+  CommunityPostIdRoute: typeof CommunityPostIdRoute
+}
+
+const CommunityRouteChildren: CommunityRouteChildren = {
+  CommunityPostIdRoute: CommunityPostIdRoute,
+}
+
+const CommunityRouteWithChildren = CommunityRoute._addFileChildren(
+  CommunityRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -521,7 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookingsRoute: BookingsRoute,
   BusinessDashboardRoute: BusinessDashboardRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
-  CommunityRoute: CommunityRoute,
+  CommunityRoute: CommunityRouteWithChildren,
   CultureHistoryRoute: CultureHistoryRoute,
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,
