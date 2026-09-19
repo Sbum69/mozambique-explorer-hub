@@ -135,9 +135,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadAuthenticatedUser = useCallback(async (currentAuthUser: User | null) => {
     setAuthUser(currentAuthUser);
     if (!currentAuthUser) {
-      setUser(null);
+      setUser(isGuestModeActive() ? GUEST_USER : null);
       setIsLoading(false);
       return;
+    }
+    try {
+      sessionStorage.removeItem(GUEST_MODE_KEY);
+    } catch {
+      /* ignore */
     }
 
     const [{ data: profile }, { data: roleRows }, { data: provinceRows }] = await Promise.all([
@@ -209,6 +214,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   const loginAsGuest = () => {
+    try {
+      sessionStorage.setItem(GUEST_MODE_KEY, "1");
+    } catch {
+      /* ignore */
+    }
     setUser({
       username: "Convidado",
       role: "guest",
@@ -223,6 +233,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await supabase.auth.signOut();
+    try {
+      sessionStorage.removeItem(GUEST_MODE_KEY);
+    } catch {
+      /* ignore */
+    }
     setAuthUser(null);
     setUser(null);
   };
@@ -308,10 +323,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
 
-  const needsOnboarding =
-    !!user &&
-    (user.role === "user" || user.role === "guest") &&
-    !user.preferences?.province;
+  // Guests never see onboarding: they have no profile and save nothing.
+  const needsOnboarding = !!authUser && !!user && user.role === "user" && !user.preferences?.province;
 
   const isGuest = user?.role === "guest";
   const isUser = user?.role === "user";
