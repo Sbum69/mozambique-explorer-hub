@@ -73,11 +73,13 @@ export function scoreExperience(
   const categories = categoriesFor(interests);
   const preferred = ctx.preferredDestination;
 
+  const provinceCodes = preferredProvinceCodes(prefs, preferred);
   const matchesProvince =
-    !!preferred &&
-    (experience.destinationId === preferred.slug ||
-      experience.destinationUuid === preferred.id ||
-      experience.province === preferred.province);
+    (!!preferred &&
+      (experience.destinationId === preferred.slug ||
+        experience.destinationUuid === preferred.id ||
+        experience.province === preferred.province)) ||
+    (!!experience.province && provinceCodes.includes(experience.province));
 
   const reasons = interests.filter((id) =>
     (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(experience.category),
@@ -102,7 +104,9 @@ export function scoreDestination(
   experiences: Experience[] = [],
 ): Scored<Destination> {
   const interests = prefs.interests ?? [];
-  const matchesProvince = prefs.province === destination.slug;
+  const matchesProvince =
+    prefs.province === destination.slug ||
+    (!!destination.province && (prefs.provinces ?? []).includes(destination.province));
 
   const reasons = interests.filter((id) =>
     (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(destination.category ?? ""),
