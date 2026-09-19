@@ -18,8 +18,8 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useDestinations } from "@/hooks/useDestinations";
-import { SAMPLE_ITINERARIES } from "@/data/itineraries";
-import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+import { useRouteCatalogue } from "@/hooks/useRoutes";
+
 import { requireAuthenticatedUser } from "@/lib/auth";
 
 
@@ -72,21 +72,19 @@ function DashboardPage() {
   const xpToNext = (user.level + 1) * 1000;
   const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
 
+  // Official itinerary of the chosen province, read from the database (no mock data).
   const recommendedItinerary = province
-    ? SAMPLE_ITINERARIES.find((it) => it.id === DESTINATION_ITINERARY[province.slug])
+    ? publicRoutes.find((r) => r.province?.code === province.province) ?? null
     : null;
   const tripDays = user.preferences?.durationDays ?? 3;
   const daySlices = recommendedItinerary
-    ? Array.from({ length: Math.min(tripDays, 5) }).map((_, idx) => {
-        const stops = recommendedItinerary.route;
-        return {
-          day: idx + 1,
-          morning: stops[(idx * 3) % stops.length]?.name ?? stops[(idx * 3) % stops.length]?.title ?? "Explorar a região",
-          afternoon: stops[(idx * 3 + 1) % stops.length]?.name ?? stops[(idx * 3 + 1) % stops.length]?.title ?? "Passeio local",
-          evening: stops[(idx * 3 + 2) % stops.length]?.name ?? stops[(idx * 3 + 2) % stops.length]?.title ?? "Jantar típico",
-        };
-      })
+    ? recommendedItinerary.days.slice(0, Math.min(tripDays, recommendedItinerary.days.length)).map((day) => ({
+        day: day.dayNumber,
+        title: day.title,
+        stops: day.stops,
+      }))
     : [];
+
 
 
   return (
