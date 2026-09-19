@@ -71,6 +71,13 @@
       "when": 1789838807504,
       "tag": "0009_community_anon_category_policy",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789838828396,
+      "tag": "0010_community_authors_view_no_has_role",
+      "breakpoints": true
     }
   ]
 }
