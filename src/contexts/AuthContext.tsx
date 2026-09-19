@@ -8,6 +8,8 @@ export type UserRole = "guest" | "user" | "admin" | "business-small" | "business
 
 export interface UserPreferences {
   province?: string;
+  /** Province codes (provinces.code) chosen by the tourist — several are allowed. */
+  provinces?: string[];
   durationDays?: number;
   interests?: string[];
 }
