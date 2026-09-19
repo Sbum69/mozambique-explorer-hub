@@ -4,22 +4,24 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Navigation, Loader2, Car, Bike, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Itinerary, ItineraryStop } from "@/data/itineraries";
-import { ITINERARY_STOP_COORDS, DEFAULT_MZ_CENTER } from "@/data/itinerary-coords";
+import type { RouteStop } from "@/lib/routes";
 
 type Mode = "driving" | "cycling" | "walking";
 
-function stopColor(type: ItineraryStop["type"]) {
-  return type === "business" ? "#2563eb" : type === "waypoint" ? "#9333ea" : "#f97316";
+/** Center fallback (approx. Mozambique center) when no stop has coordinates yet. */
+const DEFAULT_MZ_CENTER: [number, number] = [-18.5, 35.5];
+
+function stopColor(kind: RouteStop["kind"]) {
+  return kind === "experience" ? "#2563eb" : "#9333ea";
 }
 
-function numberedIcon(n: number, color: string, sponsored?: boolean) {
+function numberedIcon(n: number, color: string) {
   return L.divIcon({
     className: "ekaya-itin-pin",
     html: `<div style="
       width: 34px; height: 34px;
       background:${color};
-      border:3px solid ${sponsored ? "#facc15" : "white"};
+      border:3px solid white;
       border-radius:50%;
       color:white;font-weight:700;font-size:14px;
       display:flex;align-items:center;justify-content:center;
@@ -42,22 +44,19 @@ function FitAll({ points }: { points: [number, number][] }) {
 }
 
 interface Props {
-  itinerary: Itinerary;
+  /** Stops in visiting order; coordinates come from the real destination rows. */
+  stops: RouteStop[];
   lang?: "pt" | "en";
 }
 
-export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
-  const stopsWithCoords = useMemo(() => {
-    return itinerary.route
-      .map((s) => {
-        const key = `${itinerary.id}:${s.id}`;
-        const coord =
-          ITINERARY_STOP_COORDS[key] ??
-          (s.lat != null && s.lng != null ? ([s.lat, s.lng] as [number, number]) : null);
-        return coord ? { stop: s, coord } : null;
-      })
-      .filter((v): v is { stop: ItineraryStop; coord: [number, number] } => v !== null);
-  }, [itinerary]);
+export function ItineraryMap({ stops, lang = "pt" }: Props) {
+  const stopsWithCoords = useMemo(
+    () =>
+      stops
+        .map((stop) => (stop.coords ? { stop, coord: stop.coords } : null))
+        .filter((v): v is { stop: RouteStop; coord: [number, number] } => v !== null),
+    [stops],
+  );
 
   const points = stopsWithCoords.map((s) => s.coord);
   const [mode, setMode] = useState<Mode>("driving");
@@ -182,19 +181,17 @@ export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
           )}
 
           {stopsWithCoords.map(({ stop, coord }, i) => (
-            <Marker key={stop.id} position={coord} icon={numberedIcon(i + 1, stopColor(stop.type), stop.sponsored)}>
+            <Marker key={stop.id} position={coord} icon={numberedIcon(i + 1, stopColor(stop.kind))}>
               <Popup>
                 <div style={{ minWidth: 200 }}>
                   <p style={{ fontSize: 10, textTransform: "uppercase", color: "#666", margin: 0, fontWeight: 700 }}>
-                    {stop.type === "business"
-                      ? lang === "pt" ? "Negócio" : "Business"
-                      : stop.type === "waypoint"
-                      ? "Waypoint"
-                      : lang === "pt" ? "História" : "Story"}
+                    {stop.kind === "experience"
+                      ? lang === "pt" ? "Experiência" : "Experience"
+                      : lang === "pt" ? "Destino" : "Destination"}
                   </p>
-                  <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{stop.name ?? stop.title}</h3>
-                  {stop.description && (
-                    <p style={{ fontSize: 12, color: "#555", margin: "0 0 6px" }}>{stop.description}</p>
+                  <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{stop.title}</h3>
+                  {stop.destinationName && (
+                    <p style={{ fontSize: 12, color: "#555", margin: "0 0 6px" }}>{stop.destinationName}</p>
                   )}
                   <p style={{ fontSize: 10, color: "#888", margin: 0 }}>
                     📍 {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
@@ -225,11 +222,11 @@ export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
         </MapContainer>
       </div>
 
-      {points.length < itinerary.route.length && (
+      {points.length < stops.length && (
         <p className="text-xs text-muted-foreground mt-2">
           {lang === "pt"
-            ? `${itinerary.route.length - points.length} paragem(ns) sem coordenadas GPS.`
-            : `${itinerary.route.length - points.length} stop(s) without GPS coordinates.`}
+            ? `${stops.length - points.length} paragem(ns) sem coordenadas GPS.`
+            : `${stops.length - points.length} stop(s) without GPS coordinates.`}
         </p>
       )}
     </div>
