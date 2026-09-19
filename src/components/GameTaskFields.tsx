@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Heart, Route as RouteIcon, Sunrise, Sunset, CalendarDays, Share2, Check, Languages, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useExperiences } from "@/hooks/useExperiences";
-import { SAMPLE_ITINERARIES, getUserItineraries, type Itinerary } from "@/data/itineraries";
+import { SAMPLE_ITINERARIES, type Itinerary } from "@/data/itineraries";
 
 function Wrap({ title, hint, icon: Icon, children }: { title: string; hint?: string; icon: typeof Heart; children: React.ReactNode }) {
   return (
@@ -65,7 +65,7 @@ export function ItineraryTask({
   value: { itineraryId: string; stopId: number } | null;
   onChange: (v: { itineraryId: string; stopId: number } | null, label?: string) => void;
 }) {
-  const list = useMemo<Itinerary[]>(() => [...SAMPLE_ITINERARIES, ...getUserItineraries()], []);
+  const list = useMemo<Itinerary[]>(() => SAMPLE_ITINERARIES, []);
   const [openId, setOpenId] = useState<string | null>(value?.itineraryId ?? null);
   const current = list.find((i) => i.id === openId);
 
