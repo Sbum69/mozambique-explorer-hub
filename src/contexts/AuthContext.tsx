@@ -74,6 +74,28 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const LOCAL_STATE_PREFIX = "ekaya.user-state:";
+/** Session-only flag: guest mode is a browsing mode, never an account. */
+const GUEST_MODE_KEY = "ekaya.guest-mode";
+
+const GUEST_USER: AppUser = {
+  username: "Convidado",
+  role: "guest",
+  displayName: "Convidado",
+  xp: 0,
+  level: 0,
+  visitedPlaces: 0,
+  completedItineraries: 0,
+  kmExplored: 0,
+};
+
+export function isGuestModeActive() {
+  if (typeof window === "undefined") return false;
+  try {
+    return sessionStorage.getItem(GUEST_MODE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 const rolePriority: AppRole[] = ["admin", "business_large", "business_small", "tourist"];
 
