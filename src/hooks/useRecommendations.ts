@@ -43,10 +43,16 @@ export function useRecommendations(limit = 6) {
   const preferences: TravelPreferences = useMemo(
     () => ({
       province: user?.preferences?.province,
+      provinces: user?.preferences?.provinces ?? [],
       durationDays: user?.preferences?.durationDays,
       interests: user?.preferences?.interests ?? [],
     }),
-    [user?.preferences?.province, user?.preferences?.durationDays, user?.preferences?.interests],
+    [
+      user?.preferences?.province,
+      user?.preferences?.provinces,
+      user?.preferences?.durationDays,
+      user?.preferences?.interests,
+    ],
   );
 
   const personalised = hasPreferences(preferences);
