@@ -374,28 +374,28 @@ function HomePage() {
             >
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="relative aspect-[16/10]">
-                  <img src={it.image} alt={it.name} className="size-full object-cover" loading="lazy" decoding="async" />
-                  <Badge className="absolute top-3 left-3">{it.difficulty}</Badge>
+                  <img src={routeCover(it)} alt={it.title} className="size-full object-cover" loading="lazy" decoding="async" />
+                  {it.province && <Badge className="absolute top-3 left-3">{it.province.name[lang]}</Badge>}
                 </div>
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-1 text-xs text-warning mb-1.5">
-                    <Star className="size-3.5 fill-current" />
-                    <span className="font-semibold">{it.rating}</span>
-                    <span className="text-muted-foreground">({it.totalReviews})</span>
-                  </div>
-                  <h3 className="font-semibold leading-tight">{it.name}</h3>
+                  <p className="text-xs font-mono text-muted-foreground mb-1.5">{it.code}</p>
+                  <h3 className="font-semibold leading-tight">{it.title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                     {it.description}
                   </p>
                   <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="size-3.5" /> {it.duration}
+                      <Clock className="size-3.5" /> {it.durationDays} {lang === "pt" ? "dias" : "days"}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <MapPin className="size-3.5" /> {it.stops}{" "}
+                      <MapPin className="size-3.5" /> {routeStopCount(it)}{" "}
                       {lang === "pt" ? "paragens" : "stops"}
                     </span>
-                    <span className="ml-auto font-semibold text-foreground">${it.cost}</span>
+                    {routePriceMzn(it) > 0 && (
+                      <span className="ml-auto font-semibold text-foreground">
+                        {routePriceMzn(it).toLocaleString("pt-MZ")} MZN
+                      </span>
+                    )}
                   </div>
                   <Button asChild size="sm" variant="outline" className="mt-4 w-full">
                     <Link to="/itinerary/$id" params={{ id: it.id }}>
@@ -406,6 +406,7 @@ function HomePage() {
               </Card>
             </motion.div>
           ))}
+
         </RecoRow>
 
         {/* Experiences */}
