@@ -539,7 +539,7 @@ function PostEditor({
           </Field>
           <Field label={t("communityExperience")}>
             <Select value={experienceId} onChange={setExperienceId} placeholder="—">
-              {experiences.map((e) => <option key={e.id} value={e.id}>{e.title}</option>)}
+              {experiences.map((e) => <option key={e.id} value={e.id}>{e.title[lang]}</option>)}
             </Select>
           </Field>
           <Field label={t("communityRoute")}>
