@@ -209,6 +209,40 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                     );
                   })}
                 </div>
+
+                {/* Provinces: several may be chosen, from the real province list */}
+                <div className="mt-8">
+                  <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="size-4 text-primary" />
+                    {lang === "pt" ? "Províncias que queres explorar" : "Provinces you want to explore"}
+                  </h3>
+                  {loadingProvinces ? (
+                    <p className="text-sm text-muted-foreground animate-pulse">
+                      {lang === "pt" ? "A carregar províncias..." : "Loading provinces..."}
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {provinces.map((p) => {
+                        const selected = provinceCodes.includes(p.code);
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => toggleProvince(p.code)}
+                            className={cn(
+                              "rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors",
+                              selected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/40 text-muted-foreground",
+                            )}
+                          >
+                            {p.name[lang]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </motion.div>
             )}
 
