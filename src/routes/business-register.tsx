@@ -21,6 +21,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { registerBusinessAccount } from "@/lib/business-registration.functions";
+import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 
 export const Route = createFileRoute("/business-register")({
   head: () => ({
@@ -36,25 +37,8 @@ export const Route = createFileRoute("/business-register")({
   component: BusinessRegisterPage,
 });
 
-const CATEGORIES_LARGE = [
-  "Alojamento",
-  "Restaurante",
-  "Bar e Discoteca",
-  "Agência de Turismo",
-  "Transporte Turístico",
-  "Centro Cultural",
-  "Outro",
-];
+// Categories and provinces now come from the database (business_categories / provinces).
 
-const CATEGORIES_SMALL = [
-  "Artesanato Local",
-  "Comida de Rua",
-  "Guia Turístico Individual",
-  "Vendedor Ambulante",
-  "Banca de Mercado",
-  "Serviços Tradicionais",
-  "Outro",
-];
 
 function BusinessRegisterPage() {
   const navigate = useNavigate();

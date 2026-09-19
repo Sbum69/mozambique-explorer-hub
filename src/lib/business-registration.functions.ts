@@ -7,7 +7,10 @@ import type { Database } from "@/integrations/supabase/types";
 const schema = z.object({
   businessName: z.string().trim().min(2),
   businessType: z.enum(["small", "large"]),
+  /** business_categories.code — free text is rejected by the database reference. */
   category: z.string().trim().min(1),
+  /** provinces.code — the province must already exist. */
+  provinceCode: z.string().trim().min(1),
   location: z.string().trim().min(1),
   description: z.string().trim().min(1),
   contact: z.string().trim().min(1),
