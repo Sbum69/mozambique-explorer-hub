@@ -32,7 +32,6 @@ import {
   Activity,
   Tag,
   MessageSquare,
-  MessageSquare,
   Compass,
   Loader2,
 } from "lucide-react";

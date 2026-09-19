@@ -317,7 +317,7 @@ export async function createRoute(
   ownerId: string,
   options: { isCurated?: boolean } = {},
 ): Promise<ItineraryRoute> {
-  const payload: Record<string, unknown> = {
+  const payload = {
     owner_id: options.isCurated ? null : ownerId,
     title: input.title,
     description: input.description,
@@ -325,6 +325,15 @@ export async function createRoute(
     duration_days: Math.max(1, input.days.length),
     is_public: input.isPublic,
     is_curated: options.isCurated ?? false,
+  } as {
+    owner_id: string | null;
+    title: string;
+    description: string | null;
+    province_id: string | null;
+    duration_days: number;
+    is_public: boolean;
+    is_curated: boolean;
+    unique_code?: string;
   };
   if (input.customCode) payload.unique_code = normaliseCode(input.customCode);
 
