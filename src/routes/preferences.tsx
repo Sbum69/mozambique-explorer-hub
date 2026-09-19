@@ -32,6 +32,7 @@ function PreferencesPage() {
         open
         initial={{
           province: user?.preferences?.province,
+          provinces: user?.preferences?.provinces,
           durationDays: user?.preferences?.durationDays,
           interests: user?.preferences?.interests,
         }}
