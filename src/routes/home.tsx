@@ -38,6 +38,8 @@ import { useDestinations } from "@/hooks/useDestinations";
 import { type ExperienceCategory } from "@/lib/experiences";
 import { useExperiences } from "@/hooks/useExperiences";
 import { useRecommendations } from "@/hooks/useRecommendations";
+import { useRouteCatalogue } from "@/hooks/useRoutes";
+import { routeCover, routePriceMzn, routeStopCount } from "@/lib/routes";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
@@ -119,6 +121,7 @@ function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
   const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
+  const { publicRoutes } = useRouteCatalogue(null);
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
