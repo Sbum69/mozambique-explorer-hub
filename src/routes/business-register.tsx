@@ -92,7 +92,7 @@ function BusinessRegisterPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!businessType) return;
-    if (!businessName || !category || !location || !description || !contact || !ownerName || !email || !password) {
+    if (!businessName || !category || !provinceCode || !location || !description || !contact || !ownerName || !email || !password) {
       toast.error("Preenche todos os campos obrigatórios");
       return;
     }
@@ -111,6 +111,7 @@ function BusinessRegisterPage() {
         businessName,
         businessType,
         category,
+        provinceCode,
         location,
         description,
         contact,
