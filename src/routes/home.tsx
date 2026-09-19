@@ -142,8 +142,9 @@ function HomePage() {
   const maxDays = bucketMax(applied.days);
 
   const recoItineraries = useMemo(() => {
-    return SAMPLE_ITINERARIES.filter((it) => itineraryDays(it) <= maxDays + 1).slice(0, 4);
-  }, [maxDays]);
+    return publicRoutes.filter((r) => r.durationDays <= maxDays + 1).slice(0, 4);
+  }, [maxDays, publicRoutes]);
+
 
   const recoExperiences = useMemo(() => {
     const pool = experiences.filter((e) => {
