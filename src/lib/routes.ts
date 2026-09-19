@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { IMAGE_BY_SLUG } from "@/lib/destinations";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 /**
  * Itineraries ("roteiros") live in the database: routes -> route_days -> route_stops.
@@ -340,7 +341,7 @@ export async function createRoute(
   // unique_code is filled by a database trigger when omitted.
   const { data, error } = await supabase
     .from("routes")
-    .insert(payload as unknown as { unique_code: string })
+    .insert(payload as unknown as TablesInsert<"routes">)
     .select("id")
     .single();
   if (error) {

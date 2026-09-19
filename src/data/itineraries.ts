@@ -338,47 +338,8 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
   },
 ];
 
-// ----- LocalStorage user itineraries -----
-const USER_KEY = "ekaya.user.itineraries";
-
-export function getUserItineraries(): Itinerary[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as Itinerary[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveUserItineraries(list: Itinerary[]) {
-  localStorage.setItem(USER_KEY, JSON.stringify(list));
-}
-
-export function addUserItinerary(it: Itinerary) {
-  const list = getUserItineraries();
-  saveUserItineraries([it, ...list.filter((x) => x.id !== it.id)]);
-}
-
-export function updateUserItinerary(it: Itinerary) {
-  const list = getUserItineraries().map((x) => (x.id === it.id ? it : x));
-  saveUserItineraries(list);
-}
-
-export function deleteUserItinerary(id: string) {
-  saveUserItineraries(getUserItineraries().filter((x) => x.id !== id));
-}
-
-export function findItineraryByCode(code: string): Itinerary | undefined {
-  const all = [...SAMPLE_ITINERARIES, ...getUserItineraries()];
-  return all.find((i) => i.code.toUpperCase() === code.toUpperCase());
-}
-
-export function findItineraryById(id: string): Itinerary | undefined {
-  const all = [...SAMPLE_ITINERARIES, ...getUserItineraries()];
-  return all.find((i) => i.id === id);
-}
-
-export function generateCode(): string {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
+/**
+ * Real itineraries (routes) now live in the database — see `@/lib/routes`.
+ * The sample data above remains only as narrative content for the
+ * gamification/story features, which are not migrated yet.
+ */

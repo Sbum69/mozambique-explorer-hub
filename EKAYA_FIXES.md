@@ -585,3 +585,47 @@ Todos os testes do bloco passaram, excepto os marcados: criação/gravação de 
 - `profiles.province` continua a guardar o slug do destino; a distinção "Maputo cidade" vs "Maputo província" nos dados antigos foi mantida como `maputo` e precisa de confirmação editorial.
 - Descoberta de negócios por província/categoria para turistas: estrutura pronta, página ainda não existe.
 - Gamificação, roteiros, comunidade, eventos, notificações, recompensas, notícias, cultura, informações úteis e métricas do Admin continuam por migrar (nenhum depende ainda de `province_id`, excepto futuros filtros por província).
+
+---
+
+## BLOCK 6G — ROTEIROS REAIS, PERSISTENTES E PESQUISÁVEIS
+
+**Problema**
+Os roteiros eram 100% mock: 3 roteiros hardcoded em `src/data/itineraries.ts`, criação/edição/importação em `localStorage` (`ekaya.user.itineraries`), progresso apenas em memória e coordenadas inventadas.
+
+**Causa**
+Nunca existiu estrutura de roteiros na base de dados; toda a funcionalidade vivia no browser, pelo que nada era partilhável, pesquisável ou persistente entre dispositivos.
+
+**Ficheiros afetados**
+- `supabase/migrations/0006_create_routes_itineraries.sql` (novo): `routes`, `route_days`, `route_stops`, `route_progress`, `route_stop_progress`, geração de código `EK-XXXXXX`, GRANTs e RLS.
+- `src/lib/routes.ts` (novo): leitura pública/próprios/admin, criação, edição, eliminação, visibilidade, estado, pesquisa por código, importação e progresso.
+- `src/hooks/useRoutes.ts` (novo): `useRouteCatalogue`, `useRoute`.
+- `src/routes/itineraries.tsx`, `src/routes/itinerary.$id.tsx`, `src/components/ItineraryMap.tsx`: reescritos sobre dados reais.
+- `src/routes/dashboard.tsx`, `src/routes/home.tsx`: sugestões de roteiros passam a usar roteiros reais.
+- `src/routes/admin.tsx`: novo painel “Gerir Roteiros” (listar, pesquisar, filtrar por província, criar oficial, editar, ativar/desativar, público/privado, apagar).
+- `src/data/itineraries.ts`: removidas todas as funções de `localStorage`; o mock permanece apenas como conteúdo narrativo da gamificação (ainda não migrada).
+- `src/components/GameTaskFields.tsx`: deixou de ler roteiros do `localStorage`.
+
+**Correção**
+- Dois roteiros curados migrados usando **apenas** destinos e experiências que já existem (Inhambane + Tofo + Vilankulo + Dhow Bazaruto; Maputo + Mercado Central + Marrabenta). O terceiro roteiro mock (“Bazaruto Completo”) **não** foi migrado por depender de paragens inventadas.
+- Paragens referenciam `destinations` ou `experiences` reais (exatamente uma por paragem, garantido por constraint); preços, durações e coordenadas vêm dessas tabelas.
+- Códigos únicos `EK-*` gerados pela base de dados; pesquisa por código é case-insensitive e permite abrir/importar roteiros partilhados.
+- Progresso (`route_progress` / `route_stop_progress`) guardado por conta, com dia atual, paragens concluídas, reiniciar e terminar.
+- RLS: público vê roteiros públicos ativos; o proprietário vê/edita os seus (incluindo privados); admin vê e gere tudo.
+
+**Estado**
+BLOCK 6G COMPLETE.
+
+**Testes realizados**
+1. Catálogo `/itineraries` carrega os 2 roteiros oficiais reais com província, dias, paragens e preço — OK.
+2. Detalhe do roteiro mostra dias/paragens reais e mapa com coordenadas reais — OK.
+3. Começar roteiro criou progresso persistente na base de dados (`route_progress`, `in_progress`, dia 1) — OK.
+4. Criação de roteiro de utilizador gerou código `EK-7D5F02`, privado, visível só para o autor — OK.
+5. Pesquisa por código em minúsculas (`ek-map002`) abriu o roteiro correto — OK.
+6. Painel Admin → Gerir Roteiros listou os 3 roteiros (incluindo o privado com nome do proprietário) e apagou o roteiro de teste — OK.
+7. Dashboard e Home mostram sugestões de roteiros reais sem erros de consola — OK.
+8. Typecheck e build: OK.
+
+**Limitações conhecidas**
+- Sem dados reais para restaurantes/hotéis/paragens narrativas, as paragens limitam-se a destinos e experiências existentes.
+- Gamificação, comunidade, eventos, notificações, notícias e recompensas continuam locais/mock (fora do âmbito deste bloco).
