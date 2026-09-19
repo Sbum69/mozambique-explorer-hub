@@ -25,7 +25,6 @@ import {
   translateBookingError,
   type Booking,
 } from "@/lib/bookings";
-import { requireAuthenticatedUser } from "@/lib/auth";
 
 const WEEKDAY_LABEL: { pt: string; en: string }[] = [
   { pt: "Domingo", en: "Sunday" },
@@ -49,7 +48,6 @@ export const Route = createFileRoute("/experiences")({
     ],
   }),
   ssr: false,
-  beforeLoad: requireAuthenticatedUser,
   component: ExperiencesPage,
 });
 

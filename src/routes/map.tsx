@@ -15,7 +15,6 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { type Destination } from "@/lib/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { requireAuthenticatedUser } from "@/lib/auth";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
@@ -36,7 +35,6 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: requireAuthenticatedUser,
   component: MapPage,
 });
 
