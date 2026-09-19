@@ -215,6 +215,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         duration_days: next.preferences?.durationDays,
         interests: next.preferences?.interests,
       }).eq("id", authUser.id);
+
+      // Several provinces per tourist live in profile_provinces (RLS: own rows only).
+      if (prefs.provinces) {
+        const codes = [...new Set(prefs.provinces)];
+        const { data: rows } = await supabase.from("provinces").select("id, code").in("code", codes.length ? codes : [""]);
+        await supabase.from("profile_provinces").delete().eq("profile_id", authUser.id);
+        if (rows && rows.length) {
+          await supabase
+            .from("profile_provinces")
+            .insert(rows.map((row) => ({ profile_id: authUser.id, province_id: row.id })));
+        }
+      }
     }
   };
 
