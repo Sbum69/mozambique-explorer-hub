@@ -110,13 +110,24 @@ export const registerBusinessAccount = createServerFn({ method: "POST" })
       return { ok: false, error: "Esta conta já tem um negócio registado." };
     }
 
-    // 4. Business entity, always pending approval.
+    // 4. Province and category must exist in the official lists.
+    const [{ data: province }, { data: categoryRow }] = await Promise.all([
+      supabaseAdmin.from("provinces").select("id, code").eq("code", data.provinceCode).eq("active", true).maybeSingle(),
+      supabaseAdmin.from("business_categories").select("code").eq("code", data.category).eq("active", true).maybeSingle(),
+    ]);
+    if (!province) return { ok: false, error: "Escolhe uma província válida da lista." };
+    if (!categoryRow) return { ok: false, error: "Escolhe uma categoria válida da lista." };
+
+    // 5. Business entity, always pending approval.
     const { error: businessError } = await supabaseAdmin.from("businesses").insert({
       owner_id: userId,
       name: data.businessName,
       slug: slugify(data.businessName),
       type: data.businessType === "large" ? "large" : "small",
-      category: data.category,
+      category: categoryRow.code,
+      category_code: categoryRow.code,
+      province: province.code,
+      province_id: province.id,
       description: data.description,
       location: { address: data.location },
       contact: { phone: data.contact },
