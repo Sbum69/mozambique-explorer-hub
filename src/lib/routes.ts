@@ -337,7 +337,12 @@ export async function createRoute(
   };
   if (input.customCode) payload.unique_code = normaliseCode(input.customCode);
 
-  const { data, error } = await supabase.from("routes").insert(payload).select("id").single();
+  // unique_code is filled by a database trigger when omitted.
+  const { data, error } = await supabase
+    .from("routes")
+    .insert(payload as unknown as { unique_code: string })
+    .select("id")
+    .single();
   if (error) {
     if (error.code === "23505" || /duplicate key/i.test(error.message)) {
       throw new Error("DUPLICATE_CODE");
