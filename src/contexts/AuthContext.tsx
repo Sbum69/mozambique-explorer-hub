@@ -154,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       businessInfo: local.businessInfo,
       preferences: {
         province: profile?.province ?? local.preferences?.province,
+        provinces: provinceCodes,
         durationDays: profile?.duration_days ?? local.preferences?.durationDays,
         interests: profile?.interests ?? local.preferences?.interests,
       },
