@@ -65,6 +65,8 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [showChangeDest, setShowChangeDest] = useState(false);
   const { destinations } = useDestinations();
+  const { publicRoutes } = useRouteCatalogue(null);
+
 
   if (!user) return null;
 
@@ -212,21 +214,28 @@ function DashboardPage() {
                       {i < daySlices.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
                     </div>
                     <div className="flex-1 pb-4 space-y-1.5">
-                      <p className="text-sm font-semibold">{lang === "pt" ? "Dia" : "Day"} {d.day}</p>
+                      <p className="text-sm font-semibold">
+                        {lang === "pt" ? "Dia" : "Day"} {d.day}
+                        {d.title ? ` — ${d.title}` : ""}
+                      </p>
 
-                      <div className="flex items-start gap-2 text-sm">
-                        <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
-                        <span>{d.morning}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <CloudSun className="size-4 text-orange-500 mt-0.5 shrink-0" />
-                        <span>{d.afternoon}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <Moon className="size-4 text-indigo-500 mt-0.5 shrink-0" />
-                        <span>{d.evening}</span>
-                      </div>
+                      {d.stops.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          {lang === "pt" ? "Sem paragens definidas." : "No stops defined."}
+                        </p>
+                      )}
+                      {d.stops.map((stop) => (
+                        <div key={stop.id} className="flex items-start gap-2 text-sm">
+                          {stop.kind === "experience" ? (
+                            <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                          ) : (
+                            <MapPin className="size-4 text-primary mt-0.5 shrink-0" />
+                          )}
+                          <span>{stop.title}</span>
+                        </div>
+                      ))}
                     </div>
+
                   </motion.div>
                 ))}
               </div>
