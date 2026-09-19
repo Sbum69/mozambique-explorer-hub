@@ -503,6 +503,240 @@ export type Database = {
         }
         Relationships: []
       }
+      route_days: {
+        Row: {
+          created_at: string
+          day_number: number
+          description: string | null
+          id: string
+          route_id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          day_number: number
+          description?: string | null
+          id?: string
+          route_id: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          day_number?: number
+          description?: string | null
+          id?: string
+          route_id?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_days_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_progress: {
+        Row: {
+          completed_at: string | null
+          current_day: number
+          id: string
+          route_id: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          current_day?: number
+          id?: string
+          route_id: string
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          current_day?: number
+          id?: string
+          route_id?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_progress_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stop_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          progress_id: string
+          route_stop_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          progress_id: string
+          route_stop_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          progress_id?: string
+          route_stop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stop_progress_progress_id_fkey"
+            columns: ["progress_id"]
+            isOneToOne: false
+            referencedRelation: "route_progress"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stop_progress_route_stop_id_fkey"
+            columns: ["route_stop_id"]
+            isOneToOne: false
+            referencedRelation: "route_stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          created_at: string
+          destination_id: string | null
+          estimated_duration_minutes: number | null
+          experience_id: string | null
+          id: string
+          notes: string | null
+          route_day_id: string
+          stop_order: number
+        }
+        Insert: {
+          created_at?: string
+          destination_id?: string | null
+          estimated_duration_minutes?: number | null
+          experience_id?: string | null
+          id?: string
+          notes?: string | null
+          route_day_id: string
+          stop_order: number
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string | null
+          estimated_duration_minutes?: number | null
+          experience_id?: string | null
+          id?: string
+          notes?: string | null
+          route_day_id?: string
+          stop_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stops_route_day_id_fkey"
+            columns: ["route_day_id"]
+            isOneToOne: false
+            referencedRelation: "route_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          duration_days: number
+          id: string
+          is_curated: boolean
+          is_public: boolean
+          owner_id: string | null
+          province_id: string | null
+          status: string
+          title: string
+          unique_code: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_curated?: boolean
+          is_public?: boolean
+          owner_id?: string | null
+          province_id?: string | null
+          status?: string
+          title: string
+          unique_code: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          is_curated?: boolean
+          is_public?: boolean
+          owner_id?: string | null
+          province_id?: string | null
+          status?: string
+          title?: string
+          unique_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routes_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routes_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -541,7 +775,10 @@ export type Database = {
         Args: { _date: string; _experience_id: string; _time: string }
         Returns: number
       }
+      can_edit_route: { Args: { _route_id: string }; Returns: boolean }
+      can_view_route: { Args: { _route_id: string }; Returns: boolean }
       generate_booking_code: { Args: never; Returns: string }
+      generate_route_code: { Args: never; Returns: string }
       get_experience_availability: {
         Args: { _date: string; _experience_id: string }
         Returns: {

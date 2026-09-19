@@ -43,6 +43,13 @@
       "when": 1789778517584,
       "tag": "0005_provinces_and_business_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789818598937,
+      "tag": "0006_create_routes_itineraries",
+      "breakpoints": true
     }
   ]
 }

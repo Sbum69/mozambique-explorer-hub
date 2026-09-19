@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
-  MapPin, Sun, CloudSun, Moon, ArrowRight,
+  MapPin, Sun, ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -18,8 +18,8 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useDestinations } from "@/hooks/useDestinations";
-import { SAMPLE_ITINERARIES } from "@/data/itineraries";
-import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+import { useRouteCatalogue } from "@/hooks/useRoutes";
+
 import { requireAuthenticatedUser } from "@/lib/auth";
 
 
@@ -65,6 +65,8 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [showChangeDest, setShowChangeDest] = useState(false);
   const { destinations } = useDestinations();
+  const { publicRoutes } = useRouteCatalogue(null);
+
 
   if (!user) return null;
 
@@ -72,21 +74,19 @@ function DashboardPage() {
   const xpToNext = (user.level + 1) * 1000;
   const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
 
+  // Official itinerary of the chosen province, read from the database (no mock data).
   const recommendedItinerary = province
-    ? SAMPLE_ITINERARIES.find((it) => it.id === DESTINATION_ITINERARY[province.slug])
+    ? publicRoutes.find((r) => r.province?.code === province.province) ?? null
     : null;
   const tripDays = user.preferences?.durationDays ?? 3;
   const daySlices = recommendedItinerary
-    ? Array.from({ length: Math.min(tripDays, 5) }).map((_, idx) => {
-        const stops = recommendedItinerary.route;
-        return {
-          day: idx + 1,
-          morning: stops[(idx * 3) % stops.length]?.name ?? stops[(idx * 3) % stops.length]?.title ?? "Explorar a região",
-          afternoon: stops[(idx * 3 + 1) % stops.length]?.name ?? stops[(idx * 3 + 1) % stops.length]?.title ?? "Passeio local",
-          evening: stops[(idx * 3 + 2) % stops.length]?.name ?? stops[(idx * 3 + 2) % stops.length]?.title ?? "Jantar típico",
-        };
-      })
+    ? recommendedItinerary.days.slice(0, Math.min(tripDays, recommendedItinerary.days.length)).map((day) => ({
+        day: day.dayNumber,
+        title: day.title,
+        stops: day.stops,
+      }))
     : [];
+
 
 
   return (
@@ -214,21 +214,28 @@ function DashboardPage() {
                       {i < daySlices.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
                     </div>
                     <div className="flex-1 pb-4 space-y-1.5">
-                      <p className="text-sm font-semibold">{lang === "pt" ? "Dia" : "Day"} {d.day}</p>
+                      <p className="text-sm font-semibold">
+                        {lang === "pt" ? "Dia" : "Day"} {d.day}
+                        {d.title ? ` — ${d.title}` : ""}
+                      </p>
 
-                      <div className="flex items-start gap-2 text-sm">
-                        <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
-                        <span>{d.morning}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <CloudSun className="size-4 text-orange-500 mt-0.5 shrink-0" />
-                        <span>{d.afternoon}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <Moon className="size-4 text-indigo-500 mt-0.5 shrink-0" />
-                        <span>{d.evening}</span>
-                      </div>
+                      {d.stops.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          {lang === "pt" ? "Sem paragens definidas." : "No stops defined."}
+                        </p>
+                      )}
+                      {d.stops.map((stop) => (
+                        <div key={stop.id} className="flex items-start gap-2 text-sm">
+                          {stop.kind === "experience" ? (
+                            <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                          ) : (
+                            <MapPin className="size-4 text-primary mt-0.5 shrink-0" />
+                          )}
+                          <span>{stop.title}</span>
+                        </div>
+                      ))}
                     </div>
+
                   </motion.div>
                 ))}
               </div>
