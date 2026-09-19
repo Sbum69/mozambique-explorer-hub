@@ -112,7 +112,8 @@ const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
 );
 
 function HomePage() {
-  const { user, needsOnboarding, logout, isGuest } = useAuth();
+  const { user, needsOnboarding, logout, isGuest: guestRole, isAuthenticated } = useAuth();
+  const isGuest = guestRole || !isAuthenticated;
   const { t, lang } = useLang();
   const navigate = useNavigate();
 
@@ -160,7 +161,6 @@ function HomePage() {
 
   const recoStories = STORY_STOPS.slice(0, 3);
 
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -237,7 +237,9 @@ function HomePage() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-4 py-1.5 text-sm">
               <Sparkles className="size-3.5" />
-              {lang === "pt" ? `Olá, ${user.displayName}` : `Hi, ${user.displayName}`}
+              {lang === "pt"
+                ? `Olá, ${user?.displayName ?? "Convidado"}`
+                : `Hi, ${user?.displayName ?? "Guest"}`}
             </div>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight max-w-3xl leading-[1.05]">
               {lang === "pt"
