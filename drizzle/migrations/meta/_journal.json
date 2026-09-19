@@ -36,6 +36,13 @@
       "when": 1789757247579,
       "tag": "0004_move_admin_role_to_verified_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789778517584,
+      "tag": "0005_provinces_and_business_categories",
+      "breakpoints": true
     }
   ]
 }
