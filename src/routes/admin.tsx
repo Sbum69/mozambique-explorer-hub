@@ -386,6 +386,122 @@ function ModalShell({
   );
 }
 
+/* ---------- Provinces modal (real CRUD, admin-only through RLS) ---------- */
+
+function ProvincesModal({ onClose }: { onClose: () => void }) {
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [namePt, setNamePt] = useState("");
+  const [nameEn, setNameEn] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    fetchProvinces(true)
+      .then(setProvinces)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "erro"))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const handleAdd = async () => {
+    if (!code.trim() || !namePt.trim() || !nameEn.trim()) {
+      toast.error("Preenche código e nomes");
+      return;
+    }
+    setSaving(true);
+    try {
+      await createProvince({ code: code.trim().toLowerCase(), namePt: namePt.trim(), nameEn: nameEn.trim() });
+      setCode("");
+      setNamePt("");
+      setNameEn("");
+      toast.success("Província adicionada");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível adicionar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggle = async (p: Province) => {
+    try {
+      await setProvinceActive(p.id, !p.active);
+      setProvinces((prev) => prev.map((x) => (x.id === p.id ? { ...x, active: !x.active } : x)));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível actualizar");
+    }
+  };
+
+  return (
+    <ModalShell
+      headerGradient="from-orange-500 to-orange-700"
+      onClose={onClose}
+      header={
+        <div>
+          <h3 className="text-lg font-bold">Províncias</h3>
+          <p className="text-xs text-white/80">Lista oficial usada por destinos, negócios e preferências</p>
+        </div>
+      }
+      footer={
+        <button onClick={onClose} className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 font-medium">Fechar</button>
+      }
+    >
+      {loading && <p className="text-sm text-gray-500">A carregar províncias...</p>}
+      {error && (
+        <div className="space-y-2">
+          <p className="text-sm text-gray-600">Não foi possível carregar as províncias.</p>
+          <button onClick={load} className="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm">Tentar novamente</button>
+        </div>
+      )}
+      {!loading && !error && (
+        <>
+          <ul className="divide-y divide-gray-100">
+            {provinces.map((p) => (
+              <li key={p.id} className="flex items-center gap-3 py-3">
+                <span className="size-9 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                  <MapPin className="size-4" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">{p.name.pt}</p>
+                  <p className="text-xs text-gray-500">{p.name.en} · {p.code}</p>
+                </div>
+                <button
+                  onClick={() => void handleToggle(p)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${p.active ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
+                >
+                  {p.active ? "Activa" : "Inactiva"}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-5 border-t border-gray-100 pt-4">
+            <p className="font-semibold text-sm mb-2">Adicionar província</p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="código (ex: gaza)" className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+              <input value={namePt} onChange={(e) => setNamePt(e.target.value)} placeholder="Nome (PT)" className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+              <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} placeholder="Name (EN)" className="rounded-lg border border-gray-200 px-3 py-2 text-sm" />
+            </div>
+            <button
+              onClick={() => void handleAdd()}
+              disabled={saving}
+              className="mt-3 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium disabled:opacity-60"
+            >
+              {saving ? "A adicionar..." : "Adicionar"}
+            </button>
+          </div>
+        </>
+      )}
+    </ModalShell>
+  );
+}
+
 /* ---------- Users modal ---------- */
 
 function UsersModal({ onClose }: { onClose: () => void }) {
