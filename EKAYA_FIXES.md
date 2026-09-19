@@ -646,3 +646,29 @@ BLOCK 6G COMPLETE.
 - Onboarding nunca aparece a convidados; fluxo signup → confirmação → login → onboarding inalterado.
 
 **Estado:** BLOCK GUEST FLOW COMPLETE.
+
+## BLOCK 6H — COMUNIDADE REAL
+
+**Audit (antes):** a página Comunidade usava um array hardcoded de posts com autores e likes falsos, estado em memória (perdido em reload), sem categorias, províncias, denúncias, moderação ou persistência. Nenhuma tabela de comunidade existia na BD. Províncias reais (`provinces`) e roles (`user_roles`) já existiam e foram reutilizados.
+
+**Base de dados** (`0007_create_community.sql`, `0008_community_public_authors_view.sql`, `0009_community_anon_category_policy.sql`, `0010_community_authors_view_no_has_role.sql`):
+- `community_categories` — 8 categorias fechadas (Dicas de Viagem, Destinos, Gastronomia, Cultura, Experiências, Roteiros, Perguntas, Fotografias).
+- `community_posts` — author_id, title, content, image_url, category_id, province_id, destination_id/experience_id/route_id (nullable, FKs reais), status (pending/published/rejected/hidden), timestamps.
+- `community_post_reactions` — UNIQUE (user_id, post_id), like/dislike.
+- `community_reports` — UNIQUE (post_id, reporter_id), motivos spam/inappropriate/misleading/offensive/other, status pending/reviewed/dismissed/action_taken, resolved_by/resolved_at.
+- Triggers forçam `author_id`/`reporter_id` = `auth.uid()`, impedem alteração de autor e de estado por não-admins, e registam quem resolveu a denúncia.
+- View `community_post_authors` expõe apenas display_name + avatar (sem email nem dados privados).
+
+**RLS:** anónimo lê só posts publicados, categorias ativas e contadores; não escreve nada (testado: insert de post e de reação rejeitados). Autenticado cria/edita/elimina só os próprios posts, reage, denuncia; não vê nem altera denúncias de terceiros. Admin (via `user_roles` existente) modera e resolve denúncias.
+
+**Frontend:** `src/lib/community.ts` (leitura/escrita, filtros, reações com toggle, denúncias, moderação); `src/routes/community.tsx` reescrito (feed real, pesquisa, filtros por categoria e província, ordenação recentes/populares, estados loading/erro/vazio, editor com destino/experiência/roteiro reais, edição/eliminação do próprio post); `src/routes/community.$postId.tsx` (detalhe + denúncia); `src/routes/admin.tsx` (+ "Moderação da Comunidade" e "Denúncias"); LanguageContext com ~35 chaves PT/EN.
+
+**Guest:** abre Comunidade, lê, pesquisa, filtra e abre detalhes; publicar/reagir/denunciar abre o diálogo "Esta funcionalidade requer uma conta." (Entrar / Criar conta / Continuar a explorar). Nunca é enviado para onboarding.
+
+**Storage:** bucket `community-images` recusado pelo ambiente (`public_buckets_blocked`) — imagens ficam desativadas nesta etapa, sem base64 nem URLs externas.
+
+**Testes (PASS):** guest feed/pesquisa/filtros/estado vazio/gating; criar post autenticado; like → 1, novo clique → 0, dislike → 1; página de detalhe; utilizador B não edita nem elimina post de A; author_id e reporter_id não falsificáveis; status forçado a published/pending; anónimo não escreve; denúncias de terceiros invisíveis; admin oculta post e resolve denúncia; post oculto deixa de ser público. Typecheck e build OK. Dados de teste marcados [TESTE] foram removidos no fim.
+
+**Limitações:** upload de imagens pendente (Storage bloqueado); posts entram como `published` (sem fila de aprovação prévia) — o admin pode ocultar/rejeitar depois; sem comentários/respostas (por decisão de privacidade existente).
+
+**BLOCK 6H COMPLETE**
