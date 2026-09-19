@@ -629,3 +629,20 @@ BLOCK 6G COMPLETE.
 **Limitações conhecidas**
 - Sem dados reais para restaurantes/hotéis/paragens narrativas, as paragens limitam-se a destinos e experiências existentes.
 - Gamificação, comunidade, eventos, notificações, notícias e recompensas continuam locais/mock (fora do âmbito deste bloco).
+
+## BLOCK GUEST FLOW — Modo convidado
+
+**Problema:** o convidado era enviado para `/login` (ou para o onboarding) em quase todas as páginas públicas.
+
+**Causa:** `/home`, `/map` e `/experiences` tinham `beforeLoad: requireAuthenticatedUser`; `/` redirecionava sempre para `/login`; `needsOnboarding` incluía `role === "guest"`; o botão de convidado ia para `/news-alerts`; o estado de convidado só existia em memória (perdido em reload).
+
+**Ficheiros afetados:** `src/contexts/AuthContext.tsx`, novo `src/contexts/AuthGateContext.tsx`, `src/routes/__root.tsx`, `src/routes/index.tsx`, `src/routes/login.tsx`, `src/routes/home.tsx`, `src/routes/map.tsx`, `src/routes/experiences.tsx`, `src/routes/itineraries.tsx`, `src/routes/itinerary.$id.tsx`, `src/routes/favorites.tsx`, `src/routes/games.tsx`, `src/components/FavoriteButton.tsx`.
+
+**Correção:**
+- Modo convidado como *modo de navegação* (flag em `sessionStorage`, nunca profile/role/preferências na BD); limpo em login e logout.
+- Páginas públicas sem guard: Home, Mapa, Experiências, Roteiros, detalhe de roteiro, cultura, informação útil, notícias, comunidade, impacto.
+- Guards mantidos/adicionados em páginas pessoais: dashboard, reservas, gamificação, jogos, favoritos, preferências, voucher, admin, business.
+- Novo diálogo "Esta funcionalidade requer uma conta." com Entrar / Criar conta / Continuar a explorar, ligado a favoritos, reservas, XP/visitas, criar/importar roteiros e progresso de rotas.
+- Onboarding nunca aparece a convidados; fluxo signup → confirmação → login → onboarding inalterado.
+
+**Estado:** BLOCK GUEST FLOW COMPLETE.
