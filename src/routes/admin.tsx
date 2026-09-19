@@ -32,7 +32,11 @@ import {
   Activity,
   Tag,
   MessageSquare,
+  MessageSquare,
+  Compass,
+  Loader2,
 } from "lucide-react";
+
 
 import { useAuth } from "@/contexts/AuthContext";
 import { requireRole } from "@/lib/auth";
@@ -56,7 +60,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type ModalKey = null | "users" | "provinces" | "addBusiness" | "reports" | "settings";
+type ModalKey = null | "users" | "routes" | "provinces" | "addBusiness" | "reports" | "settings";
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
   tourist: "Turista",
@@ -113,11 +117,13 @@ function AdminPage() {
 
   const quickActions = [
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users, color: "text-blue-600 bg-blue-100" },
+    { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
     { key: "provinces" as const, label: "Gerir Províncias", icon: MapPin, color: "text-orange-600 bg-orange-100" },
     { key: "addBusiness" as const, label: "Adicionar Negócio", icon: MapPin, color: "text-green-600 bg-green-100" },
     { key: "reports" as const, label: "Relatórios", icon: FileText, color: "text-purple-600 bg-purple-100" },
     { key: "settings" as const, label: "Configurações", icon: Settings, color: "text-gray-600 bg-gray-100" },
   ];
+
 
   const activity = [
     { color: "bg-green-500", text: "Novo negócio aprovado: Café Moçambique", time: "há 2 horas" },
@@ -324,6 +330,8 @@ function AdminPage() {
 
       <AnimatePresence>
         {activeModal === "users" && <UsersModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "routes" && <RoutesModal onClose={() => setActiveModal(null)} />}
+
         {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "addBusiness" && <AddBusinessModal onClose={() => setActiveModal(null)} />}
         {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} />}

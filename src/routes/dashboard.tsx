@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
-  MapPin, Sun, CloudSun, Moon, ArrowRight,
+  MapPin, Sun, ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 
