@@ -5,6 +5,8 @@ import type { Experience } from "@/lib/experiences";
 export interface TravelPreferences {
   /** Destination slug chosen in onboarding (profiles.province). */
   province?: string;
+  /** Province codes chosen by the tourist (profile_provinces → provinces.code). */
+  provinces?: string[];
   durationDays?: number;
   interests?: string[];
 }
@@ -29,7 +31,14 @@ function categoriesFor(interests: string[]): string[] {
 }
 
 export function hasPreferences(prefs: TravelPreferences | undefined): boolean {
-  return !!prefs?.province;
+  return !!prefs?.province || (prefs?.provinces?.length ?? 0) > 0;
+}
+
+/** Province codes the tourist cares about (several provinces are allowed). */
+function preferredProvinceCodes(prefs: TravelPreferences, preferred?: Destination | null): string[] {
+  const codes = [...(prefs.provinces ?? [])];
+  if (preferred?.province) codes.push(preferred.province);
+  return [...new Set(codes)];
 }
 
 export interface Scored<T> {
