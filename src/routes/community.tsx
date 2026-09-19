@@ -363,6 +363,7 @@ function CommunityPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => void handleReaction(p, "like")}
+                            aria-label={t("communityLike")}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
                               p.myReaction === "like" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700 hover:bg-green-50"
                             }`}
@@ -371,12 +372,14 @@ function CommunityPage() {
                           </button>
                           <button
                             onClick={() => void handleReaction(p, "dislike")}
+                            aria-label={t("communityDislike")}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
                               p.myReaction === "dislike" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-700 hover:bg-red-50"
                             }`}
                           >
                             <ThumbsDown className="size-4" /> {p.dislikes}
                           </button>
+
                         </div>
                         <div className="flex items-center gap-1">
                           {mine && (
