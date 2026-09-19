@@ -859,3 +859,381 @@ function SettingRow({ label, value, action }: { label: string; value?: string; a
     </div>
   );
 }
+
+/* ---------- Itineraries (roteiros) modal — real data, admin-only through RLS ---------- */
+
+interface AdminDraftStop {
+  kind: RouteStopKind;
+  refId: string;
+  title: string;
+}
+
+function RoutesModal({ onClose }: { onClose: () => void }) {
+  const [routes, setRoutes] = useState<ItineraryRoute[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [provinceFilter, setProvinceFilter] = useState("all");
+  const [editing, setEditing] = useState<ItineraryRoute | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // form state (create curated / edit)
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [provinceId, setProvinceId] = useState("");
+  const [days, setDays] = useState<{ title: string; stops: AdminDraftStop[] }[]>([{ title: "", stops: [] }]);
+  const [pickerDay, setPickerDay] = useState(0);
+  const [pickerValue, setPickerValue] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [routeList, provinceList, destinationList, experienceList] = await Promise.all([
+        fetchAllRoutesAdmin(),
+        fetchProvinces(true),
+        fetchDestinations(),
+        fetchExperiences(),
+      ]);
+      setRoutes(routeList);
+      setProvinces(provinceList);
+      setDestinations(destinationList);
+      setExperiences(experienceList);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Não foi possível carregar os roteiros.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const openForm = (route: ItineraryRoute | null) => {
+    setEditing(route);
+    setCreating(route === null);
+    setTitle(route?.title ?? "");
+    setDescription(route?.description ?? "");
+    setProvinceId(route?.provinceId ?? "");
+    setDays(
+      route && route.days.length > 0
+        ? route.days.map((d) => ({
+            title: d.title ?? "",
+            stops: d.stops.map((s) => ({ kind: s.kind, refId: s.refId, title: s.title })),
+          }))
+        : [{ title: "", stops: [] }],
+    );
+    setPickerDay(0);
+    setPickerValue("");
+  };
+
+  const closeForm = () => {
+    setEditing(null);
+    setCreating(false);
+  };
+
+  const addStop = () => {
+    if (!pickerValue) return;
+    const [kind, refId] = pickerValue.split("::") as [RouteStopKind, string];
+    const label =
+      kind === "destination"
+        ? destinations.find((d) => d.id === refId)?.name
+        : experiences.find((e) => e.id === refId)?.title.pt;
+    if (!label) return;
+    setDays((prev) =>
+      prev.map((day, index) => (index === pickerDay ? { ...day, stops: [...day.stops, { kind, refId, title: label }] } : day)),
+    );
+    setPickerValue("");
+  };
+
+  const submit = async () => {
+    if (!title.trim()) {
+      toast.error("O título é obrigatório.");
+      return;
+    }
+    const payload = {
+      title: title.trim(),
+      description: description.trim() || null,
+      provinceId: provinceId || null,
+      isPublic: editing ? editing.isPublic : true,
+      days: days.map((day) => ({
+        title: day.title.trim() || null,
+        stops: day.stops.map((s) => ({ kind: s.kind, refId: s.refId })),
+      })),
+    };
+    setSaving(true);
+    try {
+      if (editing) {
+        await updateRoute(editing.id, payload);
+        toast.success("Roteiro atualizado.");
+      } else {
+        await createRouteAsAdmin(payload);
+        toast.success("Roteiro oficial criado.");
+      }
+      closeForm();
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const filtered = routes.filter((route) => {
+    if (provinceFilter !== "all" && route.provinceId !== provinceFilter) return false;
+    const term = search.trim().toLowerCase();
+    if (!term) return true;
+    return route.title.toLowerCase().includes(term) || route.code.toLowerCase().includes(term);
+  });
+
+  return (
+    <ModalShell
+      header={
+        <div>
+          <h3 className="text-lg font-bold">Gestão de Roteiros</h3>
+          <p className="text-sm text-white/80">{routes.length} roteiros na plataforma</p>
+        </div>
+      }
+      headerGradient="from-indigo-600 to-blue-600"
+      onClose={onClose}
+      maxWidth="max-w-4xl"
+    >
+      {loading ? (
+        <p className="flex items-center gap-2 text-sm text-gray-500">
+          <Loader2 className="size-4 animate-spin" /> A carregar roteiros...
+        </p>
+      ) : error ? (
+        <div>
+          <p className="text-sm text-red-600 mb-3">{error}</p>
+          <button onClick={() => void load()} className="px-3 py-1.5 rounded-lg border text-sm">
+            Tentar novamente
+          </button>
+        </div>
+      ) : editing || creating ? (
+        <div className="space-y-3">
+          <p className="font-semibold text-sm">{editing ? `Editar: ${editing.title}` : "Novo roteiro oficial"}</p>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Título"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Descrição"
+            rows={3}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          />
+          <select
+            value={provinceId}
+            onChange={(e) => setProvinceId(e.target.value)}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+          >
+            <option value="">Sem província definida</option>
+            {provinces.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name.pt}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex gap-2 flex-wrap items-center">
+            <select
+              value={pickerDay}
+              onChange={(e) => setPickerDay(Number(e.target.value))}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+            >
+              {days.map((_, index) => (
+                <option key={index} value={index}>
+                  Dia {index + 1}
+                </option>
+              ))}
+            </select>
+            <select
+              value={pickerValue}
+              onChange={(e) => setPickerValue(e.target.value)}
+              className="flex-1 min-w-[220px] rounded-lg border border-gray-200 px-3 py-2 text-sm"
+            >
+              <option value="">Escolher destino ou experiência real...</option>
+              {destinations.map((d) => (
+                <option key={d.id} value={`destination::${d.id}`}>
+                  📍 {d.name}
+                </option>
+              ))}
+              {experiences.map((e) => (
+                <option key={e.id} value={`experience::${e.id}`}>
+                  🏪 {e.title.pt}
+                </option>
+              ))}
+            </select>
+            <button onClick={addStop} className="px-3 py-2 rounded-lg bg-gray-900 text-white text-sm">
+              Adicionar paragem
+            </button>
+            <button
+              onClick={() => setDays((prev) => [...prev, { title: "", stops: [] }])}
+              className="px-3 py-2 rounded-lg border border-gray-200 text-sm"
+            >
+              + Dia
+            </button>
+          </div>
+
+          {days.map((day, dayIndex) => (
+            <div key={dayIndex} className="rounded-xl border border-gray-100 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-bold text-gray-500">DIA {dayIndex + 1}</span>
+                <input
+                  value={day.title}
+                  onChange={(e) =>
+                    setDays((prev) => prev.map((d, i) => (i === dayIndex ? { ...d, title: e.target.value } : d)))
+                  }
+                  placeholder="Título do dia (opcional)"
+                  className="flex-1 rounded-lg border border-gray-200 px-2 py-1 text-sm"
+                />
+                {days.length > 1 && (
+                  <button
+                    onClick={() => {
+                      setDays((prev) => prev.filter((_, i) => i !== dayIndex));
+                      setPickerDay(0);
+                    }}
+                    className="text-sm text-red-600"
+                  >
+                    remover
+                  </button>
+                )}
+              </div>
+              {day.stops.length === 0 ? (
+                <p className="text-xs text-gray-500">Sem paragens.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {day.stops.map((stop, stopIndex) => (
+                    <li key={`${stop.refId}-${stopIndex}`} className="flex items-center gap-2 text-sm">
+                      <span className="text-xs text-gray-400">#{stopIndex + 1}</span>
+                      <span className="flex-1">
+                        {stop.kind === "experience" ? "🏪" : "📍"} {stop.title}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setDays((prev) =>
+                            prev.map((d, i) =>
+                              i === dayIndex ? { ...d, stops: d.stops.filter((_, si) => si !== stopIndex) } : d,
+                            ),
+                          )
+                        }
+                        className="text-red-600 text-xs"
+                      >
+                        remover
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={() => void submit()}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium disabled:opacity-60"
+            >
+              {saving ? "A guardar..." : "Guardar"}
+            </button>
+            <button onClick={closeForm} className="px-4 py-2 rounded-lg border border-gray-200 text-sm">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex gap-2 flex-wrap mb-4">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pesquisar por nome ou código"
+              className="flex-1 min-w-[200px] rounded-lg border border-gray-200 px-3 py-2 text-sm"
+            />
+            <select
+              value={provinceFilter}
+              onChange={(e) => setProvinceFilter(e.target.value)}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+            >
+              <option value="all">Todas as províncias</option>
+              {provinces.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name.pt}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => openForm(null)} className="px-3 py-2 rounded-lg bg-gray-900 text-white text-sm">
+              Criar roteiro oficial
+            </button>
+          </div>
+
+          {filtered.length === 0 ? (
+            <p className="text-sm text-gray-500">Nenhum roteiro corresponde à pesquisa.</p>
+          ) : (
+            <ul className="space-y-2">
+              {filtered.map((route) => (
+                <li key={route.id} className="rounded-xl border border-gray-100 p-3">
+                  <div className="flex items-start gap-3 flex-wrap">
+                    <div className="flex-1 min-w-[200px]">
+                      <p className="font-semibold text-sm">
+                        {route.title} <span className="font-mono text-xs text-gray-500">{route.code}</span>
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {route.isCurated ? "Oficial" : `Proprietário: ${route.ownerName ?? route.ownerId ?? "—"}`} ·{" "}
+                        {route.province?.name.pt ?? "sem província"} · {route.durationDays} dias ·{" "}
+                        {route.isPublic ? "público" : "privado"} · {route.status === "active" ? "activo" : "inactivo"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={async () => {
+                          await setRouteStatus(route.id, route.status === "active" ? "inactive" : "active");
+                          await load();
+                        }}
+                        className="px-2 py-1 rounded-lg border border-gray-200 text-xs"
+                      >
+                        {route.status === "active" ? "Desativar" : "Ativar"}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          await setRouteVisibility(route.id, !route.isPublic);
+                          await load();
+                        }}
+                        className="px-2 py-1 rounded-lg border border-gray-200 text-xs"
+                      >
+                        {route.isPublic ? "Tornar privado" : "Tornar público"}
+                      </button>
+                      <button onClick={() => openForm(route)} className="px-2 py-1 rounded-lg border border-gray-200 text-xs">
+                        Editar
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Apagar "${route.title}"?`)) return;
+                          await deleteRoute(route.id);
+                          toast.success("Roteiro apagado.");
+                          await load();
+                        }}
+                        className="px-2 py-1 rounded-lg border border-red-200 text-red-600 text-xs"
+                      >
+                        Apagar
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </ModalShell>
+  );
+}
+
