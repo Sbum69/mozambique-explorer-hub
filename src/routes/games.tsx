@@ -1,3 +1,4 @@
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo } from "react";
@@ -30,6 +31,8 @@ export const Route = createFileRoute("/games")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: GamesPage,
 });
 

@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
+import { isGuestModeActive } from "@/contexts/AuthContext";
 import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/")({
   ssr: false,
   beforeLoad: async () => {
     const user = await getAuthenticatedUser();
-    throw redirect({ to: user ? await postAuthTarget(user.id) : "/login" });
+    if (user) throw redirect({ to: await postAuthTarget(user.id) });
+    // Guests keep exploring; they never go through onboarding.
+    throw redirect({ to: isGuestModeActive() ? "/home" : "/login" });
   },
   component: () => null,
 });

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -44,6 +45,8 @@ export const Route = createFileRoute("/favorites")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: FavoritesPage,
 });
 

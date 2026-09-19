@@ -66,7 +66,7 @@ function LoginPage() {
 
   const handleGuest = () => {
     loginAsGuest();
-    navigate({ to: "/news-alerts" });
+    navigate({ to: "/home" });
   };
 
   return (

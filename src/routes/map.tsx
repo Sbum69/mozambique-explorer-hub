@@ -9,13 +9,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { type Destination } from "@/lib/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { requireAuthenticatedUser } from "@/lib/auth";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
@@ -36,7 +36,6 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: requireAuthenticatedUser,
   component: MapPage,
 });
 
@@ -45,6 +44,7 @@ const BADGE_THRESHOLDS = [100, 500, 750, 1000, 1500, 2500, 4000, 5000];
 function MapPage() {
   const { t, lang } = useLang();
   const { user, visitDestination } = useAuth();
+  const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const preferredId = user?.preferences?.province;
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
@@ -152,6 +152,7 @@ function MapPage() {
   };
 
   const handleVisit = (d: Destination) => {
+    if (!requireAccount(lang === "pt" ? "Registar visitas e XP" : "Visits and XP")) return;
     const prevXp = user?.xp ?? 0;
     const result = visitDestination(d.slug, 25);
     if (!result) return;

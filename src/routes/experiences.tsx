@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -25,7 +26,6 @@ import {
   translateBookingError,
   type Booking,
 } from "@/lib/bookings";
-import { requireAuthenticatedUser } from "@/lib/auth";
 
 const WEEKDAY_LABEL: { pt: string; en: string }[] = [
   { pt: "Domingo", en: "Sunday" },
@@ -49,7 +49,6 @@ export const Route = createFileRoute("/experiences")({
     ],
   }),
   ssr: false,
-  beforeLoad: requireAuthenticatedUser,
   component: ExperiencesPage,
 });
 
@@ -66,6 +65,7 @@ const CATEGORIES: { id: ExperienceCategory | "all"; emoji: string; labelPt: stri
 function ExperiencesPage() {
   const { t, lang } = useLang();
   const { addXP, user } = useAuth();
+  const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const preferredInterest = user?.preferences?.interests?.find((i) =>
     CATEGORIES.some((c) => c.id === i),
@@ -147,6 +147,7 @@ function ExperiencesPage() {
 
   const openBookingModal = (exp: Experience) => {
     if (booked.has(exp.id)) return;
+    if (!requireAccount(lang === "pt" ? "Reservas" : "Bookings")) return;
     setForm({
       date: "",
       time: "",

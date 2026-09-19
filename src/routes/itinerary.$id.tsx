@@ -28,6 +28,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { ItineraryMap } from "@/components/ItineraryMap";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useRoute } from "@/hooks/useRoutes";
 import {
   fetchRouteProgress,
@@ -69,6 +70,7 @@ function ItineraryDetailPage() {
   const navigate = useNavigate();
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
+  const { requireAccount } = useAuthGate();
 
   const { route, loading } = useRoute(id);
   const [progress, setProgress] = useState<RouteProgress | null>(null);
@@ -131,10 +133,7 @@ function ItineraryDetailPage() {
   const currentDay = progress?.currentDay ?? 1;
 
   const start = async () => {
-    if (isGuest || !userId) {
-      toast.error(lang === "pt" ? "Entra na conta para começar a rota" : "Sign in to start the route");
-      return;
-    }
+    if (!requireAccount(lang === "pt" ? "Progresso de rotas" : "Route progress") || !userId) return;
     setBusy(true);
     try {
       setProgress(await startRouteProgress(route.id, userId));
@@ -201,10 +200,7 @@ function ItineraryDetailPage() {
   };
 
   const importThis = async () => {
-    if (isGuest || !userId) {
-      toast.error(lang === "pt" ? "Entra na conta para importar" : "Sign in to import");
-      return;
-    }
+    if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId) return;
     setBusy(true);
     try {
       const copy = await importRouteByCode(route.code, userId);

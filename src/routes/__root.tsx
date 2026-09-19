@@ -2,6 +2,7 @@ import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-r
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthGateProvider } from "@/contexts/AuthGateContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
@@ -73,12 +74,14 @@ function RootComponent() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <NotificationsProvider>
-          <FavoritesProvider>
-            <Outlet />
-            <Toaster />
-          </FavoritesProvider>
-        </NotificationsProvider>
+        <AuthGateProvider>
+          <NotificationsProvider>
+            <FavoritesProvider>
+              <Outlet />
+              <Toaster />
+            </FavoritesProvider>
+          </NotificationsProvider>
+        </AuthGateProvider>
       </AuthProvider>
     </LanguageProvider>
   );
