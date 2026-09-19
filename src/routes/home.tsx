@@ -112,7 +112,7 @@ const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
 );
 
 function HomePage() {
-  const { user, needsOnboarding, logout } = useAuth();
+  const { user, needsOnboarding, logout, isGuest } = useAuth();
   const { t, lang } = useLang();
   const navigate = useNavigate();
 
@@ -187,27 +187,48 @@ function HomePage() {
           <div className="flex items-center gap-2">
             <NotificationsBell variant="onDark" />
             <LanguageToggle />
-            <Button
-              asChild
-              size="sm"
-              className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
-            >
-              <Link to="/dashboard">
-                <LayoutDashboard className="size-4" />
-                {t("dashboard")}
-              </Link>
-            </Button>
-            <Button
-
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10 hover:text-white"
-              onClick={() => {
-                void logout().then(() => navigate({ to: "/login", replace: true }));
-              }}
-            >
-              {t("logout")}
-            </Button>
+            {isGuest ? (
+              <>
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
+                >
+                  <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 hover:text-white"
+                >
+                  <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
+                >
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="size-4" />
+                    {t("dashboard")}
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 hover:text-white"
+                  onClick={() => {
+                    void logout().then(() => navigate({ to: "/login", replace: true }));
+                  }}
+                >
+                  {t("logout")}
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 

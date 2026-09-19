@@ -52,6 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { useProvinces } from "@/hooks/useProvinces";
 import { useDestinations } from "@/hooks/useDestinations";
@@ -95,6 +96,7 @@ function ItinerariesPage() {
   const navigate = useNavigate();
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
+  const { requireAccount } = useAuthGate();
 
   const { all, loading, error, reload } = useRouteCatalogue(userId);
   const { provinces } = useProvinces();
@@ -159,10 +161,7 @@ function ItinerariesPage() {
   };
 
   const handleImport = async () => {
-    if (isGuest || !userId) {
-      toast.error(lang === "pt" ? "Entra na conta para importar roteiros" : "Sign in to import itineraries");
-      return;
-    }
+    if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId) return;
     setImportBusy(true);
     try {
       const copy = await importRouteByCode(importCode, userId);
@@ -257,16 +256,20 @@ function ItinerariesPage() {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" onClick={() => setShowImportModal(true)} className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries")) return;
+                setShowImportModal(true);
+              }}
+              className="gap-2"
+            >
               <Download className="h-4 w-4" />
               {lang === "pt" ? "Importar Roteiro" : "Import Itinerary"}
             </Button>
             <Button
               onClick={() => {
-                if (isGuest) {
-                  toast.error(lang === "pt" ? "Entra na conta para criar roteiros" : "Sign in to create itineraries");
-                  return;
-                }
+                if (!requireAccount(lang === "pt" ? "Criar roteiros" : "Create itineraries")) return;
                 setShowCreateModal(true);
               }}
               className="gap-2 bg-gradient-to-r from-primary to-orange-600"
