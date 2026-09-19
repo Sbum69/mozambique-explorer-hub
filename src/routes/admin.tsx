@@ -32,7 +32,6 @@ import {
   Activity,
   Tag,
   MessageSquare,
-  MessageSquare,
   Compass,
   Loader2,
 } from "lucide-react";
@@ -43,6 +42,18 @@ import { requireRole } from "@/lib/auth";
 import { listPlatformUsers, type PlatformRole, type PlatformUser } from "@/lib/platform-users.functions";
 import { toast } from "sonner";
 import { createProvince, fetchProvinces, setProvinceActive, type Province } from "@/lib/provinces";
+import { fetchDestinations, type Destination } from "@/lib/destinations";
+import { fetchExperiences, type Experience } from "@/lib/experiences";
+import {
+  createRoute,
+  deleteRoute,
+  fetchAllRoutesAdmin,
+  setRouteStatus,
+  setRouteVisibility,
+  updateRoute,
+  type ItineraryRoute,
+  type RouteStopKind,
+} from "@/lib/routes";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -972,7 +983,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
         await updateRoute(editing.id, payload);
         toast.success("Roteiro atualizado.");
       } else {
-        await createRouteAsAdmin(payload);
+        await createRoute(payload, "", { isCurated: true });
         toast.success("Roteiro oficial criado.");
       }
       closeForm();
