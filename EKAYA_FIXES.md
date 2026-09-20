@@ -672,3 +672,27 @@ BLOCK 6G COMPLETE.
 **Limitações:** upload de imagens pendente (Storage bloqueado); posts entram como `published` (sem fila de aprovação prévia) — o admin pode ocultar/rejeitar depois; sem comentários/respostas (por decisão de privacidade existente).
 
 **BLOCK 6H COMPLETE**
+
+---
+
+## BLOCO 7A — CULTURA & HISTÓRIA
+
+**Audit realizado**
+- A secção já usava o `LanguageToggle`, mas não consumia o idioma do `LanguageContext`; todos os textos visíveis e os seis tópicos estavam fixos em português.
+- O seletor global já alternava e persistia `pt`/`en` em `ekaya.lang`, mas a página não reagia à alteração.
+- A secção usa cartões que abrem um diálogo de detalhe (não abas técnicas). Cada tópico contém título, subtítulo, data, resumo, quatro secções e uma curiosidade.
+- O diálogo estava limitado a `max-w-3xl`, com uma imagem de 20rem e uma área textual limitada a 60vh.
+
+**Correção**
+- O conteúdo existente foi preservado e passou a ter versões PT/EN no mesmo modelo local.
+- A página passou a reutilizar diretamente `useLang`; cabeçalho, apresentação, etiquetas, cartões, detalhes, botões, rótulos acessíveis e alternativas das imagens atualizam imediatamente com o idioma global.
+- A seleção do idioma continua a usar a persistência já existente no `LanguageContext`; não foi criado qualquer sistema paralelo.
+- O diálogo de leitura passou para `max-w-5xl`, com área textual flexível, texto maior, espaçamento reforçado e duas colunas em ecrãs largos; em mobile mantém uma coluna e ocupa o espaço disponível com scroll interno.
+- A lógica do botão Voltar para `/dashboard` não foi alterada.
+
+**Âmbito**
+- Apenas `src/routes/culture-history.tsx` e esta documentação foram alterados.
+- Sem alterações de backend, autenticação, RLS, dados ou outras áreas do Ekaya.
+
+**Estado**
+- Implementação concluída; resultados dos testes registados após validação final.
