@@ -695,4 +695,13 @@ BLOCK 6G COMPLETE.
 - Sem alterações de backend, autenticação, RLS, dados ou outras áreas do Ekaya.
 
 **Estado**
-- Implementação concluída; resultados dos testes registados após validação final.
+- Português: os seis tópicos, respetivas secções, curiosidades, ações e textos gerais verificados — PASS.
+- Inglês: os seis tópicos, respetivas secções, curiosidades, ações e textos gerais verificados — PASS.
+- Alternância PT → EN → PT repetida e atualização imediata da interface — PASS.
+- Persistência do idioma através do `LanguageContext`/`ekaya.lang` preservada — PASS.
+- Abertura e fecho sucessivos dos seis detalhes — PASS.
+- Botão Voltar preservado; sem sessão, o guard existente encaminhou `/dashboard` para `/login` — PASS.
+- Desktop (1280 × 1800) e mobile (390 × 844), incluindo scroll interno do detalhe — PASS.
+- Sem novos erros de consola; compilação automática — PASS.
+
+**BLOCO 7A — CULTURA & HISTÓRIA COMPLETE: SIM**
