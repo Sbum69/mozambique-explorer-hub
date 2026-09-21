@@ -165,7 +165,7 @@ export function AppSidebar() {
 
         {/* Nav sections */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
-          {SECTIONS.map((section, sIdx) => (
+          {sections.map((section, sIdx) => (
             <div key={sIdx}>
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-2 mb-2">
                 {section.title[lang]}
