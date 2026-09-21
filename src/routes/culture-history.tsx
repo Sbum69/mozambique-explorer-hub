@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { useBackTarget } from "@/lib/nav";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/culture-history")({
@@ -343,6 +344,7 @@ const TOPICS: Topic[] = [
 
 function CultureHistoryPage() {
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const { lang } = useLang();
   const [selected, setSelected] = useState<Topic | null>(null);
 
@@ -351,7 +353,7 @@ function CultureHistoryPage() {
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button
-            onClick={() => navigate({ to: "/dashboard" })}
+            onClick={() => navigate({ to: backTarget })}
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
             <ArrowLeft className="size-4" /> {copy.back[lang]}

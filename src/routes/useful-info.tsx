@@ -8,6 +8,7 @@ import {
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
+import { useBackTarget } from "@/lib/nav";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/useful-info")({
@@ -232,6 +233,7 @@ const CATEGORIES: Category[] = [
 function UsefulInfoPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const [openIds, setOpenIds] = useState<Set<string>>(new Set([CATEGORIES[0].id]));
 
   const toggle = (id: string) => {
@@ -370,7 +372,7 @@ function UsefulInfoPage() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => navigate({ to: "/dashboard" })}
+        onClick={() => navigate({ to: backTarget })}
         className="fixed bottom-6 right-6 size-14 rounded-full bg-gradient-to-br from-primary to-secondary text-white shadow-2xl flex items-center justify-center z-40"
         aria-label="Voltar ao Dashboard"
       >
@@ -378,7 +380,7 @@ function UsefulInfoPage() {
       </motion.button>
 
       <div className="sr-only">
-        <Button onClick={() => navigate({ to: "/dashboard" })}><ArrowLeft className="size-4" /> Voltar</Button>
+        <Button onClick={() => navigate({ to: backTarget })}><ArrowLeft className="size-4" /> Voltar</Button>
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { type Destination } from "@/lib/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
+import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 
 const InteractiveMap = lazy(() =>
@@ -46,6 +47,7 @@ function MapPage() {
   const { user, visitDestination } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const preferredId = user?.preferences?.province;
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const [selected, setSelected] = useState<Destination | null>(null);
@@ -184,7 +186,7 @@ function MapPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button onClick={() => navigate({ to: "/dashboard" })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
+            <button onClick={() => navigate({ to: backTarget })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
               <ArrowLeft className="size-4" /> {t("backToDashboard")}
             </button>
           </div>

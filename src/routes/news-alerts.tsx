@@ -57,6 +57,7 @@ import {
   TRAVEL_TIPS,
 } from "@/data/news-extra";
 import { cn } from "@/lib/utils";
+import { useBackTarget } from "@/lib/nav";
 
 export const Route = createFileRoute("/news-alerts")({
   head: () => ({
@@ -89,6 +90,7 @@ const TABS: { id: Tab; pt: string; en: string; icon: typeof Newspaper; grad: str
 function NewsAlertsPage() {
   const { lang } = useLang();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const [tab, setTab] = useState<Tab>("news");
 
   return (
@@ -99,7 +101,7 @@ function NewsAlertsPage() {
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
             <button
-              onClick={() => navigate({ to: "/dashboard" })}
+              onClick={() => navigate({ to: backTarget })}
               className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
               aria-label="Back"
             >
