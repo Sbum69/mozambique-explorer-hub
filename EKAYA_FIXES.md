@@ -705,3 +705,31 @@ BLOCK 6G COMPLETE.
 - Sem novos erros de consola; compilação automática — PASS.
 
 **BLOCO 7A — CULTURA & HISTÓRIA COMPLETE: SIM**
+
+---
+
+## BLOCO 7C — GUEST FLOW + NAVEGAÇÃO
+
+**Diagnóstico**
+- Guest → Home já estava correto (botão "Convidado" navega para `/home`); confirmado por teste.
+- Botões "Voltar" das páginas públicas navegavam sempre para `/dashboard` (rota privada): como convidado o clique resultava em redirect para `/login`.
+- O menu lateral mostrava a convidados entradas que exigem conta (Painel, Minhas Reservas, Favoritos, Editar Preferências, Conquistas, Jogar Desafios), todas terminando em `/login`.
+- O rodapé do menu mostrava "Sair" a convidados (por existir `user` em modo convidado), sem opção de criar conta.
+
+**Alterações**
+- Novo `src/lib/nav.ts` → `useBackTarget()`: devolve `/dashboard` com sessão e `/home` sem sessão.
+- Botões "Voltar" passam a usar `useBackTarget()` em: `culture-history`, `useful-info`, `map`, `experiences`, `news-alerts`, `itineraries`, `impact`.
+- `AppSidebar.tsx`: entradas marcadas `privateOnly` são escondidas sem sessão; rodapé mostra "Entrar" + "Criar conta" a visitantes e "Sair" apenas a autenticados.
+
+**Não alterado**: schema, RLS, Auth, traduções, destinos, experiências, reservas, roteiros, comunidade, gamificação.
+
+**Testes (Playwright)**
+- Convidado → `/home` direto, sem onboarding nem dashboard: PASS
+- Convidado navega `/home`, `/map`, `/experiences`, `/itineraries`, `/community`, `/culture-history`, `/useful-info`, `/news-alerts`, `/impact`: PASS
+- Rotas privadas (`/dashboard`, `/favorites`, `/games`, `/preferences`, `/bookings`) continuam a pedir autenticação: PASS
+- Ação privada (publicar na Comunidade) mostra "Esta funcionalidade requer uma conta.": PASS
+- Menu lateral de convidado sem entradas privadas e com "Criar conta": PASS
+- Voltar em Cultura & História: convidado → `/home`; autenticado → `/dashboard`: PASS
+- Typecheck e consola sem erros novos: PASS
+
+**BLOCO 7C — GUEST FLOW + NAVEGAÇÃO COMPLETE: SIM**
