@@ -238,7 +238,7 @@ export function AppSidebar() {
               {lang === "pt" ? "Painel Admin" : "Admin Panel"}
             </Button>
           )}
-          {user ? (
+          {isAuthenticated ? (
             <Button
               variant="outline"
               className="w-full"
@@ -251,16 +251,28 @@ export function AppSidebar() {
               {lang === "pt" ? "Sair" : "Sign out"}
             </Button>
           ) : (
-            <Button
-              className="w-full bg-primary hover:bg-primary/90"
-              onClick={() => {
-                close();
-                navigate({ to: "/login" });
-              }}
-            >
-              <LogIn className="size-4" />
-              {lang === "pt" ? "Entrar" : "Sign in"}
-            </Button>
+            <>
+              <Button
+                className="w-full bg-primary hover:bg-primary/90"
+                onClick={() => {
+                  close();
+                  navigate({ to: "/login" });
+                }}
+              >
+                <LogIn className="size-4" />
+                {lang === "pt" ? "Entrar" : "Sign in"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  close();
+                  navigate({ to: "/signup" });
+                }}
+              >
+                {lang === "pt" ? "Criar conta" : "Create account"}
+              </Button>
+            </>
           )}
         </div>
       </SheetContent>
