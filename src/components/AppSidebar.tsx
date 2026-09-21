@@ -18,6 +18,8 @@ interface NavItem {
   icon: LucideIcon;
   label: { pt: string; en: string };
   badge?: string;
+  /** Requires an account: hidden for guests so they are never bounced to /login. */
+  privateOnly?: boolean;
 }
 
 const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
@@ -25,10 +27,10 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     title: { pt: "Geral", en: "General" },
     items: [
       { to: "/home", icon: Home, label: { pt: "Home", en: "Home" } },
-      { to: "/dashboard", icon: LayoutDashboard, label: { pt: "Painel", en: "Dashboard" } },
-      { to: "/bookings", icon: CalendarCheck, label: { pt: "Minhas Reservas", en: "My Bookings" } },
-      { to: "/favorites", icon: Bookmark, label: { pt: "Favoritos", en: "Favorites" } },
-      { to: "/preferences", icon: SlidersHorizontal, label: { pt: "Editar Preferências", en: "Edit Preferences" } },
+      { to: "/dashboard", icon: LayoutDashboard, label: { pt: "Painel", en: "Dashboard" }, privateOnly: true },
+      { to: "/bookings", icon: CalendarCheck, label: { pt: "Minhas Reservas", en: "My Bookings" }, privateOnly: true },
+      { to: "/favorites", icon: Bookmark, label: { pt: "Favoritos", en: "Favorites" }, privateOnly: true },
+      { to: "/preferences", icon: SlidersHorizontal, label: { pt: "Editar Preferências", en: "Edit Preferences" }, privateOnly: true },
       { to: "/news-alerts", icon: Bell, label: { pt: "Notícias & Avisos", en: "News & Alerts" }, badge: "NOVO" },
     ],
   },
@@ -38,8 +40,8 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
       { to: "/map", icon: Map, label: { pt: "Mapa", en: "Map" } },
       { to: "/experiences", icon: Compass, label: { pt: "Experiências", en: "Experiences" } },
       { to: "/itineraries", icon: Heart, label: { pt: "Roteiros", en: "Itineraries" } },
-      { to: "/gamification", icon: Trophy, label: { pt: "Conquistas", en: "Achievements" } },
-      { to: "/games", icon: Gamepad2, label: { pt: "🎮 Jogar Desafios", en: "🎮 Play Challenges" }, badge: "NOVO" },
+      { to: "/gamification", icon: Trophy, label: { pt: "Conquistas", en: "Achievements" }, privateOnly: true },
+      { to: "/games", icon: Gamepad2, label: { pt: "🎮 Jogar Desafios", en: "🎮 Play Challenges" }, badge: "NOVO", privateOnly: true },
       { to: "/impact", icon: Activity, label: { pt: "Impacto Social", en: "Social Impact" } },
     ],
   },
