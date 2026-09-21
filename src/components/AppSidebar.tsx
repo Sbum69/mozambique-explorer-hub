@@ -57,13 +57,17 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
 
 export function AppSidebar() {
   const [open, setOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { lang } = useLang();
   const navigate = useNavigate();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
 
   const close = () => setOpen(false);
   const isAdmin = user?.role === "admin";
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => isAuthenticated || !item.privateOnly),
+  })).filter((section) => section.items.length > 0);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
