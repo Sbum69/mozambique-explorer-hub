@@ -20,6 +20,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { type Experience, type ExperienceCategory } from "@/lib/experiences";
 import { useAvailability, useExperiences } from "@/hooks/useExperiences";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { useBackTarget } from "@/lib/nav";
 import {
   createBooking,
   fetchAvailableWeekdays,
@@ -67,6 +68,7 @@ function ExperiencesPage() {
   const { addXP, user } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const preferredInterest = user?.preferences?.interests?.find((i) =>
     CATEGORIES.some((c) => c.id === i),
   ) as ExperienceCategory | undefined;
@@ -206,7 +208,7 @@ function ExperiencesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button onClick={() => navigate({ to: "/dashboard" })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
+            <button onClick={() => navigate({ to: backTarget })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
               <ArrowLeft className="size-4" /> {t("backToDashboard")}
             </button>
           </div>

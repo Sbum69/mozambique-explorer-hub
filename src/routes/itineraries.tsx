@@ -74,6 +74,7 @@ import {
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
+import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 
 export const Route = createFileRoute("/itineraries")({
@@ -94,6 +95,7 @@ function ItinerariesPage() {
   const { user, authUser } = useAuth();
   const { lang } = useLang();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
@@ -232,7 +234,7 @@ function ItinerariesPage() {
           <div className="flex items-center gap-1">
             <AppSidebar />
             <button
-              onClick={() => navigate({ to: "/dashboard" })}
+              onClick={() => navigate({ to: backTarget })}
               className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
             >
               <ArrowLeft className="size-4" /> {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}

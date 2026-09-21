@@ -11,6 +11,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useBackTarget } from "@/lib/nav";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/impact")({
@@ -100,6 +101,7 @@ function formatKpi(v: number, k: KPI) {
 function ImpactPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -110,7 +112,7 @@ function ImpactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
-            <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/dashboard" })}>
+            <Button variant="ghost" size="icon" onClick={() => navigate({ to: backTarget })}>
               <ArrowLeft className="size-5" />
             </Button>
             <div className="min-w-0">
