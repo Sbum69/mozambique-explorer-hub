@@ -1,37 +1,101 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { MOCK_NOTIFICATIONS, type NotificationItem } from "@/data/news";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  fetchMyNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type AppNotification,
+} from "@/lib/notifications";
 
 interface Ctx {
-  notifications: NotificationItem[];
+  notifications: AppNotification[];
   unreadCount: number;
-  markAllRead: () => void;
+  loading: boolean;
+  error: string | null;
+  /** True when the visitor has no account (guest/anonymous). */
+  isGuest: boolean;
+  markRead: (id: string) => Promise<void>;
+  markAllRead: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 const NotificationsContext = createContext<Ctx | undefined>(undefined);
-const STORAGE_KEY = "ekaya.notifications.readIds";
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
-  const [readIds, setReadIds] = useState<string[]>([]);
+  const { isAuthenticated, user } = useAuth();
+  const userId = isAuthenticated ? (user?.id ?? null) : null;
+
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    if (!userId) {
+      setNotifications([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      setNotifications(await fetchMyNotifications(userId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "load-failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setReadIds(JSON.parse(raw));
-    } catch {}
-  }, []);
+    void load();
+  }, [load]);
 
-  const markAllRead = () => {
-    const all = MOCK_NOTIFICATIONS.map((n) => n.id);
-    setReadIds(all);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-    } catch {}
-  };
+  const markRead = useCallback(
+    async (id: string) => {
+      if (!userId) return;
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+      try {
+        await markNotificationRead(id);
+      } catch {
+        await load();
+      }
+    },
+    [userId, load],
+  );
 
-  const value = useMemo<Ctx>(() => {
-    const unread = MOCK_NOTIFICATIONS.filter((n) => !readIds.includes(n.id)).length;
-    return { notifications: MOCK_NOTIFICATIONS, unreadCount: unread, markAllRead };
-  }, [readIds]);
+  const markAllRead = useCallback(async () => {
+    if (!userId) return;
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    try {
+      await markAllNotificationsRead(userId);
+    } catch {
+      await load();
+    }
+  }, [userId, load]);
+
+  const value = useMemo<Ctx>(
+    () => ({
+      notifications,
+      unreadCount: notifications.filter((n) => !n.read).length,
+      loading,
+      error,
+      isGuest: !userId,
+      markRead,
+      markAllRead,
+      refresh: load,
+    }),
+    [notifications, loading, error, userId, markRead, markAllRead, load],
+  );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
 }
