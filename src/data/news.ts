@@ -1,5 +1,4 @@
 export type NewsCategory = "event" | "tip" | "safety" | "community";
-export type NotifCategory = "itinerary" | "experience" | "safety" | "promo";
 
 export interface NewsItem {
   id: string;
@@ -11,14 +10,6 @@ export interface NewsItem {
   image?: string;
 }
 
-export interface NotificationItem {
-  id: string;
-  title: { pt: string; en: string };
-  body: { pt: string; en: string };
-  category: NotifCategory;
-  date: string;
-  link?: string;
-}
 
 export const MOCK_NEWS: NewsItem[] = [
   {
@@ -107,41 +98,6 @@ export const MOCK_NEWS: NewsItem[] = [
   },
 ];
 
-export const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "no1",
-    category: "itinerary",
-    date: "2026-05-24T09:15:00Z",
-    title: { pt: "Novo roteiro em Ilha de Moçambique", en: "New itinerary on Mozambique Island" },
-    body: { pt: "Roteiro gastronómico de 2 dias agora disponível.", en: "2-day gastronomic itinerary now available." },
-    link: "/itineraries",
-  },
-  {
-    id: "no2",
-    category: "experience",
-    date: "2026-05-23T18:40:00Z",
-    title: { pt: "Nova experiência comunitária em Tofo", en: "New community experience in Tofo" },
-    body: { pt: "Mergulho com tubarões-baleia guiado por biólogos locais.", en: "Whale shark dive guided by local biologists." },
-    link: "/experiences",
-  },
-  {
-    id: "no3",
-    category: "safety",
-    date: "2026-05-22T07:00:00Z",
-    title: { pt: "Aviso meteorológico em Inhambane", en: "Weather warning in Inhambane" },
-    body: { pt: "Chuvas fortes previstas até quinta-feira.", en: "Heavy rains forecast until Thursday." },
-    link: "/news-alerts",
-  },
-  {
-    id: "no4",
-    category: "promo",
-    date: "2026-05-20T11:30:00Z",
-    title: { pt: "Desconto de 15% em Gorongosa", en: "15% off in Gorongosa" },
-    body: { pt: "Safari de 3 dias com operadores certificados.", en: "3-day safari with certified operators." },
-    link: "/experiences",
-  },
-];
-
 export const NEWS_CATEGORIES: NewsCategory[] = ["event", "tip", "safety", "community"];
 
 export const newsCategoryLabel = (c: NewsCategory, lang: "pt" | "en") => {
@@ -150,16 +106,6 @@ export const newsCategoryLabel = (c: NewsCategory, lang: "pt" | "en") => {
     tip: { pt: "Dica de viagem", en: "Travel tip" },
     safety: { pt: "Segurança", en: "Safety" },
     community: { pt: "Comunidade", en: "Community" },
-  } as const;
-  return map[c][lang];
-};
-
-export const notifCategoryLabel = (c: NotifCategory, lang: "pt" | "en") => {
-  const map = {
-    itinerary: { pt: "Roteiros", en: "Itineraries" },
-    experience: { pt: "Experiências", en: "Experiences" },
-    safety: { pt: "Segurança", en: "Safety" },
-    promo: { pt: "Promoções", en: "Deals" },
   } as const;
   return map[c][lang];
 };

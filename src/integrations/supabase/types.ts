@@ -664,6 +664,60 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body_en: string | null
+          body_pt: string
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title_en: string | null
+          title_pt: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body_en?: string | null
+          body_pt: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title_en?: string | null
+          title_pt: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body_en?: string | null
+          body_pt?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title_en?: string | null
+          title_pt?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_provinces: {
         Row: {
           created_at: string
