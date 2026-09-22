@@ -31,8 +31,8 @@ interface Ctx {
 const NotificationsContext = createContext<Ctx | undefined>(undefined);
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated, user } = useAuth();
-  const userId = isAuthenticated ? (user?.id ?? null) : null;
+  const { isAuthenticated, authUser } = useAuth();
+  const userId = isAuthenticated ? (authUser?.id ?? null) : null;
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(false);
