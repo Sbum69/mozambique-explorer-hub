@@ -48,13 +48,16 @@ function mapNotification(row: RawNotification): AppNotification {
 }
 
 /** Notifications for the signed-in user, newest first. */
-export async function fetchMyNotifications(userId: string): Promise<AppNotification[]> {
+export async function fetchMyNotifications(
+  userId: string,
+  limit = 50,
+): Promise<AppNotification[]> {
   const { data, error } = await supabase
     .from("notifications")
     .select("id, type, title_pt, title_en, body_pt, body_en, link, read_at, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(limit);
 
   if (error) throw new Error(error.message);
   return (data ?? []).map((row) => mapNotification(row as RawNotification));
