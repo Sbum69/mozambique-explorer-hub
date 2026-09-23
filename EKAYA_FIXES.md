@@ -733,3 +733,47 @@ BLOCK 6G COMPLETE.
 - Typecheck e consola sem erros novos: PASS
 
 **BLOCO 7C — GUEST FLOW + NAVEGAÇÃO COMPLETE: SIM**
+
+---
+
+## BLOCO 7D — NOTIFICAÇÕES
+
+**Auditoria (antes)**
+- Existia `NotificationsBell.tsx` (sheet com sino, badge de não lidas) usado em 10 rotas.
+- Existia `NotificationsContext.tsx`, mas alimentado por `MOCK_NOTIFICATIONS` (4 notificações fixas em `src/data/news.ts`), com `readIds` em `localStorage` e apenas "marcar todas como lidas".
+- Não existia tabela, serviço, hook, RLS, estado de loading/erro, marcação individual nem qualquer ligação ao utilizador autenticado.
+
+**Base de dados (nova migration `drizzle/migrations/0011_create_notifications.sql`)**
+- `public.notifications`: `id`, `user_id` → `profiles(id)` ON DELETE CASCADE, `type` (system/booking/itinerary/experience/community/route/reward/safety/promo/event), `title_pt`, `title_en`, `body_pt`, `body_en`, `link` (apenas caminhos internos `/…`), `read_at`, `created_at`.
+- Índices por utilizador/data e parcial para não lidas. GRANT SELECT, UPDATE a `authenticated`; ALL a `service_role` (sem INSERT para utilizadores: notificações são geradas pelo sistema).
+- RLS: cada utilizador lê apenas as suas (`auth.uid() = user_id`); admin lê todas via `has_role`; UPDATE apenas nas próprias linhas.
+- Trigger `notifications_immutable_content()`: numa atualização só o estado de leitura pode mudar (autor, tipo, texto, link e data são imutáveis).
+
+**Frontend**
+- Novo `src/lib/notifications.ts`: `fetchMyNotifications`, `markNotificationRead`, `markAllNotificationsRead` (cliente Supabase do browser, RLS aplicada).
+- `src/contexts/NotificationsContext.tsx` reescrito: lê da BD para o utilizador autenticado (`authUser.id`), expõe `notifications`, `unreadCount`, `loading`, `error`, `isGuest`, `markRead`, `markAllRead`, `refresh`; atualização otimista com recarga em caso de falha; convidado fica sempre com lista vazia e nada é gravado.
+- `src/components/NotificationsBell.tsx`: lidas vs. não lidas distinguidas visualmente (borda/realce, ponto), "Marcar como lida" por item, "Marcar todas como lidas", loading, erro com "Carregar novamente", estado vazio, cartão de convidado com Entrar/Criar conta, ícones/etiquetas por tipo, tudo PT/EN via `useLang` (sem novo sistema de tradução).
+- Mocks removidos de `src/data/news.ts`: `MOCK_NOTIFICATIONS`, `NotificationItem`, `NotifCategory`, `notifCategoryLabel`. As notícias (`MOCK_NEWS`) ficam intactas, fora do âmbito deste bloco.
+
+**Navegação**: `link` é opcional e só aponta para caminhos internos existentes; abrir a notificação marca-a como lida. Botões "Voltar" e `useBackTarget()` do Bloco 7C não foram tocados.
+
+**Gatilhos automáticos**: não implementados (reservas, eventos, comunidade, roteiros, recompensas, XP, notícias, IA) — ficam para os blocos respetivos.
+
+**Testes (Playwright + SQL, com notificações de teste marcadas `[TESTE]` e apagadas no fim)**
+- Utilizador autenticado abre o painel e vê apenas as suas notificações: PASS
+- Contador de não lidas: 2 → "marcar como lida" → 1 → "marcar todas como lidas" → 0: PASS
+- Estado persiste após refresh (0 não lidas, lidas continuam lidas): PASS
+- RLS: notificação de outro utilizador nunca aparece; admin com acesso de leitura conforme política: PASS
+- Tentativa de alterar conteúdo de uma notificação rejeitada pelo trigger: PASS
+- Convidado: não vê notificações privadas, vê "Esta funcionalidade requer uma conta." com Entrar/Criar conta; nenhum registo criado: PASS
+- PT e EN (títulos, corpo, botões, descrições): PASS
+- Desktop (1280 × 1800) e mobile (390 × 844): PASS
+- Sem erros de consola; typecheck e build: PASS
+- Base de dados final: 0 notificações (dados de teste eliminados): PASS
+
+**Limitações / blocos futuros**
+- Sem gatilhos automáticos e sem página dedicada `/notifications` (o painel lateral cobre o âmbito pedido).
+- Sem tempo real (`realtime`): a lista é carregada ao abrir a aplicação e via "Carregar novamente".
+- Notificações só podem ser criadas pelo sistema (`service_role`), como previsto.
+
+**BLOCO 7D — NOTIFICAÇÕES COMPLETE: SIM**
