@@ -26,6 +26,9 @@ interface Ctx {
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
   refresh: () => Promise<void>;
+  /** True once the full history (beyond the recent limit) has been loaded. */
+  showingAll: boolean;
+  loadAll: () => Promise<void>;
 }
 
 const NotificationsContext = createContext<Ctx | undefined>(undefined);
