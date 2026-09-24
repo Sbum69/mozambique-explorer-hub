@@ -777,3 +777,10 @@ BLOCK 6G COMPLETE.
 - Notificações só podem ser criadas pelo sistema (`service_role`), como previsto.
 
 **BLOCO 7D — NOTIFICAÇÕES COMPLETE: SIM**
+
+## BLOCK 7E — MAPA
+- Audit: marcadores vinham da tabela destinations (6, todos com coordenadas reais); "Ver detalhes" só selecionava; "Como chegar" traçava rota interna (OSRM); visitas/XP em localStorage (visitDestination).
+- Nova tabela destination_visits (user_id, destination_id, visited_at, UNIQUE) com RLS só do próprio (select/insert/delete). Sem GPS guardado. Base para XP futuro (XP não implementado).
+- Mapa: "Ver detalhes" abre e rola para o painel do destino; "Como chegar" abre Google Maps / Apple Maps / Waze com coordenadas reais (rota interna removida); "A minha localização" com Geolocation a pedido, erros tratados (recusada/indisponível/timeout/sem suporte), só local; marcar/desmarcar visita persistente com gate de convidado; destinos sem coordenadas válidas não são mostrados no mapa.
+- Notificações: "Ver todas as notificações" carrega o histórico completo no painel.
+- Testes: guest mapa, localização concedida/recusada, direções, gate, adicionar/duplicado(409)/outro utilizador(403)/anon vazio/remover — PASS. Typecheck OK.
