@@ -98,9 +98,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       isGuest: !userId,
       markRead,
       markAllRead,
-      refresh: load,
+      refresh: () => load(showingAll),
+      showingAll,
+      loadAll: () => load(true),
     }),
-    [notifications, loading, error, userId, markRead, markAllRead, load],
+    [notifications, loading, error, userId, markRead, markAllRead, load, showingAll],
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
