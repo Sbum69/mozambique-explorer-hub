@@ -465,6 +465,49 @@ export type Database = {
           },
         ]
       }
+      destination_visits: {
+        Row: {
+          destination_id: string
+          id: string
+          user_id: string
+          visited_at: string
+        }
+        Insert: {
+          destination_id: string
+          id?: string
+          user_id: string
+          visited_at?: string
+        }
+        Update: {
+          destination_id?: string
+          id?: string
+          user_id?: string
+          visited_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destination_visits_destination_id_fkey"
+            columns: ["destination_id"]
+            isOneToOne: false
+            referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "destination_visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "destination_visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       destinations: {
         Row: {
           badges: string[]

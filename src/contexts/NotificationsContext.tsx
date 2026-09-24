@@ -40,18 +40,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showingAll, setShowingAll] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (all = false) => {
     if (!userId) {
       setNotifications([]);
       setError(null);
       setLoading(false);
+      setShowingAll(false);
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      setNotifications(await fetchMyNotifications(userId));
+      setNotifications(await fetchMyNotifications(userId, all ? 1000 : 50));
+      setShowingAll(all);
     } catch (err) {
       setError(err instanceof Error ? err.message : "load-failed");
     } finally {
@@ -95,9 +98,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       isGuest: !userId,
       markRead,
       markAllRead,
-      refresh: load,
+      refresh: () => load(showingAll),
+      showingAll,
+      loadAll: () => load(true),
     }),
-    [notifications, loading, error, userId, markRead, markAllRead, load],
+    [notifications, loading, error, userId, markRead, markAllRead, load, showingAll],
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

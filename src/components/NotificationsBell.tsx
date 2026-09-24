@@ -76,7 +76,7 @@ interface Props {
 }
 
 export function NotificationsBell({ variant = "default" }: Props) {
-  const { notifications, unreadCount, loading, error, isGuest, markRead, markAllRead, refresh } =
+  const { notifications, unreadCount, loading, error, isGuest, markRead, markAllRead, refresh, showingAll, loadAll } =
     useNotifications();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
@@ -257,14 +257,14 @@ export function NotificationsBell({ variant = "default" }: Props) {
             })}
         </div>
 
-        <div className="mt-6 pt-4 border-t">
-          <Button asChild variant="outline" className="w-full" onClick={() => setOpen(false)}>
-            <Link to="/news-alerts">
-              {pt ? "Ver todas as notícias" : "View all news"}
+        {!isGuest && !showingAll && notifications.length > 0 && (
+          <div className="mt-6 pt-4 border-t">
+            <Button variant="outline" className="w-full" onClick={() => void loadAll()}>
+              {pt ? "Ver todas as notificações" : "View all notifications"}
               <ArrowRight className="size-4 ml-2" />
-            </Link>
-          </Button>
-        </div>
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

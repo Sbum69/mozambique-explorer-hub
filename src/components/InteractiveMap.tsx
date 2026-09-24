@@ -40,15 +40,25 @@ function FitRoute({ coords }: { coords: [number, number][] | null }) {
   return null;
 }
 
+function FlyTo({ target }: { target: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (target) map.flyTo(target, 12);
+  }, [target, map]);
+  return null;
+}
+
 interface Props {
   destinations: Destination[];
   onSelect?: (d: Destination) => void;
   onDirections?: (d: Destination) => void;
   routeCoords?: [number, number][] | null;
   origin?: [number, number] | null;
+  visitedIds?: Set<string>;
+  focus?: [number, number] | null;
 }
 
-export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin }: Props) {
+export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus }: Props) {
   const { lang } = useLang();
 
   return (
@@ -60,6 +70,7 @@ export function InteractiveMap({ destinations, onSelect, onDirections, routeCoor
     >
       <MapResizer />
       <FitRoute coords={routeCoords ?? null} />
+      <FlyTo target={focus ?? null} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -89,6 +100,9 @@ export function InteractiveMap({ destinations, onSelect, onDirections, routeCoor
               <img src={d.image} alt={d.name} style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 8 }} />
               <h3 style={{ margin: "8px 0 4px", fontWeight: 700, fontSize: 16 }}>{d.name}</h3>
               <p style={{ fontSize: 12, color: "#666", margin: "0 0 8px" }}>{d.description[lang]}</p>
+              {visitedIds?.has(d.id) && (
+                <p style={{ fontSize: 11, color: "#16a34a", fontWeight: 600, margin: "0 0 6px" }}>✓ {lang === "pt" ? "Visitado" : "Visited"}</p>
+              )}
               <p style={{ fontSize: 11, color: "#888", margin: "0 0 8px" }}>👥 {d.visitorsK}k {lang === "pt" ? "visitantes/ano" : "visitors/year"}</p>
               {onSelect && (
                 <button
