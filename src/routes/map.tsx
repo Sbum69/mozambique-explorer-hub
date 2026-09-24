@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, lazy, Suspense } from "react";
-import { ArrowLeft, MapPin, Users, Award, Check, Sparkles, Navigation, Car, Bike, Footprints, X, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { ArrowLeft, MapPin, Users, Award, Check, Navigation, X, Loader2, LocateFixed, Undo2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,12 @@ import { type Destination } from "@/lib/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { addVisit, directionsUrls, fetchMyVisits, hasValidCoords, removeVisit } from "@/lib/visits";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
 );
 
-type TravelMode = "car" | "bike" | "foot";
-const OSRM_PROFILE: Record<TravelMode, string> = { car: "driving", bike: "cycling", foot: "walking" };
 
 export const Route = createFileRoute("/map")({
   ssr: false,
@@ -40,11 +39,10 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
-const BADGE_THRESHOLDS = [100, 500, 750, 1000, 1500, 2500, 4000, 5000];
 
 function MapPage() {
   const { t, lang } = useLang();
-  const { user, visitDestination } = useAuth();
+  const { user, isAuthenticated, authUser } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
@@ -56,127 +54,93 @@ function MapPage() {
     ? destinations.filter((d) => d.slug === preferredId)
     : destinations;
 
+  const mappable = visibleDestinations.filter((d) => hasValidCoords(d.coords));
+
   useEffect(() => {
     if (!destinations.length) return;
     setSelected((current) => current ?? destinations.find((d) => d.slug === preferredId) ?? destinations[0]);
   }, [destinations, preferredId]);
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
-  const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
-  const [routeStats, setRouteStats] = useState<Record<TravelMode, { distance: number; duration: number } | null>>({ car: null, bike: null, foot: null });
-  const [mode, setMode] = useState<TravelMode>("car");
-  const [loadingRoute, setLoadingRoute] = useState(false);
+  const [focus, setFocus] = useState<[number, number] | null>(null);
+  const [locating, setLocating] = useState(false);
   const [directionsOpen, setDirectionsOpen] = useState(false);
+  const [visited, setVisited] = useState<Set<string>>(new Set());
+  const [savingVisit, setSavingVisit] = useState(false);
+  const detailRef = useRef<HTMLDivElement>(null);
+  const userId = isAuthenticated ? (authUser?.id ?? null) : null;
+  const pt = lang === "pt";
 
+  useEffect(() => {
+    if (!userId) { setVisited(new Set()); return; }
+    fetchMyVisits(userId).then(setVisited).catch(() => toast.error(pt ? "Não foi possível carregar as visitas." : "Couldn't load your visits."));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
-  const isVisited = (id: string) => user?.visitedIds?.includes(id) ?? false;
+  const isVisited = (id: string) => visited.has(id);
 
-  const locateUser = (): Promise<[number, number]> =>
-    new Promise((resolve, reject) => {
-      if (!navigator.geolocation) return reject(new Error("no-geo"));
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve([pos.coords.latitude, pos.coords.longitude]),
-        () => reject(new Error("denied")),
-        { timeout: 8000 },
-      );
-    });
-
-  const fetchRoute = async (from: [number, number], to: [number, number], m: TravelMode) => {
-    const url = `https://router.project-osrm.org/route/v1/${OSRM_PROFILE[m]}/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("route");
-    const data = await res.json();
-    const r = data.routes?.[0];
-    if (!r) throw new Error("route");
-    return {
-      coords: (r.geometry.coordinates as [number, number][]).map(([lng, lat]) => [lat, lng] as [number, number]),
-      distance: r.distance as number,
-      duration: r.duration as number,
-    };
-  };
-
-  const computeDirections = async (d: Destination) => {
-    setDirectionsOpen(true);
-    setLoadingRoute(true);
-    setSelected(d);
-    try {
-      let from = origin;
-      if (!from) {
-        from = await locateUser();
-        setOrigin(from);
-      }
-      const [carR, bikeR, footR] = await Promise.allSettled([
-        fetchRoute(from, d.coords, "car"),
-        fetchRoute(from, d.coords, "bike"),
-        fetchRoute(from, d.coords, "foot"),
-      ]);
-      const pick = (r: PromiseSettledResult<Awaited<ReturnType<typeof fetchRoute>>>) =>
-        r.status === "fulfilled" ? { distance: r.value.distance, duration: r.value.duration } : null;
-      setRouteStats({ car: pick(carR), bike: pick(bikeR), foot: pick(footR) });
-      const active = mode === "car" ? carR : mode === "bike" ? bikeR : footR;
-      const fallback = [carR, bikeR, footR].find((r) => r.status === "fulfilled") as PromiseFulfilledResult<Awaited<ReturnType<typeof fetchRoute>>> | undefined;
-      if (active.status === "fulfilled") setRouteCoords(active.value.coords);
-      else if (fallback) setRouteCoords(fallback.value.coords);
-      else throw new Error("route");
-    } catch (e: unknown) {
-      const err = e as Error;
-      toast.error(err.message === "denied" || err.message === "no-geo" ? t("locationError") : t("routeError"));
-    } finally {
-      setLoadingRoute(false);
-    }
-  };
-
-  const switchMode = async (m: TravelMode) => {
-    setMode(m);
-    if (!origin || !selected) return;
-    setLoadingRoute(true);
-    try {
-      const r = await fetchRoute(origin, selected.coords, m);
-      setRouteCoords(r.coords);
-      setRouteStats((s) => ({ ...s, [m]: { distance: r.distance, duration: r.duration } }));
-    } catch {
-      toast.error(t("routeError"));
-    } finally {
-      setLoadingRoute(false);
-    }
-  };
-
-  const clearRoute = () => {
-    setRouteCoords(null);
-    setDirectionsOpen(false);
-  };
-
-  const fmtDist = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
-  const fmtDur = (s: number) => {
-    const h = Math.floor(s / 3600);
-    const min = Math.round((s % 3600) / 60);
-    return h > 0 ? `${h}h ${min}min` : `${min} min`;
-  };
-
-  const handleVisit = (d: Destination) => {
-    if (!requireAccount(lang === "pt" ? "Registar visitas e XP" : "Visits and XP")) return;
-    const prevXp = user?.xp ?? 0;
-    const result = visitDestination(d.slug, 25);
-    if (!result) return;
-    if (result.alreadyVisited) {
-      toast.info(t("alreadyVisited"), { description: d.name });
+  const locateMe = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error(pt ? "Este dispositivo não suporta localização." : "This device doesn't support location.");
       return;
     }
-    toast.success(`+${result.gained} ${t("xpGained")}`, {
-      description: d.name,
-      icon: <Sparkles className="size-4" />,
-    });
-    if (result.leveledUp) {
-      setTimeout(() => {
-        toast.success(`${t("levelUp")} Lv ${result.newLevel}`, { icon: <Award className="size-4" /> });
-      }, 400);
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const c: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+        setOrigin(c);
+        setFocus(c);
+        setLocating(false);
+      },
+      (err) => {
+        setLocating(false);
+        const msg = err.code === err.PERMISSION_DENIED
+          ? (pt ? "Permissão recusada. Permite a localização nas definições do browser." : "Permission denied. Allow location in your browser settings.")
+          : err.code === err.POSITION_UNAVAILABLE
+            ? (pt ? "Localização indisponível." : "Location unavailable.")
+            : err.code === err.TIMEOUT
+              ? (pt ? "A localização demorou demasiado. Tenta novamente." : "Location timed out. Try again.")
+              : (pt ? "Erro de localização." : "Location error.");
+        toast.error(msg);
+      },
+      { timeout: 10000, enableHighAccuracy: true, maximumAge: 0 },
+    );
+  };
+
+  const showDetails = (d: Destination) => {
+    setSelected(d);
+    setDirectionsOpen(false);
+    setTimeout(() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
+  const openDirections = (d: Destination) => {
+    setSelected(d);
+    if (!hasValidCoords(d.coords)) {
+      toast.error(pt ? "Este local ainda não tem coordenadas disponíveis." : "This place has no coordinates yet.");
+      return;
     }
-    const newXp = prevXp + result.gained;
-    const unlockedNow = BADGE_THRESHOLDS.filter((x) => prevXp < x && newXp >= x).length;
-    if (unlockedNow > 0) {
-      setTimeout(() => {
-        toast.success(`${unlockedNow} × ${t("newBadgesUnlocked")}`, { icon: <Sparkles className="size-4" /> });
-      }, 800);
+    setDirectionsOpen(true);
+    setTimeout(() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
+  const toggleVisit = async (d: Destination) => {
+    if (!requireAccount(pt ? "Marcar como visitado" : "Mark as visited")) return;
+    if (!userId) return;
+    const was = isVisited(d.id);
+    setSavingVisit(true);
+    try {
+      if (was) await removeVisit(userId, d.id);
+      else await addVisit(userId, d.id);
+      setVisited((prev) => {
+        const next = new Set(prev);
+        if (was) next.delete(d.id); else next.add(d.id);
+        return next;
+      });
+      toast.success(was ? (pt ? "Visita removida" : "Visit removed") : (pt ? "Marcado como visitado" : "Marked as visited"), { description: d.name });
+    } catch {
+      toast.error(pt ? "Não foi possível guardar. Tenta novamente." : "Couldn't save. Try again.");
+    } finally {
+      setSavingVisit(false);
     }
   };
 
@@ -207,13 +171,23 @@ function MapPage() {
 
         <div className="grid lg:grid-cols-[1fr_360px] gap-6">
           {/* Map */}
-          <Card className="overflow-hidden border-0 shadow-[var(--shadow-elegant)] h-[500px] lg:h-[640px] p-0">
+          <Card className="relative overflow-hidden border-0 shadow-[var(--shadow-elegant)] h-[420px] sm:h-[500px] lg:h-[640px] p-0">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={locateMe}
+              disabled={locating}
+              className="absolute bottom-4 left-4 z-[500] shadow-md"
+            >
+              {locating ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
+              {locating ? (pt ? "A localizar..." : "Locating...") : origin ? (pt ? "Atualizar localização" : "Update location") : (pt ? "A minha localização" : "My location")}
+            </Button>
             <Suspense fallback={
               <div className="h-full w-full flex items-center justify-center bg-muted">
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap destinations={visibleDestinations} onSelect={setSelected} onDirections={computeDirections} routeCoords={routeCoords} origin={origin} />
+              <InteractiveMap destinations={mappable} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
             </Suspense>
           </Card>
 
@@ -276,8 +250,8 @@ function MapPage() {
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{d.description[lang]}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {isVisited(d.slug) && (
-                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-white"><Check className="size-2.5 mr-1" />{t("alreadyVisited")}</Badge>
+                        {isVisited(d.id) && (
+                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-white"><Check className="size-2.5 mr-1" />{pt ? "Visitado" : "Visited"}</Badge>
                         )}
                         {d.badges.includes("most-visited") && (
                           <Badge variant="secondary" className="text-[9px] px-1.5 py-0"><Users className="size-2.5 mr-1" />{t("mostVisited")}</Badge>
@@ -298,6 +272,7 @@ function MapPage() {
         {/* Selected detail */}
         {selected && (
           <motion.div
+            ref={detailRef}
             key={selected.id}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -346,88 +321,44 @@ function MapPage() {
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Button
-                      onClick={() => handleVisit(selected)}
-                      disabled={isVisited(selected.slug)}
-                      className="bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
+                      onClick={() => void toggleVisit(selected)}
+                      disabled={savingVisit}
+                      variant={isVisited(selected.id) ? "outline" : "default"}
+                      className={isVisited(selected.id) ? "" : "bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"}
                     >
-                      {isVisited(selected.slug) ? (
-                        <><Check className="size-4" /> {t("alreadyVisited")}</>
-                      ) : (
-                        <><Sparkles className="size-4" /> {t("visitHere")} (+150 XP)</>
-                      )}
+                      {savingVisit ? <Loader2 className="size-4 animate-spin" /> : isVisited(selected.id) ? <Undo2 className="size-4" /> : <Check className="size-4" />}
+                      {isVisited(selected.id) ? (pt ? "Desmarcar visita" : "Unmark visit") : (pt ? "Marcar como visitado" : "Mark as visited")}
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => computeDirections(selected)}
-                      disabled={loadingRoute}
-                    >
-                      {loadingRoute ? <Loader2 className="size-4 animate-spin" /> : <Navigation className="size-4" />}
-                      {t("getDirections")}
+                    <Button variant="outline" onClick={() => openDirections(selected)}>
+                      <Navigation className="size-4" /> {pt ? "Como chegar" : "Get directions"}
                     </Button>
                     <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
-                      {lang === "pt" ? "Ver experiências" : "See experiences"}
+                      {pt ? "Ver experiências" : "See experiences"}
                     </Button>
                   </div>
 
-                  <AnimatePresence>
-                    {directionsOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-6 overflow-hidden"
-                      >
-                        <div className="rounded-xl border bg-accent/30 p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-semibold flex items-center gap-2">
-                              <Navigation className="size-4 text-primary" /> {t("directions")}
-                            </h3>
-                            <Button size="sm" variant="ghost" onClick={clearRoute}>
-                              <X className="size-4" /> {t("clearRoute")}
-                            </Button>
-                          </div>
-
-                          <div className="grid grid-cols-3 gap-2">
-                            {([
-                              { id: "car" as const, icon: Car, label: t("byCar") },
-                              { id: "bike" as const, icon: Bike, label: t("byBike") },
-                              { id: "foot" as const, icon: Footprints, label: t("onFoot") },
-                            ]).map(({ id, icon: Icon, label }) => {
-                              const stats = routeStats[id];
-                              const active = mode === id;
-                              return (
-                                <button
-                                  key={id}
-                                  onClick={() => switchMode(id)}
-                                  disabled={loadingRoute}
-                                  className={`text-left rounded-lg border p-3 transition-all ${active ? "border-primary bg-primary/10 shadow-sm" : "border-border bg-background hover:border-primary/40"}`}
-                                >
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Icon className="size-4" />
-                                    <span className="text-xs font-semibold">{label}</span>
-                                  </div>
-                                  {stats ? (
-                                    <>
-                                      <div className="text-sm font-bold">{fmtDur(stats.duration)}</div>
-                                      <div className="text-[11px] text-muted-foreground">{fmtDist(stats.distance)}</div>
-                                    </>
-                                  ) : (
-                                    <div className="text-[11px] text-muted-foreground">—</div>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {loadingRoute && (
-                            <p className="text-xs text-muted-foreground mt-3 flex items-center gap-2">
-                              <Loader2 className="size-3 animate-spin" /> {t("locating")}
-                            </p>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {directionsOpen && hasValidCoords(selected.coords) && (
+                    <div className="mt-6 rounded-xl border bg-accent/30 p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <Navigation className="size-4 text-primary" /> {pt ? "Abrir direções em" : "Open directions in"}
+                        </h3>
+                        <Button size="sm" variant="ghost" onClick={() => setDirectionsOpen(false)} aria-label={pt ? "Fechar" : "Close"}>
+                          <X className="size-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {(() => { const u = directionsUrls(selected.coords); return ([["Google Maps", u.google], ["Apple Maps", u.apple], ["Waze", u.waze]] as const).map(([label, href]) => (
+                          <Button key={label} asChild variant="outline" className="bg-background">
+                            <a href={href} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /> {label}</a>
+                          </Button>
+                        )); })()}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-3">
+                        {pt ? "As direções abrem na aplicação de mapas do teu dispositivo." : "Directions open in your device's maps app."}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
