@@ -76,7 +76,7 @@ interface Props {
 }
 
 export function NotificationsBell({ variant = "default" }: Props) {
-  const { notifications, unreadCount, loading, error, isGuest, markRead, markAllRead, refresh } =
+  const { notifications, unreadCount, loading, error, isGuest, markRead, markAllRead, refresh, showingAll, loadAll } =
     useNotifications();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
