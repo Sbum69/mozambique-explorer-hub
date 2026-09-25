@@ -579,6 +579,42 @@ export type Database = {
           },
         ]
       }
+      event_participations: {
+        Row: {
+          created_at: string
+          event_key: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_key: string
+          id?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          event_key?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_participations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experience_availability: {
         Row: {
           active: boolean
@@ -703,6 +739,42 @@ export type Database = {
             columns: ["destination_id"]
             isOneToOne: false
             referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_likes: {
+        Row: {
+          created_at: string
+          id: string
+          news_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          news_key: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          news_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "news_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1182,6 +1254,13 @@ export type Database = {
       }
       can_edit_route: { Args: { _route_id: string }; Returns: boolean }
       can_view_route: { Args: { _route_id: string }; Returns: boolean }
+      event_participant_counts: {
+        Args: { _keys: string[] }
+        Returns: {
+          event_key: string
+          participants: number
+        }[]
+      }
       generate_booking_code: { Args: never; Returns: string }
       generate_route_code: { Args: never; Returns: string }
       get_experience_availability: {
@@ -1203,6 +1282,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      news_like_counts: {
+        Args: { _keys: string[] }
+        Returns: {
+          likes: number
+          news_key: string
+        }[]
       }
       owns_business: { Args: { _business_id: string }; Returns: boolean }
       owns_experience: { Args: { _experience_id: string }; Returns: boolean }

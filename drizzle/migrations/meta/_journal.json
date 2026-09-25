@@ -92,6 +92,13 @@
       "when": 1790217059845,
       "tag": "0012_create_destination_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790321623657,
+      "tag": "0013_news_likes_event_participations",
+      "breakpoints": true
     }
   ]
 }
