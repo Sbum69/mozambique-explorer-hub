@@ -41,15 +41,11 @@ import {
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
 import { useLang } from "@/contexts/LanguageContext";
-import {
-  MOCK_NEWS,
-  NEWS_CATEGORIES,
-  newsCategoryLabel,
-  type NewsCategory,
-  type NewsItem,
-} from "@/data/news";
+import { useAuthGate } from "@/contexts/AuthGateContext";
+import { useEngagement } from "@/lib/news-engagement";
+import { toast } from "sonner";
 import {
   EVENTS,
   WEATHER,
@@ -181,12 +177,6 @@ function NewsAlertsPage() {
 }
 
 /* ---------- News tab ---------- */
-const CATEGORY_TONE: Record<NewsCategory, string> = {
-  event: "bg-primary/15 text-primary border-primary/20",
-  tip: "bg-secondary/15 text-secondary border-secondary/20",
-  safety: "bg-destructive/15 text-destructive border-destructive/20",
-  community: "bg-success/15 text-success border-success/20",
-};
 
 interface LiveNews {
   title: string;
@@ -221,7 +211,7 @@ function useLiveNews(lang: "pt" | "en") {
         const data = await res.json();
         if (cancelled) return;
         if (data.status !== "ok") throw new Error(data.message || "RSS error");
-        const parsed: LiveNews[] = (data.items || []).slice(0, 8).map((it: any) => {
+        const parsed: LiveNews[] = (data.items || []).slice(0, 12).map((it: any) => {
           const desc = stripHtml(it.description || "");
           // Google News wraps items — source is often at the end after " - "
           const sourceMatch = it.title.match(/ - ([^-]+)$/);
@@ -251,29 +241,27 @@ function useLiveNews(lang: "pt" | "en") {
 }
 
 function NewsTab({ lang }: { lang: "pt" | "en" }) {
-  const [filter, setFilter] = useState<"all" | NewsCategory>("all");
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<NewsItem | null>(null);
+  const [selected, setSelected] = useState<LiveNews | null>(null);
   const live = useLiveNews(lang);
+  const { requireAccount } = useAuthGate();
 
-  const filtered = useMemo(() => {
+  // Featured = the most recent items of the same live feed (no second feed).
+  const featured = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return MOCK_NEWS.filter((n) => {
-      if (filter !== "all" && n.category !== filter) return false;
-      if (!q) return true;
-      return (
-        n.title[lang].toLowerCase().includes(q) ||
-        n.summary[lang].toLowerCase().includes(q)
-      );
-    }).sort((a, b) => (a.date < b.date ? 1 : -1));
-  }, [filter, query, lang]);
+    return [...live.items]
+      .filter((n) => !q || n.title.toLowerCase().includes(q) || n.description.toLowerCase().includes(q))
+      .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
+      .slice(0, 4);
+  }, [live.items, query]);
+  const likeKeys = useMemo(() => featured.map((n) => n.link), [featured]);
+  const likes = useEngagement("news", likeKeys);
 
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleDateString(lang === "pt" ? "pt-PT" : "en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+  const onLike = async (key: string) => {
+    if (!requireAccount(lang === "pt" ? "Gostos" : "Likes")) return;
+    const r = await likes.toggle(key);
+    if (!r.ok) toast.error(lang === "pt" ? "Não foi possível guardar o gosto." : "Couldn't save like.");
+  };
 
   const fmtLive = (d: string) => {
     try {
@@ -300,25 +288,6 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
             className="pl-9"
           />
         </div>
-      </div>
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Button
-          size="sm"
-          variant={filter === "all" ? "default" : "outline"}
-          onClick={() => setFilter("all")}
-        >
-          {lang === "pt" ? "Todas" : "All"}
-        </Button>
-        {NEWS_CATEGORIES.map((c) => (
-          <Button
-            key={c}
-            size="sm"
-            variant={filter === c ? "default" : "outline"}
-            onClick={() => setFilter(c)}
-          >
-            {newsCategoryLabel(c, lang)}
-          </Button>
-        ))}
       </div>
 
       {/* LIVE NEWS from Google News RSS (Mozambique) */}
@@ -405,17 +374,23 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
         {lang === "pt" ? "Notícias em destaque" : "Featured stories"}
       </h2>
       <div className="space-y-4">
-        {filtered.map((n, i) => (
+        {live.loading && (
+          <div className="rounded-2xl border bg-card h-48 animate-pulse" />
+        )}
+        {featured.map((n, i) => {
+          const liked = likes.mine.has(n.link);
+          const count = likes.counts[n.link] ?? 0;
+          return (
           <motion.article
-            key={n.id}
+            key={n.link}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
             className="bg-card rounded-2xl shadow-sm border overflow-hidden grid md:grid-cols-3 gap-0"
           >
             <div className="relative h-48 md:h-auto bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-950/40 dark:to-orange-950/40">
-              {n.image ? (
-                <img src={n.image} alt={n.title[lang]} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+              {n.thumbnail ? (
+                <img src={n.thumbnail} alt={n.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Newspaper className="size-16 text-red-300" />
@@ -423,12 +398,12 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
               )}
               {i === 0 && (
                 <div className="absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                  <TrendingUp className="size-3" /> TRENDING
+                  <TrendingUp className="size-3" /> {lang === "pt" ? "MAIS RECENTE" : "LATEST"}
                 </div>
               )}
               <div className="absolute bottom-3 left-3">
-                <Badge variant="outline" className={cn(CATEGORY_TONE[n.category], "bg-background/90")}>
-                  {newsCategoryLabel(n.category, lang)}
+                <Badge variant="outline" className="bg-background/90">
+                  {n.source}
                 </Badge>
               </div>
             </div>
@@ -436,16 +411,12 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-2">
                 <span className="flex items-center gap-1">
                   <Clock className="size-3" />
-                  {fmt(n.date)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="size-3" />
-                  {((i + 1) * 813).toLocaleString()} {lang === "pt" ? "visualizações" : "views"}
+                  {fmtLive(n.pubDate)}
                 </span>
               </div>
-              <h3 className="text-xl font-bold leading-tight mb-2">{n.title[lang]}</h3>
+              <h3 className="text-xl font-bold leading-tight mb-2">{n.title}</h3>
               <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                {n.summary[lang]}
+                {n.description}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -456,37 +427,25 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                   {lang === "pt" ? "Ler mais" : "Read more"}
                   <ChevronRight className="size-4" />
                 </Button>
-                <FavoriteButton
-                  itemId={n.id}
-                  itemType="news"
-                  itemData={{
-                    title: n.title,
-                    summary: n.summary,
-                    image: n.image,
-                    category: n.category,
-                    date: n.date,
-                  }}
-                  size="sm"
-                  className="shadow-none border"
-                />
+                <ShareButton payload={{ title: n.title, description: n.description, url: n.link }} />
                 <Button
                   variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(n.title[lang]);
-                  }}
-                  aria-label="Share"
+                  size="sm"
+                  aria-label={lang === "pt" ? "Gosto" : "Like"}
+                  aria-pressed={liked}
+                  disabled={likes.busy === n.link}
+                  onClick={() => onLike(n.link)}
+                  className="gap-1"
                 >
-                  <Share2 className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon" aria-label="Like">
-                  <Heart className="size-4" />
+                  <Heart className={cn("size-4", liked && "fill-destructive text-destructive")} />
+                  <span className="text-xs">{count}</span>
                 </Button>
               </div>
             </div>
           </motion.article>
-        ))}
-        {filtered.length === 0 && (
+          );
+        })}
+        {!live.loading && featured.length === 0 && (
           <p className="text-center text-muted-foreground py-12">
             {lang === "pt" ? "Sem notícias." : "No news."}
           </p>
@@ -499,33 +458,22 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
             <>
               <DialogHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className={CATEGORY_TONE[selected.category]}>
-                    {newsCategoryLabel(selected.category, lang)}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{fmt(selected.date)}</span>
+                  <Badge variant="outline">{selected.source}</Badge>
+                  <span className="text-xs text-muted-foreground">{fmtLive(selected.pubDate)}</span>
                 </div>
-                <DialogTitle className="text-2xl">{selected.title[lang]}</DialogTitle>
+                <DialogTitle className="text-2xl">{selected.title}</DialogTitle>
                 <DialogDescription className="text-base">
-                  {selected.summary[lang]}
+                  {selected.description}
                 </DialogDescription>
               </DialogHeader>
-              <p className="text-sm leading-relaxed text-foreground/90">
-                {selected.body[lang]}
-              </p>
               <div className="flex gap-2 pt-2">
-                <FavoriteButton
-                  itemId={selected.id}
-                  itemType="news"
-                  itemData={{
-                    title: selected.title,
-                    summary: selected.summary,
-                    image: selected.image,
-                    category: selected.category,
-                    date: selected.date,
-                  }}
-                  size="sm"
-                  className="shadow-none border"
-                />
+                <Button asChild size="sm">
+                  <a href={selected.link} target="_blank" rel="noopener noreferrer">
+                    {lang === "pt" ? "Ler notícia completa" : "Read full story"}
+                    <ChevronRight className="size-4" />
+                  </a>
+                </Button>
+                <ShareButton size="sm" payload={{ title: selected.title, description: selected.description, url: selected.link }} />
               </div>
             </>
           )}
@@ -537,9 +485,31 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
 
 /* ---------- Events tab ---------- */
 function EventsTab({ lang }: { lang: "pt" | "en" }) {
+  const { requireAccount } = useAuthGate();
+  const eventKeys = useMemo(() => EVENTS.map((e) => e.id), []);
+  const part = useEngagement("event", eventKeys);
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+
+  const onJoin = async (id: string) => {
+    if (!requireAccount(lang === "pt" ? "Participar em eventos" : "Join events")) return;
+    const r = await part.toggle(id);
+    if (!r.ok) {
+      toast.error(lang === "pt" ? "Não foi possível atualizar a participação." : "Couldn't update participation.");
+      return;
+    }
+    toast.success(
+      r.active
+        ? lang === "pt" ? "Inscrição confirmada!" : "You're registered!"
+        : lang === "pt" ? "Participação cancelada." : "Participation cancelled.",
+    );
+  };
+
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      {EVENTS.map((ev, i) => (
+      {EVENTS.map((ev, i) => {
+        const joined = part.mine.has(ev.id);
+        const count = part.counts[ev.id] ?? 0;
+        return (
         <motion.div
           key={ev.id}
           initial={{ opacity: 0, y: 12 }}
@@ -570,24 +540,44 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
             <div className="p-5">
               <h3 className="font-bold text-lg leading-tight mb-2">{ev.title[lang]}</h3>
               <p className="text-sm text-muted-foreground mb-4">{ev.description[lang]}</p>
-              <div className="flex items-center justify-between pt-4 border-t">
+              {joined && (
+                <p className="mb-3 text-xs font-semibold text-success flex items-center gap-1">
+                  ✓ {lang === "pt" ? "Já estás inscrito" : "You're registered"}
+                </p>
+              )}
+              <div className="flex items-center justify-between pt-4 border-t gap-2">
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="flex items-center gap-1">
-                    <Users className="size-3" /> {ev.attendees}+
+                  <span className="flex items-center gap-1" title={lang === "pt" ? "Inscritos no Ekaya" : "Registered on Ekaya"}>
+                    <Users className="size-3" /> {count}
                   </span>
                   <span className="font-semibold text-emerald-600">{ev.price[lang]}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                <ShareButton
+                  payload={{
+                    title: ev.title[lang],
+                    description: `${ev.date[lang]} · ${ev.location} — ${ev.description[lang]}`,
+                    url: `${origin}/news-alerts`,
+                  }}
+                />
                 <Button
                   size="sm"
-                  className={`bg-gradient-to-r ${ev.gradient} text-white border-0 hover:opacity-90`}
+                  disabled={part.busy === ev.id}
+                  onClick={() => onJoin(ev.id)}
+                  variant={joined ? "outline" : "default"}
+                  className={joined ? "" : `bg-gradient-to-r ${ev.gradient} text-white border-0 hover:opacity-90`}
                 >
-                  {lang === "pt" ? "Participar" : "Join"}
+                  {joined
+                    ? lang === "pt" ? "Cancelar participação" : "Cancel"
+                    : lang === "pt" ? "Participar" : "Join"}
                 </Button>
+                </div>
               </div>
             </div>
           </Card>
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }
