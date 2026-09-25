@@ -177,12 +177,6 @@ function NewsAlertsPage() {
 }
 
 /* ---------- News tab ---------- */
-const CATEGORY_TONE: Record<NewsCategory, string> = {
-  event: "bg-primary/15 text-primary border-primary/20",
-  tip: "bg-secondary/15 text-secondary border-secondary/20",
-  safety: "bg-destructive/15 text-destructive border-destructive/20",
-  community: "bg-success/15 text-success border-success/20",
-};
 
 interface LiveNews {
   title: string;
@@ -217,7 +211,7 @@ function useLiveNews(lang: "pt" | "en") {
         const data = await res.json();
         if (cancelled) return;
         if (data.status !== "ok") throw new Error(data.message || "RSS error");
-        const parsed: LiveNews[] = (data.items || []).slice(0, 8).map((it: any) => {
+        const parsed: LiveNews[] = (data.items || []).slice(0, 12).map((it: any) => {
           const desc = stripHtml(it.description || "");
           // Google News wraps items — source is often at the end after " - "
           const sourceMatch = it.title.match(/ - ([^-]+)$/);
