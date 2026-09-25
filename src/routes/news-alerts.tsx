@@ -41,15 +41,11 @@ import {
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
 import { useLang } from "@/contexts/LanguageContext";
-import {
-  MOCK_NEWS,
-  NEWS_CATEGORIES,
-  newsCategoryLabel,
-  type NewsCategory,
-  type NewsItem,
-} from "@/data/news";
+import { useAuthGate } from "@/contexts/AuthGateContext";
+import { useEngagement } from "@/lib/news-engagement";
+import { toast } from "sonner";
 import {
   EVENTS,
   WEATHER,
@@ -586,7 +582,8 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
             </div>
           </Card>
         </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }
