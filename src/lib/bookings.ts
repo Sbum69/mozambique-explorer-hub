@@ -9,9 +9,13 @@ export interface Booking {
   experienceId: string;
   businessId: string;
   experienceTitle: { pt: string; en: string };
+  experienceDescription: { pt: string; en: string };
   host: string;
+  hostPhone: string | null;
+  hostEmail: string | null;
   location: string;
   destinationName: string | null;
+  destinationSlug: string | null;
   image: string;
   durationHours: number;
   date: string;
@@ -28,16 +32,23 @@ export interface Booking {
 }
 
 const SELECT =
-  "id, code, experience_id, business_id, date, time, people, customer_name, customer_phone, customer_email, notes, total_mzn, status, created_at, experiences(title_pt, title_en, images, duration_hours, location, province, businesses(name), destinations(name, slug))";
+  "id, code, experience_id, business_id, date, time, people, customer_name, customer_phone, customer_email, notes, total_mzn, status, created_at, experiences(title_pt, title_en, description_pt, description_en, images, duration_hours, location, province, businesses(name, contact), destinations(name, slug))";
+
+interface JoinedBusiness {
+  name: string;
+  contact?: unknown;
+}
 
 interface JoinedExperience {
   title_pt: string;
   title_en: string | null;
+  description_pt?: string | null;
+  description_en?: string | null;
   images: string[] | null;
   duration_hours: number | string | null;
   location: string | null;
   province: string | null;
-  businesses: { name: string } | { name: string }[] | null;
+  businesses: JoinedBusiness | JoinedBusiness[] | null;
   destinations: { name: string; slug: string } | { name: string; slug: string }[] | null;
 }
 
@@ -64,20 +75,33 @@ function first<T>(value: T | T[] | null): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
+function contactField(value: unknown, key: string): string | null {
+  if (value && typeof value === "object" && key in (value as Record<string, unknown>)) {
+    const inner = (value as Record<string, unknown>)[key];
+    return typeof inner === "string" && inner.trim() ? inner.trim() : null;
+  }
+  return null;
+}
+
 function mapBooking(row: BookingRow): Booking {
   const exp = first(row.experiences);
   const destination = exp ? first(exp.destinations) : null;
   const business = exp ? first(exp.businesses) : null;
   const titlePt = exp?.title_pt ?? "";
+  const descPt = exp?.description_pt ?? "";
   return {
     id: row.id,
     code: row.code,
     experienceId: row.experience_id,
     businessId: row.business_id,
     experienceTitle: { pt: titlePt, en: exp?.title_en ?? titlePt },
+    experienceDescription: { pt: descPt, en: exp?.description_en ?? descPt },
     host: business?.name ?? "",
+    hostPhone: contactField(business?.contact, "phone"),
+    hostEmail: contactField(business?.contact, "email"),
     location: exp?.location ?? destination?.name ?? exp?.province ?? "",
     destinationName: destination?.name ?? null,
+    destinationSlug: destination?.slug ?? null,
     image: (destination ? IMAGE_BY_SLUG[destination.slug] : undefined) ?? exp?.images?.[0] ?? "",
     durationHours: Number(exp?.duration_hours ?? 0),
     date: row.date,
@@ -91,6 +115,16 @@ function mapBooking(row: BookingRow): Booking {
     status: row.status,
     createdAt: row.created_at,
   };
+}
+
+/**
+ * Cancels a pending booking of the signed-in customer. The database function
+ * enforces ownership + pending state; the row is kept (status = cancelled), so
+ * its seats are released automatically and history is preserved.
+ */
+export async function cancelMyBooking(id: string): Promise<void> {
+  const { error } = await supabase.rpc("cancel_my_booking", { _booking_id: id });
+  if (error) throw new Error(error.message);
 }
 
 export interface NewBookingInput {
