@@ -36,6 +36,8 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>): { destination?: string } =>
+    typeof search.destination === "string" ? { destination: search.destination } : {},
   component: MapPage,
 });
 
@@ -46,10 +48,11 @@ function MapPage() {
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
+  const { destination: linkedSlug } = Route.useSearch();
   const preferredId = user?.preferences?.province;
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const [selected, setSelected] = useState<Destination | null>(null);
-  const [showAllDestinations, setShowAllDestinations] = useState(!preferredId);
+  const [showAllDestinations, setShowAllDestinations] = useState(!preferredId || !!linkedSlug);
   const visibleDestinations = preferredId && !showAllDestinations
     ? destinations.filter((d) => d.slug === preferredId)
     : destinations;
@@ -58,8 +61,12 @@ function MapPage() {
 
   useEffect(() => {
     if (!destinations.length) return;
-    setSelected((current) => current ?? destinations.find((d) => d.slug === preferredId) ?? destinations[0]);
-  }, [destinations, preferredId]);
+    setSelected((current) =>
+      current ??
+      (linkedSlug ? destinations.find((d) => d.slug === linkedSlug) : undefined) ??
+      destinations.find((d) => d.slug === preferredId) ??
+      destinations[0]);
+  }, [destinations, preferredId, linkedSlug]);
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [focus, setFocus] = useState<[number, number] | null>(null);
