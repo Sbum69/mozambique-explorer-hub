@@ -784,3 +784,12 @@ BLOCK 6G COMPLETE.
 - Mapa: "Ver detalhes" abre e rola para o painel do destino; "Como chegar" abre Google Maps / Apple Maps / Waze com coordenadas reais (rota interna removida); "A minha localização" com Geolocation a pedido, erros tratados (recusada/indisponível/timeout/sem suporte), só local; marcar/desmarcar visita persistente com gate de convidado; destinos sem coordenadas válidas não são mostrados no mapa.
 - Notificações: "Ver todas as notificações" carrega o histórico completo no painel.
 - Testes: guest mapa, localização concedida/recusada, direções, gate, adicionar/duplicado(409)/outro utilizador(403)/anon vazio/remover — PASS. Typecheck OK.
+
+## BLOCK 7F — Notícias & Eventos
+- Notícias em Destaque: deixaram de usar MOCK_NEWS; mostram as 4 notícias mais recentes do mesmo feed em tempo real (sem segundo feed). Filtros de categoria mock removidos (o feed real não tem categorias); pesquisa mantida.
+- Eventos: botão Participar/Cancelar real (tabela event_participations, única por utilizador+evento), "Já estás inscrito", contagem real de inscritos no Ekaya. Eventos continuam os existentes (não criados novos).
+- Gostos: tabela news_likes (um por utilizador por notícia, chave = link da notícia), contagem pública via função.
+- Partilha: novo componente reutilizável ShareButton (WhatsApp, Instagram, X, Web Share API, copiar link). Instagram não tem link web de partilha: usa partilha nativa ou copia o link e abre o Instagram.
+- Migration: 0013_news_likes_event_participations.sql (RLS: cada utilizador só vê/cria/apaga as suas linhas; visitante bloqueado).
+- Testes: convidado bloqueado (diálogo de conta) PASS; participar 201 / duplicado 409 / cancelar 204 PASS; like/unlike PASS; visitante direto na BD 401 PASS; menu de partilha desktop/mobile PASS; typecheck PASS.
+- Limitação: contagem "attendees" antiga (fixa) substituída pela contagem real.
