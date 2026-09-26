@@ -1254,6 +1254,7 @@ export type Database = {
       }
       can_edit_route: { Args: { _route_id: string }; Returns: boolean }
       can_view_route: { Args: { _route_id: string }; Returns: boolean }
+      cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
       event_participant_counts: {
         Args: { _keys: string[] }
         Returns: {
