@@ -793,3 +793,8 @@ BLOCK 6G COMPLETE.
 - Migration: 0013_news_likes_event_participations.sql (RLS: cada utilizador só vê/cria/apaga as suas linhas; visitante bloqueado).
 - Testes: convidado bloqueado (diálogo de conta) PASS; participar 201 / duplicado 409 / cancelar 204 PASS; like/unlike PASS; visitante direto na BD 401 PASS; menu de partilha desktop/mobile PASS; typecheck PASS.
 - Limitação: contagem "attendees" antiga (fixa) substituída pela contagem real.
+
+## Bloco 8A — Minhas Reservas
+- Página /bookings: separadores Todas/Pendentes/Confirmadas/Concluídas-Rejeitadas, detalhe (código EK, estado, destino, negócio, contacto, descrição), Ver experiência (/experiences), Ver destino (/map?destination=slug), cancelamento só de pendentes com confirmação.
+- Migration 0014: `cancel_my_booking(uuid)` (dono + pendente), `bookings_guard_update` endurecido (estados finais imutáveis; só o cliente cancela pendentes; só o dono do negócio confirma/rejeita/conclui), trigger `bookings_notify_status` cria notificações reais (confirmada/rejeitada/cancelada). Reservas nunca apagadas; lugares libertados porque `booked_people` só conta pending/confirmed.
+- Testes SQL (transação revertida): cancelamento 6→8 lugares, recancelar/cancelar confirmada/outro utilizador/anon bloqueados, notificações geradas, estranho vê 0 reservas. UI com dados reais de reserva não testado (conta de teste sem reservas).
