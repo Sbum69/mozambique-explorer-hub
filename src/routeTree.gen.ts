@@ -26,6 +26,7 @@ import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CultureHistoryRouteImport } from './routes/culture-history'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as BusinessRegisterRouteImport } from './routes/business-register'
 import { Route as BusinessDashboardRouteImport } from './routes/business-dashboard'
 import { Route as BookingsRouteImport } from './routes/bookings'
@@ -33,7 +34,9 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
+import { Route as ExperienceIdRouteImport } from './routes/experience.$id'
 import { Route as CommunityPostIdRouteImport } from './routes/community.$postId'
+import { Route as BusinessIdRouteImport } from './routes/business.$id'
 
 const UsefulInfoRoute = UsefulInfoRouteImport.update({
   id: '/useful-info',
@@ -120,6 +123,11 @@ const CommunityRoute = CommunityRouteImport.update({
   path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessesRoute = BusinessesRouteImport.update({
+  id: '/businesses',
+  path: '/businesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   id: '/business-register',
   path: '/business-register',
@@ -155,10 +163,20 @@ const ItineraryIdRoute = ItineraryIdRouteImport.update({
   path: '/itinerary/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExperienceIdRoute = ExperienceIdRouteImport.update({
+  id: '/experience/$id',
+  path: '/experience/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityPostIdRoute = CommunityPostIdRouteImport.update({
   id: '/$postId',
   path: '/$postId',
   getParentRoute: () => CommunityRoute,
+} as any)
+const BusinessIdRoute = BusinessIdRouteImport.update({
+  id: '/business/$id',
+  path: '/business/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -167,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
+  '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
@@ -184,7 +203,9 @@ export interface FileRoutesByFullPath {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
+  '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -194,6 +215,7 @@ export interface FileRoutesByTo {
   '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
+  '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
@@ -211,7 +233,9 @@ export interface FileRoutesByTo {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
+  '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -222,6 +246,7 @@ export interface FileRoutesById {
   '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
+  '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
@@ -239,7 +264,9 @@ export interface FileRoutesById {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
+  '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -251,6 +278,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/business-dashboard'
     | '/business-register'
+    | '/businesses'
     | '/community'
     | '/culture-history'
     | '/dashboard'
@@ -268,7 +296,9 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/business/$id'
     | '/community/$postId'
+    | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   fileRoutesByTo: FileRoutesByTo
@@ -278,6 +308,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/business-dashboard'
     | '/business-register'
+    | '/businesses'
     | '/community'
     | '/culture-history'
     | '/dashboard'
@@ -295,7 +326,9 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/business/$id'
     | '/community/$postId'
+    | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   id:
@@ -305,6 +338,7 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/business-dashboard'
     | '/business-register'
+    | '/businesses'
     | '/community'
     | '/culture-history'
     | '/dashboard'
@@ -322,7 +356,9 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/business/$id'
     | '/community/$postId'
+    | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   fileRoutesById: FileRoutesById
@@ -333,6 +369,7 @@ export interface RootRouteChildren {
   BookingsRoute: typeof BookingsRoute
   BusinessDashboardRoute: typeof BusinessDashboardRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
+  BusinessesRoute: typeof BusinessesRoute
   CommunityRoute: typeof CommunityRouteWithChildren
   CultureHistoryRoute: typeof CultureHistoryRoute
   DashboardRoute: typeof DashboardRoute
@@ -350,6 +387,8 @@ export interface RootRouteChildren {
   PreferencesRoute: typeof PreferencesRoute
   SignupRoute: typeof SignupRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
+  BusinessIdRoute: typeof BusinessIdRoute
+  ExperienceIdRoute: typeof ExperienceIdRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
   VoucherRewardIdRoute: typeof VoucherRewardIdRoute
 }
@@ -475,6 +514,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/businesses': {
+      id: '/businesses'
+      path: '/businesses'
+      fullPath: '/businesses'
+      preLoaderRoute: typeof BusinessesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business-register': {
       id: '/business-register'
       path: '/business-register'
@@ -524,12 +570,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItineraryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/experience/$id': {
+      id: '/experience/$id'
+      path: '/experience/$id'
+      fullPath: '/experience/$id'
+      preLoaderRoute: typeof ExperienceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community/$postId': {
       id: '/community/$postId'
       path: '/$postId'
       fullPath: '/community/$postId'
       preLoaderRoute: typeof CommunityPostIdRouteImport
       parentRoute: typeof CommunityRoute
+    }
+    '/business/$id': {
+      id: '/business/$id'
+      path: '/business/$id'
+      fullPath: '/business/$id'
+      preLoaderRoute: typeof BusinessIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -552,6 +612,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookingsRoute: BookingsRoute,
   BusinessDashboardRoute: BusinessDashboardRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
+  BusinessesRoute: BusinessesRoute,
   CommunityRoute: CommunityRouteWithChildren,
   CultureHistoryRoute: CultureHistoryRoute,
   DashboardRoute: DashboardRoute,
@@ -569,6 +630,8 @@ const rootRouteChildren: RootRouteChildren = {
   PreferencesRoute: PreferencesRoute,
   SignupRoute: SignupRoute,
   UsefulInfoRoute: UsefulInfoRoute,
+  BusinessIdRoute: BusinessIdRoute,
+  ExperienceIdRoute: ExperienceIdRoute,
   ItineraryIdRoute: ItineraryIdRoute,
   VoucherRewardIdRoute: VoucherRewardIdRoute,
 }
