@@ -87,6 +87,8 @@ const dict = {
   modExperiencesDesc: { pt: "Reserva experiências comunitárias", en: "Book community experiences" },
   modInfoDesc: { pt: "Vistos, moeda, transportes", en: "Visa, currency, transport" },
   modAchievementsDesc: { pt: "Badges, XP e recompensas", en: "Badges, XP and rewards" },
+  modBusinesses: { pt: "🏪 Negócios Locais", en: "🏪 Local Businesses" },
+  modBusinessesDesc: { pt: "Descobre negócios comunitários e as suas experiências", en: "Discover community businesses and their experiences" },
   modImpactDesc: { pt: "O teu contributo às comunidades", en: "Your contribution to communities" },
   comingSoon: { pt: "Em breve", en: "Coming soon" },
   // interests

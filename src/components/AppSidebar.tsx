@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Menu, X, Home, LayoutDashboard, Bookmark, Bell, Map, Compass, Trophy,
   Activity, BookOpen, Sparkles, Heart, Users, Info, ArrowRight, Crown,
-  LogOut, LogIn, Shield, Gamepad2, CalendarCheck, SlidersHorizontal, type LucideIcon,
+  LogOut, LogIn, Shield, Gamepad2, CalendarCheck, SlidersHorizontal, Store, type LucideIcon,
 } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -39,6 +39,7 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     items: [
       { to: "/map", icon: Map, label: { pt: "Mapa", en: "Map" } },
       { to: "/experiences", icon: Compass, label: { pt: "Experiências", en: "Experiences" } },
+      { to: "/businesses", icon: Store, label: { pt: "Negócios Locais", en: "Local Businesses" } },
       { to: "/itineraries", icon: Heart, label: { pt: "Roteiros", en: "Itineraries" } },
       { to: "/gamification", icon: Trophy, label: { pt: "Conquistas", en: "Achievements" }, privateOnly: true },
       { to: "/games", icon: Gamepad2, label: { pt: "🎮 Jogar Desafios", en: "🎮 Play Challenges" }, badge: "NOVO", privateOnly: true },

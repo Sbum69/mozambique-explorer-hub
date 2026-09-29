@@ -50,6 +50,8 @@ export const Route = createFileRoute("/experiences")({
     ],
   }),
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { book?: string } =>
+    typeof search.book === "string" ? { book: search.book } : {},
   component: ExperiencesPage,
 });
 
@@ -92,6 +94,7 @@ function ExperiencesPage() {
   });
 
   const { experiences, loading, error, isEmpty, reload } = useExperiences();
+  const { book: bookId } = Route.useSearch();
 
   const filtered = useMemo(() => {
     let list = experiences;
@@ -146,6 +149,16 @@ function ExperiencesPage() {
     }
     setForm((f) => ({ ...f, date: value, time: "" }));
   };
+
+  // Deep link from an experience detail page: open that experience's booking form once.
+  const [bookHandled, setBookHandled] = useState(false);
+  useEffect(() => {
+    if (!bookId || bookHandled || loading) return;
+    const exp = experiences.find((e) => e.id === bookId);
+    setBookHandled(true);
+    if (exp) openBookingModal(exp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId, bookHandled, loading, experiences]);
 
   const openBookingModal = (exp: Experience) => {
     if (booked.has(exp.id)) return;
