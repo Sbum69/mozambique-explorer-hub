@@ -272,7 +272,7 @@ function BookingsPage() {
               )}
               {cancelError && <p className="text-sm text-destructive">{cancelError}</p>}
               <div className="flex flex-wrap gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => navigate({ to: "/experiences" })}>
+                <Button variant="outline" size="sm" onClick={() => navigate({ to: "/experience/$id", params: { id: open.experienceId } })}>
                   <Compass className="size-4 mr-1" />{pt ? "Ver experiência" : "View experience"}
                 </Button>
                 {open.destinationSlug && (

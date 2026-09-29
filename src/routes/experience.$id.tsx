@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import { FavoriteButton } from "@/components/FavoriteButton";
 import { fetchExperienceById, type Experience } from "@/lib/experiences";
 
 export const Route = createFileRoute("/experience/$id")({
@@ -73,7 +72,6 @@ function ExperienceDetailPage() {
           <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)]">
             <div className="relative h-56 sm:h-72 bg-muted">
               {exp.image && <img src={exp.image} alt={exp.title[lang]} className="w-full h-full object-cover" />}
-              <div className="absolute top-3 right-3"><FavoriteButton kind="experience" id={exp.id} /></div>
             </div>
             <div className="p-5 space-y-4">
               <h1 className="text-2xl font-bold">{exp.title[lang]}</h1>
