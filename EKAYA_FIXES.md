@@ -798,3 +798,9 @@ BLOCK 6G COMPLETE.
 - Página /bookings: separadores Todas/Pendentes/Confirmadas/Concluídas-Rejeitadas, detalhe (código EK, estado, destino, negócio, contacto, descrição), Ver experiência (/experiences), Ver destino (/map?destination=slug), cancelamento só de pendentes com confirmação.
 - Migration 0014: `cancel_my_booking(uuid)` (dono + pendente), `bookings_guard_update` endurecido (estados finais imutáveis; só o cliente cancela pendentes; só o dono do negócio confirma/rejeita/conclui), trigger `bookings_notify_status` cria notificações reais (confirmada/rejeitada/cancelada). Reservas nunca apagadas; lugares libertados porque `booked_people` só conta pending/confirmed.
 - Testes SQL (transação revertida): cancelamento 6→8 lugares, recancelar/cancelar confirmada/outro utilizador/anon bloqueados, notificações geradas, estranho vê 0 reservas. UI com dados reais de reserva não testado (conta de teste sem reservas).
+
+## Bloco 8B — Negócios Locais
+- Novas páginas `/businesses` (lista com pesquisa/província/categoria vindos da BD), `/business/$id` (detalhe, experiências, mapa, direções) e `/experience/$id` (detalhe; "Reservar" abre o formulário existente via `/experiences?book=id`).
+- Reutiliza RLS existente: público vê apenas `status = approved`; owner_id nunca é selecionado. Sem migrations.
+- Atalho na dashboard e no menu; "Ver experiência" em Minhas Reservas abre agora a experiência específica.
+- Limitação: negócios atuais não têm localização/contacto/imagem na BD; "Ver no mapa" usa o destino das experiências e "Como chegar" usa esse destino ou o nome+província.
