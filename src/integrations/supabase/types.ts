@@ -246,6 +246,65 @@ export type Database = {
         }
         Relationships: []
       }
+      community_experiences: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          description_en: string
+          description_pt: string
+          id: string
+          image_url: string | null
+          lat: number | null
+          lng: number | null
+          location: string
+          province_id: string
+          title_en: string
+          title_pt: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          description_en: string
+          description_pt: string
+          id?: string
+          image_url?: string | null
+          lat?: number | null
+          lng?: number | null
+          location?: string
+          province_id: string
+          title_en: string
+          title_pt: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          description_en?: string
+          description_pt?: string
+          id?: string
+          image_url?: string | null
+          lat?: number | null
+          lng?: number | null
+          location?: string
+          province_id?: string
+          title_en?: string
+          title_pt?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_experiences_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_post_reactions: {
         Row: {
           created_at: string
