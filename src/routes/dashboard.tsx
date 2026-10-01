@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
-  MapPin, Sun, ArrowRight, Store,
+  MapPin, Sun, ArrowRight, Store, Users as UsersIcon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,7 +53,7 @@ const MODULES: ModuleDef[] = [
   { to: "/favorites", icon: Bookmark, titleKey: "modFavorites", descKey: "modFavoritesDesc", gradient: "from-pink-500 to-rose-500" },
   { to: "/news-alerts", icon: Bell, titleKey: "modNews", descKey: "modNewsDesc", gradient: "from-red-500 to-orange-500" },
   { to: "/itineraries", icon: Compass, titleKey: "modItineraries", descKey: "modItinerariesDesc", gradient: "from-primary to-primary-glow" },
-  { to: "/community-experiences", icon: Users, titleKey: "modCommunityExp", descKey: "modCommunityExpDesc", gradient: "from-emerald-500 to-teal-500" },
+  { to: "/community-experiences", icon: UsersIcon, titleKey: "modCommunityExp", descKey: "modCommunityExpDesc", gradient: "from-emerald-500 to-teal-500" },
   { to: "/businesses", icon: Store, titleKey: "modBusinesses", descKey: "modBusinessesDesc", gradient: "from-amber-500 to-orange-500" },
   { to: "/experiences", icon: Heart, titleKey: "modExperiences", descKey: "modExperiencesDesc", gradient: "from-success to-emerald-400" },
   { to: "/useful-info", icon: Info, titleKey: "modInfo", descKey: "modInfoDesc", gradient: "from-purple-500 to-violet-500" },
