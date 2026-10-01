@@ -88,6 +88,8 @@ const dict = {
   modInfoDesc: { pt: "Vistos, moeda, transportes", en: "Visa, currency, transport" },
   modAchievementsDesc: { pt: "Badges, XP e recompensas", en: "Badges, XP and rewards" },
   modBusinesses: { pt: "🏪 Negócios Locais", en: "🏪 Local Businesses" },
+  modCommunityExp: { pt: "👥 Experiências Comunitárias", en: "👥 Community Experiences" },
+  modCommunityExpDesc: { pt: "Atividades gratuitas, sem reserva, por província", en: "Free activities, no booking, by province" },
   modBusinessesDesc: { pt: "Descobre negócios comunitários e as suas experiências", en: "Discover community businesses and their experiences" },
   modImpactDesc: { pt: "O teu contributo às comunidades", en: "Your contribution to communities" },
   comingSoon: { pt: "Em breve", en: "Coming soon" },
