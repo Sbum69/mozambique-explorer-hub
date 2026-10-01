@@ -5,6 +5,10 @@ import "leaflet/dist/leaflet.css";
 
 import type { Destination } from "@/lib/destinations";
 import { useLang } from "@/contexts/LanguageContext";
+import type { CommunityExperience } from "@/lib/community-experiences";
+import { categoryMeta } from "@/lib/community-experiences";
+import { communityIcon } from "@/components/CommunityMiniMap";
+import { directionsUrls } from "@/lib/visits";
 
 const pinIcon = L.divIcon({
   className: "ekaya-pin",
@@ -56,9 +60,11 @@ interface Props {
   origin?: [number, number] | null;
   visitedIds?: Set<string>;
   focus?: [number, number] | null;
+  community?: CommunityExperience[];
+  highlightCommunityId?: string | null;
 }
 
-export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus }: Props) {
+export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus, community = [], highlightCommunityId }: Props) {
   const { lang } = useLang();
 
   return (
@@ -145,6 +151,29 @@ export function InteractiveMap({ destinations, onSelect, onDirections, routeCoor
                   🧭 {lang === "pt" ? "Como chegar" : "Get directions"}
                 </button>
               )}
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+
+      {community.filter((c) => c.lat !== null && c.lng !== null).map((c) => (
+        <Marker
+          key={`c-${c.id}`}
+          position={[c.lat as number, c.lng as number]}
+          icon={communityIcon}
+          ref={(m) => { if (m && c.id === highlightCommunityId) setTimeout(() => m.openPopup(), 600); }}
+        >
+          <Popup>
+            <div style={{ minWidth: 200 }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "#15803d", margin: 0 }}>
+                {categoryMeta(c.category).emoji} {lang === "pt" ? "Experiência comunitária · grátis" : "Community experience · free"}
+              </p>
+              <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{c.title[lang]}</h3>
+              <p style={{ fontSize: 11, color: "#888", margin: "0 0 4px" }}>{c.provinceName[lang]} · {c.location}</p>
+              <p style={{ fontSize: 12, color: "#666", margin: "0 0 8px" }}>{c.description[lang]}</p>
+              <a href={directionsUrls([c.lat as number, c.lng as number]).google} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 600 }}>
+                🧭 {lang === "pt" ? "Como chegar" : "Get directions"}
+              </a>
             </div>
           </Popup>
         </Marker>
