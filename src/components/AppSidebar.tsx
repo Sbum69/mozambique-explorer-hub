@@ -39,6 +39,7 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     items: [
       { to: "/map", icon: Map, label: { pt: "Mapa", en: "Map" } },
       { to: "/experiences", icon: Compass, label: { pt: "Experiências", en: "Experiences" } },
+      { to: "/community-experiences", icon: Users, label: { pt: "Experiências Comunitárias", en: "Community Experiences" } },
       { to: "/businesses", icon: Store, label: { pt: "Negócios Locais", en: "Local Businesses" } },
       { to: "/itineraries", icon: Heart, label: { pt: "Roteiros", en: "Itineraries" } },
       { to: "/gamification", icon: Trophy, label: { pt: "Conquistas", en: "Achievements" }, privateOnly: true },

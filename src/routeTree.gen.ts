@@ -25,6 +25,7 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CultureHistoryRouteImport } from './routes/culture-history'
+import { Route as CommunityExperiencesRouteImport } from './routes/community-experiences'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as BusinessRegisterRouteImport } from './routes/business-register'
@@ -118,6 +119,11 @@ const CultureHistoryRoute = CultureHistoryRouteImport.update({
   path: '/culture-history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityExperiencesRoute = CommunityExperiencesRouteImport.update({
+  id: '/community-experiences',
+  path: '/community-experiences',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/business-register': typeof BusinessRegisterRoute
   '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
+  '/community-experiences': typeof CommunityExperiencesRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByTo {
   '/business-register': typeof BusinessRegisterRoute
   '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
+  '/community-experiences': typeof CommunityExperiencesRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/business-register': typeof BusinessRegisterRoute
   '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
+  '/community-experiences': typeof CommunityExperiencesRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/business-register'
     | '/businesses'
     | '/community'
+    | '/community-experiences'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/business-register'
     | '/businesses'
     | '/community'
+    | '/community-experiences'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/business-register'
     | '/businesses'
     | '/community'
+    | '/community-experiences'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessesRoute: typeof BusinessesRoute
   CommunityRoute: typeof CommunityRouteWithChildren
+  CommunityExperiencesRoute: typeof CommunityExperiencesRoute
   CultureHistoryRoute: typeof CultureHistoryRoute
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
@@ -507,6 +520,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CultureHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community-experiences': {
+      id: '/community-experiences'
+      path: '/community-experiences'
+      fullPath: '/community-experiences'
+      preLoaderRoute: typeof CommunityExperiencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
@@ -614,6 +634,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessesRoute: BusinessesRoute,
   CommunityRoute: CommunityRouteWithChildren,
+  CommunityExperiencesRoute: CommunityExperiencesRoute,
   CultureHistoryRoute: CultureHistoryRoute,
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,

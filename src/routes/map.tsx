@@ -17,6 +17,7 @@ import { type Destination } from "@/lib/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
 import { addVisit, directionsUrls, fetchMyVisits, hasValidCoords, removeVisit } from "@/lib/visits";
 
 const InteractiveMap = lazy(() =>
@@ -36,8 +37,10 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>): { destination?: string } =>
-    typeof search.destination === "string" ? { destination: search.destination } : {},
+  validateSearch: (search: Record<string, unknown>): { destination?: string; community?: string } => ({
+    ...(typeof search.destination === "string" ? { destination: search.destination } : {}),
+    ...(typeof search.community === "string" ? { community: search.community } : {}),
+  }),
   component: MapPage,
 });
 
@@ -48,7 +51,7 @@ function MapPage() {
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
-  const { destination: linkedSlug } = Route.useSearch();
+  const { destination: linkedSlug, community: linkedCommunity } = Route.useSearch();
   const preferredId = user?.preferences?.province;
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const [selected, setSelected] = useState<Destination | null>(null);
@@ -77,6 +80,21 @@ function MapPage() {
   const detailRef = useRef<HTMLDivElement>(null);
   const userId = isAuthenticated ? (authUser?.id ?? null) : null;
   const pt = lang === "pt";
+
+  // Community (free) experiences: own layer and own marker, never mixed with destinations.
+  const [communityItems, setCommunityItems] = useState<CommunityExperience[]>([]);
+  const [showDestinations, setShowDestinations] = useState(true);
+  const [showCommunity, setShowCommunity] = useState(true);
+  useEffect(() => {
+    fetchCommunityExperiences()
+      .then((rows) => {
+        setCommunityItems(rows);
+        const linked = linkedCommunity ? rows.find((r) => r.id === linkedCommunity) : undefined;
+        if (linked && linked.lat !== null && linked.lng !== null) setFocus([linked.lat, linked.lng]);
+      })
+      .catch(() => toast.error(pt ? "Não foi possível carregar as experiências comunitárias." : "Couldn't load community experiences."));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkedCommunity]);
 
   useEffect(() => {
     if (!userId) { setVisited(new Set()); return; }
@@ -176,6 +194,18 @@ function MapPage() {
           <p className="text-muted-foreground mt-2">{t("mapSub")}</p>
         </motion.div>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm" aria-label={pt ? "Legenda do mapa" : "Map legend"}>
+          <button type="button" aria-pressed={showDestinations} onClick={() => setShowDestinations((v) => !v)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-opacity ${showDestinations ? "" : "opacity-50"}`}>
+            <span className="size-3 rounded-full bg-primary" aria-hidden /> {pt ? "Destinos" : "Destinations"}
+          </button>
+          <button type="button" aria-pressed={showCommunity} onClick={() => setShowCommunity((v) => !v)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-opacity ${showCommunity ? "" : "opacity-50"}`}>
+            <span className="size-3 rotate-45 rounded-[3px] bg-success" aria-hidden /> {pt ? "Experiências Comunitárias" : "Community Experiences"} ({communityItems.length})
+          </button>
+          <span className="inline-flex items-center gap-2 rounded-full border border-dashed px-3 py-1.5 text-muted-foreground">
+            <span className="size-3 rounded-sm bg-warning" aria-hidden /> {pt ? "Negócios: ainda sem coordenadas registadas" : "Businesses: no coordinates registered yet"}
+          </span>
+        </div>
+
         <div className="grid lg:grid-cols-[1fr_360px] gap-6">
           {/* Map */}
           <Card className="relative overflow-hidden border-0 shadow-[var(--shadow-elegant)] h-[420px] sm:h-[500px] lg:h-[640px] p-0">
@@ -194,7 +224,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap destinations={mappable} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
+              <InteractiveMap destinations={showDestinations ? mappable : []} community={showCommunity ? communityItems : []} highlightCommunityId={linkedCommunity ?? null} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
             </Suspense>
           </Card>
 

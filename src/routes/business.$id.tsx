@@ -10,6 +10,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { fetchPublicBusiness, type PublicBusiness } from "@/lib/local-businesses";
 import { supabase } from "@/integrations/supabase/client";
 import { mapExperience, type Experience } from "@/lib/experiences";
+import { BusinessFreeActivities } from "@/components/BusinessFreeActivities";
 
 export const Route = createFileRoute("/business/$id")({
   head: () => ({
@@ -170,6 +171,8 @@ function BusinessDetailPage() {
                 </div>
               )}
             </section>
+
+            <BusinessFreeActivities provinceId={b.provinceId} provinceName={b.province?.[lang] ?? null} />
           </>
         )}
       </main>
