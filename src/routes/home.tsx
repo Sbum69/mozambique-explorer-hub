@@ -38,6 +38,8 @@ import { useDestinations } from "@/hooks/useDestinations";
 import { type ExperienceCategory } from "@/lib/experiences";
 import { useExperiences } from "@/hooks/useExperiences";
 import { useRecommendations } from "@/hooks/useRecommendations";
+import { CommunityExperienceCard, CommunityExperienceDialog } from "@/components/CommunityExperienceCard";
+import type { CommunityExperience } from "@/lib/community-experiences";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
 import { routeCover, routePriceMzn, routeStopCount } from "@/lib/routes";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
@@ -704,9 +706,11 @@ function PersonalSection({ lang }: { lang: Lang }) {
     preferredDestination,
     recommendedExperiences,
     recommendedDestinations,
+    recommendedCommunity,
     loading,
     error,
   } = useRecommendations(4);
+  const [openCommunity, setOpenCommunity] = useState<CommunityExperience | null>(null);
 
   const interestLabel = (id: string) =>
     INTEREST_OPTIONS.find((opt) => opt.id === (id as Interest))?.label[lang] ?? id;
@@ -841,6 +845,23 @@ function PersonalSection({ lang }: { lang: Lang }) {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {!loading && !error && personalised && recommendedCommunity.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xl font-semibold">{lang === "pt" ? "Grátis e sem reserva" : "Free, no booking"}</h3>
+            <Link to="/community-experiences" className="text-sm text-primary hover:underline">
+              {lang === "pt" ? "Ver todas" : "See all"}
+            </Link>
+          </div>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {recommendedCommunity.map(({ item }) => (
+              <CommunityExperienceCard key={item.id} item={item} onOpen={() => setOpenCommunity(item)} />
+            ))}
+          </div>
+          <CommunityExperienceDialog item={openCommunity} onClose={() => setOpenCommunity(null)} />
         </div>
       )}
 

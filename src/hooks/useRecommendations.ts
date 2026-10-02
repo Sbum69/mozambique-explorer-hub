@@ -4,13 +4,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useExperiences } from "@/hooks/useExperiences";
 import { fetchAvailabilityCounts } from "@/lib/experiences";
+import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
+import { useProvinces } from "@/hooks/useProvinces";
 import {
   hasPreferences,
+  recommendCommunity,
   recommendDestinations,
   recommendExperiences,
   type TravelPreferences,
 } from "@/lib/recommendations";
 
+let communityCache: CommunityExperience[] | null = null;
 let availabilityCache: Record<string, number> | null = null;
 
 /**
@@ -34,6 +38,24 @@ export function useRecommendations(limit = 6) {
       })
       .catch(() => {
         // availability only adds a bonus to the score; failing is not fatal
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const { provinces } = useProvinces();
+  const [community, setCommunity] = useState<CommunityExperience[]>(communityCache ?? []);
+  useEffect(() => {
+    if (communityCache) return;
+    let active = true;
+    fetchCommunityExperiences()
+      .then((rows) => {
+        communityCache = rows;
+        if (active) setCommunity(rows);
+      })
+      .catch(() => {
+        // community recommendations are optional
       });
     return () => {
       active = false;
@@ -80,8 +102,14 @@ export function useRecommendations(limit = 6) {
     [personalised, destinations, preferences, experiences],
   );
 
+  const recommendedCommunity = useMemo(
+    () => (personalised ? recommendCommunity(community, preferences, provinces.map((p) => p.code), 4) : []),
+    [personalised, community, preferences, provinces],
+  );
+
   return {
     personalised,
+    recommendedCommunity,
     preferences,
     preferredDestination,
     recommendedExperiences,
