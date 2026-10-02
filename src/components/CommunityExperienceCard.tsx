@@ -62,14 +62,17 @@ export function CommunityExperienceDialog({ item, onClose }: { item: CommunityEx
   return (
     <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {!item && <DialogTitle className="sr-only">{pt ? "Experiência comunitária" : "Community experience"}</DialogTitle>}
         {item && cat && (
           <>
             <DialogHeader>
               <DialogTitle>{item.title[lang]}</DialogTitle>
-              <DialogDescription className="flex flex-wrap gap-2 pt-1">
+              <DialogDescription asChild>
+                <div className="flex flex-wrap gap-2 pt-1">
                 <Badge variant="secondary">{cat.emoji} {cat.label[lang]}</Badge>
                 <Badge variant="outline">{item.provinceName[lang]}</Badge>
                 <Badge className="gap-1"><Gift className="size-3" />{pt ? "Gratuito · sem reserva" : "Free · no booking"}</Badge>
+                </div>
               </DialogDescription>
             </DialogHeader>
             <CommunityImage item={item} className="w-full h-44 rounded-xl" />
