@@ -804,3 +804,11 @@ BLOCK 6G COMPLETE.
 - Reutiliza RLS existente: público vê apenas `status = approved`; owner_id nunca é selecionado. Sem migrations.
 - Atalho na dashboard e no menu; "Ver experiência" em Minhas Reservas abre agora a experiência específica.
 - Limitação: negócios atuais não têm localização/contacto/imagem na BD; "Ver no mapa" usa o destino das experiências e "Como chegar" usa esse destino ou o nome+província.
+
+## Bloco 8C — Experiências Comunitárias (dados reais)
+
+- Migration `drizzle/migrations/0015_community_experiences.sql`: tabela `community_experiences` (separada de `experiences`; sem preço, sem reserva), FK `province_id → provinces`, categoria restrita a beach/culture/food/nature/community/adventure ("All" é só filtro do frontend), lat/lng, `image_url` nulo, `active`. UNIQUE (province_id, title_pt) + `ON CONFLICT DO NOTHING` → importação idempotente (testado: segunda execução insere 0).
+- RLS: anon/autenticados leem só ativas; Admin lê tudo e cria/edita/desativa/elimina. Anon: insert negado (42501), update/delete afetam 0 linhas.
+- Dados: 54 atividades fornecidas pelo utilizador (a lista enviada tem 9 províncias × 6; Manica e Cidade de Maputo não tinham atividades). Festival Tambo guardado em Cabo Delgado (Nampula 5, Cabo Delgado 7). Textos EN traduzidos fielmente do PT fornecido.
+- UI: `/community-experiences` (pesquisa, província, categorias, cartões, detalhe com mapa/coordenadas/Como chegar/Ver no mapa); atalho no painel e menu; secção "O que podes fazer gratuitamente nesta província" no detalhe do negócio; marcador verde próprio + legenda/camadas no mapa (`/map?community=id`); Home recomenda atividades gratuitas (só províncias escolhidas; todas quando nenhuma/todas selecionadas; depois interesses); Admin → "Experiências Comunitárias".
+- Negócios não têm coordenadas na BD, por isso não há marcadores de negócios no mapa (legenda indica).

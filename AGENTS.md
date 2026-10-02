@@ -1,0 +1,1 @@
+- Free community activities live in `community_experiences`, never in `experiences` (business, bookable). Why: different rules (free, no booking, no price).
