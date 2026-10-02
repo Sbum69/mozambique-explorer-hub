@@ -152,3 +152,28 @@ export function recommendDestinations(
     .sort((a, b) => b.score - a.score || b.item.visitorsK - a.item.visitorsK)
     .slice(0, limit);
 }
+
+/**
+ * Community (free) experiences reuse the same rules:
+ *  1) only the provinces the tourist chose (all provinces only when none / "Todas" is chosen);
+ *  2) then interests (+3 per matching interest).
+ */
+export function recommendCommunity<T extends { provinceCode: string; category: string }>(
+  items: T[],
+  prefs: TravelPreferences,
+  allProvinceCodes: string[] = [],
+  limit = 4,
+): Scored<T>[] {
+  const chosen = prefs.provinces ?? [];
+  const isAll = chosen.length === 0 || (allProvinceCodes.length > 0 && allProvinceCodes.every((c) => chosen.includes(c)));
+  const interests = prefs.interests ?? [];
+  return items
+    .filter((it) => isAll || chosen.includes(it.provinceCode))
+    .map((item) => {
+      const reasons = interests.filter((id) => (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(item.category));
+      const matchesProvince = !isAll;
+      return { item, reasons, matchesProvince, score: (matchesProvince ? 4 : 0) + reasons.length * 3 };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
