@@ -43,6 +43,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { requireRole } from "@/lib/auth";
 import { listPlatformUsers, type PlatformRole, type PlatformUser } from "@/lib/platform-users.functions";
 import { toast } from "sonner";
+import {
+  COMMUNITY_CATEGORIES,
+  createCommunityExperience,
+  deleteCommunityExperience,
+  fetchCommunityExperiences,
+  setCommunityExperienceActive,
+  updateCommunityExperience,
+  type CommunityCategory,
+  type CommunityExperience,
+  type CommunityInput,
+} from "@/lib/community-experiences";
 import { createProvince, fetchProvinces, setProvinceActive, type Province } from "@/lib/provinces";
 import { fetchDestinations, type Destination } from "@/lib/destinations";
 import { fetchExperiences, type Experience } from "@/lib/experiences";
@@ -93,7 +104,8 @@ type ModalKey =
   | "reports"
   | "settings"
   | "community"
-  | "communityReports";
+  | "communityReports"
+  | "communityExperiences";
 
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
@@ -154,6 +166,7 @@ function AdminPage() {
     { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
     { key: "community" as const, label: "Moderação da Comunidade", icon: MessageSquare, color: "text-pink-600 bg-pink-100" },
     { key: "communityReports" as const, label: "Denúncias", icon: Flag, color: "text-red-600 bg-red-100" },
+    { key: "communityExperiences" as const, label: "Experiências Comunitárias", icon: Users, color: "text-emerald-600 bg-emerald-100" },
     { key: "provinces" as const, label: "Gerir Províncias", icon: MapPin, color: "text-orange-600 bg-orange-100" },
 
     { key: "addBusiness" as const, label: "Adicionar Negócio", icon: MapPin, color: "text-green-600 bg-green-100" },
@@ -372,6 +385,7 @@ function AdminPage() {
         {activeModal === "communityReports" && <CommunityReportsModal onClose={() => setActiveModal(null)} />}
 
 
+        {activeModal === "communityExperiences" && <CommunityExperiencesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "addBusiness" && <AddBusinessModal onClose={() => setActiveModal(null)} />}
         {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} />}
@@ -1573,6 +1587,176 @@ function CommunityReportsModal({ onClose }: { onClose: () => void }) {
           ))}
         </ul>
       )}
+    </ModalShell>
+  );
+}
+
+
+/* ---------- Community experiences modal (free activities) — admin-only through RLS ---------- */
+
+const EMPTY_COMMUNITY: CommunityInput = {
+  titlePt: "", titleEn: "", descriptionPt: "", descriptionEn: "", provinceId: "",
+  category: "beach", location: "", lat: null, lng: null, imageUrl: null,
+};
+
+function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
+  const [items, setItems] = useState<CommunityExperience[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState<CommunityInput>(EMPTY_COMMUNITY);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState("");
+
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    Promise.all([fetchCommunityExperiences({ includeInactive: true }), fetchProvinces(true)])
+      .then(([rows, provs]) => { setItems(rows); setProvinces(provs); })
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "erro"))
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { load(); }, []);
+
+  const set = <K extends keyof CommunityInput>(k: K, v: CommunityInput[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  const startEdit = (it: CommunityExperience) => {
+    setEditingId(it.id);
+    setForm({
+      titlePt: it.title.pt, titleEn: it.title.en, descriptionPt: it.description.pt, descriptionEn: it.description.en,
+      provinceId: it.provinceId, category: it.category, location: it.location, lat: it.lat, lng: it.lng, imageUrl: it.imageUrl,
+    });
+  };
+  const reset = () => { setEditingId(null); setForm(EMPTY_COMMUNITY); };
+
+  const save = async () => {
+    if (!form.titlePt.trim() || !form.titleEn.trim() || !form.descriptionPt.trim() || !form.descriptionEn.trim() || !form.provinceId) {
+      toast.error("Preenche títulos, descrições (PT/EN) e província.");
+      return;
+    }
+    if ((form.lat !== null && (form.lat < -90 || form.lat > 90)) || (form.lng !== null && (form.lng < -180 || form.lng > 180))) {
+      toast.error("Coordenadas inválidas.");
+      return;
+    }
+    setSaving(true);
+    try {
+      if (editingId) {
+        await updateCommunityExperience(editingId, form);
+        toast.success("Atividade atualizada.");
+      } else {
+        await createCommunityExperience(form);
+        toast.success("Atividade adicionada.");
+      }
+      reset();
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggle = async (it: CommunityExperience) => {
+    try {
+      await setCommunityExperienceActive(it.id, !it.active);
+      toast.success(it.active ? "Atividade desativada." : "Atividade ativada.");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    }
+  };
+
+  const remove = async (it: CommunityExperience) => {
+    if (!window.confirm(`Eliminar "${it.title.pt}"? Esta ação não pode ser desfeita.`)) return;
+    try {
+      await deleteCommunityExperience(it.id);
+      toast.success("Atividade eliminada.");
+      if (editingId === it.id) reset();
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    }
+  };
+
+  const numOrNull = (v: string) => (v.trim() === "" || Number.isNaN(Number(v)) ? null : Number(v));
+  const visible = items.filter((it) => !filter || it.provinceId === filter);
+  const input = "w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900";
+
+  return (
+    <ModalShell
+      onClose={onClose}
+      headerGradient="from-emerald-600 to-teal-600"
+      maxWidth="max-w-4xl"
+      header={
+        <div>
+          <h2 className="text-xl font-bold">Experiências Comunitárias</h2>
+          <p className="text-sm text-white/80">Atividades gratuitas, sem reserva · {items.length} registadas</p>
+        </div>
+      }
+    >
+      <div className="space-y-5">
+        <div className="rounded-2xl border border-gray-100 p-4 space-y-3 bg-gray-50">
+          <p className="font-semibold text-gray-900">{editingId ? "Editar atividade" : "Adicionar atividade"}</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <input className={input} placeholder="Título PT" value={form.titlePt} onChange={(e) => set("titlePt", e.target.value)} />
+            <input className={input} placeholder="Título EN" value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
+            <textarea className={input} rows={2} placeholder="Descrição PT" value={form.descriptionPt} onChange={(e) => set("descriptionPt", e.target.value)} />
+            <textarea className={input} rows={2} placeholder="Descrição EN" value={form.descriptionEn} onChange={(e) => set("descriptionEn", e.target.value)} />
+            <select className={input} value={form.provinceId} onChange={(e) => set("provinceId", e.target.value)}>
+              <option value="">Província...</option>
+              {provinces.map((p) => <option key={p.id} value={p.id}>{p.name.pt}</option>)}
+            </select>
+            <select className={input} value={form.category} onChange={(e) => set("category", e.target.value as CommunityCategory)}>
+              {COMMUNITY_CATEGORIES.filter((c) => c.id !== "all").map((c) => (
+                <option key={c.id} value={c.id}>{c.emoji} {c.label.en}</option>
+              ))}
+            </select>
+            <input className={input} placeholder="Localização" value={form.location} onChange={(e) => set("location", e.target.value)} />
+            <input className={input} placeholder="URL da imagem (opcional)" value={form.imageUrl ?? ""} onChange={(e) => set("imageUrl", e.target.value || null)} />
+            <input className={input} placeholder="Latitude" inputMode="decimal" value={form.lat ?? ""} onChange={(e) => set("lat", numOrNull(e.target.value))} />
+            <input className={input} placeholder="Longitude" inputMode="decimal" value={form.lng ?? ""} onChange={(e) => set("lng", numOrNull(e.target.value))} />
+          </div>
+          <div className="flex gap-2 justify-end">
+            {editingId && <button onClick={reset} className="px-4 py-2 rounded-lg text-sm bg-white border border-gray-200 text-gray-700">Cancelar</button>}
+            <button onClick={() => void save()} disabled={saving} className="px-4 py-2 rounded-lg text-sm bg-emerald-600 text-white disabled:opacity-50">
+              {saving ? "A guardar..." : editingId ? "Guardar alterações" : "Adicionar"}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm text-gray-600">{visible.length} atividades</p>
+          <select className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900" value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="">Todas as províncias</option>
+            {provinces.map((p) => <option key={p.id} value={p.id}>{p.name.pt}</option>)}
+          </select>
+        </div>
+
+        {loading ? (
+          <p className="text-sm text-gray-500">A carregar...</p>
+        ) : error ? (
+          <p className="text-sm text-red-600">{error}</p>
+        ) : visible.length === 0 ? (
+          <p className="text-sm text-gray-500">Sem atividades.</p>
+        ) : (
+          <ul className="divide-y divide-gray-100">
+            {visible.map((it) => (
+              <li key={it.id} className="py-3 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{it.title.pt}</p>
+                  <p className="text-xs text-gray-500">{it.provinceName.pt} · {it.category} · {it.active ? "Ativa" : "Inativa"}</p>
+                </div>
+                <button onClick={() => startEdit(it)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600" aria-label="Editar"><Edit className="size-4" /></button>
+                <button onClick={() => void toggle(it)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600" aria-label={it.active ? "Desativar" : "Ativar"}>
+                  {it.active ? <Ban className="size-4" /> : <CheckCircle className="size-4" />}
+                </button>
+                <button onClick={() => void remove(it)} className="p-2 rounded-lg hover:bg-red-50 text-red-600" aria-label="Eliminar"><Trash2 className="size-4" /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </ModalShell>
   );
 }
