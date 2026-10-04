@@ -29,11 +29,22 @@ export interface CommunityExperience {
   lat: number | null;
   lng: number | null;
   imageUrl: string | null;
+  imagePath: string | null;
   active: boolean;
+  status: CommunityStatus;
+  submittedBy: string | null;
+  submitterName: string | null;
+  submittedAt: string;
+  decidedAt: string | null;
+  rejectionReason: string | null;
+  additionalInfo: string | null;
 }
 
+export type CommunityStatus = "pending" | "approved" | "rejected";
+export const COMMUNITY_PHOTOS_BUCKET = "community-photos";
+
 const SELECT =
-  "id, title_pt, title_en, description_pt, description_en, province_id, category, location, lat, lng, image_url, active, provinces(code, name_pt, name_en)";
+  "id, title_pt, title_en, description_pt, description_en, province_id, category, location, lat, lng, image_url, image_path, active, status, submitted_by, submitted_at, decided_at, rejection_reason, additional_info, provinces(code, name_pt, name_en), submitter:profiles!community_experiences_submitted_by_fkey(display_name)";
 
 interface Row {
   id: string;
@@ -47,7 +58,15 @@ interface Row {
   lat: number | string | null;
   lng: number | string | null;
   image_url: string | null;
+  image_path: string | null;
   active: boolean;
+  status: string;
+  submitted_by: string | null;
+  submitted_at: string;
+  decided_at: string | null;
+  rejection_reason: string | null;
+  additional_info: string | null;
+  submitter: { display_name: string | null } | { display_name: string | null }[] | null;
   provinces: { code: string; name_pt: string; name_en: string } | { code: string; name_pt: string; name_en: string }[] | null;
 }
 
@@ -65,7 +84,15 @@ function map(row: Row): CommunityExperience {
     lat: row.lat === null ? null : Number(row.lat),
     lng: row.lng === null ? null : Number(row.lng),
     imageUrl: row.image_url || null,
+    imagePath: row.image_path || null,
     active: row.active,
+    status: row.status as CommunityStatus,
+    submittedBy: row.submitted_by,
+    submitterName: (Array.isArray(row.submitter) ? row.submitter[0] : row.submitter)?.display_name ?? null,
+    submittedAt: row.submitted_at,
+    decidedAt: row.decided_at,
+    rejectionReason: row.rejection_reason,
+    additionalInfo: row.additional_info,
   };
 }
 
@@ -74,12 +101,39 @@ export interface CommunityFilters {
   category?: CommunityCategory;
   search?: string;
   includeInactive?: boolean;
+  /** Admin only. Public reads are always approved + active. */
+  status?: CommunityStatus | "any";
+  mine?: string;
+}
+
+/** Private bucket: photos are shown through short-lived signed URLs (storage RLS decides who may read). */
+async function withSignedImages(items: CommunityExperience[]): Promise<CommunityExperience[]> {
+  const paths = items.map((i) => i.imagePath).filter((p): p is string => !!p);
+  if (!paths.length) return items;
+  const { data } = await supabase.storage.from(COMMUNITY_PHOTOS_BUCKET).createSignedUrls(paths, 3600);
+  const byPath = new Map((data ?? []).filter((d) => d.signedUrl && d.path).map((d) => [d.path as string, d.signedUrl]));
+  return items.map((i) => (i.imagePath && byPath.get(i.imagePath) ? { ...i, imageUrl: byPath.get(i.imagePath)! } : i));
+}
+
+export async function uploadCommunityPhoto(userId: string, file: File): Promise<string> {
+  if (!file.type.startsWith("image/")) throw new Error("invalid_type");
+  if (file.size > 5 * 1024 * 1024) throw new Error("too_large");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from(COMMUNITY_PHOTOS_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+  if (error) throw new Error(error.message);
+  return path;
 }
 
 /** Filters run in the database. Inactive rows are only returned to admins (RLS). */
 export async function fetchCommunityExperiences(f: CommunityFilters = {}): Promise<CommunityExperience[]> {
   let q = supabase.from("community_experiences").select(SELECT).order("title_pt");
-  if (!f.includeInactive) q = q.eq("active", true);
+  if (f.mine) q = q.eq("submitted_by", f.mine);
+  else {
+    if (!f.includeInactive) q = q.eq("active", true);
+    const st = f.status ?? "approved";
+    if (st !== "any") q = q.eq("status", st);
+  }
   if (f.provinceId) q = q.eq("province_id", f.provinceId);
   if (f.category) q = q.eq("category", f.category);
   if (f.search?.trim()) {
@@ -88,7 +142,7 @@ export async function fetchCommunityExperiences(f: CommunityFilters = {}): Promi
   }
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => map(r as unknown as Row));
+  return withSignedImages((data ?? []).map((r) => map(r as unknown as Row)));
 }
 
 export interface CommunityInput {
@@ -102,6 +156,8 @@ export interface CommunityInput {
   lat: number | null;
   lng: number | null;
   imageUrl: string | null;
+  imagePath?: string | null;
+  additionalInfo?: string | null;
 }
 
 function toRow(i: CommunityInput) {
@@ -116,6 +172,8 @@ function toRow(i: CommunityInput) {
     lat: i.lat,
     lng: i.lng,
     image_url: i.imageUrl || null,
+    image_path: i.imagePath ?? null,
+    additional_info: i.additionalInfo?.trim() || null,
   };
 }
 
@@ -124,8 +182,22 @@ export async function createCommunityExperience(i: CommunityInput) {
   const { error } = await supabase.from("community_experiences").insert(toRow(i));
   if (error) throw new Error(error.message);
 }
+/** Tourist/business proposal: the database forces status=pending and submitted_by=auth.uid(). */
+export async function submitCommunityExperience(userId: string, i: CommunityInput) {
+  const { error } = await supabase.from("community_experiences").insert({ ...toRow(i), image_url: null, status: "pending", submitted_by: userId });
+  if (error) throw new Error(error.message);
+}
+export async function decideCommunityExperience(id: string, status: "approved" | "rejected", reason?: string) {
+  const { error } = await supabase
+    .from("community_experiences")
+    .update({ status, rejection_reason: status === "rejected" ? reason?.trim() || null : null })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
 export async function updateCommunityExperience(id: string, i: CommunityInput) {
-  const { error } = await supabase.from("community_experiences").update(toRow(i)).eq("id", id);
+  const row = toRow(i);
+  if (i.imagePath === undefined) delete (row as Partial<typeof row>).image_path;
+  const { error } = await supabase.from("community_experiences").update(row).eq("id", id);
   if (error) throw new Error(error.message);
 }
 export async function setCommunityExperienceActive(id: string, active: boolean) {
