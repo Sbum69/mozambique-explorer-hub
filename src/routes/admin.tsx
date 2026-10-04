@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -46,7 +47,9 @@ import { toast } from "sonner";
 import {
   COMMUNITY_CATEGORIES,
   createCommunityExperience,
+  decideCommunityExperience,
   deleteCommunityExperience,
+  uploadCommunityPhoto,
   fetchCommunityExperiences,
   setCommunityExperienceActive,
   updateCommunityExperience,
@@ -1612,7 +1615,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
   const load = () => {
     setLoading(true);
     setError(null);
-    Promise.all([fetchCommunityExperiences({ includeInactive: true }), fetchProvinces(true)])
+    Promise.all([fetchCommunityExperiences({ includeInactive: true, status: "any" }), fetchProvinces(true)])
       .then(([rows, provs]) => { setItems(rows); setProvinces(provs); })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "erro"))
       .finally(() => setLoading(false));
@@ -1625,7 +1628,8 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
     setEditingId(it.id);
     setForm({
       titlePt: it.title.pt, titleEn: it.title.en, descriptionPt: it.description.pt, descriptionEn: it.description.en,
-      provinceId: it.provinceId, category: it.category, location: it.location, lat: it.lat, lng: it.lng, imageUrl: it.imageUrl,
+      provinceId: it.provinceId, category: it.category, location: it.location, lat: it.lat, lng: it.lng,
+      imageUrl: it.imagePath ? null : it.imageUrl, imagePath: it.imagePath, additionalInfo: it.additionalInfo,
     });
   };
   const reset = () => { setEditingId(null); setForm(EMPTY_COMMUNITY); };
@@ -1679,8 +1683,43 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const [uploading, setUploading] = useState(false);
+  const [tab, setTab] = useState<"pending" | "all">("pending");
+  const uploadPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) throw new Error("Sessão expirada.");
+      const path = await uploadCommunityPhoto(data.user.id, file);
+      setForm((f) => ({ ...f, imagePath: path, imageUrl: null }));
+      toast.success("Fotografia carregada. Guarda para aplicar.");
+    } catch (e) {
+      toast.error(e instanceof Error && e.message === "too_large" ? "Máximo 5 MB." : e instanceof Error && e.message === "invalid_type" ? "Escolhe uma imagem." : "Não foi possível carregar a fotografia.");
+    } finally {
+      setUploading(false);
+    }
+  };
+  const decide = async (it: CommunityExperience, status: "approved" | "rejected") => {
+    let reason: string | undefined;
+    if (status === "rejected") {
+      const r = window.prompt(`Rejeitar "${it.title.pt}"? Indica o motivo (opcional):`, "");
+      if (r === null) return;
+      reason = r;
+    } else if (!window.confirm(`Aprovar "${it.title.pt}" e torná-la pública?`)) return;
+    try {
+      await decideCommunityExperience(it.id, status, reason);
+      toast.success(status === "approved" ? "Experiência aprovada." : "Experiência rejeitada.");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falhou");
+    }
+  };
+  const statusLabel = (s: string) => (s === "pending" ? "Pendente" : s === "rejected" ? "Rejeitada" : "Aprovada");
+  const pendingCount = items.filter((it) => it.status === "pending").length;
+
   const numOrNull = (v: string) => (v.trim() === "" || Number.isNaN(Number(v)) ? null : Number(v));
-  const visible = items.filter((it) => !filter || it.provinceId === filter);
+  const visible = items.filter((it) => (!filter || it.provinceId === filter) && (tab === "all" || it.status === "pending"));
   const input = "w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900";
 
   return (
@@ -1713,7 +1752,11 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
               ))}
             </select>
             <input className={input} placeholder="Localização" value={form.location} onChange={(e) => set("location", e.target.value)} />
-            <input className={input} placeholder="URL da imagem (opcional)" value={form.imageUrl ?? ""} onChange={(e) => set("imageUrl", e.target.value || null)} />
+            <label className={`${input} flex items-center gap-2 cursor-pointer bg-white`}>
+              <span className="truncate">{uploading ? "A carregar..." : form.imagePath ? "Fotografia anexada ✓ (trocar)" : "Anexar fotografia (máx. 5 MB)"}</span>
+              <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(e) => void uploadPhoto(e.target.files?.[0])} />
+            </label>
+            <input className={input} placeholder="Informação adicional (opcional)" value={form.additionalInfo ?? ""} onChange={(e) => set("additionalInfo", e.target.value)} />
             <input className={input} placeholder="Latitude" inputMode="decimal" value={form.lat ?? ""} onChange={(e) => set("lat", numOrNull(e.target.value))} />
             <input className={input} placeholder="Longitude" inputMode="decimal" value={form.lng ?? ""} onChange={(e) => set("lng", numOrNull(e.target.value))} />
           </div>
@@ -1725,7 +1768,11 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex gap-1">
+            <button onClick={() => setTab("pending")} className={`px-3 py-1.5 rounded-lg text-sm ${tab === "pending" ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-700"}`}>Pendentes ({pendingCount})</button>
+            <button onClick={() => setTab("all")} className={`px-3 py-1.5 rounded-lg text-sm ${tab === "all" ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-700"}`}>Todas ({items.length})</button>
+          </div>
           <p className="text-sm text-gray-600">{visible.length} atividades</p>
           <select className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-900" value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="">Todas as províncias</option>
@@ -1743,10 +1790,16 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
           <ul className="divide-y divide-gray-100">
             {visible.map((it) => (
               <li key={it.id} className="py-3 flex items-center gap-3">
+                {it.imageUrl ? <img src={it.imageUrl} alt="" className="size-14 rounded-lg object-cover shrink-0" /> : <div className="size-14 rounded-lg bg-gray-100 shrink-0" />}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">{it.title.pt}</p>
-                  <p className="text-xs text-gray-500">{it.provinceName.pt} · {it.category} · {it.active ? "Ativa" : "Inativa"}</p>
+                  <p className="text-xs text-gray-500">{it.provinceName.pt} · {it.category} · {it.location || "—"} · {it.active ? "Ativa" : "Inativa"} · <span className={it.status === "pending" ? "text-amber-600 font-semibold" : it.status === "rejected" ? "text-red-600" : "text-emerald-700"}>{statusLabel(it.status)}</span></p>
+                  {it.submittedBy && <p className="text-xs text-gray-500">Submetida por: {it.submitterName ?? it.submittedBy.slice(0, 8)} · {new Date(it.submittedAt).toLocaleDateString("pt-PT")}</p>}
+                  {tab === "pending" && <p className="text-xs text-gray-600 line-clamp-2">{it.description.pt}</p>}
+                  {it.rejectionReason && <p className="text-xs text-red-600">Motivo: {it.rejectionReason}</p>}
                 </div>
+                {it.status !== "approved" && <button onClick={() => void decide(it, "approved")} className="px-2 py-1 rounded-lg text-xs bg-emerald-600 text-white">Aprovar</button>}
+                {it.status === "pending" && <button onClick={() => void decide(it, "rejected")} className="px-2 py-1 rounded-lg text-xs bg-red-600 text-white">Rejeitar</button>}
                 <button onClick={() => startEdit(it)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600" aria-label="Editar"><Edit className="size-4" /></button>
                 <button onClick={() => void toggle(it)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600" aria-label={it.active ? "Desativar" : "Ativar"}>
                   {it.active ? <Ban className="size-4" /> : <CheckCircle className="size-4" />}

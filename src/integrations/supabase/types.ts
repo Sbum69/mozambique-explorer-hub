@@ -249,58 +249,110 @@ export type Database = {
       community_experiences: {
         Row: {
           active: boolean
+          additional_info: string | null
           category: string
           created_at: string
+          decided_at: string | null
+          decided_by: string | null
           description_en: string
           description_pt: string
           id: string
+          image_path: string | null
           image_url: string | null
           lat: number | null
           lng: number | null
           location: string
           province_id: string
+          rejection_reason: string | null
+          status: string
+          submitted_at: string
+          submitted_by: string | null
           title_en: string
           title_pt: string
           updated_at: string
         }
         Insert: {
           active?: boolean
+          additional_info?: string | null
           category: string
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
           description_en: string
           description_pt: string
           id?: string
+          image_path?: string | null
           image_url?: string | null
           lat?: number | null
           lng?: number | null
           location?: string
           province_id: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
           title_en: string
           title_pt: string
           updated_at?: string
         }
         Update: {
           active?: boolean
+          additional_info?: string | null
           category?: string
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
           description_en?: string
           description_pt?: string
           id?: string
+          image_path?: string | null
           image_url?: string | null
           lat?: number | null
           lng?: number | null
           location?: string
           province_id?: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
           title_en?: string
           title_pt?: string
           updated_at?: string
         }
         Relationships: [
           {
+            foreignKeyName: "community_experiences_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_experiences_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "community_experiences_province_id_fkey"
             columns: ["province_id"]
             isOneToOne: false
             referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_experiences_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_experiences_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
