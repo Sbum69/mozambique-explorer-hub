@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Store, MapPin, Phone, Mail, Globe, Navigation, Map as MapIcon, Compass, Clock, BadgeCheck } from "lucide-react";
+import { ArrowLeft, Store, MapPin, Phone, Mail, Globe, Map as MapIcon, Compass, Clock, BadgeCheck } from "lucide-react";
 
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { Button } from "@/components/ui/button";

@@ -74,10 +74,11 @@ interface Props {
   community?: CommunityExperience[];
   highlightCommunityId?: string | null;
   selectedId?: string | null;
+  onPick?: (d: Destination) => void;
   onSelectCommunity?: (c: CommunityExperience) => void;
 }
 
-export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus, community = [], highlightCommunityId, selectedId, onSelectCommunity }: Props) {
+export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus, community = [], highlightCommunityId, selectedId, onPick, onSelectCommunity }: Props) {
   const { lang } = useLang();
 
   return (
@@ -113,7 +114,7 @@ export function InteractiveMap({ destinations, onSelect, onDirections, routeCoor
       )}
 
       {destinations.map((d) => (
-        <Marker key={d.id} position={d.coords} icon={d.id === selectedId ? selectedPinIcon : pinIcon} zIndexOffset={d.id === selectedId ? 1000 : 0} eventHandlers={{ click: () => onSelect?.(d) }}>
+        <Marker key={d.id} position={d.coords} icon={d.id === selectedId ? selectedPinIcon : pinIcon} zIndexOffset={d.id === selectedId ? 1000 : 0} eventHandlers={{ click: () => onPick?.(d) }}>
           <Popup>
             <div style={{ minWidth: 200 }}>
               <img src={d.image} alt={d.name} style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 8 }} />
