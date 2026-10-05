@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLang } from "@/contexts/LanguageContext";
-import { categoryMeta, type CommunityExperience } from "@/lib/community-experiences";
+import { categoryMeta, type CommunityCategory, type CommunityExperience } from "@/lib/community-experiences";
 import { hasValidCoords } from "@/lib/visits";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 
@@ -92,7 +92,7 @@ export function CommunityExperienceDialog({ item, onClose, mapCategory }: { item
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <DirectionsButtons coords={coords} />
-                  <Button size="sm" onClick={() => navigate({ to: "/map", search: { community: item.id, category: mapCategory === "all" ? undefined : (mapCategory ?? item.category) } })}>
+                  <Button size="sm" onClick={() => navigate({ to: "/map", search: { community: item.id, category: mapCategory === "all" ? undefined : ((mapCategory ?? item.category) as CommunityCategory) } })}>
                     <MapIcon className="size-4 mr-1" />{pt ? "Ver no mapa" : "View on map"}
                   </Button>
                 </div>
