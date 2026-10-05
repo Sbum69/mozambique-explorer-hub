@@ -80,6 +80,9 @@ function MapPage() {
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [focus, setFocus] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
+  useEffect(() => {
+    if (linkedSlug && selected && (selected.slug === linkedSlug || selected.id === linkedSlug) && hasValidCoords(selected.coords)) setFocus(selected.coords);
+  }, [linkedSlug, selected]);
   const [directionsOpen, setDirectionsOpen] = useState(false);
   const [visited, setVisited] = useState<Set<string>>(new Set());
   const [savingVisit, setSavingVisit] = useState(false);
