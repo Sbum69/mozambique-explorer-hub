@@ -120,6 +120,13 @@
       "when": 1791132665411,
       "tag": "0016_community_experiences_submissions",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791180309809,
+      "tag": "0017_community_experiences_notify_type",
+      "breakpoints": true
     }
   ]
 }
