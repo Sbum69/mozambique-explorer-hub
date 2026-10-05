@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Store, MapPin, Phone, Mail, Globe, Navigation, Map as MapIcon, Compass, Clock, BadgeCheck } from "lucide-react";
+import { ArrowLeft, Store, MapPin, Phone, Mail, Globe, Map as MapIcon, Compass, Clock, BadgeCheck } from "lucide-react";
 
+import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -68,14 +69,6 @@ function BusinessDetailPage() {
 
   const mapSlug = exps.find((e) => e.destinationId)?.destinationId ?? null;
 
-  const directions = () => {
-    if (!b) return;
-    const dest = coords
-      ? `${coords.lat},${coords.lng}`
-      : encodeURIComponent([b.name, b.address, b.province?.pt, "Moçambique"].filter(Boolean).join(", "));
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest}`, "_blank", "noopener");
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b">
@@ -135,9 +128,7 @@ function BusinessDetailPage() {
                       <MapIcon className="size-4 mr-1" />{pt ? "Ver no mapa" : "View on map"}
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" onClick={directions}>
-                    <Navigation className="size-4 mr-1" />{pt ? "Como chegar" : "Get directions"}
-                  </Button>
+                  <DirectionsButtons coords={coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng) ? [coords.lat, coords.lng] : null} />
                   <Button size="sm" onClick={() => document.getElementById("business-experiences")?.scrollIntoView({ behavior: "smooth" })}>
                     <Compass className="size-4 mr-1" />{pt ? "Ver experiências" : "View experiences"}
                   </Button>

@@ -18,6 +18,11 @@ import {
   type CommunityExperience,
 } from "@/lib/community-experiences";
 import { CommunityExperienceCard, CommunityExperienceDialog } from "@/components/CommunityExperienceCard";
+import { CommunitySubmitDialog } from "@/components/CommunitySubmitDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
+import { useNavigate } from "@tanstack/react-router";
+import { Plus, Map as MapIcon } from "lucide-react";
 
 export const Route = createFileRoute("/community-experiences")({
   head: () => ({
@@ -50,6 +55,11 @@ function CommunityExperiencesPage() {
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const [open, setOpen] = useState<CommunityExperience | null>(null);
+  const [proposing, setProposing] = useState(false);
+  const { isAuthenticated, authUser } = useAuth();
+  const { requireAccount } = useAuthGate();
+  const navigate = useNavigate();
+  const propose = () => { if (requireAccount(pt ? "Propor experiência" : "Propose experience")) setProposing(true); };
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -95,6 +105,12 @@ function CommunityExperiencesPage() {
             ? "Atividades de lazer gratuitas, sem reserva, organizadas por província."
             : "Free leisure activities, no booking needed, organised by province."}
         </p>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={propose}><Plus className="size-4" />{pt ? "Propor experiência" : "Propose experience"}</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate({ to: "/map", search: { category: category === "all" ? undefined : category } })}>
+            <MapIcon className="size-4" />{pt ? "Ver no mapa" : "View on map"}
+          </Button>
+        </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="relative">
@@ -162,7 +178,8 @@ function CommunityExperiencesPage() {
         )}
       </main>
 
-      <CommunityExperienceDialog item={open} onClose={() => setOpen(null)} />
+      <CommunityExperienceDialog item={open} onClose={() => setOpen(null)} mapCategory={category} />
+      {isAuthenticated && authUser && <CommunitySubmitDialog open={proposing} onClose={() => setProposing(false)} userId={authUser.id} />}
     </div>
   );
 }

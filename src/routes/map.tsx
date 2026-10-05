@@ -17,7 +17,7 @@ import { type Destination } from "@/lib/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
+import { COMMUNITY_CATEGORIES, fetchCommunityExperiences, type CommunityCategory, type CommunityExperience } from "@/lib/community-experiences";
 import { addVisit, directionsUrls, fetchMyVisits, hasValidCoords, removeVisit } from "@/lib/visits";
 
 const InteractiveMap = lazy(() =>
@@ -37,9 +37,11 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>): { destination?: string; community?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { destination?: string; community?: string; category?: CommunityCategory } => ({
     ...(typeof search.destination === "string" ? { destination: search.destination } : {}),
     ...(typeof search.community === "string" ? { community: search.community } : {}),
+    ...(typeof search.category === "string" && COMMUNITY_CATEGORIES.some((c) => c.id === search.category && c.id !== "all")
+      ? { category: search.category as CommunityCategory } : {}),
   }),
   component: MapPage,
 });
@@ -51,7 +53,11 @@ function MapPage() {
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
-  const { destination: linkedSlug, community: linkedCommunity } = Route.useSearch();
+  const { destination: linkedSlug, community: linkedCommunity, category: linkedCategory } = Route.useSearch();
+  const [communityCategory, setCommunityCategory] = useState<CommunityCategory | "all">(linkedCategory ?? "all");
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(linkedCommunity ?? null);
+  useEffect(() => { setCommunityCategory(linkedCategory ?? "all"); }, [linkedCategory]);
+  useEffect(() => { setSelectedCommunityId(linkedCommunity ?? null); }, [linkedCommunity]);
   const preferredId = user?.preferences?.province;
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const [selected, setSelected] = useState<Destination | null>(null);
@@ -66,7 +72,7 @@ function MapPage() {
     if (!destinations.length) return;
     setSelected((current) =>
       current ??
-      (linkedSlug ? destinations.find((d) => d.slug === linkedSlug) : undefined) ??
+      (linkedSlug ? destinations.find((d) => d.slug === linkedSlug || d.id === linkedSlug) : undefined) ??
       destinations.find((d) => d.slug === preferredId) ??
       destinations[0]);
   }, [destinations, preferredId, linkedSlug]);
@@ -74,6 +80,9 @@ function MapPage() {
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [focus, setFocus] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
+  useEffect(() => {
+    if (linkedSlug && selected && (selected.slug === linkedSlug || selected.id === linkedSlug) && hasValidCoords(selected.coords)) setFocus(selected.coords);
+  }, [linkedSlug, selected]);
   const [directionsOpen, setDirectionsOpen] = useState(false);
   const [visited, setVisited] = useState<Set<string>>(new Set());
   const [savingVisit, setSavingVisit] = useState(false);
@@ -85,6 +94,7 @@ function MapPage() {
   const [communityItems, setCommunityItems] = useState<CommunityExperience[]>([]);
   const [showDestinations, setShowDestinations] = useState(true);
   const [showCommunity, setShowCommunity] = useState(true);
+  const filteredCommunity = communityItems.filter((c) => (communityCategory === "all" || c.category === communityCategory) && c.lat !== null && c.lng !== null);
   useEffect(() => {
     fetchCommunityExperiences()
       .then((rows) => {
@@ -196,14 +206,23 @@ function MapPage() {
 
         <div className="mb-4 flex flex-wrap items-center gap-2 text-sm" aria-label={pt ? "Legenda do mapa" : "Map legend"}>
           <button type="button" aria-pressed={showDestinations} onClick={() => setShowDestinations((v) => !v)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-opacity ${showDestinations ? "" : "opacity-50"}`}>
-            <span className="size-3 rounded-full bg-primary" aria-hidden /> {pt ? "Destinos" : "Destinations"}
+            <span className="size-3 rounded-full bg-success" aria-hidden /> {pt ? "Destinos" : "Destinations"} · <span className="size-3 rounded-full bg-primary" aria-hidden /> {pt ? "selecionado" : "selected"}
           </button>
           <button type="button" aria-pressed={showCommunity} onClick={() => setShowCommunity((v) => !v)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-opacity ${showCommunity ? "" : "opacity-50"}`}>
-            <span className="size-3 rotate-45 rounded-[3px] bg-success" aria-hidden /> {pt ? "Experiências Comunitárias" : "Community Experiences"} ({communityItems.length})
+            <span className="size-3 rotate-45 rounded-[3px] bg-success" aria-hidden /> {pt ? "Experiências Comunitárias" : "Community Experiences"} ({filteredCommunity.length})
           </button>
           <span className="inline-flex items-center gap-2 rounded-full border border-dashed px-3 py-1.5 text-muted-foreground">
             <span className="size-3 rounded-sm bg-warning" aria-hidden /> {pt ? "Negócios: ainda sem coordenadas registadas" : "Businesses: no coordinates registered yet"}
           </span>
+        </div>
+
+        <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label={pt ? "Categoria das experiências comunitárias" : "Community experience category"}>
+          {COMMUNITY_CATEGORIES.map((c) => (
+            <Button key={c.id} size="sm" role="tab" aria-selected={communityCategory === c.id} variant={communityCategory === c.id ? "default" : "outline"}
+              onClick={() => { setCommunityCategory(c.id); setShowCommunity(true); navigate({ to: "/map", search: (prev) => ({ ...prev, category: c.id === "all" ? undefined : c.id }), replace: true }); }}>
+              <span aria-hidden>{c.emoji}</span> {c.label[lang]}
+            </Button>
+          ))}
         </div>
 
         <div className="grid lg:grid-cols-[1fr_360px] gap-6">
@@ -224,7 +243,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap destinations={showDestinations ? mappable : []} community={showCommunity ? communityItems : []} highlightCommunityId={linkedCommunity ?? null} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
+              <InteractiveMap destinations={showDestinations ? mappable : []} community={showCommunity ? filteredCommunity : []} highlightCommunityId={selectedCommunityId} onSelectCommunity={(c) => setSelectedCommunityId(c.id)} selectedId={selected?.id ?? null} onPick={(d) => { setSelected(d); setDirectionsOpen(false); }} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
             </Suspense>
           </Card>
 

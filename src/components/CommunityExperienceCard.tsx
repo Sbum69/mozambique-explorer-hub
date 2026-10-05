@@ -1,14 +1,15 @@
 import { lazy, Suspense } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { MapPin, Navigation, Map as MapIcon, Gift } from "lucide-react";
+import { MapPin, Map as MapIcon, Gift } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLang } from "@/contexts/LanguageContext";
-import { categoryMeta, type CommunityExperience } from "@/lib/community-experiences";
-import { directionsUrls, hasValidCoords } from "@/lib/visits";
+import { categoryMeta, type CommunityCategory, type CommunityExperience } from "@/lib/community-experiences";
+import { hasValidCoords } from "@/lib/visits";
+import { DirectionsButtons } from "@/components/DirectionsButtons";
 
 const CommunityMiniMap = lazy(() =>
   import("@/components/CommunityMiniMap").then((m) => ({ default: m.CommunityMiniMap })),
@@ -51,7 +52,8 @@ export function CommunityExperienceCard({ item, onOpen }: { item: CommunityExper
   );
 }
 
-export function CommunityExperienceDialog({ item, onClose }: { item: CommunityExperience | null; onClose: () => void }) {
+/** mapCategory: the page filter ("all" keeps all categories); defaults to the item's own category. */
+export function CommunityExperienceDialog({ item, onClose, mapCategory }: { item: CommunityExperience | null; onClose: () => void; mapCategory?: string }) {
   const { lang } = useLang();
   const pt = lang === "pt";
   const navigate = useNavigate();
@@ -89,12 +91,8 @@ export function CommunityExperienceDialog({ item, onClose }: { item: CommunityEx
                   {pt ? "Coordenadas aproximadas" : "Approximate coordinates"}: {coords[0]}, {coords[1]}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button asChild variant="outline" size="sm">
-                    <a href={directionsUrls(coords).google} target="_blank" rel="noopener noreferrer">
-                      <Navigation className="size-4 mr-1" />{pt ? "Como chegar" : "Get directions"}
-                    </a>
-                  </Button>
-                  <Button size="sm" onClick={() => navigate({ to: "/map", search: { community: item.id } })}>
+                  <DirectionsButtons coords={coords} />
+                  <Button size="sm" onClick={() => navigate({ to: "/map", search: { community: item.id, category: mapCategory === "all" ? undefined : ((mapCategory ?? item.category) as CommunityCategory) } })}>
                     <MapIcon className="size-4 mr-1" />{pt ? "Ver no mapa" : "View on map"}
                   </Button>
                 </div>

@@ -40,6 +40,6 @@ export function directionsUrls([lat, lng]: [number, number]) {
   return {
     google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
     apple: `https://maps.apple.com/?daddr=${lat},${lng}`,
-    waze: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+    waze: `https://www.waze.com/ul?ll=${lat},${lng}&navigate=yes`,
   };
 }
