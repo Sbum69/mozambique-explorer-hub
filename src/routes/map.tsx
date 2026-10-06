@@ -209,7 +209,7 @@ function MapPage() {
             <span className="size-3 rounded-full bg-success" aria-hidden /> {pt ? "Destinos" : "Destinations"} · <span className="size-3 rounded-full bg-primary" aria-hidden /> {pt ? "selecionado" : "selected"}
           </button>
           <button type="button" aria-pressed={showCommunity} onClick={() => setShowCommunity((v) => !v)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 transition-opacity ${showCommunity ? "" : "opacity-50"}`}>
-            <span className="size-3 rotate-45 rounded-[3px] bg-success" aria-hidden /> {pt ? "Experiências Comunitárias" : "Community Experiences"} ({filteredCommunity.length})
+            <span className="size-3 rotate-45 rounded-[3px]" style={{ background: "oklch(0.55 0.16 245)" }} aria-hidden /> {pt ? "Experiências Comunitárias" : "Community Experiences"} ({filteredCommunity.length})
           </button>
           <span className="inline-flex items-center gap-2 rounded-full border border-dashed px-3 py-1.5 text-muted-foreground">
             <span className="size-3 rounded-sm bg-warning" aria-hidden /> {pt ? "Negócios: ainda sem coordenadas registadas" : "Businesses: no coordinates registered yet"}
@@ -294,7 +294,7 @@ function MapPage() {
                 transition={{ delay: i * 0.05 }}
               >
                 <Card
-                  onClick={() => setSelected(d)}
+                  onClick={() => { setSelected(d); if (hasValidCoords(d.coords)) setFocus(d.coords); }}
                   className={`overflow-hidden border-0 cursor-pointer transition-all ${selected?.id === d.id ? "ring-2 ring-primary shadow-[var(--shadow-elegant)]" : "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]"}`}
                 >
                   <div className="flex">

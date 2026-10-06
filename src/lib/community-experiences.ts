@@ -44,7 +44,7 @@ export type CommunityStatus = "pending" | "approved" | "rejected";
 export const COMMUNITY_PHOTOS_BUCKET = "community-photos";
 
 const SELECT =
-  "id, title_pt, title_en, description_pt, description_en, province_id, category, location, lat, lng, image_url, image_path, active, status, submitted_by, submitted_at, decided_at, rejection_reason, additional_info, provinces(code, name_pt, name_en), submitter:profiles!community_experiences_submitted_by_fkey(display_name)";
+  "id, title_pt, title_en, description_pt, description_en, province_id, category, location, lat, lng, image_url, image_path, active, status, submitted_by, submitted_at, decided_at, rejection_reason, additional_info, provinces(code, name_pt, name_en)";
 
 interface Row {
   id: string;
@@ -66,7 +66,6 @@ interface Row {
   decided_at: string | null;
   rejection_reason: string | null;
   additional_info: string | null;
-  submitter: { display_name: string | null } | { display_name: string | null }[] | null;
   provinces: { code: string; name_pt: string; name_en: string } | { code: string; name_pt: string; name_en: string }[] | null;
 }
 
@@ -88,7 +87,7 @@ function map(row: Row): CommunityExperience {
     active: row.active,
     status: row.status as CommunityStatus,
     submittedBy: row.submitted_by,
-    submitterName: (Array.isArray(row.submitter) ? row.submitter[0] : row.submitter)?.display_name ?? null,
+    submitterName: null,
     submittedAt: row.submitted_at,
     decidedAt: row.decided_at,
     rejectionReason: row.rejection_reason,
@@ -142,7 +141,17 @@ export async function fetchCommunityExperiences(f: CommunityFilters = {}): Promi
   }
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  return withSignedImages((data ?? []).map((r) => map(r as unknown as Row)));
+  let items = (data ?? []).map((r) => map(r as unknown as Row));
+  if (f.status === "any") {
+    // Admin view: submitter names (profiles RLS decides; falls back to the id when unreadable).
+    const ids = [...new Set(items.map((i) => i.submittedBy).filter((x): x is string => !!x))];
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, display_name").in("id", ids);
+      const names = new Map((profs ?? []).map((p) => [p.id, p.display_name]));
+      items = items.map((i) => ({ ...i, submitterName: (i.submittedBy && names.get(i.submittedBy)) || null }));
+    }
+  }
+  return withSignedImages(items);
 }
 
 export interface CommunityInput {
