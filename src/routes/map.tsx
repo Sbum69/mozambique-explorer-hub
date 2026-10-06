@@ -294,7 +294,7 @@ function MapPage() {
                 transition={{ delay: i * 0.05 }}
               >
                 <Card
-                  onClick={() => setSelected(d)}
+                  onClick={() => { setSelected(d); if (hasValidCoords(d.coords)) setFocus(d.coords); }}
                   className={`overflow-hidden border-0 cursor-pointer transition-all ${selected?.id === d.id ? "ring-2 ring-primary shadow-[var(--shadow-elegant)]" : "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]"}`}
                 >
                   <div className="flex">
