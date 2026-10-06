@@ -31,7 +31,7 @@ const selectedPinIcon = makePin("linear-gradient(135deg, oklch(0.68 0.19 45), ok
 /** Community experiences keep the diamond; the selected one is larger with an orange ring. */
 const communitySelectedIcon = L.divIcon({
   className: "ekaya-community-pin-selected",
-  html: `<div style="width:36px;height:36px;background:oklch(0.62 0.15 150);border:4px solid oklch(0.7 0.19 45);border-radius:7px;transform:rotate(45deg);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 4px 14px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:15px">👥</span></div>`,
+  html: `<div style="width:36px;height:36px;background:oklch(0.55 0.16 245);border:4px solid oklch(0.7 0.19 45);border-radius:7px;transform:rotate(45deg);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 4px 14px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:15px">👥</span></div>`,
   iconSize: [36, 36],
   iconAnchor: [18, 18],
   popupAnchor: [0, -20],
