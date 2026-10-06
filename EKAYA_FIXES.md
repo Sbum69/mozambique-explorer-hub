@@ -812,3 +812,10 @@ BLOCK 6G COMPLETE.
 - Dados: 54 atividades fornecidas pelo utilizador (a lista enviada tem 9 províncias × 6; Manica e Cidade de Maputo não tinham atividades). Festival Tambo guardado em Cabo Delgado (Nampula 5, Cabo Delgado 7). Textos EN traduzidos fielmente do PT fornecido.
 - UI: `/community-experiences` (pesquisa, província, categorias, cartões, detalhe com mapa/coordenadas/Como chegar/Ver no mapa); atalho no painel e menu; secção "O que podes fazer gratuitamente nesta província" no detalhe do negócio; marcador verde próprio + legenda/camadas no mapa (`/map?community=id`); Home recomenda atividades gratuitas (só províncias escolhidas; todas quando nenhuma/todas selecionadas; depois interesses); Admin → "Experiências Comunitárias".
 - Negócios não têm coordenadas na BD, por isso não há marcadores de negócios no mapa (legenda indica).
+
+## Bloco 8C — correções finais (submissão, fotos, mapa, direções)
+- Migrations 0016 (status pending/approved/rejected, submitted_by/at, decided_by/at, rejection_reason, additional_info, image_path; RLS público = approved+active; dono lê as suas; triggers forçam pending para não-admin e notificam decisão) e 0017 (notificação com tipo 'community').
+- Storage privado `community-photos` (5 MB): upload na pasta do próprio utilizador; leitura só de fotos de experiências aprovadas, do próprio ou Admin; exibidas por URL assinado.
+- Formulário "Propor experiência" + "As minhas propostas"; Admin com separador Pendentes, aprovar/rejeitar com motivo, upload de foto.
+- Mapa: filtro por categoria (?category=), destinos verdes / selecionado laranja, experiências em losango azul, selecionada destacada.
+- Direções centralizadas em DirectionsButtons (Google Maps, Waze, Apple Maps); sem coordenadas não há link.

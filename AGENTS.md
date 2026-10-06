@@ -1,1 +1,3 @@
 - Free community activities live in `community_experiences`, never in `experiences` (business, bookable). Why: different rules (free, no booking, no price).
+- Community experience photos live in the private `community-photos` bucket (path in `image_path`) and render via signed URLs. Why: public buckets are blocked and pending photos must stay private.
+- Map/directions links go through `DirectionsButtons` / `directionsUrls`, never built from names. Why: no coordinates must mean no (wrong) link.
