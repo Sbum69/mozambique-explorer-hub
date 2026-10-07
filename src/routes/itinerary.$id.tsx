@@ -50,11 +50,11 @@ import {
   stopTitle,
   type RouteProgress,
   type RouteStop,
+  routeInterestMeta,
 } from "@/lib/routes";
 import { ShareButton } from "@/components/ShareButton";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
-import { categoryMeta } from "@/lib/community-experiences";
 import { Camera, Users, Image as ImageIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 

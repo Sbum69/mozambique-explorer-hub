@@ -71,6 +71,7 @@ import {
   routeTitle,
   recommendRoutes,
   ROUTE_INTERESTS,
+  routeInterestMeta,
   updateRoute,
   type ItineraryRoute,
   type RouteDayInput,
@@ -82,7 +83,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
-import { fetchCommunityExperiences, categoryMeta, type CommunityExperience } from "@/lib/community-experiences";
+import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
