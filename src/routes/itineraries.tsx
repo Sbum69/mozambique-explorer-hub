@@ -725,6 +725,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
   const { provinces } = useProvinces();
   const { destinations } = useDestinations();
   const { experiences } = useExperiences();
+  const { provinces: provinceList } = useProvinces();
   const isEdit = !!editing;
 
   const [title, setTitle] = useState("");
@@ -737,6 +738,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
   const [community, setCommunity] = useState<CommunityExperience[]>([]);
   const [description, setDescription] = useState("");
   const [provinceId, setProvinceId] = useState<string>("none");
+  const provinceCode = provinceList.find((p) => p.id === provinceId)?.code ?? null;
   const [isPublic, setIsPublic] = useState(false);
   const [days, setDays] = useState<DraftDay[]>([{ title: "", stops: [] }]);
   const [pickerDay, setPickerDay] = useState(0);
@@ -817,6 +819,16 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
         return { ...day, stops };
       }),
     );
+
+  const moveDay = (dayIndex: number, delta: number) =>
+    setDays((prev) => {
+      const target = dayIndex + delta;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(dayIndex, 1);
+      next.splice(target, 0, moved);
+      return next;
+    });
 
   const submit = async () => {
     if (!ownerId) return;
@@ -970,12 +982,12 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                 <SelectValue placeholder={lang === "pt" ? "Escolher destino, atividade ou experiência comunitária" : "Pick destination, activity or community experience"} />
               </SelectTrigger>
               <SelectContent>
-                {destinations.map((d) => (
+                {destinations.filter((d) => !provinceCode || d.province === provinceCode).map((d) => (
                   <SelectItem key={d.id} value={`destination::${d.id}`}>
                     📍 {d.name}
                   </SelectItem>
                 ))}
-                {experiences.map((e) => (
+                {experiences.filter((e) => !provinceCode || e.province === provinceCode).map((e) => (
                   <SelectItem key={e.id} value={`experience::${e.id}`}>
                     🏪 {lang === "pt" ? e.title.pt : e.title.en}
                   </SelectItem>
@@ -1009,6 +1021,12 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                       setDays((prev) => prev.map((d, i) => (i === dayIndex ? { ...d, title: e.target.value } : d)))
                     }
                   />
+                  {days.length > 1 && (
+                    <>
+                      <Button type="button" variant="ghost" size="sm" aria-label={lang === "pt" ? "Subir dia" : "Move day up"} disabled={dayIndex === 0} onClick={() => moveDay(dayIndex, -1)}>↑</Button>
+                      <Button type="button" variant="ghost" size="sm" aria-label={lang === "pt" ? "Descer dia" : "Move day down"} disabled={dayIndex === days.length - 1} onClick={() => moveDay(dayIndex, 1)}>↓</Button>
+                    </>
+                  )}
                   {days.length > 1 && (
                     <Button
                       type="button"

@@ -826,3 +826,14 @@ BLOCK 6G COMPLETE.
 - Detalhe: PT/EN, ligações a atividade/experiência comunitária/destino específicos, direções Google/Waze/Apple, prova fotográfica.
 - Admin: pendentes, aprovar/rejeitar com motivo.
 - Seed dos 30 roteiros: PENDENTE (catálogo não fornecido).
+
+## 8D — QA round (2026-10-07)
+Tested with a real tourist account and the Admin account (API + browser, desktop + mobile).
+Bugs fixed:
+- `route_stops_one_ref` check blocked community-experience stops (any route with one failed to save). Migration 0019 allows exactly one reference (destination / activity / community) or a titled custom stop; adds unique (owner, source) index so imports can't duplicate at DB level.
+- Admin saw the author's UUID instead of the name: migration 0020 lets admins read profiles.
+- Itinerary detail crashed on server render (map loaded on server) → map now loads in the browser only.
+- No language toggle on itinerary detail → added.
+- Route form listed destinations/activities from every province → filtered to the chosen province.
+- Days could not be reordered → ↑/↓ day buttons.
+Open: Admin has no screen to browse users' progress/photos (backend allows it); Waze/Apple Maps opening on a real phone not testable here. QA test data was removed afterwards.

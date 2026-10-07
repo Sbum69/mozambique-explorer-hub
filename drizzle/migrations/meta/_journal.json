@@ -134,6 +134,20 @@
       "when": 1791373620504,
       "tag": "0018_routes_8d_review_bilingual_stops_proofs",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791377524278,
+      "tag": "0019_fix_route_stops_ref_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791378508993,
+      "tag": "0020_admins_read_profiles",
+      "breakpoints": true
     }
   ]
 }

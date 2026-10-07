@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Clock,
@@ -25,7 +25,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { ItineraryMap } from "@/components/ItineraryMap";
+import { ClientOnly } from "@tanstack/react-router";
+const ItineraryMap = lazy(() => import("@/components/ItineraryMap").then((m) => ({ default: m.ItineraryMap })));
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
@@ -51,6 +52,7 @@ import {
   type RouteStop,
 } from "@/lib/routes";
 import { ShareButton } from "@/components/ShareButton";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { categoryMeta } from "@/lib/community-experiences";
 import { Camera, Users, Image as ImageIcon } from "lucide-react";
@@ -276,7 +278,8 @@ function ItineraryDetailPage() {
         >
           <ArrowLeft className="h-4 w-4" /> {lang === "pt" ? "Roteiros" : "Itineraries"}
         </Link>
-        <div className="absolute top-6 right-6">
+        <div className="absolute top-6 right-6 flex items-center gap-2">
+          <div className="rounded-md bg-background/80 backdrop-blur"><LanguageToggle /></div>
           <FavoriteButton
             itemId={route.id}
             itemType="itinerary"
@@ -358,7 +361,7 @@ function ItineraryDetailPage() {
                 </div>
                 <Compass className="h-5 w-5 text-muted-foreground" />
               </div>
-              <ItineraryMap stops={stops} lang={lang} />
+              <ClientOnly fallback={<div className="h-[480px] rounded-xl border bg-muted" />}><Suspense fallback={<div className="h-[480px] rounded-xl border bg-muted" />}><ItineraryMap stops={stops} lang={lang} /></Suspense></ClientOnly>
             </Card>
 
             {/* Days */}
