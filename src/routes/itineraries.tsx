@@ -64,8 +64,12 @@ import {
   importRouteByCode,
   fetchRouteByCode,
   routeCover,
+  routeDescription,
   routePriceMzn,
   routeStopCount,
+  routeTitle,
+  recommendRoutes,
+  ROUTE_INTERESTS,
   updateRoute,
   type ItineraryRoute,
   type RouteDayInput,
@@ -76,6 +80,8 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
+import { fetchCommunityExperiences, categoryMeta, type CommunityExperience } from "@/lib/community-experiences";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
@@ -105,6 +111,9 @@ function ItinerariesPage() {
 
   const [provinceFilter, setProvinceFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [durationFilter, setDurationFilter] = useState<"all" | "short" | "mid" | "long">("all");
+  const [interestFilter, setInterestFilter] = useState<string | null>(null);
+  const [preview, setPreview] = useState<ItineraryRoute | null>(null);
   const [quickCode, setQuickCode] = useState("");
   const [codeBusy, setCodeBusy] = useState(false);
 
@@ -121,14 +130,24 @@ function ItinerariesPage() {
     const term = search.trim().toLowerCase();
     return all.filter((route) => {
       if (provinceFilter !== "all" && route.provinceId !== provinceFilter) return false;
+      if (durationFilter === "short" && route.durationDays > 2) return false;
+      if (durationFilter === "mid" && (route.durationDays < 3 || route.durationDays > 4)) return false;
+      if (durationFilter === "long" && route.durationDays < 5) return false;
+      if (interestFilter && !route.interests.includes(interestFilter)) return false;
       if (!term) return true;
       return (
         route.title.toLowerCase().includes(term) ||
+        (route.titleEn ?? "").toLowerCase().includes(term) ||
         route.code.toLowerCase().includes(term) ||
         (route.description ?? "").toLowerCase().includes(term)
       );
     });
-  }, [all, provinceFilter, search]);
+  }, [all, provinceFilter, search, durationFilter, interestFilter]);
+
+  const recommended = useMemo(
+    () => recommendRoutes(all, { provinces: user?.preferences?.provinces, durationDays: user?.preferences?.durationDays, interests: user?.preferences?.interests }),
+    [all, user?.preferences?.provinces, user?.preferences?.durationDays, user?.preferences?.interests],
+  );
 
   const isMine = (route: ItineraryRoute) => !!userId && route.ownerId === userId;
 
@@ -162,6 +181,23 @@ function ItinerariesPage() {
     }
   };
 
+  const lookupImport = async () => {
+    setImportBusy(true);
+    try {
+      const found = await fetchRouteByCode(importCode);
+      if (!found || (found.ownerId !== userId && (!found.isPublic || found.reviewStatus !== "approved"))) {
+        setPreview(null);
+        toast.error(lang === "pt" ? "Roteiro não encontrado." : "Itinerary not found.");
+        return;
+      }
+      setPreview(found);
+    } catch {
+      toast.error(lang === "pt" ? "Não foi possível pesquisar agora" : "Search failed");
+    } finally {
+      setImportBusy(false);
+    }
+  };
+
   const handleImport = async () => {
     if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId) return;
     setImportBusy(true);
@@ -171,6 +207,7 @@ function ItinerariesPage() {
         description: `${copy.title} · ${copy.code}`,
       });
       setImportCode("");
+      setPreview(null);
       setShowImportModal(false);
       await reload();
     } catch (e) {
@@ -182,6 +219,8 @@ function ItinerariesPage() {
               ? "O código não existe ou o roteiro não é público."
               : "The code does not exist or the itinerary is not public.",
         });
+      } else if (message === "ALREADY_IMPORTED") {
+        toast.info(lang === "pt" ? "Este roteiro já está nos teus roteiros." : "This itinerary is already in your itineraries.");
       } else if (message === "ALREADY_OWN") {
         toast.info(lang === "pt" ? "Este roteiro já é teu" : "This itinerary is already yours");
       } else {
@@ -329,7 +368,42 @@ function ItinerariesPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={durationFilter} onValueChange={(v) => setDurationFilter(v as typeof durationFilter)}>
+            <SelectTrigger className="w-[180px]" aria-label={lang === "pt" ? "Duração" : "Duration"}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{lang === "pt" ? "Qualquer duração" : "Any duration"}</SelectItem>
+              <SelectItem value="short">1–2 {lang === "pt" ? "dias" : "days"}</SelectItem>
+              <SelectItem value="mid">3–4 {lang === "pt" ? "dias" : "days"}</SelectItem>
+              <SelectItem value="long">5+ {lang === "pt" ? "dias" : "days"}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+        <div className="flex gap-2 flex-wrap mb-6" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
+          {ROUTE_INTERESTS.map((i) => {
+            const m = categoryMeta(i);
+            return (
+              <Button key={i} size="sm" variant={interestFilter === i ? "default" : "outline"} aria-pressed={interestFilter === i}
+                onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}>
+                <span aria-hidden>{m.emoji}</span> {m.label[lang]}
+              </Button>
+            );
+          })}
+        </div>
+
+        {recommended.length > 0 && (
+          <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
+            <p className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="size-4 text-primary" />{lang === "pt" ? "Recomendados para ti" : "Recommended for you"}</p>
+            <div className="flex flex-wrap gap-2">
+              {recommended.map((r) => (
+                <Button key={r.id} asChild size="sm" variant="secondary">
+                  <Link to="/itinerary/$id" params={{ id: r.id }}>{routeTitle(r, lang)} · {r.durationDays} {lang === "pt" ? "dias" : "days"}</Link>
+                </Button>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {loading && (
           <div className="flex items-center gap-2 text-muted-foreground py-16 justify-center">
@@ -416,7 +490,7 @@ function ItinerariesPage() {
                       />
                     </div>
                     <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <h3 className="text-xl font-bold">{route.title}</h3>
+                      <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>
                       {route.province && (
                         <p className="text-xs text-white/80">
                           {lang === "pt" ? route.province.name.pt : route.province.name.en}
@@ -426,7 +500,14 @@ function ItinerariesPage() {
                   </div>
 
                   <div className="p-5 flex-1 flex flex-col">
-                    {route.description && <p className="text-sm text-muted-foreground mb-4">{route.description}</p>}
+                    {isMine(route) && route.isPublic && route.reviewStatus !== "approved" && (
+                      <div className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 text-amber-900" : "bg-destructive/10 text-destructive"}`}>
+                        {route.reviewStatus === "pending"
+                          ? (lang === "pt" ? "Pendente — à espera de aprovação do Admin." : "Pending — awaiting admin approval.")
+                          : `${lang === "pt" ? "Rejeitado" : "Rejected"}${route.rejectionReason ? ` — ${route.rejectionReason}` : ""}`}
+                      </div>
+                    )}
+                    {routeDescription(route, lang) && <p className="text-sm text-muted-foreground mb-4">{routeDescription(route, lang)}</p>}
 
                     <div className="grid grid-cols-3 gap-2 mb-4 text-sm">
                       <div className="flex items-center gap-1">
@@ -452,7 +533,9 @@ function ItinerariesPage() {
                     <div className="space-y-1.5 mb-4">
                       {route.days.flatMap((d) => d.stops).slice(0, 3).map((s) => (
                         <div key={s.id} className="flex items-center gap-2 text-sm">
-                          {s.kind === "experience" ? (
+                          {s.kind === "community" ? (
+                            <Users className="h-4 w-4 text-emerald-600 shrink-0" />
+                          ) : s.kind === "experience" ? (
                             <Store className="h-4 w-4 text-blue-500 shrink-0" />
                           ) : (
                             <MapPin className="h-4 w-4 text-purple-500 shrink-0" />
@@ -478,17 +561,9 @@ function ItinerariesPage() {
                           {lang === "pt" ? "Ver Roteiro" : "View Itinerary"}
                         </Link>
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedRoute(route);
-                          setShowShareModal(true);
-                        }}
-                        title={lang === "pt" ? "Partilhar" : "Share"}
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      {route.isPublic && route.reviewStatus === "approved" && (
+                        <ShareButton payload={{ title: `${routeTitle(route, lang)} · ${route.code}`, description: routeDescription(route, lang) ?? undefined, url: `${typeof window !== "undefined" ? window.location.origin : ""}/itinerary/${route.id}` }} />
+                      )}
                       {isMine(route) && (
                         <>
                           <Button
@@ -519,104 +594,6 @@ function ItinerariesPage() {
         </div>
       </div>
 
-      {/* Share */}
-      <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{lang === "pt" ? "Partilhar Roteiro" : "Share Itinerary"}</DialogTitle>
-            <DialogDescription>
-              {lang === "pt" ? "Escolhe uma forma de partilhar este roteiro." : "Choose how to share this itinerary."}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedRoute && (
-            <>
-              {!selectedRoute.isPublic && (
-                <p className="text-xs rounded-md bg-muted p-3 text-muted-foreground">
-                  {lang === "pt"
-                    ? "Este roteiro é privado: o link só funciona para ti. Torna-o público na edição para o partilhares."
-                    : "This itinerary is private: the link only works for you. Make it public in the edit form to share it."}
-                </p>
-              )}
-              <div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-                  {lang === "pt" ? "Copiar código" : "Copy code"}
-                </p>
-                <div className="flex gap-2">
-                  <Input value={selectedRoute.code} readOnly className="font-mono text-lg" />
-                  <Button onClick={copyCode} variant="outline" size="icon">
-                    {codeCopied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-                  {lang === "pt" ? "Partilhar em" : "Share on"}
-                </p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  <ShareBtn
-                    icon={MessageCircle}
-                    label="WhatsApp"
-                    color="text-green-600"
-                    href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`}
-                  />
-                  <ShareBtn
-                    icon={Send}
-                    label="Telegram"
-                    color="text-sky-500"
-                    href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`}
-                  />
-                  <ShareBtn
-                    icon={Facebook}
-                    label="Facebook"
-                    color="text-blue-600"
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-                  />
-                  <ShareBtn
-                    icon={Twitter}
-                    label="X / Twitter"
-                    color="text-foreground"
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
-                  />
-                  <ShareBtn
-                    icon={Mail}
-                    label="Email"
-                    color="text-orange-500"
-                    href={`mailto:?subject=${encodeURIComponent(selectedRoute.title)}&body=${encodeURIComponent(shareText + "\n" + shareUrl)}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={nativeShare}
-                    className="flex flex-col items-center gap-1 rounded-lg border p-3 hover:border-primary/40 hover:bg-accent/50 transition"
-                  >
-                    <Smartphone className="size-5 text-primary" />
-                    <span className="text-[11px] font-medium">{lang === "pt" ? "Sistema" : "System"}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(shareUrl);
-                      toast.success(lang === "pt" ? "Link copiado!" : "Link copied!");
-                    }}
-                    className="flex flex-col items-center gap-1 rounded-lg border p-3 hover:border-primary/40 hover:bg-accent/50 transition"
-                  >
-                    <Copy className="size-5 text-muted-foreground" />
-                    <span className="text-[11px] font-medium">{lang === "pt" ? "Copiar link" : "Copy link"}</span>
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowShareModal(false)}>
-              {lang === "pt" ? "Fechar" : "Close"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Import */}
       <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
         <DialogContent>
@@ -633,21 +610,41 @@ function ItinerariesPage() {
               {lang === "pt" ? "Entra na conta para importar roteiros." : "Sign in to import itineraries."}
             </p>
           ) : (
-            <Input
-              placeholder="EK-INH001"
-              value={importCode}
-              onChange={(e) => setImportCode(e.target.value.toUpperCase())}
-              className="font-mono"
-            />
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="EK-INH001"
+                  value={importCode}
+                  onChange={(e) => { setImportCode(e.target.value.toUpperCase()); setPreview(null); }}
+                  onKeyDown={(e) => e.key === "Enter" && void lookupImport()}
+                  className="font-mono"
+                  aria-label={lang === "pt" ? "Código do roteiro" : "Itinerary code"}
+                />
+                <Button variant="outline" onClick={() => void lookupImport()} disabled={!importCode.trim() || importBusy}>
+                  <Search className="size-4" /> {lang === "pt" ? "Pesquisar" : "Search"}
+                </Button>
+              </div>
+              {preview && (
+                <Card className="p-3 text-sm space-y-1">
+                  <p className="font-semibold">{routeTitle(preview, lang)}</p>
+                  <p className="text-muted-foreground">
+                    {preview.province ? preview.province.name[lang] : "—"} · {preview.durationDays} {lang === "pt" ? "dias" : "days"} · {preview.days.length} {lang === "pt" ? "dias planeados" : "planned days"}
+                  </p>
+                  {preview.interests.length > 0 && (
+                    <p className="text-xs">{preview.interests.map((i) => `${categoryMeta(i).emoji} ${categoryMeta(i).label[lang]}`).join(" · ")}</p>
+                  )}
+                </Card>
+              )}
+            </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportModal(false)}>
               {lang === "pt" ? "Fechar" : "Close"}
             </Button>
             {!isGuest && (
-              <Button onClick={() => void handleImport()} disabled={!importCode.trim() || importBusy}>
+              <Button onClick={() => void handleImport()} disabled={!preview || importBusy}>
                 {importBusy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {lang === "pt" ? "Importar" : "Import"}
+                {lang === "pt" ? "Confirmar importação" : "Confirm import"}
               </Button>
             )}
           </DialogFooter>
@@ -664,9 +661,11 @@ function ItinerariesPage() {
         }}
         onSaved={async (route, isEdit) => {
           toast.success(
-            isEdit
-              ? lang === "pt" ? "Roteiro atualizado!" : "Itinerary updated!"
-              : lang === "pt" ? "Roteiro criado!" : "Itinerary created!",
+            route.isPublic && route.reviewStatus === "pending"
+              ? lang === "pt" ? "Roteiro submetido! Fica pendente até aprovação do Admin." : "Itinerary submitted! Pending admin approval."
+              : isEdit
+                ? lang === "pt" ? "Roteiro atualizado!" : "Itinerary updated!"
+                : lang === "pt" ? "Roteiro criado!" : "Itinerary created!",
             { description: `${lang === "pt" ? "Código" : "Code"}: ${route.code}` },
           );
           await reload();
