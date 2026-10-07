@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Users,
   Clock,
   MapPin,
   Coins,
@@ -727,6 +728,13 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
   const isEdit = !!editing;
 
   const [title, setTitle] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [subtitlePt, setSubtitlePt] = useState("");
+  const [subtitleEn, setSubtitleEn] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [intensity, setIntensity] = useState<"none" | "low" | "medium" | "high">("none");
+  const [community, setCommunity] = useState<CommunityExperience[]>([]);
   const [description, setDescription] = useState("");
   const [provinceId, setProvinceId] = useState<string>("none");
   const [isPublic, setIsPublic] = useState(false);
@@ -737,6 +745,17 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
 
   useEffect(() => {
     if (!open) return;
+    fetchCommunityExperiences().then(setCommunity).catch(() => setCommunity([]));
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    setTitleEn(editing?.titleEn ?? "");
+    setSubtitlePt(editing?.subtitle.pt ?? "");
+    setSubtitleEn(editing?.subtitle.en ?? "");
+    setDescriptionEn(editing?.descriptionEn ?? "");
+    setInterests(editing?.interests ?? []);
+    setIntensity(editing?.intensity ?? "none");
     if (editing) {
       setTitle(editing.title);
       setDescription(editing.description ?? "");
@@ -746,7 +765,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
         editing.days.length > 0
           ? editing.days.map((d) => ({
               title: d.title ?? "",
-              stops: d.stops.map((s) => ({ kind: s.kind, refId: s.refId, title: s.title })),
+              stops: d.stops.filter((s) => s.kind !== "custom").map((s) => ({ kind: s.kind, refId: s.refId, title: s.title })),
             }))
           : [{ title: "", stops: [] }],
       );
@@ -767,7 +786,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
     const label =
       kind === "destination"
         ? destinations.find((d) => d.id === refId)?.name
-        : experiences.find((e) => e.id === refId)?.title[lang === "pt" ? "pt" : "en"];
+        : kind === "community"
+          ? community.find((c) => c.id === refId)?.title[lang]
+          : experiences.find((e) => e.id === refId)?.title[lang === "pt" ? "pt" : "en"];
     if (!label) return;
     setDays((prev) =>
       prev.map((day, index) =>
@@ -813,8 +834,19 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
     }
     setSaving(true);
     try {
+      if (isPublic && (!titleEn.trim() || !description.trim() || !descriptionEn.trim() || provinceId === "none")) {
+        toast.error(lang === "pt" ? "Para submeter, preenche título e descrição em PT e EN e a província." : "To submit, fill PT and EN title and description and the province.");
+        setSaving(false);
+        return;
+      }
       const input = {
         title: title.trim(),
+        titleEn: titleEn.trim() || null,
+        subtitlePt: subtitlePt.trim() || null,
+        subtitleEn: subtitleEn.trim() || null,
+        descriptionEn: descriptionEn.trim() || null,
+        interests,
+        intensity: intensity === "none" ? null : intensity,
         description: description.trim() || null,
         provinceId: provinceId === "none" ? null : provinceId,
         isPublic,
@@ -854,17 +886,35 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
 
         <div className="space-y-3">
           <h4 className="font-semibold text-sm">1. {lang === "pt" ? "Informações básicas" : "Basic info"}</h4>
-          <Input
-            placeholder={lang === "pt" ? "Título do roteiro" : "Itinerary title"}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Textarea
-            placeholder={lang === "pt" ? "Descrição" : "Description"}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-          />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input aria-label="Título PT" placeholder={lang === "pt" ? "Título (PT)" : "Title (PT)"} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} />
+            <Input aria-label="Title EN" placeholder={lang === "pt" ? "Título (EN)" : "Title (EN)"} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} maxLength={140} />
+            <Input aria-label="Subtítulo PT" placeholder={lang === "pt" ? "Subtítulo (PT, opcional)" : "Subtitle (PT, optional)"} value={subtitlePt} onChange={(e) => setSubtitlePt(e.target.value)} maxLength={160} />
+            <Input aria-label="Subtitle EN" placeholder={lang === "pt" ? "Subtítulo (EN, opcional)" : "Subtitle (EN, optional)"} value={subtitleEn} onChange={(e) => setSubtitleEn(e.target.value)} maxLength={160} />
+            <Textarea aria-label="Descrição PT" placeholder={lang === "pt" ? "Descrição (PT)" : "Description (PT)"} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={2000} />
+            <Textarea aria-label="Description EN" placeholder={lang === "pt" ? "Descrição (EN)" : "Description (EN)"} value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} maxLength={2000} />
+          </div>
+          <div className="flex flex-wrap gap-2" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
+            {ROUTE_INTERESTS.map((i) => {
+              const m = categoryMeta(i);
+              const on = interests.includes(i);
+              return (
+                <Button key={i} type="button" size="sm" variant={on ? "default" : "outline"} aria-pressed={on}
+                  onClick={() => setInterests((cur) => (on ? cur.filter((x) => x !== i) : [...cur, i]))}>
+                  {m.emoji} {m.label[lang]}
+                </Button>
+              );
+            })}
+          </div>
+          <Select value={intensity} onValueChange={(v) => setIntensity(v as typeof intensity)}>
+            <SelectTrigger aria-label={lang === "pt" ? "Intensidade" : "Intensity"}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{lang === "pt" ? "Intensidade (opcional)" : "Intensity (optional)"}</SelectItem>
+              <SelectItem value="low">{lang === "pt" ? "Leve" : "Low"}</SelectItem>
+              <SelectItem value="medium">{lang === "pt" ? "Moderada" : "Medium"}</SelectItem>
+              <SelectItem value="high">{lang === "pt" ? "Exigente" : "High"}</SelectItem>
+            </SelectContent>
+          </Select>
           <Select value={provinceId} onValueChange={setProvinceId}>
             <SelectTrigger>
               <SelectValue placeholder={lang === "pt" ? "Província principal" : "Main province"} />
@@ -883,7 +933,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
             <Label htmlFor="route-public" className="flex items-center gap-2 text-sm">
               {isPublic ? <Globe2 className="size-4 text-primary" /> : <Lock className="size-4 text-muted-foreground" />}
               {isPublic
-                ? lang === "pt" ? "Público — qualquer pessoa com o código pode abrir" : "Public — anyone with the code can open it"
+                ? lang === "pt" ? "Propor como público — fica pendente até o Admin aprovar" : "Propose as public — stays pending until an admin approves"
                 : lang === "pt" ? "Privado — só tu vês este roteiro" : "Private — only you can see it"}
             </Label>
           </div>
@@ -917,7 +967,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
             </Select>
             <Select value={pickerValue} onValueChange={setPickerValue}>
               <SelectTrigger className="flex-1 min-w-[200px]">
-                <SelectValue placeholder={lang === "pt" ? "Escolher destino ou experiência" : "Pick destination or experience"} />
+                <SelectValue placeholder={lang === "pt" ? "Escolher destino, atividade ou experiência comunitária" : "Pick destination, activity or community experience"} />
               </SelectTrigger>
               <SelectContent>
                 {destinations.map((d) => (
@@ -930,6 +980,13 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                     🏪 {lang === "pt" ? e.title.pt : e.title.en}
                   </SelectItem>
                 ))}
+                {community
+                  .filter((c) => provinceId === "none" || c.provinceId === provinceId)
+                  .map((c) => (
+                    <SelectItem key={c.id} value={`community::${c.id}`}>
+                      👥 {c.title[lang]}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Button type="button" onClick={addStop} disabled={!pickerValue}>
@@ -975,7 +1032,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                   day.stops.map((stop, stopIndex) => (
                     <div key={`${stop.refId}-${stopIndex}`} className="flex items-center gap-2 rounded-md border bg-card p-2">
                       <span className="text-xs font-mono text-muted-foreground">#{stopIndex + 1}</span>
-                      {stop.kind === "experience" ? (
+                      {stop.kind === "community" ? (
+                        <Users className="size-4 text-emerald-600" />
+                      ) : stop.kind === "experience" ? (
                         <Store className="size-4 text-blue-500" />
                       ) : (
                         <MapPin className="size-4 text-purple-500" />
@@ -1012,7 +1071,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
             {saving && <Loader2 className="size-4 animate-spin mr-2" />}
             {isEdit
               ? lang === "pt" ? "Guardar Alterações" : "Save Changes"
-              : lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
+              : isPublic
+                ? lang === "pt" ? "Submeter para aprovação" : "Submit for approval"
+                : lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
           </Button>
         </DialogFooter>
       </DialogContent>
