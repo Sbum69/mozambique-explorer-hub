@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Clock,
@@ -25,7 +25,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { lazy, Suspense } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 const ItineraryMap = lazy(() => import("@/components/ItineraryMap").then((m) => ({ default: m.ItineraryMap })));
 import { useLang } from "@/contexts/LanguageContext";
