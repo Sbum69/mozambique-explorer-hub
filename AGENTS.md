@@ -1,3 +1,6 @@
 - Free community activities live in `community_experiences`, never in `experiences` (business, bookable). Why: different rules (free, no booking, no price).
 - Community experience photos live in the private `community-photos` bucket (path in `image_path`) and render via signed URLs. Why: public buckets are blocked and pending photos must stay private.
 - Map/directions links go through `DirectionsButtons` / `directionsUrls`, never built from names. Why: no coordinates must mean no (wrong) link.
+- Route visibility = is_public + status active + review_status approved; non-admin public routes are forced to pending by the `routes_review_guard` trigger. Why: user routes need admin curation.
+- Route stop completion requires a photo in the private `route-proofs` bucket (enforced by trigger). Why: proof of visit, kept private.
+- Route covers come from one image per province (`PROVINCE_COVER_SLUG`/`provinces.cover_image`), never per-route uploads. Why: consistent, no invented images.

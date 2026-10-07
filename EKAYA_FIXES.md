@@ -819,3 +819,10 @@ BLOCK 6G COMPLETE.
 - Formulário "Propor experiência" + "As minhas propostas"; Admin com separador Pendentes, aprovar/rejeitar com motivo, upload de foto.
 - Mapa: filtro por categoria (?category=), destinos verdes / selecionado laranja, experiências em losango azul, selecionada destacada.
 - Direções centralizadas em DirectionsButtons (Google Maps, Waze, Apple Maps); sem coordenadas não há link.
+
+## Bloco 8D — Roteiros
+- Migration 0018: routes.review_status/rejection_reason/decision/submission, title_en, subtitle PT/EN, description_en, interests, intensity, source_route_id (import sem duplicar); route_days.title_en; provinces.cover_image; route_stops.stop_type (destination/activity/community_experience/custom_stop) + community_experience_id + campos de paragem; route_stop_progress.photo_path/lat/lng com foto obrigatória; notificações de aprovação/rejeição; bucket privado route-proofs.
+- Catálogo: filtros duração/interesses, recomendações por província→duração→interesses, estado pendente/rejeitado para o autor, partilha via ShareButton, importação com pré-visualização.
+- Detalhe: PT/EN, ligações a atividade/experiência comunitária/destino específicos, direções Google/Waze/Apple, prova fotográfica.
+- Admin: pendentes, aprovar/rejeitar com motivo.
+- Seed dos 30 roteiros: PENDENTE (catálogo não fornecido).
