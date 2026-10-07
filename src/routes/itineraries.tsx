@@ -383,7 +383,7 @@ function ItinerariesPage() {
         </div>
         <div className="flex gap-2 flex-wrap mb-6" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
           {ROUTE_INTERESTS.map((i) => {
-            const m = categoryMeta(i);
+            const m = routeInterestMeta(i);
             return (
               <Button key={i} size="sm" variant={interestFilter === i ? "default" : "outline"} aria-pressed={interestFilter === i}
                 onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}>
@@ -632,7 +632,7 @@ function ItinerariesPage() {
                     {preview.province ? preview.province.name[lang] : "—"} · {preview.durationDays} {lang === "pt" ? "dias" : "days"} · {preview.days.length} {lang === "pt" ? "dias planeados" : "planned days"}
                   </p>
                   {preview.interests.length > 0 && (
-                    <p className="text-xs">{preview.interests.map((i) => `${categoryMeta(i).emoji} ${categoryMeta(i).label[lang]}`).join(" · ")}</p>
+                    <p className="text-xs">{preview.interests.map((i) => `${routeInterestMeta(i).emoji} ${routeInterestMeta(i).label[lang]}`).join(" · ")}</p>
                   )}
                 </Card>
               )}
@@ -908,7 +908,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           </div>
           <div className="flex flex-wrap gap-2" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
             {ROUTE_INTERESTS.map((i) => {
-              const m = categoryMeta(i);
+              const m = routeInterestMeta(i);
               const on = interests.includes(i);
               return (
                 <Button key={i} type="button" size="sm" variant={on ? "default" : "outline"} aria-pressed={on}

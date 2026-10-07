@@ -315,7 +315,7 @@ function ItineraryDetailPage() {
             {routeSubtitle(route, lang) && <p className="text-xl text-white/90 mb-2">{routeSubtitle(route, lang)}</p>}
             {routeDescription(route, lang) && <p className="text-lg text-white/90 max-w-2xl mb-3">{routeDescription(route, lang)}</p>}
             {route.interests.length > 0 && (
-              <p className="text-sm text-white/90 mb-2">{route.interests.map((i) => `${categoryMeta(i).emoji} ${categoryMeta(i).label[lang]}`).join(" · ")}{route.intensity ? ` · ${lang === "pt" ? { low: "Leve", medium: "Moderada", high: "Exigente" }[route.intensity] : { low: "Low", medium: "Medium", high: "High" }[route.intensity]}` : ""}</p>
+              <p className="text-sm text-white/90 mb-2">{route.interests.map((i) => `${routeInterestMeta(i).emoji} ${routeInterestMeta(i).label[lang]}`).join(" · ")}{route.intensity ? ` · ${lang === "pt" ? { low: "Leve", medium: "Moderada", high: "Exigente" }[route.intensity] : { low: "Low", medium: "Medium", high: "High" }[route.intensity]}` : ""}</p>
             )}
             <div className="flex gap-4 text-sm flex-wrap">
               <span className="flex items-center gap-1">

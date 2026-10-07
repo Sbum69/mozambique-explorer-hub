@@ -14,7 +14,7 @@ export type RouteStopKind = "destination" | "experience" | "community" | "custom
 /** One reusable cover per province (bundled real photos); others stay neutral until a province image exists. */
 const PROVINCE_COVER_SLUG: Record<string, string> = {
   "maputo-cidade": "maputo", maputo: "maputo", inhambane: "inhambane", sofala: "gorongosa",
-  nampula: "ilha-de-mocambique", "cabo-delgado": "pemba",
+  nampula: "ilha", "cabo-delgado": "pemba",
 };
 export const ROUTE_PROOFS_BUCKET = "route-proofs";
 
@@ -39,6 +39,10 @@ export interface RouteStop {
   priceMzn: number | null;
   durationHours: number | null;
   destinationName: string | null;
+  /** Base-catalogue stop without a linked entity: still needs field validation. */
+  pendingValidation: boolean;
+  /** Potential community articulation only — never a confirmed community experience. */
+  communityCandidate: boolean;
 }
 
 export interface RouteDay {
@@ -47,6 +51,8 @@ export interface RouteDay {
   title: string | null;
   titleEn: string | null;
   description: string | null;
+  /** Stops kept as a sequence; the day-by-day split is not validated yet. */
+  isUnassigned: boolean;
   stops: RouteStop[];
 }
 
@@ -72,6 +78,9 @@ export interface ItineraryRoute {
   coverImage: string | null;
   isPublic: boolean;
   isCurated: boolean;
+  requiresValidation: boolean;
+  catalogNotes: { pt: string | null; en: string | null };
+  communityCandidates: string[];
   status: "active" | "inactive";
   createdAt: string;
   days: RouteDay[];
@@ -94,6 +103,8 @@ interface StopRow {
   lat: number | string | null;
   lng: number | string | null;
   is_free: boolean | null;
+  validation_status?: string | null;
+  community_candidate?: boolean | null;
   community_experiences:
     | { id: string; title_pt: string; title_en: string; description_pt: string; description_en: string; location: string; lat: number | string | null; lng: number | string | null }
     | null;
@@ -134,6 +145,10 @@ interface RouteRow {
   cover_image: string | null;
   is_public: boolean;
   is_curated: boolean;
+  requires_validation?: boolean | null;
+  catalog_notes_pt?: string | null;
+  catalog_notes_en?: string | null;
+  community_candidates?: unknown;
   status: string;
   created_at: string;
   provinces: { code: string; name_pt: string; name_en: string } | null;
@@ -145,6 +160,7 @@ interface RouteRow {
         title: string | null;
         title_en: string | null;
         description: string | null;
+        is_unassigned?: boolean | null;
         route_stops: StopRow[] | null;
       }[]
     | null;
@@ -152,11 +168,11 @@ interface RouteRow {
 
 const SELECT = `id, owner_id, title, title_en, subtitle_pt, subtitle_en, description, description_en, interests, intensity,
   review_status, rejection_reason, submitted_at, source_route_id, province_id, unique_code, duration_days, cover_image,
-  is_public, is_curated, status, created_at,
+  is_public, is_curated, status, created_at, requires_validation, catalog_notes_pt, catalog_notes_en, community_candidates,
   provinces(code, name_pt, name_en),
-  route_days(id, day_number, title, title_en, description,
+  route_days(id, day_number, title, title_en, description, is_unassigned,
     route_stops(id, stop_order, notes, estimated_duration_minutes, destination_id, experience_id, community_experience_id,
-      stop_type, custom_title_pt, custom_title_en, description_pt, description_en, location, lat, lng, is_free,
+      stop_type, custom_title_pt, custom_title_en, description_pt, description_en, location, lat, lng, is_free, validation_status, community_candidate,
       community_experiences(id, title_pt, title_en, description_pt, description_en, location, lat, lng),
       destinations(id, slug, name, lat, lng),
       experiences(id, slug, title_pt, title_en, price_mzn, duration_hours, destinations(slug, name, lat, lng))))`;
@@ -178,6 +194,8 @@ function mapStop(row: StopRow): RouteStop | null {
     description: { pt: row.description_pt, en: row.description_en },
     location: row.location,
     isFree: row.is_free,
+    pendingValidation: row.validation_status === "pending_validation",
+    communityCandidate: !!row.community_candidate,
   };
   if (row.stop_type === "community_experience") {
     const c = row.community_experiences;
@@ -243,6 +261,7 @@ function mapRoute(row: RouteRow): ItineraryRoute {
       title: d.title,
       titleEn: d.title_en,
       description: d.description,
+      isUnassigned: !!d.is_unassigned,
       stops: (d.route_stops ?? [])
         .slice()
         .sort((a, b) => a.stop_order - b.stop_order)
@@ -274,6 +293,11 @@ function mapRoute(row: RouteRow): ItineraryRoute {
     coverImage: row.cover_image,
     isPublic: row.is_public,
     isCurated: row.is_curated,
+    requiresValidation: !!row.requires_validation,
+    catalogNotes: { pt: row.catalog_notes_pt ?? null, en: row.catalog_notes_en ?? null },
+    communityCandidates: Array.isArray(row.community_candidates)
+      ? (row.community_candidates as { item?: unknown }[]).map((c) => (typeof c?.item === "string" ? c.item : "")).filter(Boolean)
+      : [],
     status: row.status === "inactive" ? "inactive" : "active",
     createdAt: row.created_at,
     days,
@@ -685,7 +709,34 @@ export async function resetRouteProgress(progressId: string) {
 
 // ---------- bilingual helpers + deterministic recommendations ----------
 
-export const ROUTE_INTERESTS = ["beach", "culture", "food", "nature", "community", "adventure"] as const;
+export const ROUTE_INTERESTS = [
+  "beach", "culture", "food", "nature", "community", "adventure",
+  "wildlife", "history", "heritage", "local_life", "relax", "diving", "fishing", "hiking", "family", "art", "music",
+] as const;
+
+const ROUTE_INTEREST_META: Record<string, { emoji: string; label: { pt: string; en: string } }> = {
+  beach: { emoji: "🏖️", label: { pt: "Praia", en: "Beach" } },
+  culture: { emoji: "🎨", label: { pt: "Cultura", en: "Culture" } },
+  food: { emoji: "🍽️", label: { pt: "Gastronomia", en: "Food" } },
+  nature: { emoji: "🌿", label: { pt: "Natureza", en: "Nature" } },
+  community: { emoji: "👥", label: { pt: "Comunidade", en: "Community" } },
+  adventure: { emoji: "🏃", label: { pt: "Aventura", en: "Adventure" } },
+  wildlife: { emoji: "🐘", label: { pt: "Vida selvagem", en: "Wildlife" } },
+  history: { emoji: "📜", label: { pt: "História", en: "History" } },
+  heritage: { emoji: "🏛️", label: { pt: "Património", en: "Heritage" } },
+  local_life: { emoji: "🧺", label: { pt: "Vida local", en: "Local life" } },
+  relax: { emoji: "🌅", label: { pt: "Relaxamento", en: "Relaxation" } },
+  diving: { emoji: "🤿", label: { pt: "Mergulho", en: "Diving" } },
+  fishing: { emoji: "🎣", label: { pt: "Pesca", en: "Fishing" } },
+  hiking: { emoji: "🥾", label: { pt: "Hiking", en: "Hiking" } },
+  family: { emoji: "👨‍👩‍👧", label: { pt: "Família", en: "Family" } },
+  art: { emoji: "🖼️", label: { pt: "Arte", en: "Art" } },
+  music: { emoji: "🎶", label: { pt: "Música", en: "Music" } },
+};
+
+export function routeInterestMeta(id: string) {
+  return ROUTE_INTEREST_META[id] ?? { emoji: "•", label: { pt: id, en: id } };
+}
 
 export function routeTitle(r: ItineraryRoute, lang: "pt" | "en") {
   return lang === "en" && r.titleEn ? r.titleEn : r.title;
