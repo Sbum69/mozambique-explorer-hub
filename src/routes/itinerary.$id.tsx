@@ -25,7 +25,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { ItineraryMap } from "@/components/ItineraryMap";
+import { lazy, Suspense } from "react";
+import { ClientOnly } from "@tanstack/react-router";
+const ItineraryMap = lazy(() => import("@/components/ItineraryMap").then((m) => ({ default: m.ItineraryMap })));
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
@@ -360,7 +362,7 @@ function ItineraryDetailPage() {
                 </div>
                 <Compass className="h-5 w-5 text-muted-foreground" />
               </div>
-              <ItineraryMap stops={stops} lang={lang} />
+              <ClientOnly fallback={<div className="h-[480px] rounded-xl border bg-muted" />}><Suspense fallback={<div className="h-[480px] rounded-xl border bg-muted" />}><ItineraryMap stops={stops} lang={lang} /></Suspense></ClientOnly>
             </Card>
 
             {/* Days */}
