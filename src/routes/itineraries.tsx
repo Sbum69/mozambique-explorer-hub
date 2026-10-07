@@ -726,7 +726,6 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
   const { destinations } = useDestinations();
   const { experiences } = useExperiences();
   const { provinces: provinceList } = useProvinces();
-  const provinceCode = provinceList.find((p) => p.id === provinceId)?.code ?? null;
   const isEdit = !!editing;
 
   const [title, setTitle] = useState("");
@@ -739,6 +738,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
   const [community, setCommunity] = useState<CommunityExperience[]>([]);
   const [description, setDescription] = useState("");
   const [provinceId, setProvinceId] = useState<string>("none");
+  const provinceCode = provinceList.find((p) => p.id === provinceId)?.code ?? null;
   const [isPublic, setIsPublic] = useState(false);
   const [days, setDays] = useState<DraftDay[]>([{ title: "", stops: [] }]);
   const [pickerDay, setPickerDay] = useState(0);
