@@ -4,4 +4,5 @@
 - Route visibility = is_public + status active + review_status approved; non-admin public routes are forced to pending by the `routes_review_guard` trigger. Why: user routes need admin curation.
 - Route stop completion requires a photo in the private `route-proofs` bucket (enforced by trigger). Why: proof of visit, kept private.
 - Each route stop references exactly one of destination / activity / community experience, or is a titled custom stop (DB check `route_stops_one_ref`). Why: typed stops with real links only.
+- Base-catalogue routes are curated rows flagged `requires_validation`; unlinked stops are custom stops with `validation_status = pending_validation` and no coordinates, and an `is_unassigned` day holds stops whose day split is not validated. Why: publish the catalogue without inventing data.
 - Route covers come from one image per province (`PROVINCE_COVER_SLUG`/`provinces.cover_image`), never per-route uploads. Why: consistent, no invented images.

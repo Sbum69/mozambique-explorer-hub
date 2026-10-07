@@ -1062,6 +1062,7 @@ export type Database = {
           day_number: number
           description: string | null
           id: string
+          is_unassigned: boolean
           route_id: string
           title: string | null
           title_en: string | null
@@ -1071,6 +1072,7 @@ export type Database = {
           day_number: number
           description?: string | null
           id?: string
+          is_unassigned?: boolean
           route_id: string
           title?: string | null
           title_en?: string | null
@@ -1080,6 +1082,7 @@ export type Database = {
           day_number?: number
           description?: string | null
           id?: string
+          is_unassigned?: boolean
           route_id?: string
           title?: string | null
           title_en?: string | null
@@ -1193,6 +1196,8 @@ export type Database = {
       }
       route_stops: {
         Row: {
+          community_candidate: boolean
+          community_candidate_reason: string | null
           community_experience_id: string | null
           created_at: string
           custom_title_en: string | null
@@ -1211,8 +1216,11 @@ export type Database = {
           route_day_id: string
           stop_order: number
           stop_type: string | null
+          validation_status: string
         }
         Insert: {
+          community_candidate?: boolean
+          community_candidate_reason?: string | null
           community_experience_id?: string | null
           created_at?: string
           custom_title_en?: string | null
@@ -1231,8 +1239,11 @@ export type Database = {
           route_day_id: string
           stop_order: number
           stop_type?: string | null
+          validation_status?: string
         }
         Update: {
+          community_candidate?: boolean
+          community_candidate_reason?: string | null
           community_experience_id?: string | null
           created_at?: string
           custom_title_en?: string | null
@@ -1251,6 +1262,7 @@ export type Database = {
           route_day_id?: string
           stop_order?: number
           stop_type?: string | null
+          validation_status?: string
         }
         Relationships: [
           {
@@ -1285,6 +1297,9 @@ export type Database = {
       }
       routes: {
         Row: {
+          catalog_notes_en: string | null
+          catalog_notes_pt: string | null
+          community_candidates: Json
           cover_image: string | null
           created_at: string
           decided_at: string | null
@@ -1300,6 +1315,7 @@ export type Database = {
           owner_id: string | null
           province_id: string | null
           rejection_reason: string | null
+          requires_validation: boolean
           review_status: string
           source_route_id: string | null
           status: string
@@ -1312,6 +1328,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          catalog_notes_en?: string | null
+          catalog_notes_pt?: string | null
+          community_candidates?: Json
           cover_image?: string | null
           created_at?: string
           decided_at?: string | null
@@ -1327,6 +1346,7 @@ export type Database = {
           owner_id?: string | null
           province_id?: string | null
           rejection_reason?: string | null
+          requires_validation?: boolean
           review_status?: string
           source_route_id?: string | null
           status?: string
@@ -1339,6 +1359,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          catalog_notes_en?: string | null
+          catalog_notes_pt?: string | null
+          community_candidates?: Json
           cover_image?: string | null
           created_at?: string
           decided_at?: string | null
@@ -1354,6 +1377,7 @@ export type Database = {
           owner_id?: string | null
           province_id?: string | null
           rejection_reason?: string | null
+          requires_validation?: boolean
           review_status?: string
           source_route_id?: string | null
           status?: string

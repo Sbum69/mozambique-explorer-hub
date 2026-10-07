@@ -1258,7 +1258,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
                         {route.submittedAt && ` · submetido ${new Date(route.submittedAt).toLocaleDateString("pt-PT")}`}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {route.days.map((d) => `Dia ${d.dayNumber}: ${d.stops.map((st) => st.title).join(", ") || "—"}`).join(" | ")}
+                        {route.days.map((d) => `${d.isUnassigned ? "Dias a validar" : `Dia ${d.dayNumber}`}: ${d.stops.map((st) => st.title).join(", ") || "—"}`).join(" | ")}
                       </p>
                       {route.rejectionReason && <p className="text-xs text-red-600">Motivo: {route.rejectionReason}</p>}
                     </div>

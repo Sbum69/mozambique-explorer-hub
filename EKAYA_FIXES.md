@@ -837,3 +837,11 @@ Bugs fixed:
 - Route form listed destinations/activities from every province → filtered to the chosen province.
 - Days could not be reordered → ↑/↓ day buttons.
 Open: Admin has no screen to browse users' progress/photos (backend allows it); Waze/Apple Maps opening on a real phone not testable here. QA test data was removed afterwards.
+
+## 8D.1 — Base catalogue import (2026-10-07)
+- Migration 0021: route codes may carry a suffix (`EK-MAP-003`); new fields `routes.catalog_notes_pt/en`, `community_candidates`, `requires_validation`; `route_days.is_unassigned`; `route_stops.validation_status`, `community_candidate(_reason)`.
+- 30 official routes inserted (owner none, curated, approved, active) with 117 stops in catalogue order inside one "day split to validate" block.
+- 23 stops linked to existing destinations / approved community experiences (exact matches only); 94 stops are titled custom stops marked `pending_validation`, with no coordinates.
+- 4 stops flagged as community candidates (potential only); route-level candidates kept in `community_candidates`.
+- Re-running is safe: same code updates the route; stops are only written when the route has none.
+- Interests extended (wildlife, history, heritage, local_life, relax, diving, fishing, hiking, family, art, music). Nampula cover now uses the existing Ilha photo.
