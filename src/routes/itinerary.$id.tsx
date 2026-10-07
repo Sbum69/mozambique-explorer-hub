@@ -51,6 +51,7 @@ import {
   type RouteStop,
 } from "@/lib/routes";
 import { ShareButton } from "@/components/ShareButton";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { categoryMeta } from "@/lib/community-experiences";
 import { Camera, Users, Image as ImageIcon } from "lucide-react";
@@ -276,7 +277,8 @@ function ItineraryDetailPage() {
         >
           <ArrowLeft className="h-4 w-4" /> {lang === "pt" ? "Roteiros" : "Itineraries"}
         </Link>
-        <div className="absolute top-6 right-6">
+        <div className="absolute top-6 right-6 flex items-center gap-2">
+          <div className="rounded-md bg-background/80 backdrop-blur"><LanguageToggle /></div>
           <FavoriteButton
             itemId={route.id}
             itemType="itinerary"
