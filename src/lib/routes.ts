@@ -682,3 +682,50 @@ export async function resetRouteProgress(progressId: string) {
     .eq("id", progressId);
   if (error) throw new Error(error.message);
 }
+
+// ---------- bilingual helpers + deterministic recommendations ----------
+
+export const ROUTE_INTERESTS = ["beach", "culture", "food", "nature", "community", "adventure"] as const;
+
+export function routeTitle(r: ItineraryRoute, lang: "pt" | "en") {
+  return lang === "en" && r.titleEn ? r.titleEn : r.title;
+}
+export function routeSubtitle(r: ItineraryRoute, lang: "pt" | "en") {
+  return (lang === "en" ? r.subtitle.en : r.subtitle.pt) ?? r.subtitle.pt ?? null;
+}
+export function routeDescription(r: ItineraryRoute, lang: "pt" | "en") {
+  return lang === "en" && r.descriptionEn ? r.descriptionEn : r.description;
+}
+export function stopTitle(s: RouteStop, lang: "pt" | "en") {
+  return lang === "en" && s.titleEn ? s.titleEn : s.title;
+}
+
+/**
+ * Province first (never other provinces when the user chose some), then duration, then interests.
+ * Only approved public routes come in; nothing is generated.
+ */
+export function recommendRoutes(
+  routes: ItineraryRoute[],
+  prefs: { provinces?: string[]; durationDays?: number; interests?: string[] },
+  limit = 4,
+): ItineraryRoute[] {
+  const provs = prefs.provinces ?? [];
+  const interests = prefs.interests ?? [];
+  if (!provs.length && !prefs.durationDays && !interests.length) return [];
+  return routes
+    .filter((r) => r.isPublic && r.status === "active" && r.reviewStatus === "approved")
+    .filter((r) => !provs.length || (r.province && provs.includes(r.province.code)))
+    .map((r) => {
+      let score = provs.length ? 5 : 0;
+      if (prefs.durationDays) {
+        const diff = Math.abs(r.durationDays - prefs.durationDays);
+        score += diff === 0 ? 3 : diff === 1 ? 2 : 0;
+      }
+      score += r.interests.filter((i) => interests.includes(i)).length * 2;
+      return { r, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((x) => x.r);
+}
