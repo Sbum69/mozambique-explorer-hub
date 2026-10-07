@@ -1030,6 +1030,7 @@ export type Database = {
         Row: {
           active: boolean
           code: string
+          cover_image: string | null
           created_at: string
           id: string
           name_en: string
@@ -1038,6 +1039,7 @@ export type Database = {
         Insert: {
           active?: boolean
           code: string
+          cover_image?: string | null
           created_at?: string
           id?: string
           name_en: string
@@ -1046,6 +1048,7 @@ export type Database = {
         Update: {
           active?: boolean
           code?: string
+          cover_image?: string | null
           created_at?: string
           id?: string
           name_en?: string
@@ -1061,6 +1064,7 @@ export type Database = {
           id: string
           route_id: string
           title: string | null
+          title_en: string | null
         }
         Insert: {
           created_at?: string
@@ -1069,6 +1073,7 @@ export type Database = {
           id?: string
           route_id: string
           title?: string | null
+          title_en?: string | null
         }
         Update: {
           created_at?: string
@@ -1077,6 +1082,7 @@ export type Database = {
           id?: string
           route_id?: string
           title?: string | null
+          title_en?: string | null
         }
         Relationships: [
           {
@@ -1144,18 +1150,27 @@ export type Database = {
         Row: {
           completed_at: string
           id: string
+          lat: number | null
+          lng: number | null
+          photo_path: string | null
           progress_id: string
           route_stop_id: string
         }
         Insert: {
           completed_at?: string
           id?: string
+          lat?: number | null
+          lng?: number | null
+          photo_path?: string | null
           progress_id: string
           route_stop_id: string
         }
         Update: {
           completed_at?: string
           id?: string
+          lat?: number | null
+          lng?: number | null
+          photo_path?: string | null
           progress_id?: string
           route_stop_id?: string
         }
@@ -1178,36 +1193,73 @@ export type Database = {
       }
       route_stops: {
         Row: {
+          community_experience_id: string | null
           created_at: string
+          custom_title_en: string | null
+          custom_title_pt: string | null
+          description_en: string | null
+          description_pt: string | null
           destination_id: string | null
           estimated_duration_minutes: number | null
           experience_id: string | null
           id: string
+          is_free: boolean | null
+          lat: number | null
+          lng: number | null
+          location: string | null
           notes: string | null
           route_day_id: string
           stop_order: number
+          stop_type: string | null
         }
         Insert: {
+          community_experience_id?: string | null
           created_at?: string
+          custom_title_en?: string | null
+          custom_title_pt?: string | null
+          description_en?: string | null
+          description_pt?: string | null
           destination_id?: string | null
           estimated_duration_minutes?: number | null
           experience_id?: string | null
           id?: string
+          is_free?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
           notes?: string | null
           route_day_id: string
           stop_order: number
+          stop_type?: string | null
         }
         Update: {
+          community_experience_id?: string | null
           created_at?: string
+          custom_title_en?: string | null
+          custom_title_pt?: string | null
+          description_en?: string | null
+          description_pt?: string | null
           destination_id?: string | null
           estimated_duration_minutes?: number | null
           experience_id?: string | null
           id?: string
+          is_free?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
           notes?: string | null
           route_day_id?: string
           stop_order?: number
+          stop_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "route_stops_community_experience_id_fkey"
+            columns: ["community_experience_id"]
+            isOneToOne: false
+            referencedRelation: "community_experiences"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "route_stops_destination_id_fkey"
             columns: ["destination_id"]
@@ -1235,49 +1287,99 @@ export type Database = {
         Row: {
           cover_image: string | null
           created_at: string
+          decided_at: string | null
+          decided_by: string | null
           description: string | null
+          description_en: string | null
           duration_days: number
           id: string
+          intensity: string | null
+          interests: string[]
           is_curated: boolean
           is_public: boolean
           owner_id: string | null
           province_id: string | null
+          rejection_reason: string | null
+          review_status: string
+          source_route_id: string | null
           status: string
+          submitted_at: string | null
+          subtitle_en: string | null
+          subtitle_pt: string | null
           title: string
+          title_en: string | null
           unique_code: string
           updated_at: string
         }
         Insert: {
           cover_image?: string | null
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
           description?: string | null
+          description_en?: string | null
           duration_days?: number
           id?: string
+          intensity?: string | null
+          interests?: string[]
           is_curated?: boolean
           is_public?: boolean
           owner_id?: string | null
           province_id?: string | null
+          rejection_reason?: string | null
+          review_status?: string
+          source_route_id?: string | null
           status?: string
+          submitted_at?: string | null
+          subtitle_en?: string | null
+          subtitle_pt?: string | null
           title: string
+          title_en?: string | null
           unique_code: string
           updated_at?: string
         }
         Update: {
           cover_image?: string | null
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
           description?: string | null
+          description_en?: string | null
           duration_days?: number
           id?: string
+          intensity?: string | null
+          interests?: string[]
           is_curated?: boolean
           is_public?: boolean
           owner_id?: string | null
           province_id?: string | null
+          rejection_reason?: string | null
+          review_status?: string
+          source_route_id?: string | null
           status?: string
+          submitted_at?: string | null
+          subtitle_en?: string | null
+          subtitle_pt?: string | null
           title?: string
+          title_en?: string | null
           unique_code?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "routes_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routes_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "routes_owner_id_fkey"
             columns: ["owner_id"]
@@ -1297,6 +1399,13 @@ export type Database = {
             columns: ["province_id"]
             isOneToOne: false
             referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routes_source_route_id_fkey"
+            columns: ["source_route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
             referencedColumns: ["id"]
           },
         ]
