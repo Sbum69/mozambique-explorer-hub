@@ -371,21 +371,37 @@ function ItineraryDetailPage() {
               </Card>
             )}
 
+            {route.requiresValidation && (route.catalogNotes.pt || route.communityCandidates.length > 0) && (
+              <div className="rounded-lg border border-dashed p-4 text-sm space-y-1">
+                <p className="font-semibold">{lang === "pt" ? "Catálogo-base — requer validação" : "Base catalogue — requires validation"}</p>
+                {(lang === "en" ? route.catalogNotes.en ?? route.catalogNotes.pt : route.catalogNotes.pt) && (
+                  <p className="text-muted-foreground">{lang === "en" ? route.catalogNotes.en ?? route.catalogNotes.pt : route.catalogNotes.pt}</p>
+                )}
+                {route.communityCandidates.length > 0 && (
+                  <p className="text-muted-foreground">
+                    {lang === "pt" ? "Candidaturas comunitárias (por validar): " : "Community candidates (to validate): "}{route.communityCandidates.join(" · ")}
+                  </p>
+                )}
+              </div>
+            )}
+
             {route.days.map((day) => {
               const active = progress?.status === "in_progress" && day.dayNumber === currentDay;
               return (
                 <div key={day.id} className="space-y-3">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-bold text-lg">
-                      {lang === "pt" ? "Dia" : "Day"} {day.dayNumber}
-                      {(lang === "en" && day.titleEn ? day.titleEn : day.title) ? ` — ${lang === "en" && day.titleEn ? day.titleEn : day.title}` : ""}
+                      {day.isUnassigned
+                        ? (lang === "pt" ? "Paragens — distribuição por dias a validar" : "Stops — day-by-day split to be validated")
+                        : <>{lang === "pt" ? "Dia" : "Day"} {day.dayNumber}</>}
+                      {!day.isUnassigned && (lang === "en" && day.titleEn ? day.titleEn : day.title) ? ` — ${lang === "en" && day.titleEn ? day.titleEn : day.title}` : ""}
                     </h3>
                     {active && (
                       <Badge className="bg-primary text-primary-foreground">
                         {lang === "pt" ? "Dia atual" : "Current day"}
                       </Badge>
                     )}
-                    {progress && !active && (
+                    {progress && !active && !day.isUnassigned && (
                       <Button variant="ghost" size="sm" onClick={() => void goToDay(day.dayNumber)}>
                         {lang === "pt" ? "Ir para este dia" : "Go to this day"}
                       </Button>
@@ -422,6 +438,12 @@ function ItineraryDetailPage() {
                               )}
                             </span>
                             <h4 className="font-bold text-lg">{stopTitle(stop, lang)}</h4>
+                            {(stop.pendingValidation || stop.communityCandidate) && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {stop.pendingValidation && <Badge variant="outline" className="text-xs">{lang === "pt" ? "Por validar no terreno" : "To be validated on site"}</Badge>}
+                                {stop.communityCandidate && <Badge variant="outline" className="text-xs">{lang === "pt" ? "Potencial comunitário (não confirmado)" : "Community potential (not confirmed)"}</Badge>}
+                              </div>
+                            )}
                             {stop.destinationName && stop.kind === "experience" && (
                               <p className="text-sm text-muted-foreground">{stop.destinationName}</p>
                             )}
