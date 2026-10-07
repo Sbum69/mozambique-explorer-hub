@@ -725,6 +725,8 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
   const { provinces } = useProvinces();
   const { destinations } = useDestinations();
   const { experiences } = useExperiences();
+  const { provinces: provinceList } = useProvinces();
+  const provinceCode = provinceList.find((p) => p.id === provinceId)?.code ?? null;
   const isEdit = !!editing;
 
   const [title, setTitle] = useState("");
@@ -980,12 +982,12 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                 <SelectValue placeholder={lang === "pt" ? "Escolher destino, atividade ou experiência comunitária" : "Pick destination, activity or community experience"} />
               </SelectTrigger>
               <SelectContent>
-                {destinations.map((d) => (
+                {destinations.filter((d) => !provinceCode || d.province === provinceCode).map((d) => (
                   <SelectItem key={d.id} value={`destination::${d.id}`}>
                     📍 {d.name}
                   </SelectItem>
                 ))}
-                {experiences.map((e) => (
+                {experiences.filter((e) => !provinceCode || e.province === provinceCode).map((e) => (
                   <SelectItem key={e.id} value={`experience::${e.id}`}>
                     🏪 {lang === "pt" ? e.title.pt : e.title.en}
                   </SelectItem>
