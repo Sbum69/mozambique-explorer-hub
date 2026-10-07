@@ -41,8 +41,20 @@ import {
   setProgressDay,
   startRouteProgress,
   toggleStopCompleted,
+  uploadStopProof,
+  proofUrl,
+  routeTitle,
+  routeSubtitle,
+  routeDescription,
+  stopTitle,
   type RouteProgress,
+  type RouteStop,
 } from "@/lib/routes";
+import { ShareButton } from "@/components/ShareButton";
+import { DirectionsButtons } from "@/components/DirectionsButtons";
+import { categoryMeta } from "@/lib/community-experiences";
+import { Camera, Users, Image as ImageIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/itinerary/$id")({
   head: () => {
@@ -75,6 +87,9 @@ function ItineraryDetailPage() {
   const { route, loading } = useRoute(id);
   const [progress, setProgress] = useState<RouteProgress | null>(null);
   const [busy, setBusy] = useState(false);
+  const [proofStop, setProofStop] = useState<RouteStop | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofSaving, setProofSaving] = useState(false);
 
   useEffect(() => {
     if (!route || !userId) {
@@ -150,13 +165,20 @@ function ItineraryDetailPage() {
     setProgress(await fetchRouteProgress(route.id, userId));
   };
 
-  const toggle = async (stopId: string) => {
+  const toggle = async (stop: RouteStop) => {
     if (!progress) {
       toast.info(lang === "pt" ? "Começa a rota para marcar paragens" : "Start the route to tick stops");
       return;
     }
+    if (!completed.includes(stop.id)) {
+      // completing requires a photo proof
+      setProofFile(null);
+      setProofStop(stop);
+      return;
+    }
+    if (!confirm(lang === "pt" ? "Desmarcar esta paragem? A prova fotográfica deixa de contar." : "Unmark this stop? The photo proof will no longer count.")) return;
     try {
-      await toggleStopCompleted(progress.id, stopId, !completed.includes(stopId));
+      await toggleStopCompleted(progress.id, stop.id, false);
       await refreshProgress();
     } catch {
       toast.error(lang === "pt" ? "Não foi possível guardar o progresso" : "Could not save progress");
@@ -183,20 +205,36 @@ function ItineraryDetailPage() {
     toast.success(lang === "pt" ? "Progresso reiniciado" : "Progress reset");
   };
 
-  const share = async () => {
-    const url = `${window.location.origin}/itinerary/${route.id}`;
-    const text = `${route.title} — ${lang === "pt" ? "Código" : "Code"}: ${route.code} · Ekaya Explore`;
-    const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
-    if (nav.share) {
-      try {
-        await nav.share({ title: route.title, text, url });
-        return;
-      } catch {
-        /* cancelled */
-      }
+  const saveProof = async () => {
+    if (!progress || !proofStop || !userId) return;
+    if (!proofFile) {
+      toast.error(lang === "pt" ? "A fotografia é obrigatória para concluir." : "A photo is required to complete.");
+      return;
     }
-    await navigator.clipboard.writeText(`${text} ${url}`);
-    toast.success(lang === "pt" ? "Link e código copiados!" : "Link and code copied!");
+    setProofSaving(true);
+    try {
+      const path = await uploadStopProof(userId, proofFile);
+      // optional GPS — never blocks completion, never stored elsewhere
+      const pos = await new Promise<GeolocationPosition | null>((resolve) => {
+        if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 5000, maximumAge: 60000 });
+      });
+      await toggleStopCompleted(progress.id, proofStop.id, true, { photoPath: path, lat: pos?.coords.latitude ?? null, lng: pos?.coords.longitude ?? null });
+      await refreshProgress();
+      setProofStop(null);
+      toast.success(lang === "pt" ? "Paragem concluída com prova fotográfica!" : "Stop completed with photo proof!");
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "";
+      toast.error(m === "too_large" ? (lang === "pt" ? "Máximo 8 MB." : "Max 8 MB.") : m === "invalid_type" ? (lang === "pt" ? "Escolhe uma imagem." : "Choose an image.") : (lang === "pt" ? "Não foi possível guardar a prova." : "Could not save the proof."));
+    } finally {
+      setProofSaving(false);
+    }
+  };
+
+  const openProof = async (path: string) => {
+    const url = await proofUrl(path);
+    if (url) window.open(url, "_blank", "noopener");
+    else toast.error(lang === "pt" ? "Não foi possível abrir a fotografia." : "Couldn't open the photo.");
   };
 
   const importThis = async () => {
@@ -211,6 +249,8 @@ function ItineraryDetailPage() {
       toast.error(
         message === "ALREADY_OWN"
           ? lang === "pt" ? "Este roteiro já é teu" : "Already yours"
+          : message === "ALREADY_IMPORTED"
+          ? lang === "pt" ? "Este roteiro já está nos teus roteiros." : "This itinerary is already in your itineraries."
           : lang === "pt" ? "Não foi possível importar" : "Import failed",
       );
     } finally {
@@ -223,7 +263,7 @@ function ItineraryDetailPage() {
       {/* Hero */}
       <div className="relative h-96 overflow-hidden bg-muted">
         {cover ? (
-          <img src={cover} alt={route.title} className="w-full h-full object-cover" />
+          <img src={cover} alt={routeTitle(route, lang)} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             <Compass className="size-10" />
@@ -268,8 +308,12 @@ function ItineraryDetailPage() {
               </Badge>
               <Badge className="bg-white/20 text-white border-white/30 backdrop-blur font-mono">{route.code}</Badge>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">{route.title}</h1>
-            {route.description && <p className="text-lg text-white/90 max-w-2xl mb-3">{route.description}</p>}
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">{routeTitle(route, lang)}</h1>
+            {routeSubtitle(route, lang) && <p className="text-xl text-white/90 mb-2">{routeSubtitle(route, lang)}</p>}
+            {routeDescription(route, lang) && <p className="text-lg text-white/90 max-w-2xl mb-3">{routeDescription(route, lang)}</p>}
+            {route.interests.length > 0 && (
+              <p className="text-sm text-white/90 mb-2">{route.interests.map((i) => `${categoryMeta(i).emoji} ${categoryMeta(i).label[lang]}`).join(" · ")}{route.intensity ? ` · ${lang === "pt" ? { low: "Leve", medium: "Moderada", high: "Exigente" }[route.intensity] : { low: "Low", medium: "Medium", high: "High" }[route.intensity]}` : ""}</p>
+            )}
             <div className="flex gap-4 text-sm flex-wrap">
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" /> {route.durationDays} {lang === "pt" ? "dias" : "days"}
@@ -290,6 +334,13 @@ function ItineraryDetailPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {isMine && route.isPublic && route.reviewStatus !== "approved" && (
+          <Card className={`p-4 mb-6 text-sm ${route.reviewStatus === "pending" ? "bg-amber-50 border-amber-200" : "bg-destructive/10 border-destructive/30"}`}>
+            {route.reviewStatus === "pending"
+              ? lang === "pt" ? "Este roteiro está pendente de aprovação do Admin. Só tu e o Admin o conseguem ver." : "This itinerary is pending admin approval. Only you and the admin can see it."
+              : `${lang === "pt" ? "Roteiro rejeitado" : "Itinerary rejected"}${route.rejectionReason ? ` — ${lang === "pt" ? "Motivo" : "Reason"}: ${route.rejectionReason}` : ""}`}
+          </Card>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card className="overflow-hidden p-4">
@@ -324,7 +375,7 @@ function ItineraryDetailPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-bold text-lg">
                       {lang === "pt" ? "Dia" : "Day"} {day.dayNumber}
-                      {day.title ? ` — ${day.title}` : ""}
+                      {(lang === "en" && day.titleEn ? day.titleEn : day.title) ? ` — ${lang === "en" && day.titleEn ? day.titleEn : day.title}` : ""}
                     </h3>
                     {active && (
                       <Badge className="bg-primary text-primary-foreground">
@@ -356,20 +407,24 @@ function ItineraryDetailPage() {
                             {index + 1}
                           </div>
                           <div className="flex-1">
-                            <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                            <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1 uppercase">
                               {stop.kind === "experience" ? (
-                                <>
-                                  <Store className="size-3" /> {lang === "pt" ? "EXPERIÊNCIA" : "EXPERIENCE"}
-                                </>
+                                <><Store className="size-3" /> {lang === "pt" ? "Atividade" : "Activity"}</>
+                              ) : stop.kind === "community" ? (
+                                <><Users className="size-3" /> {lang === "pt" ? "Experiência comunitária · grátis" : "Community experience · free"}</>
+                              ) : stop.kind === "custom" ? (
+                                <><MapPin className="size-3" /> {lang === "pt" ? "Paragem" : "Stop"}</>
                               ) : (
-                                <>
-                                  <MapPin className="size-3" /> {lang === "pt" ? "DESTINO" : "DESTINATION"}
-                                </>
+                                <><MapPin className="size-3" /> {lang === "pt" ? "Destino" : "Destination"}</>
                               )}
                             </span>
-                            <h4 className="font-bold text-lg">{stop.title}</h4>
+                            <h4 className="font-bold text-lg">{stopTitle(stop, lang)}</h4>
                             {stop.destinationName && stop.kind === "experience" && (
                               <p className="text-sm text-muted-foreground">{stop.destinationName}</p>
+                            )}
+                            {stop.location && <p className="text-sm text-muted-foreground">{stop.location}</p>}
+                            {(lang === "en" ? stop.description.en ?? stop.description.pt : stop.description.pt) && (
+                              <p className="text-sm mt-2">{lang === "en" ? stop.description.en ?? stop.description.pt : stop.description.pt}</p>
                             )}
                             <div className="grid grid-cols-2 gap-3 mt-3 text-sm">
                               {stop.durationHours ? (
@@ -391,19 +446,40 @@ function ItineraryDetailPage() {
                               )}
                             </div>
                             {stop.notes && <p className="text-sm mt-3 text-muted-foreground">{stop.notes}</p>}
-                            {stop.kind === "experience" && (
-                              <Button asChild variant="outline" size="sm" className="mt-3">
-                                <Link to="/experiences">{lang === "pt" ? "Ver experiência" : "View experience"}</Link>
-                              </Button>
-                            )}
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {stop.kind === "experience" && (
+                                <Button asChild variant="outline" size="sm">
+                                  <Link to="/experience/$id" params={{ id: stop.refId }}>{lang === "pt" ? "Ver atividade" : "View activity"}</Link>
+                                </Button>
+                              )}
+                              {stop.kind === "community" && (
+                                <Button asChild variant="outline" size="sm">
+                                  <Link to="/map" search={{ community: stop.refId }}>{lang === "pt" ? "Ver experiência" : "View experience"}</Link>
+                                </Button>
+                              )}
+                              {stop.kind === "destination" && stop.slug && (
+                                <Button asChild variant="outline" size="sm">
+                                  <Link to="/map" search={{ destination: stop.slug }}>{lang === "pt" ? "Ver destino" : "View destination"}</Link>
+                                </Button>
+                              )}
+                              <DirectionsButtons coords={stop.coords} />
+                              {progress?.proofPaths[stop.id] && (
+                                <Button variant="ghost" size="sm" onClick={() => void openProof(progress.proofPaths[stop.id])}>
+                                  <ImageIcon className="size-4 mr-1" />{lang === "pt" ? "Ver prova" : "View proof"}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           <button
-                            onClick={() => void toggle(stop.id)}
+                            onClick={() => void toggle(stop)}
+                            aria-label={done ? (lang === "pt" ? "Desmarcar paragem" : "Unmark stop") : (lang === "pt" ? "Concluir paragem com fotografia" : "Complete stop with photo")}
                             className="shrink-0"
                             title={done ? (lang === "pt" ? "Concluído" : "Done") : lang === "pt" ? "Marcar como concluído" : "Mark as done"}
                           >
                             {done ? (
                               <CheckCircle2 className="h-7 w-7 text-green-600" />
+                            ) : progress ? (
+                              <Camera className="h-7 w-7 text-muted-foreground hover:text-foreground" />
                             ) : (
                               <Circle className="h-7 w-7 text-muted-foreground hover:text-foreground" />
                             )}
@@ -474,9 +550,12 @@ function ItineraryDetailPage() {
                   </>
                 )}
 
-                <Button variant="outline" onClick={() => void share()} className="w-full gap-2 mb-2">
-                  <Share2 className="h-4 w-4" /> {lang === "pt" ? "Partilhar" : "Share"}
-                </Button>
+                {route.isPublic && route.reviewStatus === "approved" && (
+                  <div className="mb-2 flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm">
+                    <Share2 className="h-4 w-4" /> {lang === "pt" ? "Partilhar" : "Share"}
+                    <ShareButton className="ml-auto" payload={{ title: `${routeTitle(route, lang)} · ${route.code}`, description: routeDescription(route, lang) ?? undefined, url: `${typeof window !== "undefined" ? window.location.origin : ""}/itinerary/${route.id}` }} />
+                  </div>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -487,7 +566,7 @@ function ItineraryDetailPage() {
                 >
                   <Copy className="h-4 w-4" /> {lang === "pt" ? "Copiar código" : "Copy code"}
                 </Button>
-                {!isMine && route.isPublic && (
+                {!isMine && route.isPublic && route.reviewStatus === "approved" && (
                   <Button variant="outline" onClick={() => void importThis()} disabled={busy} className="w-full gap-2">
                     <Download className="h-4 w-4" /> {lang === "pt" ? "Importar roteiro" : "Import itinerary"}
                   </Button>
