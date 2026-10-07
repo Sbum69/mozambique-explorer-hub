@@ -199,8 +199,6 @@ function mapStop(row: StopRow): RouteStop | null {
   if (row.destinations) {
     const d = row.destinations;
     return {
-      id: row.id,
-      order: row.stop_order,
       ...base,
       kind: "destination",
       refId: d.id,
@@ -218,8 +216,6 @@ function mapStop(row: StopRow): RouteStop | null {
     const e = row.experiences;
     const dest = e.destinations;
     return {
-      id: row.id,
-      order: row.stop_order,
       ...base,
       kind: "experience",
       refId: e.id,
