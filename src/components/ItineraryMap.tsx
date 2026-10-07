@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+import { directionsUrls } from "@/lib/visits";
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, CircleMarker, LayersControl } from "react-leaflet";
 import L from "leaflet";
@@ -12,7 +14,7 @@ type Mode = "driving" | "cycling" | "walking";
 const DEFAULT_MZ_CENTER: [number, number] = [-18.5, 35.5];
 
 function stopColor(kind: RouteStop["kind"]) {
-  return kind === "experience" ? "#2563eb" : "#9333ea";
+  return kind === "experience" ? "#2563eb" : kind === "community" ? "#16a34a" : kind === "custom" ? "#64748b" : "#9333ea";
 }
 
 function numberedIcon(n: number, color: string) {
@@ -90,11 +92,22 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
   }
 
   function locateMe() {
-    if (!navigator.geolocation) return;
+    const pt = lang === "pt";
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error(pt ? "Este dispositivo não suporta localização." : "This device doesn't support location.");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => setUserLoc([pos.coords.latitude, pos.coords.longitude]),
-      (err) => console.error(err),
-      { enableHighAccuracy: true },
+      (err) =>
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? pt ? "Permissão recusada. Permite a localização nas definições do browser." : "Permission denied. Allow location in your browser settings."
+            : err.code === err.TIMEOUT
+              ? pt ? "A localização demorou demasiado. Tenta novamente." : "Location timed out. Try again."
+              : pt ? "Localização indisponível." : "Location unavailable.",
+        ),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }
 
@@ -186,35 +199,23 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
                 <div style={{ minWidth: 200 }}>
                   <p style={{ fontSize: 10, textTransform: "uppercase", color: "#666", margin: 0, fontWeight: 700 }}>
                     {stop.kind === "experience"
-                      ? lang === "pt" ? "Experiência" : "Experience"
-                      : lang === "pt" ? "Destino" : "Destination"}
+                      ? lang === "pt" ? "Atividade" : "Activity"
+                      : stop.kind === "community"
+                        ? lang === "pt" ? "Experiência comunitária" : "Community experience"
+                        : stop.kind === "custom"
+                          ? lang === "pt" ? "Paragem" : "Stop"
+                          : lang === "pt" ? "Destino" : "Destination"}
                   </p>
-                  <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{stop.title}</h3>
+                  <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{lang === "en" && stop.titleEn ? stop.titleEn : stop.title}</h3>
                   {stop.destinationName && (
                     <p style={{ fontSize: 12, color: "#555", margin: "0 0 6px" }}>{stop.destinationName}</p>
                   )}
                   <p style={{ fontSize: 10, color: "#888", margin: 0 }}>
                     📍 {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
                   </p>
-                  <button
-                    onClick={() =>
-                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${coord[0]},${coord[1]}`, "_blank")
-                    }
-                    style={{
-                      marginTop: 8,
-                      width: "100%",
-                      padding: "6px 10px",
-                      background: "#f97316",
-                      color: "white",
-                      border: "none",
-                      borderRadius: 6,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    🧭 {lang === "pt" ? "Como chegar" : "Get directions"}
-                  </button>
+                  <p style={{ fontSize: 12, fontWeight: 600, margin: "8px 0 0", display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    🧭 {(() => { const u = directionsUrls(coord); return ([["Google Maps", u.google], ["Waze", u.waze], ["Apple Maps", u.apple]] as const).map(([l, h]) => <a key={l} href={h} target="_blank" rel="noopener noreferrer">{l}</a>); })()}
+                  </p>
                 </div>
               </Popup>
             </Marker>
