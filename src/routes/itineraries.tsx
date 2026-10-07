@@ -818,6 +818,16 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
       }),
     );
 
+  const moveDay = (dayIndex: number, delta: number) =>
+    setDays((prev) => {
+      const target = dayIndex + delta;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(dayIndex, 1);
+      next.splice(target, 0, moved);
+      return next;
+    });
+
   const submit = async () => {
     if (!ownerId) return;
     if (!title.trim()) {
@@ -1009,6 +1019,12 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                       setDays((prev) => prev.map((d, i) => (i === dayIndex ? { ...d, title: e.target.value } : d)))
                     }
                   />
+                  {days.length > 1 && (
+                    <>
+                      <Button type="button" variant="ghost" size="sm" aria-label={lang === "pt" ? "Subir dia" : "Move day up"} disabled={dayIndex === 0} onClick={() => moveDay(dayIndex, -1)}>↑</Button>
+                      <Button type="button" variant="ghost" size="sm" aria-label={lang === "pt" ? "Descer dia" : "Move day down"} disabled={dayIndex === days.length - 1} onClick={() => moveDay(dayIndex, 1)}>↓</Button>
+                    </>
+                  )}
                   {days.length > 1 && (
                     <Button
                       type="button"
