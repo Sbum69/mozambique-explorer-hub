@@ -582,6 +582,31 @@ function ItineraryDetailPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={!!proofStop} onOpenChange={(o) => !o && !proofSaving && setProofStop(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{lang === "pt" ? "Prova fotográfica" : "Photo proof"}</DialogTitle>
+            <DialogDescription>
+              {proofStop ? stopTitle(proofStop, lang) : ""} —{" "}
+              {lang === "pt" ? "tira ou escolhe uma fotografia para concluir esta paragem. Fica privada na tua conta." : "take or choose a photo to complete this stop. It stays private to your account."}
+            </DialogDescription>
+          </DialogHeader>
+          <label className="flex flex-col items-center gap-2 rounded-lg border-2 border-dashed p-6 text-sm cursor-pointer hover:bg-muted/50">
+            {proofFile ? (
+              <img src={URL.createObjectURL(proofFile)} alt="" className="max-h-48 rounded-md object-cover" />
+            ) : (
+              <Camera className="size-8 text-primary" />
+            )}
+            <span>{proofFile ? proofFile.name : lang === "pt" ? "Tirar / escolher fotografia" : "Take / choose photo"}</span>
+            <input type="file" accept="image/*" capture="environment" className="sr-only" aria-label={lang === "pt" ? "Fotografia da paragem" : "Stop photo"} onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
+          </label>
+          <Button onClick={() => void saveProof()} disabled={!proofFile || proofSaving} className="w-full">
+            {proofSaving && <Loader2 className="size-4 animate-spin mr-2" />}
+            {lang === "pt" ? "Guardar e concluir" : "Save and complete"}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
