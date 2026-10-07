@@ -64,6 +64,7 @@ import {
   createRoute,
   deleteRoute,
   fetchAllRoutesAdmin,
+  decideRoute,
   setRouteStatus,
   setRouteVisibility,
   updateRoute,
@@ -934,6 +935,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [provinceFilter, setProvinceFilter] = useState("all");
+  const [onlyPending, setOnlyPending] = useState(false);
   const [editing, setEditing] = useState<ItineraryRoute | null>(null);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -981,7 +983,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
       route && route.days.length > 0
         ? route.days.map((d) => ({
             title: d.title ?? "",
-            stops: d.stops.map((s) => ({ kind: s.kind, refId: s.refId, title: s.title })),
+            stops: d.stops.filter((s) => s.kind !== "custom").map((s) => ({ kind: s.kind, refId: s.refId, title: s.title })),
           }))
         : [{ title: "", stops: [] }],
     );
@@ -1041,7 +1043,9 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const pendingRoutes = routes.filter((r) => r.reviewStatus === "pending").length;
   const filtered = routes.filter((route) => {
+    if (onlyPending && route.reviewStatus !== "pending") return false;
     if (provinceFilter !== "all" && route.provinceId !== provinceFilter) return false;
     const term = search.trim().toLowerCase();
     if (!term) return true;
@@ -1215,6 +1219,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
               placeholder="Pesquisar por nome ou código"
               className="flex-1 min-w-[200px] rounded-lg border border-gray-200 px-3 py-2 text-sm"
             />
+            <button onClick={() => setOnlyPending((v) => !v)} className={`px-3 py-1.5 rounded-lg text-sm ${onlyPending ? "bg-amber-500 text-white" : "bg-gray-100 text-gray-700"}`}>Pendentes ({pendingRoutes})</button>
             <select
               value={provinceFilter}
               onChange={(e) => setProvinceFilter(e.target.value)}
@@ -1246,10 +1251,43 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
                       <p className="text-xs text-gray-500">
                         {route.isCurated ? "Oficial" : `Proprietário: ${route.ownerName ?? route.ownerId ?? "—"}`} ·{" "}
                         {route.province?.name.pt ?? "sem província"} · {route.durationDays} dias ·{" "}
-                        {route.isPublic ? "público" : "privado"} · {route.status === "active" ? "activo" : "inactivo"}
+                        {route.isPublic ? "público" : "privado"} · {route.status === "active" ? "activo" : "inactivo"} ·{" "}
+                        <span className={route.reviewStatus === "pending" ? "text-amber-600 font-semibold" : route.reviewStatus === "rejected" ? "text-red-600" : "text-emerald-700"}>
+                          {route.reviewStatus === "pending" ? "Pendente" : route.reviewStatus === "rejected" ? "Rejeitado" : "Aprovado"}
+                        </span>
+                        {route.submittedAt && ` · submetido ${new Date(route.submittedAt).toLocaleDateString("pt-PT")}`}
                       </p>
+                      <p className="text-xs text-gray-500">
+                        {route.days.map((d) => `Dia ${d.dayNumber}: ${d.stops.map((st) => st.title).join(", ") || "—"}`).join(" | ")}
+                      </p>
+                      {route.rejectionReason && <p className="text-xs text-red-600">Motivo: {route.rejectionReason}</p>}
                     </div>
                     <div className="flex gap-2 flex-wrap">
+                      {route.reviewStatus !== "approved" && (
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`Aprovar "${route.title}" e publicá-lo?`)) return;
+                            try { await decideRoute(route.id, "approved"); toast.success(`Aprovado · ${route.code}`); await load(); }
+                            catch (e) { toast.error(e instanceof Error ? e.message : "Falhou"); }
+                          }}
+                          className="px-2 py-1 rounded-lg bg-emerald-600 text-white text-xs"
+                        >
+                          Aprovar
+                        </button>
+                      )}
+                      {route.reviewStatus === "pending" && (
+                        <button
+                          onClick={async () => {
+                            const reason = window.prompt(`Rejeitar "${route.title}"? Motivo (opcional):`, "");
+                            if (reason === null) return;
+                            try { await decideRoute(route.id, "rejected", reason); toast.success("Roteiro rejeitado."); await load(); }
+                            catch (e) { toast.error(e instanceof Error ? e.message : "Falhou"); }
+                          }}
+                          className="px-2 py-1 rounded-lg bg-red-600 text-white text-xs"
+                        >
+                          Rejeitar
+                        </button>
+                      )}
                       <button
                         onClick={async () => {
                           await setRouteStatus(route.id, route.status === "active" ? "inactive" : "active");

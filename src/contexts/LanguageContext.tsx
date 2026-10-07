@@ -74,7 +74,7 @@ const dict = {
   modFavorites: { pt: "Meus Favoritos", en: "My Favorites" },
   modNews: { pt: "Notícias & Avisos", en: "News & Alerts" },
   modItineraries: { pt: "Roteiros", en: "Itineraries" },
-  modExperiences: { pt: "Experiências", en: "Experiences" },
+  modExperiences: { pt: "Atividades", en: "Activities" },
   modInfo: { pt: "Informações Úteis", en: "Useful Info" },
   modAchievements: { pt: "Conquistas", en: "Achievements" },
   modImpact: { pt: "Impacto Social", en: "Social Impact" },
