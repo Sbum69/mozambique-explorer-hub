@@ -302,11 +302,6 @@ function ItinerariesPage() {
                           <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
                         </Badge>
                       )}
-                      {route.requiresValidation && (
-                        <Badge variant="secondary" className="bg-amber-100 text-amber-900 border-0">
-                          {lang === "pt" ? "Catálogo-base — requer validação" : "Base catalogue — needs validation"}
-                        </Badge>
-                      )}
                       {isMine(route) && (
                         <Badge className="bg-emerald-500 text-white border-0">{lang === "pt" ? "Meu" : "Mine"}</Badge>
                       )}
@@ -348,6 +343,11 @@ function ItinerariesPage() {
                           ? (lang === "pt" ? "Pendente — à espera de aprovação do Admin." : "Pending — awaiting admin approval.")
                           : `${lang === "pt" ? "Rejeitado" : "Rejected"}${route.rejectionReason ? ` — ${route.rejectionReason}` : ""}`}
                       </div>
+                    )}
+                    {route.requiresValidation && (
+                      <Badge variant="secondary" className="mb-3 w-fit bg-amber-100 text-amber-900 border-0">
+                        {lang === "pt" ? "Catálogo-base — requer validação" : "Base catalogue — needs validation"}
+                      </Badge>
                     )}
                     {routeDescription(route, lang) && <p className="text-sm text-muted-foreground mb-4">{routeDescription(route, lang)}</p>}
 
