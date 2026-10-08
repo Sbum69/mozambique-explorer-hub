@@ -780,3 +780,62 @@ export function recommendRoutes(
     .slice(0, limit)
     .map((x) => x.r);
 }
+
+// ---------- personalised discovery (8D.3) ----------
+
+/**
+ * Profile interests (onboarding vocabulary) → route interest ids stored in routes.interests.
+ * Explicit map so matching never depends on language, accents or casing.
+ */
+const PREF_TO_ROUTE_INTERESTS: Record<string, string[]> = {
+  beach: ["beach", "relax", "diving"],
+  culture: ["culture", "heritage", "history", "art", "music"],
+  food: ["food"],
+  nature: ["nature", "wildlife", "hiking"],
+  community: ["community", "local_life"],
+  heritage: ["heritage", "history", "culture"],
+  festival: ["music", "culture"],
+  adventure: ["adventure", "hiking", "diving"],
+};
+
+const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+
+/** Number of the user's interests matched by the route (partial match). */
+export function routeInterestMatches(route: ItineraryRoute, interests: string[]): string[] {
+  const have = new Set(route.interests.map(norm));
+  return interests.filter((i) => (PREF_TO_ROUTE_INTERESTS[norm(i)] ?? [norm(i)]).some((x) => have.has(x)));
+}
+
+export interface PersonalizedRoutes {
+  /** Chosen province(s) + interest match + exact duration. */
+  exact: ItineraryRoute[];
+  /** Chosen province(s) + interest match, other duration (labelled as alternative). */
+  otherDuration: ItineraryRoute[];
+  /** Chosen province(s), no interest overlap. */
+  otherInProvince: ItineraryRoute[];
+  /** Other provinces, never mixed with the above. */
+  otherRegions: ItineraryRoute[];
+}
+
+/** Splits publicly visible routes by the saved preferences. Never hides an eligible route. */
+export function personalizeRoutes(
+  routes: ItineraryRoute[],
+  prefs: { provinces: string[]; durationDays?: number; interests: string[] },
+): PersonalizedRoutes {
+  const visible = routes.filter((r) => r.isPublic && r.status === "active" && r.reviewStatus === "approved");
+  const days = prefs.durationDays;
+  const score = (r: ItineraryRoute) => routeInterestMatches(r, prefs.interests).length;
+  const diff = (r: ItineraryRoute) => (days ? Math.abs(r.durationDays - days) : 0);
+  const byFit = (a: ItineraryRoute, b: ItineraryRoute) => score(b) - score(a) || diff(a) - diff(b) || a.title.localeCompare(b.title);
+  const inProv = visible.filter((r) => r.province && prefs.provinces.includes(r.province.code));
+  const matching = inProv.filter((r) => !prefs.interests.length || score(r) > 0);
+  const res: PersonalizedRoutes = {
+    exact: matching.filter((r) => !days || r.durationDays === days).sort(byFit),
+    otherDuration: matching.filter((r) => !!days && r.durationDays !== days).sort((a, b) => diff(a) - diff(b) || byFit(a, b)),
+    otherInProvince: inProv.filter((r) => !matching.includes(r)).sort(byFit),
+    otherRegions: visible
+      .filter((r) => !inProv.includes(r) && (!prefs.interests.length || score(r) > 0))
+      .sort(byFit),
+  };
+  return res;
+}
