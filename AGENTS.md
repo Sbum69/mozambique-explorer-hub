@@ -6,3 +6,4 @@
 - Each route stop references exactly one of destination / activity / community experience, or is a titled custom stop (DB check `route_stops_one_ref`). Why: typed stops with real links only.
 - Base-catalogue routes are curated rows flagged `requires_validation`; unlinked stops are custom stops with `validation_status = pending_validation` and no coordinates, and an `is_unassigned` day holds stops whose day split is not validated. Why: publish the catalogue without inventing data.
 - Route covers come from one image per province (`PROVINCE_COVER_SLUG`/`provinces.cover_image`), never per-route uploads. Why: consistent, no invented images.
+- Personalised discovery reads preferences only via `usePersonalPrefs` (AuthContext: profiles + profile_provinces) and splits routes with `personalizeRoutes` (province → interest/duration fit → other regions, never mixed). Why: one preference source, no hidden eligible routes.

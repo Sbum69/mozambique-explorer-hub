@@ -23,6 +23,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus, Map as MapIcon } from "lucide-react";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { communityInterestMatches } from "@/lib/recommendations";
 
 export const Route = createFileRoute("/community-experiences")({
   head: () => ({
@@ -59,6 +61,13 @@ function CommunityExperiencesPage() {
   const { isAuthenticated, authUser } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
+  const prefs = usePersonalPrefs();
+  // Personalised split only while no explicit province is chosen; never mixes other provinces into the main list.
+  const personal = prefs.hasPrefs && provinceId === ALL;
+  const fit = (it: CommunityExperience) => communityInterestMatches(it.category, prefs.interests).length;
+  const mainItems = personal ? items.filter((it) => prefs.provinces.includes(it.provinceCode)).sort((a, b) => fit(b) - fit(a)) : items;
+  const otherItems = personal ? items.filter((it) => !prefs.provinces.includes(it.provinceCode)).sort((a, b) => fit(b) - fit(a)) : [];
+  const provinceNames = prefs.provinces.map((c) => provinces.find((p) => p.code === c)?.name[lang] ?? c).join(", ");
   const propose = () => { if (requireAccount(pt ? "Propor experiência" : "Propose experience")) setProposing(true); };
 
   useEffect(() => {
@@ -168,12 +177,34 @@ function CommunityExperiencesPage() {
           </Card>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">{items.length} {pt ? "atividades" : "activities"}</p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((it) => (
-                <CommunityExperienceCard key={it.id} item={it} onOpen={() => setOpen(it)} />
-              ))}
-            </div>
+            {personal && (
+              <h2 className="text-xl font-bold">
+                {pt ? `Experiências comunitárias perto do teu destino — ${provinceNames}` : `Community experiences near your destination — ${provinceNames}`}
+              </h2>
+            )}
+            <p className="text-sm text-muted-foreground">{mainItems.length} {pt ? "atividades" : "activities"}</p>
+            {mainItems.length === 0 ? (
+              <Card className="p-6 text-center text-muted-foreground">
+                {pt ? "Ainda não existem experiências comunitárias para estas preferências na tua província." : "There are no community experiences for these preferences in your province yet."}
+              </Card>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {mainItems.map((it) => (
+                  <CommunityExperienceCard key={it.id} item={it} onOpen={() => setOpen(it)} />
+                ))}
+              </div>
+            )}
+            {otherItems.length > 0 && (
+              <section className="space-y-3 border-t pt-6">
+                <h2 className="text-xl font-bold">{pt ? "Descobre outras regiões" : "Discover other regions"}</h2>
+                <p className="text-sm text-muted-foreground">{pt ? "Experiências noutras províncias — não fazem parte da tua seleção." : "Experiences in other provinces — not part of your selection."} ({otherItems.length})</p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {otherItems.map((it) => (
+                    <CommunityExperienceCard key={it.id} item={it} onOpen={() => setOpen(it)} />
+                  ))}
+                </div>
+              </section>
+            )}
           </>
         )}
       </main>

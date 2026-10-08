@@ -19,6 +19,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { personalizeRoutes } from "@/lib/routes";
 
 import { requireAuthenticatedUser } from "@/lib/auth";
 
@@ -68,6 +70,7 @@ function DashboardPage() {
   const [showChangeDest, setShowChangeDest] = useState(false);
   const { destinations } = useDestinations();
   const { publicRoutes } = useRouteCatalogue(null);
+  const personalPrefs = usePersonalPrefs();
 
 
   if (!user) return null;
@@ -77,8 +80,9 @@ function DashboardPage() {
   const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
 
   // Official itinerary of the chosen province, read from the database (no mock data).
-  const recommendedItinerary = province
-    ? publicRoutes.find((r) => r.province?.code === province.province) ?? null
+  const personalized = personalPrefs.hasPrefs ? personalizeRoutes(publicRoutes, personalPrefs) : null;
+  const recommendedItinerary = personalized
+    ? personalized.exact[0] ?? personalized.otherDuration[0] ?? personalized.otherInProvince[0] ?? null
     : null;
   const tripDays = user.preferences?.durationDays ?? 3;
   const daySlices = recommendedItinerary
@@ -172,7 +176,21 @@ function DashboardPage() {
         </motion.div>
 
         {/* Personalized itinerary */}
-        {recommendedItinerary && province && (
+        {!recommendedItinerary && (
+          <Card className="mt-8 p-5 flex flex-wrap items-center justify-between gap-3 border-0 shadow-[var(--shadow-soft)]">
+            <p className="text-sm text-muted-foreground">
+              {!personalPrefs.hasPrefs
+                ? (lang === "pt" ? "Configura as tuas preferências para veres roteiros para ti." : "Set your preferences to see itineraries for you.")
+                : (lang === "pt" ? "Ainda não existem roteiros para a tua província. Vê sugestões noutras regiões." : "No itineraries for your province yet. See suggestions in other regions.")}
+            </p>
+            <Button asChild variant="outline" className="gap-2">
+              {personalPrefs.hasPrefs
+                ? <Link to="/itineraries" search={{ personal: true }}>{lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" /></Link>
+                : <Link to="/preferences">{lang === "pt" ? "Configurar preferências" : "Set preferences"} <ArrowRight className="size-4" /></Link>}
+            </Button>
+          </Card>
+        )}
+        {recommendedItinerary && (
           <motion.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -186,15 +204,15 @@ function DashboardPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {lang === "pt"
-                    ? `Itinerário para ${tripDays} dias em ${province.name}`
-                    : `Itinerary for ${tripDays} days in ${province.name}`}
+                    ? `${recommendedItinerary.title} · ${recommendedItinerary.durationDays} dias · ${recommendedItinerary.province?.name.pt ?? ""}`
+                    : `${recommendedItinerary.titleEn ?? recommendedItinerary.title} · ${recommendedItinerary.durationDays} days · ${recommendedItinerary.province?.name.en ?? ""}`}
                   {user.preferences?.interests?.length
                     ? `${lang === "pt" ? " · baseado em " : " · based on "}${user.preferences.interests.slice(0, 3).join(", ")}`
                     : ""}
                 </p>
               </div>
               <Button asChild variant="outline" className="gap-2">
-                <Link to="/itineraries">
+                <Link to="/itineraries" search={{ personal: true }}>
                   {lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" />
                 </Link>
               </Button>

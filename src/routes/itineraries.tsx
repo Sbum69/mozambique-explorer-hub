@@ -83,6 +83,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
+import { PersonalSections } from "@/components/PersonalRoutes";
 import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
 
 export const Route = createFileRoute("/itineraries")({
@@ -96,6 +97,8 @@ export const Route = createFileRoute("/itineraries")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { personal?: boolean } =>
+    s.personal === true || s.personal === "true" || s.personal === 1 || s.personal === "1" ? { personal: true } : {},
   component: ItinerariesPage,
 });
 
@@ -107,6 +110,8 @@ function ItinerariesPage() {
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
+  const { personal } = Route.useSearch();
+  const personalMode = !!personal && !isGuest;
 
   const { all, loading, error, reload } = useRouteCatalogue(userId);
   const { provinces } = useProvinces();
@@ -268,6 +273,167 @@ function ItinerariesPage() {
     }
   };
 
+  const renderCard = (route: ItineraryRoute, idx: number) => {
+            const cover = routeCover(route);
+            const stops = routeStopCount(route);
+            const price = routePriceMzn(route);
+            return (
+              <motion.div
+                key={route.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(idx * 0.06, 0.4), duration: 0.4 }}
+                whileHover={{ y: -10 }}
+                className="transition-shadow hover:shadow-2xl rounded-xl"
+              >
+                <Card className="overflow-hidden h-full flex flex-col">
+                  <div className="relative h-48 overflow-hidden bg-muted">
+                    {cover ? (
+                      <img src={cover} alt={route.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <Compass className="size-8" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
+                      {route.isCurated && (
+                        <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0 gap-1">
+                          <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
+                        </Badge>
+                      )}
+                      {isMine(route) && (
+                        <Badge className="bg-emerald-500 text-white border-0">{lang === "pt" ? "Meu" : "Mine"}</Badge>
+                      )}
+                      {!route.isPublic && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Lock className="size-3" /> {lang === "pt" ? "Privado" : "Private"}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                      <div className="bg-black/60 text-white px-2 py-1 rounded-md text-xs font-mono">{route.code}</div>
+                      <FavoriteButton
+                        itemId={route.id}
+                        itemType="itinerary"
+                        itemData={{
+                          name: route.title,
+                          description: route.description ?? "",
+                          image: cover,
+                          duration: `${route.durationDays} ${lang === "pt" ? "dias" : "days"}`,
+                          location: route.province ? (lang === "pt" ? route.province.name.pt : route.province.name.en) : route.code,
+                        }}
+                        size="sm"
+                      />
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3 text-white">
+                      <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>
+                      {route.province && (
+                        <p className="text-xs text-white/80">
+                          {lang === "pt" ? route.province.name.pt : route.province.name.en}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-5 flex-1 flex flex-col">
+                    {isMine(route) && route.isPublic && route.reviewStatus !== "approved" && (
+                      <div className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 text-amber-900" : "bg-destructive/10 text-destructive"}`}>
+                        {route.reviewStatus === "pending"
+                          ? (lang === "pt" ? "Pendente — à espera de aprovação do Admin." : "Pending — awaiting admin approval.")
+                          : `${lang === "pt" ? "Rejeitado" : "Rejected"}${route.rejectionReason ? ` — ${route.rejectionReason}` : ""}`}
+                      </div>
+                    )}
+                    {route.requiresValidation && (
+                      <Badge variant="secondary" className="mb-3 w-fit bg-amber-100 text-amber-900 border-0">
+                        {lang === "pt" ? "Catálogo-base — requer validação" : "Base catalogue — needs validation"}
+                      </Badge>
+                    )}
+                    {routeDescription(route, lang) && <p className="text-sm text-muted-foreground mb-4">{routeDescription(route, lang)}</p>}
+
+                    <div className="grid grid-cols-3 gap-2 mb-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {route.durationDays} {lang === "pt" ? "dias" : "days"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {stops} {lang === "pt" ? "paragens" : "stops"}
+                        </span>
+                      </div>
+                      {price > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Coins className="h-4 w-4 text-muted-foreground" />
+                          <span>{price.toLocaleString("pt-PT")} MZN</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 mb-4">
+                      {route.days.flatMap((d) => d.stops).slice(0, 3).map((s) => (
+                        <div key={s.id} className="flex items-center gap-2 text-sm">
+                          {s.kind === "community" ? (
+                            <Users className="h-4 w-4 text-emerald-600 shrink-0" />
+                          ) : s.kind === "experience" ? (
+                            <Store className="h-4 w-4 text-blue-500 shrink-0" />
+                          ) : (
+                            <MapPin className="h-4 w-4 text-purple-500 shrink-0" />
+                          )}
+                          <span className="truncate flex-1">{s.title}</span>
+                        </div>
+                      ))}
+                      {stops > 3 && (
+                        <p className="text-xs text-muted-foreground">
+                          + {stops - 3} {lang === "pt" ? "mais paragens" : "more stops"}
+                        </p>
+                      )}
+                      {stops === 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {lang === "pt" ? "Ainda sem paragens." : "No stops yet."}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 mt-auto flex-wrap">
+                      <Button asChild className="flex-1 min-w-[140px]">
+                        <Link to="/itinerary/$id" params={{ id: route.id }}>
+                          {lang === "pt" ? "Ver Roteiro" : "View Itinerary"}
+                        </Link>
+                      </Button>
+                      {route.isPublic && route.reviewStatus === "approved" && (
+                        <ShareButton payload={{ title: `${routeTitle(route, lang)} · ${route.code}`, description: routeDescription(route, lang) ?? undefined, url: `${typeof window !== "undefined" ? window.location.origin : ""}/itinerary/${route.id}` }} />
+                      )}
+                      {isMine(route) && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setEditing(route)}
+                            title={lang === "pt" ? "Editar" : "Edit"}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => void handleDelete(route)}
+                            title={lang === "pt" ? "Apagar" : "Delete"}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
@@ -323,6 +489,8 @@ function ItinerariesPage() {
           </div>
         </div>
 
+        {personalMode && <PersonalSections user={user} routes={all} loading={loading} error={error} renderCard={renderCard} lang={lang} onShowAll={() => navigate({ to: "/itineraries", search: {} })} />}
+        {!personalMode && (<>
         {/* Quick code search */}
         <Card className="p-4 mb-4 border-dashed border-primary/30 bg-primary/5">
           <div className="flex items-center gap-2 mb-2">
@@ -438,162 +606,9 @@ function ItinerariesPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filtered.map((route, idx) => {
-            const cover = routeCover(route);
-            const stops = routeStopCount(route);
-            const price = routePriceMzn(route);
-            return (
-              <motion.div
-                key={route.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(idx * 0.06, 0.4), duration: 0.4 }}
-                whileHover={{ y: -10 }}
-                className="transition-shadow hover:shadow-2xl rounded-xl"
-              >
-                <Card className="overflow-hidden h-full flex flex-col">
-                  <div className="relative h-48 overflow-hidden bg-muted">
-                    {cover ? (
-                      <img src={cover} alt={route.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <Compass className="size-8" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
-                      {route.isCurated && (
-                        <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0 gap-1">
-                          <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
-                        </Badge>
-                      )}
-                      {isMine(route) && (
-                        <Badge className="bg-emerald-500 text-white border-0">{lang === "pt" ? "Meu" : "Mine"}</Badge>
-                      )}
-                      {!route.isPublic && (
-                        <Badge variant="secondary" className="gap-1">
-                          <Lock className="size-3" /> {lang === "pt" ? "Privado" : "Private"}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="absolute top-3 right-3 flex items-center gap-2">
-                      <div className="bg-black/60 text-white px-2 py-1 rounded-md text-xs font-mono">{route.code}</div>
-                      <FavoriteButton
-                        itemId={route.id}
-                        itemType="itinerary"
-                        itemData={{
-                          name: route.title,
-                          description: route.description ?? "",
-                          image: cover,
-                          duration: `${route.durationDays} ${lang === "pt" ? "dias" : "days"}`,
-                          location: route.province ? (lang === "pt" ? route.province.name.pt : route.province.name.en) : route.code,
-                        }}
-                        size="sm"
-                      />
-                    </div>
-                    <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>
-                      {route.province && (
-                        <p className="text-xs text-white/80">
-                          {lang === "pt" ? route.province.name.pt : route.province.name.en}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-5 flex-1 flex flex-col">
-                    {isMine(route) && route.isPublic && route.reviewStatus !== "approved" && (
-                      <div className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 text-amber-900" : "bg-destructive/10 text-destructive"}`}>
-                        {route.reviewStatus === "pending"
-                          ? (lang === "pt" ? "Pendente — à espera de aprovação do Admin." : "Pending — awaiting admin approval.")
-                          : `${lang === "pt" ? "Rejeitado" : "Rejected"}${route.rejectionReason ? ` — ${route.rejectionReason}` : ""}`}
-                      </div>
-                    )}
-                    {routeDescription(route, lang) && <p className="text-sm text-muted-foreground mb-4">{routeDescription(route, lang)}</p>}
-
-                    <div className="grid grid-cols-3 gap-2 mb-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {route.durationDays} {lang === "pt" ? "dias" : "days"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {stops} {lang === "pt" ? "paragens" : "stops"}
-                        </span>
-                      </div>
-                      {price > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Coins className="h-4 w-4 text-muted-foreground" />
-                          <span>{price.toLocaleString("pt-PT")} MZN</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5 mb-4">
-                      {route.days.flatMap((d) => d.stops).slice(0, 3).map((s) => (
-                        <div key={s.id} className="flex items-center gap-2 text-sm">
-                          {s.kind === "community" ? (
-                            <Users className="h-4 w-4 text-emerald-600 shrink-0" />
-                          ) : s.kind === "experience" ? (
-                            <Store className="h-4 w-4 text-blue-500 shrink-0" />
-                          ) : (
-                            <MapPin className="h-4 w-4 text-purple-500 shrink-0" />
-                          )}
-                          <span className="truncate flex-1">{s.title}</span>
-                        </div>
-                      ))}
-                      {stops > 3 && (
-                        <p className="text-xs text-muted-foreground">
-                          + {stops - 3} {lang === "pt" ? "mais paragens" : "more stops"}
-                        </p>
-                      )}
-                      {stops === 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          {lang === "pt" ? "Ainda sem paragens." : "No stops yet."}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 mt-auto flex-wrap">
-                      <Button asChild className="flex-1 min-w-[140px]">
-                        <Link to="/itinerary/$id" params={{ id: route.id }}>
-                          {lang === "pt" ? "Ver Roteiro" : "View Itinerary"}
-                        </Link>
-                      </Button>
-                      {route.isPublic && route.reviewStatus === "approved" && (
-                        <ShareButton payload={{ title: `${routeTitle(route, lang)} · ${route.code}`, description: routeDescription(route, lang) ?? undefined, url: `${typeof window !== "undefined" ? window.location.origin : ""}/itinerary/${route.id}` }} />
-                      )}
-                      {isMine(route) && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setEditing(route)}
-                            title={lang === "pt" ? "Editar" : "Edit"}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => void handleDelete(route)}
-                            title={lang === "pt" ? "Apagar" : "Delete"}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
+          {filtered.map(renderCard)}
         </div>
+        </>)}
       </div>
 
       {/* Import */}
