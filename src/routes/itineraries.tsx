@@ -83,6 +83,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
+import { PersonalSections } from "@/components/PersonalRoutes";
 import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
 
 export const Route = createFileRoute("/itineraries")({
@@ -299,6 +300,11 @@ function ItinerariesPage() {
                       {route.isCurated && (
                         <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0 gap-1">
                           <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
+                        </Badge>
+                      )}
+                      {route.requiresValidation && (
+                        <Badge variant="secondary" className="bg-amber-100 text-amber-900 border-0">
+                          {lang === "pt" ? "Catálogo-base — requer validação" : "Base catalogue — needs validation"}
                         </Badge>
                       )}
                       {isMine(route) && (
