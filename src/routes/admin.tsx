@@ -44,6 +44,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { requireRole } from "@/lib/auth";
 import { listPlatformUsers, type PlatformRole, type PlatformUser } from "@/lib/platform-users.functions";
 import { toast } from "sonner";
+import { AdminRouteProgressModal } from "@/components/AdminRouteProgress";
 import {
   COMMUNITY_CATEGORIES,
   createCommunityExperience,
@@ -109,7 +110,8 @@ type ModalKey =
   | "settings"
   | "community"
   | "communityReports"
-  | "communityExperiences";
+  | "communityExperiences"
+  | "routeProgress";
 
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
@@ -168,6 +170,7 @@ function AdminPage() {
   const quickActions = [
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users, color: "text-blue-600 bg-blue-100" },
     { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
+    { key: "routeProgress" as const, label: "Progresso e Provas", icon: Compass, color: "text-teal-600 bg-teal-100" },
     { key: "community" as const, label: "Moderação da Comunidade", icon: MessageSquare, color: "text-pink-600 bg-pink-100" },
     { key: "communityReports" as const, label: "Denúncias", icon: Flag, color: "text-red-600 bg-red-100" },
     { key: "communityExperiences" as const, label: "Experiências Comunitárias", icon: Users, color: "text-emerald-600 bg-emerald-100" },
@@ -385,6 +388,7 @@ function AdminPage() {
       <AnimatePresence>
         {activeModal === "users" && <UsersModal onClose={() => setActiveModal(null)} />}
         {activeModal === "routes" && <RoutesModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "routeProgress" && <AdminRouteProgressModal onClose={() => setActiveModal(null)} />}
         {activeModal === "community" && <CommunityModerationModal onClose={() => setActiveModal(null)} />}
         {activeModal === "communityReports" && <CommunityReportsModal onClose={() => setActiveModal(null)} />}
 

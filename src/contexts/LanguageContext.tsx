@@ -139,7 +139,7 @@ const dict = {
   selectStart: { pt: "Origem", en: "From" },
   selectEnd: { pt: "Destino", en: "To" },
   // experiences
-  expTitle: { pt: "Experiências Comunitárias", en: "Community Experiences" },
+  expTitle: { pt: "Atividades", en: "Activities" },
   expSub: { pt: "Reserva atividades autênticas guiadas por locais", en: "Book authentic activities guided by locals" },
   bookNow: { pt: "Reservar", en: "Book now" },
   booked: { pt: "Reservado!", en: "Booked!" },
