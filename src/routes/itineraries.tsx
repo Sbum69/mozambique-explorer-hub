@@ -96,6 +96,8 @@ export const Route = createFileRoute("/itineraries")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { personal?: boolean } =>
+    s.personal === true || s.personal === "true" || s.personal === 1 || s.personal === "1" ? { personal: true } : {},
   component: ItinerariesPage,
 });
 
@@ -107,6 +109,8 @@ function ItinerariesPage() {
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
+  const { personal } = Route.useSearch();
+  const personalMode = !!personal && !isGuest;
 
   const { all, loading, error, reload } = useRouteCatalogue(userId);
   const { provinces } = useProvinces();
@@ -268,177 +272,7 @@ function ItinerariesPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
-      <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <AppSidebar />
-            <button
-              onClick={() => navigate({ to: backTarget })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
-            >
-              <ArrowLeft className="size-4" /> {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}
-            </button>
-          </div>
-          <div className="flex items-center gap-1">
-            <NotificationsBell />
-            <LanguageToggle />
-          </div>
-        </div>
-      </nav>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold">{lang === "pt" ? "Roteiros" : "Itineraries"}</h1>
-            <p className="text-muted-foreground mt-2">
-              {lang === "pt"
-                ? "Descobre, cria, edita e partilha roteiros únicos por Moçambique."
-                : "Discover, create, edit and share unique itineraries across Mozambique."}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries")) return;
-                setShowImportModal(true);
-              }}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              {lang === "pt" ? "Importar Roteiro" : "Import Itinerary"}
-            </Button>
-            <Button
-              onClick={() => {
-                if (!requireAccount(lang === "pt" ? "Criar roteiros" : "Create itineraries")) return;
-                setShowCreateModal(true);
-              }}
-              className="gap-2 bg-gradient-to-r from-primary to-orange-600"
-            >
-              <Plus className="h-4 w-4" />
-              {lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
-            </Button>
-          </div>
-        </div>
-
-        {/* Quick code search */}
-        <Card className="p-4 mb-4 border-dashed border-primary/30 bg-primary/5">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="size-4 text-primary" />
-            <p className="text-sm font-semibold">
-              {lang === "pt" ? "Tens um código de roteiro?" : "Got an itinerary code?"}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Input
-              placeholder={lang === "pt" ? "Cola aqui o código (ex: EK-INH001)" : "Paste code here (e.g. EK-INH001)"}
-              value={quickCode}
-              onChange={(e) => setQuickCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === "Enter" && void openByCode(quickCode)}
-              className="font-mono flex-1 min-w-[200px]"
-            />
-            <Button onClick={() => void openByCode(quickCode)} disabled={!quickCode.trim() || codeBusy}>
-              {codeBusy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {lang === "pt" ? "Abrir Roteiro" : "Open Itinerary"}
-            </Button>
-          </div>
-        </Card>
-
-        {/* Filters */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder={lang === "pt" ? "Pesquisar por nome ou código" : "Search by name or code"}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Select value={provinceFilter} onValueChange={setProvinceFilter}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder={lang === "pt" ? "Província" : "Province"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "pt" ? "Todas as províncias" : "All provinces"}</SelectItem>
-              {provinces.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {lang === "pt" ? p.name.pt : p.name.en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={durationFilter} onValueChange={(v) => setDurationFilter(v as typeof durationFilter)}>
-            <SelectTrigger className="w-[180px]" aria-label={lang === "pt" ? "Duração" : "Duration"}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "pt" ? "Qualquer duração" : "Any duration"}</SelectItem>
-              <SelectItem value="short">1–2 {lang === "pt" ? "dias" : "days"}</SelectItem>
-              <SelectItem value="mid">3–4 {lang === "pt" ? "dias" : "days"}</SelectItem>
-              <SelectItem value="long">5+ {lang === "pt" ? "dias" : "days"}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex gap-2 flex-wrap mb-6" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
-          {ROUTE_INTERESTS.map((i) => {
-            const m = routeInterestMeta(i);
-            return (
-              <Button key={i} size="sm" variant={interestFilter === i ? "default" : "outline"} aria-pressed={interestFilter === i}
-                onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}>
-                <span aria-hidden>{m.emoji}</span> {m.label[lang]}
-              </Button>
-            );
-          })}
-        </div>
-
-        {recommended.length > 0 && (
-          <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
-            <p className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="size-4 text-primary" />{lang === "pt" ? "Recomendados para ti" : "Recommended for you"}</p>
-            <div className="flex flex-wrap gap-2">
-              {recommended.map((r) => (
-                <Button key={r.id} asChild size="sm" variant="secondary">
-                  <Link to="/itinerary/$id" params={{ id: r.id }}>{routeTitle(r, lang)} · {r.durationDays} {lang === "pt" ? "dias" : "days"}</Link>
-                </Button>
-              ))}
-            </div>
-          </Card>
-        )}
-
-        {loading && (
-          <div className="flex items-center gap-2 text-muted-foreground py-16 justify-center">
-            <Loader2 className="size-5 animate-spin" />
-            {lang === "pt" ? "A carregar roteiros..." : "Loading itineraries..."}
-          </div>
-        )}
-
-        {error && !loading && (
-          <Card className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-3">
-              {lang === "pt" ? "Não foi possível carregar os roteiros." : "Could not load itineraries."}
-            </p>
-            <Button variant="outline" onClick={() => void reload()}>
-              {lang === "pt" ? "Tentar novamente" : "Try again"}
-            </Button>
-          </Card>
-        )}
-
-        {!loading && !error && filtered.length === 0 && (
-          <Card className="p-10 text-center">
-            <Compass className="size-8 mx-auto text-muted-foreground mb-3" />
-            <p className="font-semibold mb-1">{lang === "pt" ? "Sem roteiros para mostrar" : "No itineraries to show"}</p>
-            <p className="text-sm text-muted-foreground">
-              {lang === "pt"
-                ? "Ajusta a pesquisa ou cria o teu primeiro roteiro com destinos e experiências reais."
-                : "Adjust the search or create your first itinerary from real destinations and experiences."}
-            </p>
-          </Card>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filtered.map((route, idx) => {
+  const renderCard = (route: ItineraryRoute, idx: number) => {
             const cover = routeCover(route);
             const stops = routeStopCount(route);
             const price = routePriceMzn(route);
@@ -592,8 +426,183 @@ function ItinerariesPage() {
                 </Card>
               </motion.div>
             );
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+      <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <AppSidebar />
+            <button
+              onClick={() => navigate({ to: backTarget })}
+              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
+            >
+              <ArrowLeft className="size-4" /> {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}
+            </button>
+          </div>
+          <div className="flex items-center gap-1">
+            <NotificationsBell />
+            <LanguageToggle />
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold">{lang === "pt" ? "Roteiros" : "Itineraries"}</h1>
+            <p className="text-muted-foreground mt-2">
+              {lang === "pt"
+                ? "Descobre, cria, edita e partilha roteiros únicos por Moçambique."
+                : "Discover, create, edit and share unique itineraries across Mozambique."}
+            </p>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries")) return;
+                setShowImportModal(true);
+              }}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {lang === "pt" ? "Importar Roteiro" : "Import Itinerary"}
+            </Button>
+            <Button
+              onClick={() => {
+                if (!requireAccount(lang === "pt" ? "Criar roteiros" : "Create itineraries")) return;
+                setShowCreateModal(true);
+              }}
+              className="gap-2 bg-gradient-to-r from-primary to-orange-600"
+            >
+              <Plus className="h-4 w-4" />
+              {lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
+            </Button>
+          </div>
+        </div>
+
+        {personalMode && <PersonalSections user={user} routes={all} loading={loading} error={error} renderCard={renderCard} lang={lang} onShowAll={() => navigate({ to: "/itineraries", search: {} })} />}
+        {!personalMode && (<>
+        {/* Quick code search */}
+        <Card className="p-4 mb-4 border-dashed border-primary/30 bg-primary/5">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="size-4 text-primary" />
+            <p className="text-sm font-semibold">
+              {lang === "pt" ? "Tens um código de roteiro?" : "Got an itinerary code?"}
+            </p>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Input
+              placeholder={lang === "pt" ? "Cola aqui o código (ex: EK-INH001)" : "Paste code here (e.g. EK-INH001)"}
+              value={quickCode}
+              onChange={(e) => setQuickCode(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === "Enter" && void openByCode(quickCode)}
+              className="font-mono flex-1 min-w-[200px]"
+            />
+            <Button onClick={() => void openByCode(quickCode)} disabled={!quickCode.trim() || codeBusy}>
+              {codeBusy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {lang === "pt" ? "Abrir Roteiro" : "Open Itinerary"}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Filters */}
+        <div className="flex gap-2 flex-wrap mb-6">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder={lang === "pt" ? "Pesquisar por nome ou código" : "Search by name or code"}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <Select value={provinceFilter} onValueChange={setProvinceFilter}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder={lang === "pt" ? "Província" : "Province"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{lang === "pt" ? "Todas as províncias" : "All provinces"}</SelectItem>
+              {provinces.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {lang === "pt" ? p.name.pt : p.name.en}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={durationFilter} onValueChange={(v) => setDurationFilter(v as typeof durationFilter)}>
+            <SelectTrigger className="w-[180px]" aria-label={lang === "pt" ? "Duração" : "Duration"}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{lang === "pt" ? "Qualquer duração" : "Any duration"}</SelectItem>
+              <SelectItem value="short">1–2 {lang === "pt" ? "dias" : "days"}</SelectItem>
+              <SelectItem value="mid">3–4 {lang === "pt" ? "dias" : "days"}</SelectItem>
+              <SelectItem value="long">5+ {lang === "pt" ? "dias" : "days"}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2 flex-wrap mb-6" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
+          {ROUTE_INTERESTS.map((i) => {
+            const m = routeInterestMeta(i);
+            return (
+              <Button key={i} size="sm" variant={interestFilter === i ? "default" : "outline"} aria-pressed={interestFilter === i}
+                onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}>
+                <span aria-hidden>{m.emoji}</span> {m.label[lang]}
+              </Button>
+            );
           })}
         </div>
+
+        {recommended.length > 0 && (
+          <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
+            <p className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="size-4 text-primary" />{lang === "pt" ? "Recomendados para ti" : "Recommended for you"}</p>
+            <div className="flex flex-wrap gap-2">
+              {recommended.map((r) => (
+                <Button key={r.id} asChild size="sm" variant="secondary">
+                  <Link to="/itinerary/$id" params={{ id: r.id }}>{routeTitle(r, lang)} · {r.durationDays} {lang === "pt" ? "dias" : "days"}</Link>
+                </Button>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {loading && (
+          <div className="flex items-center gap-2 text-muted-foreground py-16 justify-center">
+            <Loader2 className="size-5 animate-spin" />
+            {lang === "pt" ? "A carregar roteiros..." : "Loading itineraries..."}
+          </div>
+        )}
+
+        {error && !loading && (
+          <Card className="p-6 text-center">
+            <p className="text-sm text-muted-foreground mb-3">
+              {lang === "pt" ? "Não foi possível carregar os roteiros." : "Could not load itineraries."}
+            </p>
+            <Button variant="outline" onClick={() => void reload()}>
+              {lang === "pt" ? "Tentar novamente" : "Try again"}
+            </Button>
+          </Card>
+        )}
+
+        {!loading && !error && filtered.length === 0 && (
+          <Card className="p-10 text-center">
+            <Compass className="size-8 mx-auto text-muted-foreground mb-3" />
+            <p className="font-semibold mb-1">{lang === "pt" ? "Sem roteiros para mostrar" : "No itineraries to show"}</p>
+            <p className="text-sm text-muted-foreground">
+              {lang === "pt"
+                ? "Ajusta a pesquisa ou cria o teu primeiro roteiro com destinos e experiências reais."
+                : "Adjust the search or create your first itinerary from real destinations and experiences."}
+            </p>
+          </Card>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filtered.map(renderCard)}
+        </div>
+        </>)}
       </div>
 
       {/* Import */}
