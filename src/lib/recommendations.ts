@@ -26,6 +26,11 @@ const INTEREST_TO_CATEGORIES: Record<string, string[]> = {
   adventure: ["adventure"],
 };
 
+/** Which of the user's interests a community category satisfies (explicit map, no guessing). */
+export function communityInterestMatches(category: string, interests: string[]): string[] {
+  return interests.filter((id) => (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(category));
+}
+
 function categoriesFor(interests: string[]): string[] {
   return [...new Set(interests.flatMap((id) => INTEREST_TO_CATEGORIES[id] ?? [id]))];
 }
