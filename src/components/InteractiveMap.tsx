@@ -76,9 +76,10 @@ interface Props {
   selectedId?: string | null;
   onPick?: (d: Destination) => void;
   onSelectCommunity?: (c: CommunityExperience) => void;
+  onOpenCommunity?: (c: CommunityExperience) => void;
 }
 
-export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus, community = [], highlightCommunityId, selectedId, onPick, onSelectCommunity }: Props) {
+export function InteractiveMap({ destinations, onSelect, onDirections, routeCoords, origin, visitedIds, focus, community = [], highlightCommunityId, selectedId, onPick, onSelectCommunity, onOpenCommunity }: Props) {
   const { lang } = useLang();
 
   return (
@@ -190,6 +191,14 @@ export function InteractiveMap({ destinations, onSelect, onDirections, routeCoor
               <p style={{ fontSize: 12, fontWeight: 600, margin: 0, display: "flex", gap: 10, flexWrap: "wrap" }}>
                 🧭 {(() => { const u = directionsUrls([c.lat as number, c.lng as number]); return ([["Google Maps", u.google], ["Waze", u.waze], ["Apple Maps", u.apple]] as const).map(([l, h]) => <a key={l} href={h} target="_blank" rel="noopener noreferrer">{l}</a>); })()}
               </p>
+              {onOpenCommunity && (
+                <button
+                  onClick={() => onOpenCommunity(c)}
+                  style={{ width: "100%", marginTop: 8, padding: "6px 12px", background: "oklch(0.55 0.16 245)", color: "white", border: "none", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                >
+                  {lang === "pt" ? "Ver experiência" : "See experience"}
+                </button>
+              )}
             </div>
           </Popup>
         </Marker>

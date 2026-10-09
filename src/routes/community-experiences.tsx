@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ArrowLeft, Search, Users, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ export const Route = createFileRoute("/community-experiences")({
     ],
   }),
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { open?: string } =>
+    typeof search.open === "string" && /^[0-9a-f-]{36}$/i.test(search.open) ? { open: search.open } : {},
   component: CommunityExperiencesPage,
 });
 
@@ -62,6 +65,26 @@ function CommunityExperiencesPage() {
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const prefs = usePersonalPrefs();
+  const { open: openId } = Route.useSearch();
+
+  // Deep link (e.g. from the map): open exactly that approved community experience, never a fallback.
+  useEffect(() => {
+    if (!openId) return;
+    let active = true;
+    fetchCommunityExperiences()
+      .then((rows) => {
+        if (!active) return;
+        const hit = rows.find((r) => r.id === openId);
+        if (hit) setOpen(hit);
+        else {
+          console.warn("[community-experiences] deep link id not found or not public", openId);
+          toast.error(pt ? "Esta experiência comunitária não está disponível." : "This community experience is not available.");
+        }
+      })
+      .catch(() => active && toast.error(pt ? "Não foi possível abrir a experiência." : "Couldn't open the experience."));
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openId]);
   // Personalised split only while no explicit province is chosen; never mixes other provinces into the main list.
   const personal = prefs.hasPrefs && provinceId === ALL;
   const fit = (it: CommunityExperience) => communityInterestMatches(it.category, prefs.interests).length;
@@ -209,7 +232,7 @@ function CommunityExperiencesPage() {
         )}
       </main>
 
-      <CommunityExperienceDialog item={open} onClose={() => setOpen(null)} mapCategory={category} />
+      <CommunityExperienceDialog item={open} onClose={() => { setOpen(null); if (openId) void navigate({ to: "/community-experiences", search: {}, replace: true }); }} mapCategory={category} />
       {isAuthenticated && authUser && <CommunitySubmitDialog open={proposing} onClose={() => setProposing(false)} userId={authUser.id} />}
     </div>
   );
