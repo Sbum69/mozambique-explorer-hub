@@ -75,14 +75,15 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
     if (step < totalSteps - 1) {
       setStep((s) => s + 1);
     } else {
-      void savePrefs({ province: province!, durationDays: days, interests });
+      void savePrefs({ durationDays: days, interests });
     }
   };
 
   const handleSkip = () => {
-    const fallback = province ?? destinations[0]?.slug;
-    if (!fallback) return;
-    void savePrefs({ province: fallback, durationDays: 3, interests: [] });
+    // Existing skip behaviour: keep the current choice, else the first destination's province.
+    const code = provinceCode ?? destinations[0]?.province ?? null;
+    if (!code) return;
+    void savePrefs({ durationDays: 3, interests: [] }, code);
   };
 
   const toggleInterest = (id: string) => {
