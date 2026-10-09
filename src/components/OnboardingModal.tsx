@@ -25,51 +25,65 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
   const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
   const { provinces, loading: loadingProvinces } = useProvinces();
   const [step, setStep] = useState(0);
+  /** Featured destination slug (optional, kept for the existing profiles.province field). */
   const [province, setProvince] = useState<string | null>(initial?.province ?? null);
-  const [provinceCodes, setProvinceCodes] = useState<string[]>(initial?.provinces ?? []);
+  /** The ONE destination province (provinces.code). */
+  const [provinceCode, setProvinceCode] = useState<string | null>(initial?.provinces?.[0] ?? null);
   const [days, setDays] = useState(initial?.durationDays ?? 7);
   const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
 
+  // Older profiles only have the destination slug: derive its province once destinations load.
+  useEffect(() => {
+    if (provinceCode || !province) return;
+    const d = destinations.find((x) => x.slug === province);
+    if (d?.province) setProvinceCode(d.province);
+  }, [destinations, province, provinceCode]);
+
   const totalSteps = 3;
 
-  const canNext = step === 0 ? !!province : step === 1 ? days >= 1 : interests.length >= 2;
+  const canNext = step === 0 ? !!provinceCode : step === 1 ? days >= 1 : interests.length >= 2;
 
   const [saving, setSaving] = useState(false);
 
-  /** Province codes to store: the ones picked plus the province of the chosen destination. */
-  const resolveProvinces = (destinationSlug: string) => {
-    const chosen = destinations.find((d) => d.slug === destinationSlug);
-    const codes = [...provinceCodes];
-    if (chosen?.province) codes.push(chosen.province);
-    return [...new Set(codes)];
-  };
-
-  const savePrefs = async (prefs: { province: string; durationDays: number; interests: string[] }) => {
+  const savePrefs = async (prefs: { durationDays: number; interests: string[] }) => {
+    if (!provinceCode) return;
+    // profiles.province keeps a destination slug when the chosen province has one; otherwise the province code.
+    const slug =
+      (province && destinations.find((d) => d.slug === province && d.province === provinceCode)?.slug) ??
+      destinations.find((d) => d.province === provinceCode)?.slug ??
+      provinceCode;
     setSaving(true);
     try {
-      await setPreferences({ ...prefs, provinces: resolveProvinces(prefs.province) });
+      await setPreferences({ ...prefs, province: slug, provinces: [provinceCode] });
     } finally {
       setSaving(false);
     }
     onComplete();
   };
 
-  const toggleProvince = (code: string) => {
-    setProvinceCodes((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+  /** Single choice: picking a province replaces the previous one. */
+  const pickProvince = (code: string) => {
+    setProvinceCode(code);
+    setProvince((cur) => (cur && destinations.find((d) => d.slug === cur)?.province === code ? cur : null));
+  };
+  const pickDestination = (slug: string, code?: string | null) => {
+    setProvince(slug);
+    if (code) setProvinceCode(code);
   };
 
   const handleNext = () => {
     if (step < totalSteps - 1) {
       setStep((s) => s + 1);
     } else {
-      void savePrefs({ province: province!, durationDays: days, interests });
+      void savePrefs({ durationDays: days, interests });
     }
   };
 
   const handleSkip = () => {
-    const fallback = province ?? destinations[0]?.slug;
-    if (!fallback) return;
-    void savePrefs({ province: fallback, durationDays: 3, interests: [] });
+    // Existing skip behaviour: keep the current choice, else the first destination's province.
+    const code = provinceCode ?? destinations[0]?.province ?? null;
+    if (!code) return;
+    void savePrefs({ durationDays: 3, interests: [] }, code);
   };
 
   const toggleInterest = (id: string) => {

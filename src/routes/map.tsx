@@ -243,7 +243,7 @@ function MapPage() {
                 <div className="animate-pulse text-muted-foreground">{lang === "pt" ? "A carregar mapa..." : "Loading map..."}</div>
               </div>
             }>
-              <InteractiveMap destinations={showDestinations ? mappable : []} community={showCommunity ? filteredCommunity : []} highlightCommunityId={selectedCommunityId} onSelectCommunity={(c) => setSelectedCommunityId(c.id)} selectedId={selected?.id ?? null} onPick={(d) => { setSelected(d); setDirectionsOpen(false); }} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
+              <InteractiveMap destinations={showDestinations ? mappable : []} community={showCommunity ? filteredCommunity : []} highlightCommunityId={selectedCommunityId} onSelectCommunity={(c) => setSelectedCommunityId(c.id)} onOpenCommunity={(c) => navigate({ to: "/community-experiences", search: { open: c.id } })} selectedId={selected?.id ?? null} onPick={(d) => { setSelected(d); setDirectionsOpen(false); }} onSelect={showDetails} onDirections={openDirections} origin={origin} visitedIds={visited} focus={focus} />
             </Suspense>
           </Card>
 
@@ -389,7 +389,7 @@ function MapPage() {
                       <Navigation className="size-4" /> {pt ? "Como chegar" : "Get directions"}
                     </Button>
                     <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
-                      {pt ? "Ver experiências" : "See experiences"}
+                      {pt ? "Ver atividades" : "See activities"}
                     </Button>
                   </div>
 
