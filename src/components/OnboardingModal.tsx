@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,23 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
   const [days, setDays] = useState(initial?.durationDays ?? 7);
   const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
 
+  // Saved preferences may arrive after the first render (profile still loading): adopt them once.
+  const initialCode = initial?.provinces?.[0];
+  const initialSlug = initial?.province;
+  useEffect(() => {
+    if (initialCode) setProvinceCode((c) => c ?? initialCode);
+    if (initialSlug) setProvince((c) => c ?? initialSlug);
+  }, [initialCode, initialSlug]);
+  const initialDays = initial?.durationDays;
+  const initialInterests = initial?.interests?.join(",");
+  const syncedRest = useRef(false);
+  useEffect(() => {
+    if (syncedRest.current || (initialDays == null && !initialInterests)) return;
+    syncedRest.current = true;
+    if (initialDays != null) setDays(initialDays);
+    if (initialInterests) setInterests(initialInterests.split(","));
+  }, [initialDays, initialInterests]);
+
   // Older profiles only have the destination slug: derive its province once destinations load.
   useEffect(() => {
     if (provinceCode || !province) return;
@@ -45,16 +62,17 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
 
   const [saving, setSaving] = useState(false);
 
-  const savePrefs = async (prefs: { durationDays: number; interests: string[] }) => {
-    if (!provinceCode) return;
+  const savePrefs = async (prefs: { durationDays: number; interests: string[] }, code = provinceCode) => {
+    if (!code) return;
+    const provinceCode_ = code;
     // profiles.province keeps a destination slug when the chosen province has one; otherwise the province code.
     const slug =
-      (province && destinations.find((d) => d.slug === province && d.province === provinceCode)?.slug) ??
-      destinations.find((d) => d.province === provinceCode)?.slug ??
-      provinceCode;
+      (province && destinations.find((d) => d.slug === province && d.province === provinceCode_)?.slug) ??
+      destinations.find((d) => d.province === provinceCode_)?.slug ??
+      provinceCode_;
     setSaving(true);
     try {
-      await setPreferences({ ...prefs, province: slug, provinces: [provinceCode] });
+      await setPreferences({ ...prefs, province: slug, provinces: [provinceCode_] });
     } finally {
       setSaving(false);
     }
@@ -160,7 +178,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {destinations.map((d, i) => {
-                    const selected = province === d.slug;
+                    const selected = !!provinceCode && province === d.slug && provinceCode === d.province;
                     return (
                       <motion.button
                         key={d.id}
@@ -169,7 +187,8 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
                         whileHover={{ y: -4 }}
-                        onClick={() => setProvince(d.slug)}
+                        onClick={() => pickDestination(d.slug, d.province)}
+                        aria-pressed={selected}
                         className={cn(
                           "group relative text-left rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-card",
                           selected
@@ -224,25 +243,27 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                   })}
                 </div>
 
-                {/* Provinces: several may be chosen, from the real province list */}
+                {/* Destination province: exactly one, chosen directly from the real province list */}
                 <div className="mt-8">
                   <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
                     <MapPin className="size-4 text-primary" />
-                    {lang === "pt" ? "Províncias que queres explorar" : "Provinces you want to explore"}
+                    {lang === "pt" ? "Ou escolhe diretamente a província de destino" : "Or pick your destination province directly"}
                   </h3>
                   {loadingProvinces ? (
                     <p className="text-sm text-muted-foreground animate-pulse">
                       {lang === "pt" ? "A carregar províncias..." : "Loading provinces..."}
                     </p>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={lang === "pt" ? "Província de destino" : "Destination province"}>
                       {provinces.map((p) => {
-                        const selected = provinceCodes.includes(p.code);
+                        const selected = provinceCode === p.code;
                         return (
                           <button
                             key={p.id}
                             type="button"
-                            onClick={() => toggleProvince(p.code)}
+                            onClick={() => pickProvince(p.code)}
+                            role="radio"
+                            aria-checked={selected}
                             className={cn(
                               "rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors",
                               selected
