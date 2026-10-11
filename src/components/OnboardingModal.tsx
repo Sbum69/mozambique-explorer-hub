@@ -32,6 +32,14 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
   const [days, setDays] = useState(initial?.durationDays ?? 7);
   const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
 
+  // Saved preferences may arrive after the first render (profile still loading): adopt them once.
+  const initialCode = initial?.provinces?.[0];
+  const initialSlug = initial?.province;
+  useEffect(() => {
+    if (initialCode) setProvinceCode((c) => c ?? initialCode);
+    if (initialSlug) setProvince((c) => c ?? initialSlug);
+  }, [initialCode, initialSlug]);
+
   // Older profiles only have the destination slug: derive its province once destinations load.
   useEffect(() => {
     if (provinceCode || !province) return;
@@ -161,7 +169,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {destinations.map((d, i) => {
-                    const selected = province === d.slug;
+                    const selected = !!provinceCode && province === d.slug && provinceCode === d.province;
                     return (
                       <motion.button
                         key={d.id}
@@ -170,7 +178,8 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
                         whileHover={{ y: -4 }}
-                        onClick={() => setProvince(d.slug)}
+                        onClick={() => pickDestination(d.slug, d.province)}
+                        aria-pressed={selected}
                         className={cn(
                           "group relative text-left rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-card",
                           selected
