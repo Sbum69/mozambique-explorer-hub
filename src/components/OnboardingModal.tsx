@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,15 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
     if (initialCode) setProvinceCode((c) => c ?? initialCode);
     if (initialSlug) setProvince((c) => c ?? initialSlug);
   }, [initialCode, initialSlug]);
+  const initialDays = initial?.durationDays;
+  const initialInterests = initial?.interests?.join(",");
+  const syncedRest = useRef(false);
+  useEffect(() => {
+    if (syncedRest.current || (initialDays == null && !initialInterests)) return;
+    syncedRest.current = true;
+    if (initialDays != null) setDays(initialDays);
+    if (initialInterests) setInterests(initialInterests.split(","));
+  }, [initialDays, initialInterests]);
 
   // Older profiles only have the destination slug: derive its province once destinations load.
   useEffect(() => {
