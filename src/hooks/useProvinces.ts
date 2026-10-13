@@ -7,6 +7,7 @@ import {
   type Province,
 } from "@/lib/provinces";
 
+let provincesInflight: Promise<Province[]> | null = null;
 let provincesCache: Province[] | null = null;
 let categoriesCache: BusinessCategory[] | null = null;
 
@@ -20,7 +21,9 @@ export function useProvinces(includeInactive = false) {
     setLoading(true);
     setError(null);
     try {
-      const rows = await fetchProvinces(includeInactive);
+      const rows = includeInactive
+        ? await fetchProvinces(true)
+        : await (provincesInflight ??= fetchProvinces(false).finally(() => { provincesInflight = null; }));
       if (!includeInactive) provincesCache = rows;
       setProvinces(rows);
     } catch (e) {

@@ -7,6 +7,8 @@ import {
   type Experience,
 } from "@/lib/experiences";
 
+/** In-flight request shared by components mounting at the same time (no stale data: cleared when it settles). */
+let inflight: Promise<Experience[]> | null = null;
 let cache: Experience[] | null = null;
 
 /** Shared access point for the experiences catalogue: one query, cached for the session. */
@@ -19,7 +21,7 @@ export function useExperiences() {
     setLoading(true);
     setError(null);
     try {
-      const list = await fetchExperiences();
+      const list = await (inflight ??= fetchExperiences().finally(() => { inflight = null; }));
       cache = list;
       setExperiences(list);
     } catch {
