@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { fetchDestinations, type Destination } from "@/lib/destinations";
 
+/** In-flight request shared by components mounting at the same time (no stale data: cleared when it settles). */
+let inflight: Promise<Destination[]> | null = null;
 let cache: Destination[] | null = null;
 
 /** Shared access point for the destination catalogue: one query, cached for the session. */
@@ -14,7 +16,7 @@ export function useDestinations() {
     setLoading(true);
     setError(null);
     try {
-      const list = await fetchDestinations();
+      const list = await (inflight ??= fetchDestinations().finally(() => { inflight = null; }));
       cache = list;
       setDestinations(list);
     } catch {

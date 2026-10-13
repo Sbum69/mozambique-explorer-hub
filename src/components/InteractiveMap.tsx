@@ -118,7 +118,7 @@ export function InteractiveMap({ destinations, onSelect, onDirections, routeCoor
         <Marker key={d.id} position={d.coords} icon={d.id === selectedId ? selectedPinIcon : pinIcon} zIndexOffset={d.id === selectedId ? 1000 : 0} eventHandlers={{ click: () => onPick?.(d) }}>
           <Popup>
             <div style={{ minWidth: 200 }}>
-              <img src={d.image} alt={d.name} style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 8 }} />
+              <img loading="lazy" src={d.image} alt={d.name} style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 8 }} />
               <h3 style={{ margin: "8px 0 4px", fontWeight: 700, fontSize: 16 }}>{d.name}</h3>
               <p style={{ fontSize: 12, color: "#666", margin: "0 0 8px" }}>{d.description[lang]}</p>
               {visitedIds?.has(d.id) && (

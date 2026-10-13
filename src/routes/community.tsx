@@ -355,7 +355,7 @@ function CommunityPage() {
                         <h4 className="font-bold text-gray-900 hover:text-blue-600 transition">{p.title}</h4>
                       </Link>
                       {p.imageUrl && (
-                        <img src={p.imageUrl} alt="" className="mt-3 rounded-xl max-h-52 w-full object-cover" />
+                        <img loading="lazy" decoding="async" src={p.imageUrl} alt="" className="mt-3 rounded-xl max-h-52 w-full object-cover" />
                       )}
                       <p className="mt-2 text-sm text-gray-700 leading-relaxed flex-1 line-clamp-4 whitespace-pre-line">{p.content}</p>
 

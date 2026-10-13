@@ -9,3 +9,5 @@
 - Personalised discovery reads preferences only via `usePersonalPrefs` (AuthContext: profiles + profile_provinces) and splits routes with `personalizeRoutes` (province → interest/duration fit → other regions, never mixed). Why: one preference source, no hidden eligible routes.
 - Onboarding stores exactly one destination province (profile_provinces = [code]; profiles.province = a destination slug in that province, else the province code). Why: single choice, and needsOnboarding/map still read profiles.province.
 - Map community markers open `/community-experiences?open=<id>`; the page opens only that approved id, otherwise shows a message. Why: no community detail route, never a fallback item.
+- Visitors without a session are always guests (AuthContext sets GUEST_USER; "/" redirects to /home). Why: demo/share links must open without signup; private pages still redirect to /login and RLS protects data.
+- Catalogue hooks (useDestinations/useExperiences/useProvinces) share one in-flight request. Why: several components mount together and were firing duplicate queries.
