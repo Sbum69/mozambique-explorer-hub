@@ -298,7 +298,7 @@ function MapPage() {
                   className={`overflow-hidden border-0 cursor-pointer transition-all ${selected?.id === d.id ? "ring-2 ring-primary shadow-[var(--shadow-elegant)]" : "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]"}`}
                 >
                   <div className="flex">
-                    <img src={d.image} alt={d.name} className="size-24 object-cover" />
+                    <img loading="lazy" decoding="async" src={d.image} alt={d.name} className="size-24 object-cover" />
                     <div className="flex-1 p-3 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="font-bold truncate">{d.name}</h3>

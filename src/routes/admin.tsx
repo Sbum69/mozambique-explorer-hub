@@ -1832,7 +1832,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
           <ul className="divide-y divide-gray-100">
             {visible.map((it) => (
               <li key={it.id} className="py-3 flex items-center gap-3">
-                {it.imageUrl ? <img src={it.imageUrl} alt="" className="size-14 rounded-lg object-cover shrink-0" /> : <div className="size-14 rounded-lg bg-gray-100 shrink-0" />}
+                {it.imageUrl ? <img loading="lazy" decoding="async" src={it.imageUrl} alt="" className="size-14 rounded-lg object-cover shrink-0" /> : <div className="size-14 rounded-lg bg-gray-100 shrink-0" />}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">{it.title.pt}</p>
                   <p className="text-xs text-gray-500">{it.provinceName.pt} · {it.category} · {it.location || "—"} · {it.active ? "Ativa" : "Inativa"} · <span className={it.status === "pending" ? "text-amber-600 font-semibold" : it.status === "rejected" ? "text-red-600" : "text-emerald-700"}>{statusLabel(it.status)}</span></p>

@@ -277,7 +277,7 @@ function BusinessDashboardPage() {
                   {bookings.slice(0, 8).map((b) => (
                     <li key={b.id} className="rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition">
                       <div className="flex gap-3">
-                        {b.image && <img src={b.image} alt="" className="size-16 rounded-lg object-cover shrink-0" />}
+                        {b.image && <img loading="lazy" decoding="async" src={b.image} alt="" className="size-16 rounded-lg object-cover shrink-0" />}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 flex-wrap">
                             <div className="min-w-0">
