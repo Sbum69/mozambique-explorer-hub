@@ -1,6 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { isGuestModeActive } from "@/contexts/AuthContext";
 import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
@@ -18,8 +17,8 @@ export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     const user = await getAuthenticatedUser();
     if (user) throw redirect({ to: await postAuthTarget(user.id) });
-    // Guests keep exploring; they never go through onboarding.
-    throw redirect({ to: isGuestModeActive() ? "/home" : "/login" });
+    // Visitors without an account explore the public Home directly (demo/share links); no onboarding.
+    throw redirect({ to: "/home" });
   },
   component: () => null,
 });

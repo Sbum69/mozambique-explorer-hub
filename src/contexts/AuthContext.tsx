@@ -135,7 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadAuthenticatedUser = useCallback(async (currentAuthUser: User | null) => {
     setAuthUser(currentAuthUser);
     if (!currentAuthUser) {
-      setUser(isGuestModeActive() ? GUEST_USER : null);
+      // Anyone without a session browses as a guest (public content only; RLS still applies).
+      setUser(GUEST_USER);
       setIsLoading(false);
       return;
     }
