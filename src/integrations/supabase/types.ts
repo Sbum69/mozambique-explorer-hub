@@ -133,6 +133,8 @@ export type Database = {
           category_code: string | null
           contact: Json | null
           created_at: string
+          decided_at: string | null
+          decided_by: string | null
           description: string | null
           id: string
           images: string[] | null
@@ -141,6 +143,7 @@ export type Database = {
           owner_id: string | null
           province: string | null
           province_id: string | null
+          rejection_reason: string | null
           slug: string
           status: Database["public"]["Enums"]["business_status"]
           type: string | null
@@ -152,6 +155,8 @@ export type Database = {
           category_code?: string | null
           contact?: Json | null
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
           description?: string | null
           id?: string
           images?: string[] | null
@@ -160,6 +165,7 @@ export type Database = {
           owner_id?: string | null
           province?: string | null
           province_id?: string | null
+          rejection_reason?: string | null
           slug: string
           status?: Database["public"]["Enums"]["business_status"]
           type?: string | null
@@ -171,6 +177,8 @@ export type Database = {
           category_code?: string | null
           contact?: Json | null
           created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
           description?: string | null
           id?: string
           images?: string[] | null
@@ -179,6 +187,7 @@ export type Database = {
           owner_id?: string | null
           province?: string | null
           province_id?: string | null
+          rejection_reason?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["business_status"]
           type?: string | null
@@ -192,6 +201,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "business_categories"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "businesses_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "businesses_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "businesses_owner_id_fkey"
@@ -1492,6 +1515,21 @@ export type Database = {
       }
     }
     Functions: {
+      admin_business_owner_emails: {
+        Args: never
+        Returns: {
+          business_id: string
+          email: string
+        }[]
+      }
+      admin_decide_business: {
+        Args: {
+          _business_id: string
+          _decision: Database["public"]["Enums"]["business_status"]
+          _reason?: string
+        }
+        Returns: undefined
+      }
       booked_people: {
         Args: { _date: string; _experience_id: string; _time: string }
         Returns: number
