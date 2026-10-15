@@ -24,6 +24,7 @@ import {
   X,
   Users,
   Phone,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -175,6 +176,12 @@ function BusinessDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {ownBusiness?.status === "rejected" && (
+        <div role="alert" className="bg-rose-50 border-b border-rose-200 text-rose-800 text-sm px-6 py-3">
+          <strong>O teu negócio foi rejeitado / Your business was rejected.</strong>
+          {ownBusiness.rejectionReason && <> Motivo / Reason: {ownBusiness.rejectionReason}.</>} Corrige os dados ou contacta a equipa Ekaya / Please fix the details or contact the Ekaya team.
+        </div>
+      )}
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
@@ -185,7 +192,11 @@ function BusinessDashboardPage() {
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="font-bold text-lg truncate">{businessInfo.businessName}</h1>
-                {businessInfo.verified ? (
+                {ownBusiness?.status === "rejected" ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 text-rose-700 text-xs font-semibold px-2 py-0.5">
+                    <XCircle className="w-3 h-3" /> Rejeitado
+                  </span>
+                ) : businessInfo.verified ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5">
                     <CheckCircle className="w-3 h-3" /> Verificado
                   </span>
