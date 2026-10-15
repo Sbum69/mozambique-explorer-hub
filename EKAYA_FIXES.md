@@ -845,3 +845,8 @@ Open: Admin has no screen to browse users' progress/photos (backend allows it); 
 - 4 stops flagged as community candidates (potential only); route-level candidates kept in `community_candidates`.
 - Re-running is safe: same code updates the route; stops are only written when the route has none.
 - Interests extended (wildlife, history, heritage, local_life, relax, diving, fishing, hiking, family, art, music). Nampula cover now uses the existing Ilha photo.
+
+## 8E.1 — Aprovação de negócios (Admin)
+- BD: `businesses.rejection_reason/decided_at/decided_by`; tipo de notificação `business`; RPC `admin_decide_business` e `admin_business_owner_emails` (só admin); trigger `businesses_notify_decision`; guard impede donos de alterar estado/decisão.
+- UI: `src/components/AdminBusinesses.tsx` (Admin → «Aprovação de Negócios»), aviso de rejeição com motivo no painel do negócio.
+- Testado com 2 negócios de teste isolados (removidos depois). Os 4 pendentes reais não foram alterados.

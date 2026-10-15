@@ -11,3 +11,4 @@
 - Map community markers open `/community-experiences?open=<id>`; the page opens only that approved id, otherwise shows a message. Why: no community detail route, never a fallback item.
 - Visitors without a session are always guests (AuthContext sets GUEST_USER; "/" redirects to /home). Why: demo/share links must open without signup; private pages still redirect to /login and RLS protects data.
 - Catalogue hooks (useDestinations/useExperiences/useProvinces) share one in-flight request. Why: several components mount together and were firing duplicate queries.
+- Business approval decisions go only through the admin-only `admin_decide_business` RPC (pending → approved/rejected, reason required on reject) and owner notifications come from the `businesses_notify_decision` trigger. Why: atomic, blocks stale/duplicate decisions, one notification per decision.
