@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { AdminBusinessesModal } from "@/components/AdminBusinesses";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -111,7 +112,8 @@ type ModalKey =
   | "community"
   | "communityReports"
   | "communityExperiences"
-  | "routeProgress";
+  | "routeProgress"
+  | "businesses";
 
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
@@ -169,6 +171,7 @@ function AdminPage() {
 
   const quickActions = [
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users, color: "text-blue-600 bg-blue-100" },
+    { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store, color: "text-amber-600 bg-amber-100" },
     { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
     { key: "routeProgress" as const, label: "Progresso e Provas", icon: Compass, color: "text-teal-600 bg-teal-100" },
     { key: "community" as const, label: "Moderação da Comunidade", icon: MessageSquare, color: "text-pink-600 bg-pink-100" },
@@ -389,6 +392,7 @@ function AdminPage() {
         {activeModal === "users" && <UsersModal onClose={() => setActiveModal(null)} />}
         {activeModal === "routes" && <RoutesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "routeProgress" && <AdminRouteProgressModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "businesses" && <AdminBusinessesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "community" && <CommunityModerationModal onClose={() => setActiveModal(null)} />}
         {activeModal === "communityReports" && <CommunityReportsModal onClose={() => setActiveModal(null)} />}
 
