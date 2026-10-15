@@ -24,6 +24,7 @@ import {
   X,
   Users,
   Phone,
+  XCircle as XCircleIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
