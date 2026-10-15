@@ -3,7 +3,7 @@ import { CheckCircle2, Loader2, RefreshCw, Search, XCircle } from "lucide-react"
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLang } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +61,7 @@ async function load(): Promise<Row[]> {
 }
 
 export function AdminBusinessesModal({ onClose }: { onClose: () => void }) {
-  const { lang } = useLanguage();
+  const { lang } = useLang();
   const t = TXT[lang];
   const [rows, setRows] = useState<Row[] | null>(null);
   const [err, setErr] = useState(false);
