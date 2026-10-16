@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import type { Database } from "@/integrations/supabase/types";
+import { AUTH_CALLBACK_PATH, sanitizeCallbackUrl } from "@/lib/app-url";
 
 const schema = z.object({
   businessName: z.string().trim().min(2),
@@ -17,6 +18,8 @@ const schema = z.object({
   displayName: z.string().trim().min(2),
   email: z.string().trim().email(),
   password: z.string().min(6),
+  /** Optional public callback URL; validated server-side, never trusted as-is. */
+  redirectTo: z.string().max(300).optional(),
 });
 
 export interface BusinessRegistrationResult {
