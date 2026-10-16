@@ -33,6 +33,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UsefulInfoRouteImport } from './routes/useful-info'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
 import { Route as CommunityPostIdRouteImport } from './routes/community.$postId'
 import { Route as ExperienceIdRouteImport } from './routes/experience.$id'
@@ -159,6 +160,11 @@ const UsefulInfoRoute = UsefulInfoRouteImport.update({
   path: '/useful-info',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessIdRoute = BusinessIdRouteImport.update({
   id: '/business/$id',
   path: '/business/$id',
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
   '/experience/$id': typeof ExperienceIdRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
   '/experience/$id': typeof ExperienceIdRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
   '/experience/$id': typeof ExperienceIdRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/auth/callback'
     | '/business/$id'
     | '/community/$postId'
     | '/experience/$id'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/auth/callback'
     | '/business/$id'
     | '/community/$postId'
     | '/experience/$id'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/auth/callback'
     | '/business/$id'
     | '/community/$postId'
     | '/experience/$id'
@@ -400,6 +412,7 @@ export interface RootRouteChildren {
   PreferencesRoute: typeof PreferencesRoute
   SignupRoute: typeof SignupRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   BusinessIdRoute: typeof BusinessIdRoute
   ExperienceIdRoute: typeof ExperienceIdRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
@@ -576,6 +589,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsefulInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/$id': {
       id: '/business/$id'
       path: '/business/$id'
@@ -651,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   PreferencesRoute: PreferencesRoute,
   SignupRoute: SignupRoute,
   UsefulInfoRoute: UsefulInfoRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   BusinessIdRoute: BusinessIdRoute,
   ExperienceIdRoute: ExperienceIdRoute,
   ItineraryIdRoute: ItineraryIdRoute,
