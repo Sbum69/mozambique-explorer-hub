@@ -3,6 +3,7 @@ import type { User } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/lib/auth";
+import { getAuthCallbackUrl } from "@/lib/app-url";
 
 export type UserRole = "guest" | "user" | "admin" | "business-small" | "business-large";
 
@@ -54,7 +55,7 @@ interface AuthContextValue {
   authUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: UserRole }>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: UserRole; unconfirmed?: boolean }>;
   loginAsGuest: () => void;
   logout: () => Promise<void>;
   setPreferences: (prefs: UserPreferences) => Promise<void>;
@@ -207,7 +208,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login: AuthContextValue["login"] = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error || !data.user) return { ok: false, error: authErrorMessage(error?.message ?? "") };
+    if (error || !data.user) {
+      const unconfirmed = /email not confirmed/i.test(error?.message ?? "") || error?.code === "email_not_confirmed";
+      return { ok: false, error: authErrorMessage(error?.message ?? ""), unconfirmed };
+    }
     await loadAuthenticatedUser(data.user);
     const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
     return { ok: true, role: toLegacyRole((roleRows ?? []).map(({ role }) => role) as AppRole[]) };
@@ -314,7 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: getAuthCallbackUrl(),
         data: { display_name: displayName.trim(), username: key },
       },
     });

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import type { Database } from "@/integrations/supabase/types";
+import { AUTH_CALLBACK_PATH, sanitizeCallbackUrl } from "@/lib/app-url";
 
 const schema = z.object({
   businessName: z.string().trim().min(2),
@@ -17,6 +18,8 @@ const schema = z.object({
   displayName: z.string().trim().min(2),
   email: z.string().trim().email(),
   password: z.string().min(6),
+  /** Optional public callback URL; validated server-side, never trusted as-is. */
+  redirectTo: z.string().max(300).optional(),
 });
 
 export interface BusinessRegistrationResult {
@@ -61,7 +64,11 @@ export const registerBusinessAccount = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<BusinessRegistrationResult> => {
     const SUPABASE_URL = process.env["SUPABASE_URL"]!;
     const SUPABASE_PUBLISHABLE_KEY = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-    const SITE_URL = process.env["SITE_URL"] ?? undefined;
+    const configuredSite = process.env["SITE_URL"] ?? null;
+    // Configured SITE_URL wins; otherwise only a sanitized public callback from the client.
+    const SITE_URL =
+      sanitizeCallbackUrl(configuredSite ? `${new URL(configuredSite).origin}${AUTH_CALLBACK_PATH}` : undefined, configuredSite) ??
+      (configuredSite ? undefined : sanitizeCallbackUrl(data.redirectTo, null));
 
     const publicClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       global: {

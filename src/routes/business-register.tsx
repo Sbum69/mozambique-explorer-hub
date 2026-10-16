@@ -21,6 +21,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { registerBusinessAccount } from "@/lib/business-registration.functions";
+import { getAuthCallbackUrl } from "@/lib/app-url";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 
 export const Route = createFileRoute("/business-register")({
@@ -102,6 +103,7 @@ function BusinessRegisterPage() {
         displayName: ownerName,
         email,
         password,
+        redirectTo: getAuthCallbackUrl(),
       },
     }).catch(() => ({ ok: false, error: "Sem ligação. Tenta novamente." }) as const);
 
