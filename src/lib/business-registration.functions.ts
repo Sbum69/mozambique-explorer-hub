@@ -61,7 +61,11 @@ export const registerBusinessAccount = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<BusinessRegistrationResult> => {
     const SUPABASE_URL = process.env["SUPABASE_URL"]!;
     const SUPABASE_PUBLISHABLE_KEY = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-    const SITE_URL = process.env["SITE_URL"] ?? undefined;
+    const configuredSite = process.env["SITE_URL"] ?? null;
+    // Configured SITE_URL wins; otherwise only a sanitized public callback from the client.
+    const SITE_URL =
+      sanitizeCallbackUrl(configuredSite ? `${new URL(configuredSite).origin}${AUTH_CALLBACK_PATH}` : undefined, configuredSite) ??
+      (configuredSite ? undefined : sanitizeCallbackUrl(data.redirectTo, null));
 
     const publicClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       global: {

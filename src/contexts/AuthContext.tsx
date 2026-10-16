@@ -314,7 +314,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: getAuthCallbackUrl(),
         data: { display_name: displayName.trim(), username: key },
       },
     });
