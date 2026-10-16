@@ -50,3 +50,13 @@ export async function requireRole(allowed: AppRole[]) {
 export async function postAuthTarget(userId: string): Promise<"/onboarding" | "/home"> {
   return (await hasCompletedOnboarding(userId)) ? "/home" : "/onboarding";
 }
+
+/** Role-aware landing page, based only on server-side user_roles rows. */
+export async function roleLandingTarget(
+  userId: string,
+): Promise<"/admin" | "/business-dashboard" | "/onboarding" | "/home"> {
+  const roles = await getAuthenticatedRoles(userId);
+  if (roles.includes("admin")) return "/admin";
+  if (roles.includes("business_small") || roles.includes("business_large")) return "/business-dashboard";
+  return postAuthTarget(userId);
+}
