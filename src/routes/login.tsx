@@ -10,15 +10,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { toast } from "sonner";
+import { ResendConfirmation } from "@/components/ResendConfirmation";
 
 import hero from "@/assets/hero-mozambique.jpg";
-import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
+import { getAuthenticatedUser, roleLandingTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
   beforeLoad: async () => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: await postAuthTarget(user.id) });
+    if (user) throw redirect({ to: await roleLandingTarget(user.id) });
   },
   head: () => ({
     meta: [
@@ -41,6 +42,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,20 +50,14 @@ function LoginPage() {
     const result = await login(email, password);
     setLoading(false);
     if (!result.ok) {
+      setUnconfirmed(!!result.unconfirmed);
       toast.error(result.error ?? t("invalidCredentials"));
       return;
     }
+    setUnconfirmed(false);
     toast.success(t("welcomeBack"));
-    if (result.role === "admin") {
-      navigate({ to: "/admin" });
-      return;
-    }
-    if (result.role === "business-small" || result.role === "business-large") {
-      navigate({ to: "/business-dashboard" });
-      return;
-    }
     const authenticated = await getAuthenticatedUser();
-    navigate({ to: authenticated ? await postAuthTarget(authenticated.id) : "/home" });
+    navigate({ to: authenticated ? await roleLandingTarget(authenticated.id) : "/home" });
   };
 
   const handleGuest = () => {
@@ -170,6 +166,13 @@ function LoginPage() {
               {loading ? "..." : t("login")}
             </Button>
           </form>
+
+          {unconfirmed && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-muted-foreground">{t("confirmEmailFirst")}</p>
+              <ResendConfirmation initialEmail={email} />
+            </div>
+          )}
 
           <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
             <div className="h-px bg-border flex-1" />
