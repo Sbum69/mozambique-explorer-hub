@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 export type Lang = "pt" | "en";
 
 const dict = {
+  confirmEmailFirst: { pt: "O teu email ainda não foi confirmado. Abre a ligação que te enviámos ou pede uma nova.", en: "Your email is not confirmed yet. Open the link we sent you or request a new one." },
   // generic
   appName: { pt: "Ekaya Explore", en: "Ekaya Explore" },
   tagline: {
