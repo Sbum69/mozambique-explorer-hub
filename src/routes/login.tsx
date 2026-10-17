@@ -11,10 +11,9 @@ import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { toast } from "sonner";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
-import { roleLandingTarget } from "@/lib/auth";
 
 import hero from "@/assets/hero-mozambique.jpg";
-import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
+import { getAuthenticatedUser, roleLandingTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
