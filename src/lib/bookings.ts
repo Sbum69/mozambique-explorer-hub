@@ -28,11 +28,13 @@ export interface Booking {
   notes: string | null;
   totalMzn: number;
   status: BookingStatus;
+  /** Motivo registado quando a empresa rejeita ou cancela a reserva. */
+  decisionReason: string | null;
   createdAt: string;
 }
 
 const SELECT =
-  "id, code, experience_id, business_id, date, time, people, customer_name, customer_phone, customer_email, notes, total_mzn, status, created_at, experiences(title_pt, title_en, description_pt, description_en, images, duration_hours, location, province, businesses(name, contact), destinations(name, slug))";
+  "id, code, experience_id, business_id, date, time, people, customer_name, customer_phone, customer_email, notes, total_mzn, status, decision_reason, created_at, experiences(title_pt, title_en, description_pt, description_en, images, duration_hours, location, province, businesses(name, contact), destinations(name, slug))";
 
 interface JoinedBusiness {
   name: string;
@@ -66,6 +68,7 @@ interface BookingRow {
   notes: string | null;
   total_mzn: number | string;
   status: BookingStatus;
+  decision_reason: string | null;
   created_at: string;
   experiences: JoinedExperience | JoinedExperience[] | null;
 }
@@ -113,6 +116,7 @@ function mapBooking(row: BookingRow): Booking {
     notes: row.notes,
     totalMzn: Number(row.total_mzn ?? 0),
     status: row.status,
+    decisionReason: row.decision_reason,
     createdAt: row.created_at,
   };
 }
@@ -221,12 +225,22 @@ export async function fetchBusinessBookings(): Promise<Booking[]> {
   return (data ?? []).map((row) => mapBooking(row as unknown as BookingRow));
 }
 
-/** Business owners may only move a booking to confirmed / rejected / completed. */
-export async function updateBookingStatus(
+/**
+ * Decisão da empresa sobre uma reserva, validada de forma atómica no servidor:
+ * confirmar/rejeitar uma pendente, cancelar uma confirmada ou concluí-la após a
+ * data/hora. Rejeição e cancelamento exigem motivo (guardado na reserva e
+ * incluído na notificação do turista pelo trigger da base de dados).
+ */
+export async function decideBooking(
   id: string,
-  status: "confirmed" | "rejected" | "completed",
+  decision: "confirmed" | "rejected" | "cancelled" | "completed",
+  reason?: string,
 ): Promise<void> {
-  const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
+  const { error } = await supabase.rpc("business_decide_booking", {
+    _booking_id: id,
+    _decision: decision,
+    _reason: reason?.trim() || undefined,
+  });
   if (error) throw new Error(error.message);
 }
 
@@ -259,6 +273,11 @@ export function translateBookingError(message: string, lang: "pt" | "en"): strin
   }
   if (m.includes("not active")) {
     return lang === "pt" ? "Esta experiência não está disponível." : "This experience is unavailable.";
+  }
+  if (m.includes("schedule closed")) {
+    return lang === "pt"
+      ? "Este horário está fechado a novas reservas."
+      : "This schedule is closed to new bookings.";
   }
   if (m === "not_authenticated") {
     return lang === "pt" ? "Inicia sessão para reservar." : "Sign in to book.";

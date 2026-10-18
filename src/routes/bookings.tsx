@@ -267,6 +267,9 @@ function BookingsPage() {
               {open.status === "rejected" && (
                 <p className="text-xs text-muted-foreground">{pt ? "Esta reserva foi rejeitada pelo anfitrião." : "This booking was rejected by the host."}</p>
               )}
+              {open.decisionReason && (
+                <p className="text-xs text-muted-foreground">{pt ? "Motivo: " : "Reason: "}{open.decisionReason}</p>
+              )}
               {open.status === "confirmed" && (
                 <p className="text-xs text-muted-foreground">{pt ? "Reservas confirmadas não podem ser canceladas aqui. Contacta o negócio." : "Confirmed bookings can't be cancelled here. Contact the business."}</p>
               )}

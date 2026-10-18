@@ -73,3 +73,32 @@ export const saveBusinessAvailability = createServerFn({ method: "POST" }).middl
     if (result.error) throw new Error(result.error.message);
     return result.data;
   });
+
+/**
+ * Fecha (ou reabre) um horário semanal a novas reservas. Reservas existentes
+ * ficam intactas: só a coluna accepts_new_bookings é alterada, validada no
+ * servidor por propriedade; o trigger de integridade serializa com reservas
+ * concorrentes através do lock por atividade.
+ */
+export const setSlotAcceptsNewBookings = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    const value = input as { id?: unknown; experienceId?: unknown; accepts?: unknown };
+    if (typeof value.id !== "string" || typeof value.experienceId !== "string" || typeof value.accepts !== "boolean") {
+      throw new Error("INVALID_INPUT");
+    }
+    return { id: value.id, experienceId: value.experienceId, accepts: value.accepts };
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: activity } = await supabase.from("experiences").select("id, businesses!inner(owner_id)").eq("id", data.experienceId).eq("businesses.owner_id", userId).maybeSingle();
+    if (!activity) throw new Error("NOT_OWNED");
+    const { data: updated, error } = await supabase
+      .from("experience_availability")
+      .update({ accepts_new_bookings: data.accepts })
+      .eq("id", data.id)
+      .eq("experience_id", activity.id)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return updated;
+  });
