@@ -1,5 +1,4 @@
-/// <reference types="bun" />
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { activitySchema, availabilitySchema, profileSchema } from "./business-management";
 const id = "11111111-1111-4111-8111-111111111111";
 const activity = { businessId: id, titlePt: "Teste", titleEn: "Test", descriptionPt: "Teste isolado", descriptionEn: "Isolated test", category: "culture", priceMzn: 250, durationHours: 2, capacity: 10, location: "Test", destinationId: null, active: false };
