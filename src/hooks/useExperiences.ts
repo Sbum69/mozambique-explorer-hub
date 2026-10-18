@@ -11,6 +11,11 @@ import {
 let inflight: Promise<Experience[]> | null = null;
 let cache: Experience[] | null = null;
 
+export function invalidateExperiencesCatalogue() {
+  cache = null;
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("ekaya:experiences-changed"));
+}
+
 /** Shared access point for the experiences catalogue: one query, cached for the session. */
 export function useExperiences() {
   const [experiences, setExperiences] = useState<Experience[]>(cache ?? []);
@@ -38,6 +43,12 @@ export function useExperiences() {
       return;
     }
     void load();
+  }, [load]);
+
+  useEffect(() => {
+    const refresh = () => void load();
+    window.addEventListener("ekaya:experiences-changed", refresh);
+    return () => window.removeEventListener("ekaya:experiences-changed", refresh);
   }, [load]);
 
   return {

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Calendar, Edit, Plus, Save, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { invalidateExperiencesCatalogue } from "@/hooks/useExperiences";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +36,7 @@ export function BusinessManagement() {
   const [editor, setEditor] = useState<Activity | "new" | null>(null);
   const [schedule, setSchedule] = useState<Activity | null>(null);
   const [profile, setProfile] = useState(false);
+  const saved = () => { invalidateExperiencesCatalogue(); toast.success(pt ? "Alterações guardadas." : "Changes saved."); };
   const load = useCallback(async () => { setLoading(true); setError(false); try { setData(await fetchData()); } catch { setError(true); } finally { setLoading(false); } }, [fetchData]);
   useEffect(() => { void load(); }, [load]);
   const business = data?.businesses.find(b => b.id === selected) ?? data?.businesses[0];
@@ -58,8 +61,8 @@ export function BusinessManagement() {
         <Button variant="outline" size="sm" onClick={() => setEditor(a)}><Edit className="size-4" />{pt ? "Editar" : "Edit"}</Button><Button variant="outline" size="sm" onClick={() => setSchedule(a)}><Calendar className="size-4" />{pt ? "Disponibilidade" : "Availability"}</Button>
       </li>)}</ul>
     </section>
-    <Dialog open={profile} onOpenChange={setProfile}><DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto"><DialogTitle>{pt ? "Editar perfil" : "Edit profile"}</DialogTitle><DialogDescription>{pt ? "A decisão administrativa permanece inalterada." : "The administrative decision remains unchanged."}</DialogDescription><ProfileForm business={business} data={data} onSaved={async () => { await load(); setProfile(false); }} /></DialogContent></Dialog>
-    <Dialog open={editor !== null} onOpenChange={open => { if (!open) setEditor(null); }}><DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto"><DialogTitle>{editor === "new" ? (pt ? "Criar atividade" : "Create activity") : (pt ? "Editar atividade" : "Edit activity")}</DialogTitle><DialogDescription>{pt ? "Atividade comercial · preço por pessoa em MZN" : "Commercial activity · price per person in MZN"}</DialogDescription>{editor && <ActivityForm activity={editor === "new" ? null : editor} business={business} data={data} onSaved={async () => { await load(); setEditor(null); }} />}</DialogContent></Dialog>
+    <Dialog open={profile} onOpenChange={setProfile}><DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto"><DialogTitle>{pt ? "Editar perfil" : "Edit profile"}</DialogTitle><DialogDescription>{pt ? "A decisão administrativa permanece inalterada." : "The administrative decision remains unchanged."}</DialogDescription><ProfileForm business={business} data={data} onSaved={async () => { await load(); saved(); setProfile(false); }} /></DialogContent></Dialog>
+    <Dialog open={editor !== null} onOpenChange={open => { if (!open) setEditor(null); }}><DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto"><DialogTitle>{editor === "new" ? (pt ? "Criar atividade" : "Create activity") : (pt ? "Editar atividade" : "Edit activity")}</DialogTitle><DialogDescription>{pt ? "Atividade comercial · preço por pessoa em MZN" : "Commercial activity · price per person in MZN"}</DialogDescription>{editor && <ActivityForm activity={editor === "new" ? null : editor} business={business} data={data} onSaved={async () => { await load(); saved(); setEditor(null); }} />}</DialogContent></Dialog>
     <Dialog open={schedule !== null} onOpenChange={open => { if (!open) setSchedule(null); }}><DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto"><DialogTitle>{pt ? "Disponibilidade" : "Availability"}</DialogTitle><DialogDescription>{pt ? "Horários semanais recorrentes. Reservas existentes são preservadas." : "Recurring weekly schedules. Existing bookings are preserved."}</DialogDescription>{schedule && <AvailabilityForm activity={schedule} slots={data.availability.filter(s => s.experience_id === schedule.id)} reload={load} />}</DialogContent></Dialog>
   </div>;
 }
