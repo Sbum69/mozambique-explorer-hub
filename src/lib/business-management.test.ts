@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 import { activitySchema, availabilitySchema, profileSchema } from "./business-management";
 const id = "11111111-1111-4111-8111-111111111111";
