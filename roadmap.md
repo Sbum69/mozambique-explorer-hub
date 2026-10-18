@@ -1,8 +1,11 @@
-# 8E.2
-- [x] Read-only audit of source, schema, RLS, storage and public entry points
-- [x] Profile, commercial activity and weekly availability management
-- [x] Approval visibility and existing-booking integrity enforcement
-- [x] Automated and authenticated browser tests with isolated data
-- [x] Separate implementation report and independent final technical audit
-- [x] Remove isolated QA data, confirm final counts and leave unpublished
-- [ ] Exact original-data fingerprint comparison — blocked: original aggregation formula unavailable; final counts confirmed
+# 8E.3 — Gestão de Reservas, Workflow de Estados e Fecho de Horário
+- [ ] FASE 1: Auditoria (bookings, estados, transições, capacidade, notificações, RLS)
+- [ ] FASE 2: Painel de reservas da empresa (lista, filtros, detalhe, PT/EN, mobile)
+- [ ] FASE 3: Workflow de estados (aceitar, rejeitar c/ motivo, cancelar confirmada c/ motivo, concluir c/ regra temporal)
+- [ ] FASE 4: Fechar horário a novas reservas preservando existentes
+- [ ] FASE 5: Capacidade, concorrência e integridade
+- [ ] FASE 6: Segurança e permissões
+- [ ] FASE 7: Notificações (decisão, cancelamento, nova reserva para empresa)
+- [ ] FASE 8: Testes 1–28 com dados QA isolados
+- [ ] FASE 9: Preservação de dados, limpeza QA, fingerprints
+- [ ] FASE 10: Relatório final; não publicar; não iniciar 8E.4
