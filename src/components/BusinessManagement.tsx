@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
-import { getBusinessManagement, saveBusinessProfile, saveBusinessActivity, saveBusinessAvailability } from "@/lib/business-management.functions";
+import { getBusinessManagement, saveBusinessProfile, saveBusinessActivity, saveBusinessAvailability, setSlotAcceptsNewBookings } from "@/lib/business-management.functions";
 import { activityCategories, profileSchema, activitySchema, availabilitySchema, managementError, type ActivityInput, type AvailabilityInput } from "@/lib/business-management";
 
 type Management = Awaited<ReturnType<typeof getBusinessManagement>>;
@@ -100,11 +100,23 @@ function ActivityForm({ activity, business, data, onSaved }: { activity: Activit
   </form>;
 }
 function AvailabilityForm({ activity, slots, reload }: { activity: Activity; slots: Slot[]; reload: () => Promise<void> }) {
-  const { lang } = useLang(); const pt = lang === "pt"; const save = useServerFn(saveBusinessAvailability);
+  const { lang } = useLang(); const pt = lang === "pt"; const save = useServerFn(saveBusinessAvailability); const toggleClosure = useServerFn(setSlotAcceptsNewBookings);
   const blank: AvailabilityInput = { experienceId: activity.id, dayOfWeek: 1, startTime: "", endTime: "", capacity: NaN, active: true };
   const [form, setForm] = useState(blank); const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [success, setSuccess] = useState(false);
+  const [closing, setClosing] = useState<string | null>(null);
   const days = pt ? ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"] : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  return <div className="space-y-5"><ul className="space-y-2">{slots.map(s => <li className="border-b pb-2 flex items-center gap-2 flex-wrap" key={s.id}><span className="text-sm flex-1">{days[s.day_of_week]} · {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)} · {s.capacity} · {s.active ? (pt ? "Ativo" : "Active") : (pt ? "Inativo" : "Inactive")}</span><Button variant="ghost" size="sm" onClick={() => { setSuccess(false); setError(""); setForm({ id: s.id, experienceId: activity.id, dayOfWeek: s.day_of_week, startTime: s.start_time.slice(0, 5), endTime: s.end_time.slice(0, 5), capacity: s.capacity, active: s.active }); }}><Edit className="size-4" />{pt ? "Editar horário" : "Edit schedule"}</Button></li>)}</ul>
+  const setClosure = async (slot: Slot, accepts: boolean) => {
+    setClosing(slot.id); setError(""); setSuccess(false);
+    try {
+      await toggleClosure({ data: { id: slot.id, experienceId: activity.id, accepts } });
+      await reload();
+      toast.success(accepts ? (pt ? "Horário reaberto a novas reservas." : "Schedule reopened to new bookings.") : (pt ? "Horário fechado a novas reservas. As reservas existentes ficam intactas." : "Schedule closed to new bookings. Existing bookings are untouched."));
+    } catch (err) { setError(managementError(err, pt)); } finally { setClosing(null); }
+  };
+  return <div className="space-y-5"><ul className="space-y-2">{slots.map(s => <li className="border-b pb-2 flex items-center gap-2 flex-wrap" key={s.id}><span className="text-sm flex-1">{days[s.day_of_week]} · {s.start_time.slice(0, 5)}–{s.end_time.slice(0, 5)} · {s.capacity} · {s.active ? (pt ? "Ativo" : "Active") : (pt ? "Inativo" : "Inactive")}{!s.accepts_new_bookings && <> · <strong className="text-destructive">{pt ? "Fechado a novas reservas" : "Closed to new bookings"}</strong></>}</span>
+    <Button variant="ghost" size="sm" onClick={() => { setSuccess(false); setError(""); setForm({ id: s.id, experienceId: activity.id, dayOfWeek: s.day_of_week, startTime: s.start_time.slice(0, 5), endTime: s.end_time.slice(0, 5), capacity: s.capacity, active: s.active }); }}><Edit className="size-4" />{pt ? "Editar horário" : "Edit schedule"}</Button>
+    {s.active && <Button variant="outline" size="sm" disabled={closing === s.id} onClick={() => void setClosure(s, !s.accepts_new_bookings)}>{s.accepts_new_bookings ? (pt ? "Fechar a novas reservas" : "Close to new bookings") : (pt ? "Reabrir a novas reservas" : "Reopen to new bookings")}</Button>}
+  </li>)}</ul>
     {!slots.length && <p className="text-sm text-muted-foreground">{pt ? "Sem horários. Não é possível reservar esta atividade." : "No schedules. This activity cannot be booked."}</p>}
     <Button size="sm" variant="outline" onClick={() => { setForm(blank); setSuccess(false); setError(""); }}><Plus className="size-4" />{pt ? "Novo horário" : "New schedule"}</Button>
     <form className="grid sm:grid-cols-2 gap-4" onSubmit={async e => { e.preventDefault(); setBusy(true); setError(""); setSuccess(false); try { await save({ data: availabilitySchema.parse(form) }); await reload(); setForm(blank); setSuccess(true); } catch (err) { setError(managementError(err, pt)); } finally { setBusy(false); } }}>
