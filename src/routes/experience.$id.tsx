@@ -13,9 +13,9 @@ export const Route = createFileRoute("/experience/$id")({
   head: () => ({
     meta: [
       { title: "Experiência — Ekaya Explore" },
-      { name: "description", content: "Detalhes de uma experiência comunitária em Moçambique e reserva." },
+      { name: "description", content: "Detalhes de uma atividade comercial em Moçambique e reserva." },
       { property: "og:title", content: "Experiência — Ekaya Explore" },
-      { property: "og:description", content: "Detalhes de uma experiência comunitária em Moçambique e reserva." },
+      { property: "og:description", content: "Detalhes de uma atividade comercial em Moçambique e reserva." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -37,6 +37,8 @@ function ExperienceDetailPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setError(false);
+    setExp(null);
     fetchExperienceById(id)
       .then((e) => active && setExp(e))
       .catch(() => active && setError(true))
@@ -92,7 +94,7 @@ function ExperienceDetailPage() {
                 <span className="text-sm text-muted-foreground">{pt ? "por pessoa" : "per person"}</span>
                 <div className="flex-1" />
                 {exp.destinationId && (
-                  <Button variant="outline" onClick={() => navigate({ to: "/map", search: { destination: exp.destinationId! } })}>
+                  <Button variant="outline" onClick={() => { if (exp.destinationId) void navigate({ to: "/map", search: { destination: exp.destinationId } }); }}>
                     <MapIcon className="size-4 mr-1" />{pt ? "Ver no mapa" : "View on map"}
                   </Button>
                 )}

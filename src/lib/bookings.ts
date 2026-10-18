@@ -207,9 +207,14 @@ export async function fetchMyBookings(): Promise<Booking[]> {
  * RLS (`owns_business`) already restricts the rows — no business id from the client.
  */
 export async function fetchBusinessBookings(): Promise<Booking[]> {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("NOT_AUTHENTICATED");
+  const { data: businesses, error: businessError } = await supabase.from("businesses").select("id").eq("owner_id", auth.user.id);
+  if (businessError) throw new Error(businessError.message);
   const { data, error } = await supabase
     .from("bookings")
     .select(SELECT)
+    .in("business_id", (businesses ?? []).map(b => b.id))
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
