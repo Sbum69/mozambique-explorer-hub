@@ -239,7 +239,7 @@ export async function decideBooking(
   const { error } = await supabase.rpc("business_decide_booking", {
     _booking_id: id,
     _decision: decision,
-    _reason: reason?.trim() || null,
+    _reason: reason?.trim() || undefined,
   });
   if (error) throw new Error(error.message);
 }
