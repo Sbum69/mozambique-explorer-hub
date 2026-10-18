@@ -26,6 +26,7 @@ export type AvailabilityInput = z.infer<typeof availabilitySchema>;
 
 export function managementError(error: unknown, pt: boolean) {
   const message = error instanceof Error ? error.message : "";
+  if (/PROVINCE_HAS_ACTIVITIES/.test(message)) return pt ? "Este negócio já tem atividades. A mudança de província precisa de revisão para preservar os destinos associados." : "This business already has activities. Province changes need review to preserve linked destinations.";
   if (/EXISTING_BOOKINGS|CAPACITY_BELOW_BOOKED/.test(message)) return pt ? "Este horário tem reservas. Mantém as horas e lugares já reservados." : "This schedule has bookings. Keep its times and already booked seats.";
   if (/OVERLAPPING|unique_slot|duplicate key/.test(message)) return pt ? "Este horário coincide com outro existente." : "This schedule overlaps an existing one.";
   if (/FORBIDDEN|NOT_OWNED/.test(message)) return pt ? "Não tens autorização para esta alteração." : "You are not authorized to make this change.";
