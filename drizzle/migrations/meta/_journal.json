@@ -169,6 +169,13 @@
       "when": 1792346859548,
       "tag": "0023_business_management_8e2",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792347351806,
+      "tag": "0024_business_profile_province_integrity_8e2",
+      "breakpoints": true
     }
   ]
 }
