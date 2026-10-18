@@ -1,11 +1,11 @@
 # 8E.3 — Gestão de Reservas, Workflow de Estados e Fecho de Horário
-- [ ] FASE 1: Auditoria (bookings, estados, transições, capacidade, notificações, RLS)
-- [ ] FASE 2: Painel de reservas da empresa (lista, filtros, detalhe, PT/EN, mobile)
-- [ ] FASE 3: Workflow de estados (aceitar, rejeitar c/ motivo, cancelar confirmada c/ motivo, concluir c/ regra temporal)
-- [ ] FASE 4: Fechar horário a novas reservas preservando existentes
-- [ ] FASE 5: Capacidade, concorrência e integridade
-- [ ] FASE 6: Segurança e permissões
-- [ ] FASE 7: Notificações (decisão, cancelamento, nova reserva para empresa)
-- [ ] FASE 8: Testes 1–28 com dados QA isolados
-- [ ] FASE 9: Preservação de dados, limpeza QA, fingerprints
-- [ ] FASE 10: Relatório final; não publicar; não iniciar 8E.4
+- [x] FASE 1 Auditoria do sistema de reservas
+- [x] FASE 2 Gestão de reservas no painel da empresa
+- [x] FASE 3 Workflow de estados com motivo e RPC atómica
+- [x] FASE 4 Fecho/reabertura de horário a novas reservas
+- [x] FASE 5 Capacidade, concorrência e integridade
+- [x] FASE 6 Segurança e permissões
+- [x] FASE 7 Notificações (dono e turista, com motivo)
+- [x] FASE 8 Testes 1–28 (resultados no relatório final)
+- [x] FASE 9 Limpeza de dados QA e verificação de contagens
+- [x] FASE 10 Relatório final
