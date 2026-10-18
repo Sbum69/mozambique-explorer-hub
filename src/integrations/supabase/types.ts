@@ -24,6 +24,7 @@ export type Database = {
           customer_name: string
           customer_phone: string | null
           date: string
+          decision_reason: string | null
           experience_id: string
           id: string
           notes: string | null
@@ -42,6 +43,7 @@ export type Database = {
           customer_name: string
           customer_phone?: string | null
           date: string
+          decision_reason?: string | null
           experience_id: string
           id?: string
           notes?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string | null
           date?: string
+          decision_reason?: string | null
           experience_id?: string
           id?: string
           notes?: string | null
@@ -751,6 +754,7 @@ export type Database = {
       }
       experience_availability: {
         Row: {
+          accepts_new_bookings: boolean
           active: boolean
           capacity: number
           created_at: string
@@ -762,6 +766,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepts_new_bookings?: boolean
           active?: boolean
           capacity: number
           created_at?: string
@@ -773,6 +778,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepts_new_bookings?: boolean
           active?: boolean
           capacity?: number
           created_at?: string
@@ -1533,6 +1539,14 @@ export type Database = {
       booked_people: {
         Args: { _date: string; _experience_id: string; _time: string }
         Returns: number
+      }
+      business_decide_booking: {
+        Args: {
+          _booking_id: string
+          _decision: Database["public"]["Enums"]["booking_status"]
+          _reason?: string
+        }
+        Returns: undefined
       }
       can_edit_route: { Args: { _route_id: string }; Returns: boolean }
       can_view_route: { Args: { _route_id: string }; Returns: boolean }

@@ -183,6 +183,13 @@
       "when": 1792347376702,
       "tag": "0025_business_management_history_fields_8e2",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792353919357,
+      "tag": "0026_booking_workflow_slot_closure_8e3",
+      "breakpoints": true
     }
   ]
 }
