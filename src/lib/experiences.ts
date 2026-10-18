@@ -66,7 +66,7 @@ interface ExperienceRow {
   rating: number | string | null;
   reviews: number | null;
   images: string[] | null;
-  businesses: { name: string } | { name: string }[] | null;
+  businesses: { name: string; status?: string } | { name: string; status?: string }[] | null;
   destinations: { slug: string; name: string } | { slug: string; name: string }[] | null;
 }
 
@@ -109,7 +109,7 @@ export function mapExperience(row: ExperienceRow): Experience {
 }
 
 const SELECT =
-  "id, slug, business_id, destination_id, title_pt, title_en, description_pt, description_en, province, location, category, price_mzn, duration_hours, capacity, rating, reviews, images, businesses(name), destinations(slug, name)";
+  "id, slug, business_id, destination_id, title_pt, title_en, description_pt, description_en, province, location, category, price_mzn, duration_hours, capacity, rating, reviews, images, businesses!inner(name, status), destinations(slug, name)";
 
 /** Public catalogue of active experiences (RLS allows anon + authenticated reads). */
 export async function fetchExperiences(): Promise<Experience[]> {
@@ -117,6 +117,7 @@ export async function fetchExperiences(): Promise<Experience[]> {
     .from("experiences")
     .select(SELECT)
     .eq("active", true)
+    .eq("businesses.status", "approved")
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -129,6 +130,8 @@ export async function fetchExperienceById(id: string): Promise<Experience | null
     .from("experiences")
     .select(SELECT)
     .eq("id", id)
+    .eq("active", true)
+    .eq("businesses.status", "approved")
     .maybeSingle();
 
   if (error) throw new Error(error.message);
@@ -142,6 +145,7 @@ export async function fetchExperiencesByDestination(destinationId: string): Prom
     .select(SELECT)
     .eq("active", true)
     .eq("destination_id", destinationId)
+    .eq("businesses.status", "approved")
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
@@ -175,9 +179,14 @@ export async function fetchAvailability(
 
 /** Experiences owned by the signed-in business (RLS returns only its own rows). */
 export async function fetchOwnExperiences(): Promise<Experience[]> {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("NOT_AUTHENTICATED");
+  const { data: businesses, error: businessError } = await supabase.from("businesses").select("id").eq("owner_id", auth.user.id);
+  if (businessError) throw new Error(businessError.message);
   const { data, error } = await supabase
     .from("experiences")
     .select(SELECT)
+    .in("business_id", (businesses ?? []).map(b => b.id))
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
