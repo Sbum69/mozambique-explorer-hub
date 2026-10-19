@@ -49,11 +49,11 @@ function decisionError(message: string, pt: boolean): string {
 
 function BusinessDashboardPage() {
   const navigate = useNavigate();
-  const { logout, authUser } = useAuth();
+  const { logout, authUser, isLoading } = useAuth();
   const { lang } = useLang();
   const pt = lang === "pt";
   const fetchBookings = useServerFn(getOwnerBookings);
-  const { data: bookings = [], isPending: loading, isError: error, refetch } = useQuery({ queryKey: ["owner-bookings", authUser?.id], queryFn: () => fetchBookings(), staleTime: 30_000 });
+  const { data: bookings = [], isPending: loading, isError: error, refetch } = useQuery({ queryKey: ["owner-bookings", authUser?.id], queryFn: () => fetchBookings(), enabled: !isLoading && !!authUser?.id, staleTime: 30_000 });
   const load = async () => { await refetch(); };
   const [busy, setBusy] = useState<string | null>(null);
   const { status: filter } = Route.useSearch();
@@ -116,12 +116,12 @@ function BusinessDashboardPage() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 flex-wrap">
           <Store className="size-5 text-primary" />
           <span className="font-bold flex-1">{pt ? "Painel do Negócio" : "Business Dashboard"}</span>
-          <Button variant="ghost" size="icon" aria-label={pt ? "Voltar à Home" : "Back to Home"} onClick={() => navigate({ to: "/home" })}>
+          <Button variant="ghost" size="icon" className="text-foreground" aria-label={pt ? "Voltar à Home" : "Back to Home"} onClick={() => navigate({ to: "/home" })}>
             <ArrowLeft className="size-4" />
           </Button>
           <LanguageToggle />
           <NotificationsBell />
-          <Button variant="ghost" size="icon" aria-label={pt ? "Sair" : "Sign out"} onClick={() => void logout().then(() => navigate({ to: "/login", replace: true }))}>
+          <Button variant="ghost" size="icon" className="text-foreground" aria-label={pt ? "Sair" : "Sign out"} onClick={() => void logout().then(() => navigate({ to: "/login", replace: true }))}>
             <LogOut className="size-4" />
           </Button>
         </div>

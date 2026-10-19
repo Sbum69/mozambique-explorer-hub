@@ -10,3 +10,11 @@ test('page errors do not return a silently truncated successful result', async (
   const result = await readAll(async () => ({ data: null, error: { message: 'Denied' } }));
   expect(result.error?.message).toBe('Denied');
 });
+test('a failure after a full page remains an error, not a complete history', async () => {
+  const rows = Array.from({ length: 500 }, (_, id) => ({ id }));
+  const result = await readAll(async offset => offset === 0
+    ? { data: rows, error: null }
+    : { data: null, error: { message: 'Second page denied' } });
+  expect(result.data).toHaveLength(500);
+  expect(result.error?.message).toBe('Second page denied');
+});

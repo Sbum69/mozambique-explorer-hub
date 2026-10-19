@@ -1,11 +1,12 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { BOOKING_SELECT, mapBooking, type BookingRow } from './bookings';
+import { readAll } from './read-all';
 
 export const getOwnerBookings = createServerFn({ method: 'GET' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { data: roles, error: roleError } = await context.supabase.from('user_roles').select('role').eq('user_id', context.userId);
   if (roleError || !roles?.some(r => r.role === 'business_small' || r.role === 'business_large')) throw new Error('Forbidden');
-  const { data: businesses, error } = await context.supabase.from('businesses').select('id').eq('owner_id', context.userId);
+  const { data: businesses, error } = await readAll(offset => context.supabase.from('businesses').select('id').eq('owner_id', context.userId).order('id').range(offset, offset + 499));
   if (error) throw new Error('Could not load businesses');
   const ids = (businesses ?? []).map(b => b.id);
   if (!ids.length) return [];

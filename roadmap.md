@@ -15,5 +15,6 @@
 - [x] Implementar métricas reais e atalhos reutilizando a gestão existente
 - [x] Validar testes disponíveis e interface empresarial PT/EN/temas desktop/mobile
 - [x] Comparar cinco tabelas e entregar relatório com limitações
+- [ ] Revalidar 8E.4 e corrigir lacunas de paginação, identidade e contraste; atualizar evidência e relatório
 - [ ] QA integral Admin/turista/segundo dono e decisões/fechos — bloqueada por sessões QA autorizadas e dados isolados populados
 - Não publicar, alterar visibilidade ou iniciar 8E.5.
