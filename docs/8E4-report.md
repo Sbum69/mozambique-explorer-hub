@@ -77,3 +77,66 @@ Nenhum email enviado, nenhuma notificação marcada como lida, nenhum save/decis
 
 ## 10. Antes do lançamento
 Concluir QA autorizada com Admin, turista e dono com dados QA populados, validação de estados/fechos sem tocar dados reais; revalidar snapshots de títulos/limitação acordada; completar traduções/tema de modais legados dentro de escopo autorizado; validar callback de email em URL pública e segurança pendente. Não publicar automaticamente nem iniciar 8E.5.
+
+## Revalidação do pedido — 19-10-2026, 01:40–01:44 UTC
+
+Esta secção distingue a execução atual da evidência anterior. O 8E.4 permanece implementado, mas **não fechado integralmente**.
+
+### 1. AUDIT FINDINGS
+Auditoria incremental acrescentada a `docs/8E4-audit.md`. Métricas reais, filtros, atalhos e resumos já existiam e foram preservados. Lacunas: IDs de negócios não paginados antes da leitura de reservas; leitura empresarial antes de identidade pronta; resumo Admin com chave independente da conta; redirect redundante Admin antes da resolução de Auth; baixo contraste de ícones no escuro. Não reconstruir componentes funcionais.
+
+### 2. CHANGES IMPLEMENTED
+- Paginação de todos os IDs de negócios próprios antes da leitura de reservas.
+- Leitura empresarial somente com identidade pronta; ambas as leituras do resumo Admin usam chave com ID e aguardam identidade/papel.
+- Removido redirect redundante do componente Admin; mantidos `beforeLoad` de papel e autorização do servidor.
+- Contraste dos botões Home/Sair/idioma via token; rótulo de idioma PT/EN.
+- Teste adicional: erro numa segunda página não é tratado como histórico completo bem-sucedido.
+
+### 3. FILES MODIFIED
+Nesta revalidação: `src/lib/dashboard.functions.ts`, `src/routes/business-dashboard.tsx`, `src/routes/admin.tsx`, `src/components/LanguageToggle.tsx`, `src/lib/read-all.test.ts`, `AGENTS.md`, `roadmap.md`, `EKAYA_FIXES.md`, `docs/8E4-audit.md`, `docs/8E4-report.md`. A lista da implementação original mantém-se na secção 3 acima.
+
+### 4. DATABASE CHANGES
+Nenhuma. Apenas SELECT e RPC de leitura; sem migration, schema, policy, GRANT, trigger ou alteração de dados. Nenhuma conta criada, nenhum papel alterado, nenhum email enviado.
+
+### 5. METRIC DEFINITIONS AND DATA SOURCES
+Definições da secção 5 mantidas. Reservas abrangem todos os negócios do dono; atividades/horários abrangem o negócio selecionado. Futuras são confirmadas posteriores a agora em UTC+02. Fechadas têm `accepts_new_bookings=false`; abertas exigem janela ativa, flag aberta, atividade ativa e negócio aprovado. Recentes usam `created_at`, não eventos de mudança inferidos. Preço guardado é snapshot; título é o título atual da atividade, não snapshot histórico.
+
+### 6. TEST RESULTS
+Comando executado: `bunx vitest run src/lib/business-dashboard.test.ts src/lib/business-management.test.ts src/lib/read-all.test.ts` — **20/20 PASS** (9 métricas, 8 gestão, 3 paginação).
+
+| # | Resultado atual | Evidência executada / requisito para concluir |
+|---|---|---|
+| 1 | PASS parcial | Browser da conta disponível mostra 1 negócio, 0 atividades/0 reservas; SELECT por owner_id confirma 1/0/0. Falta painel populado controlado. |
+| 2 | PASS unitário | Fixture de cinco estados: cada estado=1, total=5; não é E2E populado. |
+| 3 | PASS unitário | Fixture rejeitada/cancelada: confirmed=0, upcoming=0. |
+| 4 | PASS unitário | Fixture ativa/inativa: total=2, active=1, inactive=1. |
+| 5 | PASS unitário | Fechada excluída de abertas; janela/atividade inativa e negócio pending também excluídos. |
+| 6 | PASS parcial | Filtros pending/all atualizam URL; criar/perfil/notificações abrem, gestão navega à secção, PT/EN nos dois tamanhos. Nenhum save. Disponibilidade populada BLOCKED por ausência de atividades próprias. |
+| 7 | PASS parcial | Estado vazio verdadeiro confirmado na BD; nenhuma entrada fabricada. Feed populado não testado. |
+| 8 | PASS parcial | SDK no browser com sessão: negócios próprios=1; SELECT reservas fora desses IDs: count=0, sem erro. RPC Admin de emails negado. Troca entre dois donos BLOCKED por segunda sessão não autorizada disponível. |
+| 9 | BLOCKED | Requer conta QA turista indicada/autorizada; não escolher outra conta nem alterar papéis. |
+| 10 | PASS negativo / BLOCKED positivo | Conta empresarial em /admin termina em /dashboard; RPC administrativo negado. Requer Admin QA autorizado para testar entrada e aprovação positivas. |
+| 11 | PASS integridade / BLOCKED histórico populado | Hash de reservas e total_mzn intactos. Conta disponível sem reservas. Títulos históricos imutáveis não suportados pelo schema atual; requer decisão explícita sobre snapshot futuro, sem inventar retroativos. |
+| 12 | BLOCKED | Requer dados QA isolados populados e conta autorizada; não alterar reservas/horários reais para testar decisões, motivos e fechos. |
+| 13 | PASS empresarial / BLOCKED Admin | Browser 1280×1800 e 390×844 × PT/EN × claro/escuro: oito combinações sem overflow/pageerror. Capturas desktop/mobile e diálogo criar inspecionadas; não dispositivo físico. Admin e todos os modais legados não testados. |
+| 14 | PASS | 8/8 testes de business-management nesta execução. |
+| 15 | PASS limitado | Contagens e hashes das cinco tabelas abaixo idênticos antes/depois. Zero QA criado, zero limpeza necessária. Não comparação integral de Auth/storage/toda a BD. |
+
+Scripts atuais: `/tmp/browser/8e4-revalidation/check_dashboard.py`, `check_matrix.py`, `check_security.py`. Capturas na mesma pasta; evidência temporária, não fixtures de produção.
+
+### 7. BUILD RESULT
+Última entrada observada após correções: `2026-10-19T01:42:28Z build OK`. Nenhum build manual executado; validação automática do preview. Browser após alterações sem `pageerror`. Aviso CSRF preexistente permanece, não silenciado.
+
+### 8. DATA INTEGRITY AND QA CLEANUP
+SELECT antes e depois com a mesma fórmula `md5(string_agg(to_jsonb(t)::text,'|' order by id))` confirmou exatamente os cinco pares contagem/hash da secção 8: bookings 2, businesses 13, experiences 8, experience_availability 48, notifications 6. Nenhum registo criado/modificado/apagado para QA; nenhuma notificação marcada como lida. Não afirmar equivalência de tabelas não comparadas.
+
+### 9. KNOWN LIMITATIONS AND REMAINING RISKS
+- QA positiva Admin/turista/segundo dono e painel populado continuam bloqueadas por contas/dados QA autorizados não disponíveis; não alegar conclusão integral.
+- Correção de chave Admin/redirect verificada em código e build, mas troca de contas/cold-load Admin positivo ainda não executados.
+- Título histórico não é snapshot; preços são. Não ocultar esta lacuna.
+- Metadados dos content routes, incluindo index, inspecionados e presentes; nenhum novo destino de navegação criado.
+- Gestão e reservas ainda fazem leituras próprias dos negócios; verificação de papel cliente/servidor não deve ser removida para poupar pedidos. Gestão antiga mantém leitura por efeito e modais Admin antigos não foram redesenhados/traduzidos integralmente.
+- Leituras paginadas não são snapshot transacional; volumes grandes exigem futura abordagem agregada autorizada. Email público e CSRF continuam pendências anteriores.
+
+### 10. ITEMS BEFORE PUBLIC LAUNCH
+Disponibilizar contas QA autorizadas (Admin, turista, segundo dono com dados isolados) e concluir testes 1/6–13 positivos; decidir preservação de títulos históricos; validar traduções/tema de modais legados dentro de escopo acordado; concluir email público e avaliação CSRF. Aplicação permanece **não publicada**, visibilidade inalterada, 8E.5 não iniciado.
