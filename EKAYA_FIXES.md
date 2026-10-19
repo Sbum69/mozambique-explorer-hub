@@ -868,3 +868,9 @@ Open: Admin has no screen to browse users' progress/photos (backend allows it); 
 - 19 testes unitários/regressão PASS; browser empresarial PT/EN, claro/escuro, 1280px e 390×844 sem overflow/pageerror. Contagens e hashes completos idênticos para bookings/businesses/experiences/availability/notifications. Nenhum dado QA criado.
 - QA integral BLOCKED: sessão disponível só de dono sem atividades/reservas; faltam Admin/turista/segundo dono autorizados e dados QA populados para decisões/fechos. Não alegar 8E.4 integralmente fechado; não iniciar 8E.5; não publicado.
 - Revalidação 01:40–01:44 UTC: paginação também dos IDs de negócios; leituras aguardam identidade, chave de resumo Admin por conta, redirect redundante removido e contraste de ícones/idioma corrigido. 20/20 testes PASS; oito combinações empresariais e acesso Admin negativo reexecutados; cinco hashes/contagens intactos. Build automático 01:42:28Z OK. Relatório atualizado com QA positiva ainda BLOCKED; nenhuma publicação ou escrita QA.
+
+## 9B — Estatísticas e impacto verificável
+- Migration 0027: `platform_impact_stats()` (SECURITY DEFINER, só contagens, anon+authenticated).
+- `/impact` reescrito: métricas da plataforma vs impacto verificado; removidos $2.1M, 342, 15, 89%, +X%, "vs mês anterior" e percentagens por província fictícias; "85%" removido de Informações Úteis.
+- Regras: concluída = status completed e data/hora passada (Moçambique); sem receita (sem pagamentos); grupos por província de impacto verificado < 3 ocultos.
+- Testes: `src/lib/impact-stats.test.ts`.

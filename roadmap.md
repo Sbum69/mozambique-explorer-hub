@@ -18,3 +18,4 @@
 - [x] Revalidar 8E.4 e corrigir lacunas de paginação, identidade e contraste; atualizar evidência e relatório
 - [ ] QA integral Admin/turista/segundo dono e decisões/fechos — bloqueada por sessões QA autorizadas e dados isolados populados
 - Não publicar, alterar visibilidade ou iniciar 8E.5.
+- [x] 9B — Estatísticas e impacto verificável (/impact com RPC agregada, sem KPIs fictícios)

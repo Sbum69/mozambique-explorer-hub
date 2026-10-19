@@ -20,3 +20,4 @@
 - Dashboard queries use a per-router QueryClient and authenticated owner-scoped server reads; management metrics reuse its existing paginated result. Why: avoid cross-account caches, duplicate requests and silent row caps.
 - Private dashboard query keys include the authenticated identity and reads wait for identity readiness; paginate owner business IDs before booking reads. Why: prevent undefined-key requests, account-shared summaries and truncated owner histories.
 - Dashboard recency means booking/business creation records, never inferred status-change events; upcoming and completion use Mozambique time. Why: no event journal exists and browser timezone must not change business rules.
+- Public impact/statistics figures come only from the aggregate-only `platform_impact_stats()` RPC (counts, no rows/PII); verified impact counts only completed past bookings/routes/proofs, never money. Why: no hardcoded or unverifiable KPIs.

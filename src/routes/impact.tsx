@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense } from "react";
+import { Component, Suspense, type ReactNode } from "react";
 import {
   ArrowLeft, MapPin, Store, Building2, Users, Route as RouteIcon, CalendarCheck,
   CheckCircle2, Camera, Flag, Leaf, Wifi, Database, type LucideIcon,
@@ -72,7 +72,6 @@ function StatsBoundary() {
   );
 }
 
-import { Component, type ReactNode } from "react";
 class ErrorCatcher extends Component<{ children: ReactNode; onReset: () => void; lang: "pt" | "en" }, { err: boolean }> {
   state = { err: false };
   static getDerivedStateFromError() { return { err: true }; }
