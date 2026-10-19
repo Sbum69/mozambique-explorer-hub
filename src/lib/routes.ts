@@ -449,7 +449,7 @@ async function savePlan(routeId: string | null, input: RouteInput, curated = fal
 
 export async function createRoute(input: RouteInput, ownerId: string, options: { isCurated?: boolean } = {}): Promise<ItineraryRoute> {
   const { data } = await supabase.auth.getUser();
-  if (data.user?.id !== ownerId) throw new Error("AUTH_REQUIRED");
+  if (!data.user || (!options.isCurated && data.user.id !== ownerId)) throw new Error("AUTH_REQUIRED");
   return savePlan(null, input, options.isCurated ?? false);
 }
 
