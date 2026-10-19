@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
-  MapPin, Sun, ArrowRight, Store, Users as UsersIcon,
+  MapPin, Sun, ArrowRight, Store, Users as UsersIcon, Gamepad2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -60,6 +60,7 @@ const MODULES: ModuleDef[] = [
   { to: "/experiences", icon: Heart, titleKey: "modExperiences", descKey: "modExperiencesDesc", gradient: "from-success to-emerald-400" },
   { to: "/useful-info", icon: Info, titleKey: "modInfo", descKey: "modInfoDesc", gradient: "from-purple-500 to-violet-500" },
   { to: "/gamification", icon: Trophy, titleKey: "modAchievements", descKey: "modAchievementsDesc", gradient: "from-warning to-yellow-500" },
+  { to: "/games", icon: Gamepad2, titleKey: "modGames", descKey: "modGamesDesc", gradient: "from-primary to-secondary" },
   { to: "/impact", icon: Activity, titleKey: "modImpact", descKey: "modImpactDesc", gradient: "from-pink-500 to-fuchsia-500" },
 ];
 
