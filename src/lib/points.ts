@@ -21,6 +21,23 @@ export const REASON_LABELS: Record<PointsReason, { pt: string; en: string }> = {
   route_completed: { pt: "Roteiro concluído", en: "Route completed" },
 };
 
+export type PointsSource = "game" | "activity" | "route" | "reward";
+
+/** Origin group shown in history so game XP is distinguishable from tourism actions. */
+export function sourceOf(reason: PointsReason): PointsSource {
+  if (reason === "game_completed") return "game";
+  if (reason === "booking_completed") return "activity";
+  if (reason === "reward_redeemed") return "reward";
+  return "route";
+}
+
+export const SOURCE_LABELS: Record<PointsSource, { pt: string; en: string }> = {
+  game: { pt: "Jogo", en: "Game" },
+  activity: { pt: "Atividade", en: "Activity" },
+  route: { pt: "Roteiro", en: "Route" },
+  reward: { pt: "Resgate", en: "Redemption" },
+};
+
 export interface LevelDef {
   level: number;
   minPoints: number;

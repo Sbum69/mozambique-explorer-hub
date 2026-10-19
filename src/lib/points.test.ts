@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { levelFor, POINT_VALUES } from "./points";
+import { levelFor, POINT_VALUES, sourceOf } from "./points";
 
 describe("points config", () => {
   it("uses the adopted point values", () => {
@@ -29,5 +29,12 @@ describe("points config", () => {
   });
   it("never goes below level 1 for negative totals", () => {
     expect(levelFor(-50).current.level).toBe(1);
+  });
+  it("groups history origins: games vs tourism actions vs redemptions", () => {
+    expect(sourceOf("game_completed")).toBe("game");
+    expect(sourceOf("booking_completed")).toBe("activity");
+    expect(sourceOf("route_stop_proof")).toBe("route");
+    expect(sourceOf("route_completed")).toBe("route");
+    expect(sourceOf("reward_redeemed")).toBe("reward");
   });
 });
