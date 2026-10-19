@@ -558,11 +558,11 @@ function HomePage() {
               },
               {
                 icon: Sparkles,
-                title: lang === "pt" ? "Explora e ganha XP" : "Explore and earn XP",
+                title: lang === "pt" ? "Explora e ganha pontos" : "Explore and earn points",
                 desc:
                   lang === "pt"
-                    ? "Visita locais offline e desbloqueia recompensas."
-                    : "Visit places offline and unlock rewards.",
+                    ? "Conclui atividades e roteiros com prova para subir de nível."
+                    : "Complete activities and proven routes to level up.",
               },
             ].map((step, i) => (
               <Card key={i} className="text-center">
