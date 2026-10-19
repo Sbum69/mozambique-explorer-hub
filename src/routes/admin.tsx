@@ -190,6 +190,9 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3"><LanguageToggle />
+            <Button variant="outline" size="sm" onClick={() => navigate({ to: "/impact" })}>
+              <Activity className="size-4" /> {pt ? "Impacto" : "Impact"}
+            </Button>
             <span className="hidden sm:inline text-sm text-muted-foreground">{user.displayName ?? user.username}</span>
             <Button variant="outline"
               onClick={() => {
