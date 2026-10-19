@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
+import { PointsCard } from "@/components/PointsCard";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
@@ -76,8 +77,6 @@ function DashboardPage() {
   if (!user) return null;
 
   const province = destinations.find((d) => d.slug === user.preferences?.province);
-  const xpToNext = (user.level + 1) * 1000;
-  const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
 
   // Official itinerary of the chosen province, read from the database (no mock data).
   const personalized = personalPrefs.hasPrefs ? personalizeRoutes(publicRoutes, personalPrefs) : null;
@@ -157,23 +156,15 @@ function DashboardPage() {
 
               </div>
 
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <Stat label={t("level")} value={user.level} />
+              <div className="grid grid-cols-2 gap-4 text-center">
                 <Stat label={t("visited")} value={user.visitedPlaces} />
                 <Stat label={t("km")} value={user.kmExplored} />
               </div>
             </div>
-            {user.role !== "guest" && (
-              <div className="mt-6">
-                <div className="flex justify-between text-xs mb-2 opacity-90">
-                  <span>{t("xp")}: {user.xp}</span>
-                  <span>{xpToNext}</span>
-                </div>
-                <Progress value={xpProgress} className="h-2 bg-white/20" />
-              </div>
-            )}
           </Card>
         </motion.div>
+
+        <div className="mt-8"><PointsCard /></div>
 
         {/* Personalized itinerary */}
         {!recommendedItinerary && (

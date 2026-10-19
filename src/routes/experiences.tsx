@@ -67,7 +67,7 @@ const CATEGORIES: { id: ExperienceCategory | "all"; emoji: string; labelPt: stri
 
 function ExperiencesPage() {
   const { t, lang } = useLang();
-  const { addXP, user } = useAuth();
+  const { user } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
