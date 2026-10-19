@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { AlertCircle, History, Star } from "lucide-react";
+import { AlertCircle, Compass, Footprints, Globe, History, Sprout, Star, Trophy } from "lucide-react";
+
+const LEVEL_ICONS = [Sprout, Compass, Footprints, Globe, Trophy];
+const iconFor = (level: number) => LEVEL_ICONS[Math.min(LEVEL_ICONS.length, Math.max(1, level)) - 1];
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -49,10 +52,10 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
           key={lv.current.level}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="size-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-3xl"
+          className="size-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground"
           aria-hidden="true"
         >
-          {lv.current.emoji}
+          {(() => { const I = iconFor(lv.current.level); return <I className="size-8" />; })()}
         </motion.div>
         <div className="flex-1 min-w-[10rem]">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -106,12 +109,12 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
       {showLevels && (
         <div className="mt-6">
           <h3 className="text-sm font-semibold mb-2">{pt ? "Níveis e emblemas" : "Levels and badges"}</h3>
-          <ul className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+          <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             {LEVELS.map((l) => {
               const reached = total >= l.minPoints;
               return (
                 <li key={l.level} className={`rounded-xl border p-3 text-center ${reached ? "bg-accent/40" : "opacity-60"}`}>
-                  <div className="text-2xl" aria-hidden="true">{l.emoji}</div>
+                  {(() => { const I = iconFor(l.level); return <I className="size-6 mx-auto text-primary" aria-hidden="true" />; })()}
                   <p className="text-xs font-semibold mt-1">{l.name[lang]}</p>
                   <p className="text-[11px] text-muted-foreground">{l.minPoints} {pt ? "pts" : "pts"} · {reached ? (pt ? "alcançado" : "reached") : (pt ? "bloqueado" : "locked")}</p>
                 </li>
