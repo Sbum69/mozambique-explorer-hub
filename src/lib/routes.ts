@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { IMAGE_BY_SLUG } from "@/lib/destinations";
+import { validMapCoordinate } from "@/lib/itinerary-routing";
 import type { Json } from "@/integrations/supabase/types";
 
 /**
@@ -181,7 +182,7 @@ function coordsOf(lat: unknown, lng: unknown): [number, number] | null {
   if (lat == null || lng == null) return null;
   const a = Number(lat);
   const b = Number(lng);
-  if (!Number.isFinite(a) || !Number.isFinite(b) || (a === 0 && b === 0)) return null;
+  if (!validMapCoordinate([a, b]) || (a === 0 && b === 0)) return null;
   return [a, b];
 }
 
