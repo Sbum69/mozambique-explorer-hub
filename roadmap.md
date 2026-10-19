@@ -21,7 +21,8 @@
 - [x] 9B — Estatísticas e impacto verificável (/impact com RPC agregada, sem KPIs fictícios)
 
 # Itinerários e planeamento
-- [ ] Auditar catálogo, edição, progresso, mapas, pontos e políticas reais
-- [ ] Corrigir apenas lacunas essenciais comprovadas
-- [ ] Executar testes e verificações de leitura; documentar limitações sem alterar dados reais
-- [ ] Entregar relatório e recomendar próximo bloco; não publicar
+- [x] Auditar catálogo, edição, progresso, mapas, pontos e políticas reais
+- [x] Corrigir lacunas comprovadas de gravação, provas, conclusão e mapas
+- [x] Executar 46 testes e fluxo autenticado; documentar limites e desvio QA, com quatro fingerprints restaurados
+- [x] Entregar relatório em docs/itinerary-audit-report.md; não publicar nem iniciar outro bloco
+- [ ] QA multissessão/Admin/segundo utilizador e dispositivos físicos — depende de sessões autorizadas e dispositivos disponíveis
