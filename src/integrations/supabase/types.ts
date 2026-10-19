@@ -1990,9 +1990,17 @@ export type Database = {
         Args: { _request_id: string; _reward_id: string }
         Returns: Json
       }
+      reset_my_route_progress: {
+        Args: { _progress_id: string }
+        Returns: undefined
+      }
       route_progress_fully_proven: {
         Args: { _progress_id: string }
         Returns: boolean
+      }
+      save_route_plan: {
+        Args: { _curated?: boolean; _input: Json; _route_id: string }
+        Returns: string
       }
       start_game_quiz: { Args: { _game_key: string }; Returns: Json }
       submit_game_step: {

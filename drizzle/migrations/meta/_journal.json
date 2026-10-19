@@ -225,6 +225,13 @@
       "when": 1792414573020,
       "tag": "0031_games_achievements_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792416903445,
+      "tag": "0032_itinerary_integrity_atomic_plans",
+      "breakpoints": true
     }
   ]
 }
