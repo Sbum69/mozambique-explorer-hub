@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
-import { fetchMyPoints, levelFor, LEVELS, POINT_VALUES, REASON_LABELS } from "@/lib/points";
+import { fetchMyPoints, levelFor, LEVELS, POINT_VALUES, REASON_LABELS, SOURCE_LABELS, sourceOf } from "@/lib/points";
 
 export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLimit?: number; showLevels?: boolean }) {
   const { authUser, isGuest } = useAuth();
@@ -93,6 +93,7 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
               <li key={tx.id} className="py-2 flex items-center justify-between gap-3 text-sm">
                 <div className="min-w-0">
                   <p className="truncate">
+                    <span className="mr-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{SOURCE_LABELS[sourceOf(tx.reason)][lang]}</span>
                     {REASON_LABELS[tx.reason]?.[lang] ?? tx.reason}
                     {tx.kind === "reversal" && <span className="text-muted-foreground"> · {pt ? "revertido" : "reversed"}</span>}
                   </p>
