@@ -190,6 +190,13 @@
       "when": 1792353919357,
       "tag": "0026_booking_workflow_slot_closure_8e3",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792411793396,
+      "tag": "0027_public_impact_stats_9b",
+      "breakpoints": true
     }
   ]
 }
