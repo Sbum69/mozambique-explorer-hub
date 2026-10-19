@@ -73,6 +73,8 @@ import {
   ROUTE_INTERESTS,
   routeInterestMeta,
   updateRoute,
+  stopToInput,
+  type RouteStopInput,
   type ItineraryRoute,
   type RouteDayInput,
   type RouteStopKind,
@@ -716,14 +718,15 @@ function ShareBtn({
   );
 }
 
-interface DraftStop {
-  kind: RouteStopKind;
-  refId: string;
+interface DraftStop extends RouteStopInput {
   title: string;
 }
 
 interface DraftDay {
   title: string;
+  titleEn?: string | null;
+  description?: string | null;
+  isUnassigned?: boolean;
   stops: DraftStop[];
 }
 
@@ -782,8 +785,8 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
       setDays(
         editing.days.length > 0
           ? editing.days.map((d) => ({
-              title: d.title ?? "",
-              stops: d.stops.filter((s) => s.kind !== "custom").map((s) => ({ kind: s.kind, refId: s.refId, title: s.title })),
+              title: d.title ?? "", titleEn: d.titleEn, description: d.description, isUnassigned: d.isUnassigned,
+              stops: d.stops.map((s) => ({ ...stopToInput(s), title: s.title })),
             }))
           : [{ title: "", stops: [] }],
       );
@@ -853,8 +856,8 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
       return;
     }
     const payloadDays: RouteDayInput[] = days.map((day) => ({
-      title: day.title.trim() || null,
-      stops: day.stops.map((s) => ({ kind: s.kind, refId: s.refId })),
+      title: day.title.trim() || null, titleEn: day.titleEn, description: day.description, isUnassigned: day.isUnassigned,
+      stops: day.stops.map((s) => ({ ...s })),
     }));
     if (payloadDays.every((d) => d.stops.length === 0)) {
       toast.error(lang === "pt" ? "Adiciona pelo menos uma paragem real" : "Add at least one real stop");
@@ -886,7 +889,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
     } catch (e) {
       const message = e instanceof Error ? e.message : "";
       toast.error(
-        message === "DUPLICATE_CODE"
+        message.includes("ROUTE_HAS_PROOFS")
+          ? lang === "pt" ? "Este roteiro tem provas de visitas. Mantém as paragens para preservar o histórico." : "This itinerary has visit proofs. Keep its stops to preserve history."
+          : message === "DUPLICATE_CODE"
           ? lang === "pt" ? "Esse código já existe" : "That code already exists"
           : lang === "pt" ? "Não foi possível guardar" : "Could not save",
       );

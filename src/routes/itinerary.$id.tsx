@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -86,33 +87,40 @@ function ItineraryDetailPage() {
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
 
-  const { route, loading } = useRoute(id);
+  const { route, loading, error: routeError, reload } = useRoute(id, userId);
+  const queryClient = useQueryClient();
   const [progress, setProgress] = useState<RouteProgress | null>(null);
+  const [progressError, setProgressError] = useState(false);
+  const [progressLoading, setProgressLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [proofStop, setProofStop] = useState<RouteStop | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofSaving, setProofSaving] = useState(false);
 
   useEffect(() => {
+    setProgress(null);
+    setProgressError(false);
     if (!route || !userId) {
-      setProgress(null);
+      setProgressLoading(false);
       return;
     }
+    setProgressLoading(true);
     let active = true;
     fetchRouteProgress(route.id, userId)
       .then((p) => {
         if (active) setProgress(p);
       })
       .catch(() => {
-        /* progress is optional */
-      });
+        if (active) setProgressError(true);
+      })
+      .finally(() => { if (active) setProgressLoading(false); });
     return () => {
       active = false;
     };
   }, [route, userId]);
 
   const stops = useMemo(() => (route ? routeAllStops(route) : []), [route]);
-  const completed = progress?.completedStopIds ?? [];
+  const completed = progress?.routeId === id ? progress.completedStopIds.filter((stopId) => stops.some((stop) => stop.id === stopId)) : [];
   const progressValue = stops.length === 0 ? 0 : (completed.length / stops.length) * 100;
   const isMine = !!userId && route?.ownerId === userId;
 
@@ -130,13 +138,14 @@ function ItineraryDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold">
-            {lang === "pt" ? "Roteiro não encontrado" : "Itinerary not found"}
+            {routeError ? (lang === "pt" ? "Não foi possível carregar o roteiro" : "Could not load itinerary") : (lang === "pt" ? "Roteiro não encontrado" : "Itinerary not found")}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-sm">
             {lang === "pt"
               ? "Este roteiro não existe, é privado ou foi desativado."
               : "This itinerary does not exist, is private or has been disabled."}
           </p>
+          {routeError && <Button variant="outline" onClick={() => void reload()}>{lang === "pt" ? "Tentar novamente" : "Try again"}</Button>}
           <Link to="/itineraries" className="text-primary hover:underline mt-4 inline-block">
             {lang === "pt" ? "Voltar aos roteiros" : "Back to itineraries"}
           </Link>
@@ -165,6 +174,7 @@ function ItineraryDetailPage() {
   const refreshProgress = async () => {
     if (!userId) return;
     setProgress(await fetchRouteProgress(route.id, userId));
+    await queryClient.invalidateQueries({ predicate: (q) => ["my-points", "achievements", "leaderboard", "game-state"].includes(String(q.queryKey[0])) });
   };
 
   const toggle = async (stop: RouteStop) => {
@@ -188,23 +198,29 @@ function ItineraryDetailPage() {
   };
 
   const goToDay = async (day: number) => {
-    if (!progress) return;
-    await setProgressDay(progress.id, day);
-    await refreshProgress();
+    if (!progress || busy) return;
+    setBusy(true);
+    try { await setProgressDay(progress.id, day); await refreshProgress(); }
+    catch { toast.error(lang === "pt" ? "Não foi possível guardar o dia." : "Could not save the day."); }
+    finally { setBusy(false); }
   };
 
   const finish = async () => {
-    if (!progress) return;
-    await finishRouteProgress(progress.id);
-    await refreshProgress();
-    toast.success(lang === "pt" ? "Rota concluída!" : "Route completed!");
+    if (!progress || busy) return;
+    setBusy(true);
+    try {
+      await finishRouteProgress(progress.id); await refreshProgress();
+      toast.success(lang === "pt" ? "Rota concluída!" : "Route completed!");
+    } catch { toast.error(lang === "pt" ? "Conclui todas as paragens com fotografia antes de terminar. Se já o fizeste, tenta novamente." : "Complete every stop with a photo before finishing. If already done, try again."); }
+    finally { setBusy(false); }
   };
 
   const restart = async () => {
-    if (!progress) return;
-    await resetRouteProgress(progress.id);
-    await refreshProgress();
-    toast.success(lang === "pt" ? "Progresso reiniciado" : "Progress reset");
+    if (!progress || busy || !confirm(lang === "pt" ? "Reiniciar as visitas? Os pontos já ganhos não serão atribuídos novamente." : "Restart visits? Previously earned points will not be awarded again.")) return;
+    setBusy(true);
+    try { await resetRouteProgress(progress.id); await refreshProgress(); toast.success(lang === "pt" ? "Progresso reiniciado" : "Progress reset"); }
+    catch { toast.error(lang === "pt" ? "Não foi possível reiniciar." : "Could not restart."); }
+    finally { setBusy(false); }
   };
 
   const saveProof = async () => {
@@ -416,7 +432,7 @@ function ItineraryDetailPage() {
                   {day.stops.map((stop, index) => {
                     const done = completed.includes(stop.id);
                     return (
-                      <Card key={stop.id} className={`p-5 transition-colors ${done ? "bg-green-50 border-green-200" : ""}`}>
+                      <Card key={stop.id} className={`p-5 transition-colors ${done ? "bg-success/10 border-success/30" : ""}`}>
                         <div className="flex items-start gap-4">
                           <div
                             className={`w-12 h-12 rounded-full ${
@@ -425,7 +441,7 @@ function ItineraryDetailPage() {
                           >
                             {index + 1}
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0 break-words">
                             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1 uppercase">
                               {stop.kind === "experience" ? (
                                 <><Store className="size-3" /> {lang === "pt" ? "Atividade" : "Activity"}</>
@@ -479,7 +495,7 @@ function ItineraryDetailPage() {
                               )}
                               {stop.kind === "community" && (
                                 <Button asChild variant="outline" size="sm">
-                                  <Link to="/map" search={{ community: stop.refId }}>{lang === "pt" ? "Ver experiência" : "View experience"}</Link>
+                                  <Link to="/community-experiences" search={{ open: stop.refId }}>{lang === "pt" ? "Ver experiência" : "View experience"}</Link>
                                 </Button>
                               )}
                               {stop.kind === "destination" && stop.slug && (
@@ -495,7 +511,7 @@ function ItineraryDetailPage() {
                               )}
                             </div>
                           </div>
-                          <button
+                          <Button variant="ghost" size="icon" disabled={busy || proofSaving || progressLoading || progressError}
                             onClick={() => void toggle(stop)}
                             aria-label={done ? (lang === "pt" ? "Desmarcar paragem" : "Unmark stop") : (lang === "pt" ? "Concluir paragem com fotografia" : "Complete stop with photo")}
                             className="shrink-0"
@@ -508,7 +524,7 @@ function ItineraryDetailPage() {
                             ) : (
                               <Circle className="h-7 w-7 text-muted-foreground hover:text-foreground" />
                             )}
-                          </button>
+                          </Button>
                         </div>
                       </Card>
                     );
@@ -527,6 +543,8 @@ function ItineraryDetailPage() {
                   {completed.length}/{stops.length} {lang === "pt" ? "paragens concluídas" : "stops completed"}
                 </p>
                 <Progress value={progressValue} className="h-2 mb-4" />
+                {progressLoading && <p className="text-sm text-muted-foreground mb-2">{lang === "pt" ? "A carregar progresso..." : "Loading progress..."}</p>}
+                {progressError && <p role="alert" className="text-sm text-destructive mb-2">{lang === "pt" ? "Não foi possível consultar o progresso. Atualiza a página para tentar novamente." : "Could not read progress. Refresh the page to retry."}</p>}
 
                 {progress?.status === "completed" && (
                   <Badge className="mb-3 bg-green-600 text-white">{lang === "pt" ? "Rota concluída" : "Route completed"}</Badge>
@@ -535,7 +553,7 @@ function ItineraryDetailPage() {
                 {!progress ? (
                   <Button
                     onClick={() => void start()}
-                    disabled={busy || stops.length === 0}
+                    disabled={busy || progressLoading || progressError || stops.length === 0}
                     className="w-full mb-2 bg-gradient-to-r from-primary to-orange-600 gap-2"
                   >
                     {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
@@ -565,11 +583,11 @@ function ItineraryDetailPage() {
                       </Button>
                     </div>
                     {progress.status === "in_progress" && (
-                      <Button onClick={() => void finish()} className="w-full mb-2 gap-2">
+                      <Button disabled={busy || completed.length !== stops.length || stops.length === 0} onClick={() => void finish()} className="w-full mb-2 gap-2">
                         <Flag className="size-4" /> {lang === "pt" ? "Terminar rota" : "Finish route"}
                       </Button>
                     )}
-                    <Button variant="outline" onClick={() => void restart()} className="w-full mb-2 gap-2">
+                    <Button disabled={busy} variant="outline" onClick={() => void restart()} className="w-full mb-2 gap-2">
                       <RotateCcw className="size-4" /> {lang === "pt" ? "Reiniciar" : "Restart"}
                     </Button>
                   </>

@@ -874,3 +874,10 @@ Open: Admin has no screen to browse users' progress/photos (backend allows it); 
 - `/impact` reescrito: métricas da plataforma vs impacto verificado; removidos $2.1M, 342, 15, 89%, +X%, "vs mês anterior" e percentagens por província fictícias; "85%" removido de Informações Úteis.
 - Regras: concluída = status completed e data/hora passada (Moçambique); sem receita (sem pagamentos); grupos por província de impacto verificado < 3 ocultos.
 - Testes: `src/lib/impact-stats.test.ts`.
+
+## Itinerários — integridade, gravação e mapas
+- Migrations 0032–0033: gravação/reinício transacionais sob RLS; pertença da paragem, existência de fotografia privada, identidade/dia e conclusão comprovada; proteção de planos com provas.
+- Editor preserva paragens personalizadas; hooks descartam respostas antigas; detalhe mostra falhas/repetição, ligações comunitárias específicas e atualização de pontos; mapa distingue ordem de paragens de estimativas de carro.
+- 46 testes PASS e fluxo autenticado exercitado; matriz visual do detalhe PT/EN × temas × desktop/mobile. Concorrência multissessão, outros papéis e offline integral continuam não validados/indisponíveis.
+- QA atribuiu temporariamente 170 pontos à conta disponível. Roteiro, progresso e foto removidos; duas linhas QA de pontos apagadas por comando privilegiado, um desvio explícito da regra append-only. Quatro tabelas verificadas recuperaram fingerprints iniciais; não alegar que nenhuma escrita ocorreu.
+- Relatório: `docs/itinerary-audit-report.md`. Não publicado; nenhum novo bloco iniciado.

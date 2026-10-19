@@ -19,3 +19,10 @@
 - [ ] QA integral Admin/turista/segundo dono e decisões/fechos — bloqueada por sessões QA autorizadas e dados isolados populados
 - Não publicar, alterar visibilidade ou iniciar 8E.5.
 - [x] 9B — Estatísticas e impacto verificável (/impact com RPC agregada, sem KPIs fictícios)
+
+# Itinerários e planeamento
+- [x] Auditar catálogo, edição, progresso, mapas, pontos e políticas reais
+- [x] Corrigir lacunas comprovadas de gravação, provas, conclusão e mapas
+- [x] Executar 46 testes e fluxo autenticado; documentar limites e desvio QA, com quatro fingerprints restaurados
+- [x] Entregar relatório em docs/itinerary-audit-report.md; não publicar nem iniciar outro bloco
+- [ ] QA multissessão/Admin/segundo utilizador e dispositivos físicos — depende de sessões autorizadas e dispositivos disponíveis
