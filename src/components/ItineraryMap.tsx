@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { directionsUrls } from "@/lib/visits";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { carRouteUrl } from "@/lib/itinerary-routing";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, CircleMarker, LayersControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -60,34 +61,42 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
     [stops],
   );
 
-  const points = stopsWithCoords.map((s) => s.coord);
+  const points = useMemo(() => stopsWithCoords.map((s) => s.coord), [stopsWithCoords]);
   const [mode, setMode] = useState<Mode>("driving");
   const [route, setRoute] = useState<[number, number][] | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+  const request = useRef(0);
+  useEffect(() => {
+    request.current += 1;
+    setRoute(null); setRouteInfo(null); setLoading(false);
+    return () => { request.current += 1; };
+  }, [points]);
 
   async function computeRoute(m: Mode) {
-    if (points.length < 2) return;
+    const url = carRouteUrl(points);
+    if (m !== "driving" || !url) return;
+    const version = ++request.current;
     setLoading(true);
+    setRoute(null); setRouteInfo(null);
     setMode(m);
     try {
-      const profile = m === "driving" ? "driving" : m === "cycling" ? "cycling" : "foot";
-      const coordsStr = points.map(([lat, lng]) => `${lng},${lat}`).join(";");
-      const url = `https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error("Routing unavailable");
       const data = await res.json();
+      if (version !== request.current) return;
       if (data.routes?.[0]) {
         const coords: [number, number][] = data.routes[0].geometry.coordinates.map(
           ([lng, lat]: [number, number]) => [lat, lng],
         );
         setRoute(coords);
         setRouteInfo({ distance: data.routes[0].distance, duration: data.routes[0].duration });
-      }
+      } else throw new Error("No route");
     } catch (e) {
-      console.error(e);
+      if (version === request.current) toast.error(lang === "pt" ? "Não foi possível calcular o percurso de carro." : "Could not calculate the driving route.");
     } finally {
-      setLoading(false);
+      if (version === request.current) setLoading(false);
     }
   }
 
@@ -124,29 +133,29 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <div className="inline-flex rounded-lg border bg-background p-1 shadow-sm">
-          <button
+          <Button variant="ghost" size="sm" disabled={loading || points.length < 2}
             onClick={() => computeRoute("driving")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1 ${mode === "driving" && route ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             <Car className="h-3.5 w-3.5" /> {lang === "pt" ? "Carro" : "Car"}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm" disabled title={lang === "pt" ? "O serviço atual não calcula percursos de bicicleta" : "The current service does not calculate cycling routes"}
             onClick={() => computeRoute("cycling")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1 ${mode === "cycling" && route ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             <Bike className="h-3.5 w-3.5" /> {lang === "pt" ? "Bicicleta" : "Bike"}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm" disabled title={lang === "pt" ? "O serviço atual não calcula percursos a pé" : "The current service does not calculate walking routes"}
             onClick={() => computeRoute("walking")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1 ${mode === "walking" && route ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             <User className="h-3.5 w-3.5" /> {lang === "pt" ? "A pé" : "Walk"}
-          </button>
+          </Button>
         </div>
         <Button variant="outline" size="sm" onClick={locateMe} className="gap-1">
           <Navigation className="h-3.5 w-3.5" /> {lang === "pt" ? "Minha localização" : "My location"}
         </Button>
-        <Button variant="outline" size="sm" onClick={openInGmaps}>
+        <Button variant="outline" size="sm" disabled={points.length === 0} onClick={openInGmaps}>
           {lang === "pt" ? "Abrir no Google Maps" : "Open in Google Maps"}
         </Button>
         {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -156,6 +165,9 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
           </span>
         )}
       </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        {lang === "pt" ? "Estimativas OSRM apenas para carro. Linha tracejada: ordem das paragens, não um percurso calculado. Bicicleta e a pé: sem cálculo disponível." : "OSRM estimates for driving only. Dashed line: stop order, not a calculated route. Cycling and walking: no calculation available."}
+      </p>
 
       <div className="h-[480px] w-full rounded-xl overflow-hidden border shadow-sm">
         <MapContainer center={center} zoom={11} scrollWheelZoom style={{ height: "100%", width: "100%" }}>
