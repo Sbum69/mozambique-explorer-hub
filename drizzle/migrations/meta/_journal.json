@@ -204,6 +204,13 @@
       "when": 1792412576765,
       "tag": "0028_notify_owner_on_tourist_cancel_12",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792413172340,
+      "tag": "0029_points_ledger_10",
+      "breakpoints": true
     }
   ]
 }
