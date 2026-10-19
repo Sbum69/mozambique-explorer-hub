@@ -3,7 +3,7 @@
 - Map/directions links go through `DirectionsButtons` / `directionsUrls`, never built from names. Why: no coordinates must mean no (wrong) link.
 - Route visibility = is_public + status active + review_status approved; non-admin public routes are forced to pending by the `routes_review_guard` trigger. Why: user routes need admin curation.
 - Route stop completion requires a photo in the private `route-proofs` bucket (enforced by trigger). Why: proof of visit, kept private.
-- Points live only in append-only `points_ledger`, written solely by DB triggers on verified actions; unique (user, source, kind), reversals are negative rows; levels derive from the total (`src/lib/points.ts`). Why: clients never award points; auditable history.
+- Points live only in append-only `points_ledger` (DB triggers/RPCs only; reversals/redemptions negative); XP excludes redemptions; games progress only via game RPCs; badges derive (`src/lib/games.ts`). Why: clients never award points.
 - Each route stop references exactly one of destination / activity / community experience, or is a titled custom stop (DB check `route_stops_one_ref`). Why: typed stops with real links only.
 - Base-catalogue routes flag `requires_validation`; unlinked stops are custom `pending_validation` stops without coordinates, unvalidated day splits go in an `is_unassigned` day. Why: no invented data.
 - Route covers come from one image per province (`PROVINCE_COVER_SLUG`/`provinces.cover_image`), never per-route uploads. Why: consistent, no invented images.

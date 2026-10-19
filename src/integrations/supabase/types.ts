@@ -883,6 +883,227 @@ export type Database = {
           },
         ]
       }
+      game_catalog: {
+        Row: {
+          category: string
+          key: string
+          sort_order: number
+          total: number
+          unlock_after: string | null
+          verification: string
+          xp: number
+        }
+        Insert: {
+          category: string
+          key: string
+          sort_order?: number
+          total: number
+          unlock_after?: string | null
+          verification: string
+          xp: number
+        }
+        Update: {
+          category?: string
+          key?: string
+          sort_order?: number
+          total?: number
+          unlock_after?: string | null
+          verification?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_catalog_unlock_after_fkey"
+            columns: ["unlock_after"]
+            isOneToOne: false
+            referencedRelation: "game_catalog"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      game_completions: {
+        Row: {
+          completed_at: string
+          game_key: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          game_key: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          game_key?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_completions_game_key_fkey"
+            columns: ["game_key"]
+            isOneToOne: false
+            referencedRelation: "game_catalog"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "game_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_completions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_quiz_attempts: {
+        Row: {
+          answers: Json
+          correct_count: number
+          finished_at: string | null
+          game_key: string
+          id: string
+          passed: boolean | null
+          question_ids: string[]
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          correct_count?: number
+          finished_at?: string | null
+          game_key: string
+          id?: string
+          passed?: boolean | null
+          question_ids: string[]
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          correct_count?: number
+          finished_at?: string | null
+          game_key?: string
+          id?: string
+          passed?: boolean | null
+          question_ids?: string[]
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_quiz_attempts_game_key_fkey"
+            columns: ["game_key"]
+            isOneToOne: false
+            referencedRelation: "game_catalog"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "game_quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_quiz_questions: {
+        Row: {
+          active: boolean
+          correct_index: number
+          explanation_pt: string
+          id: string
+          options_pt: string[]
+          position: number
+          question_pt: string
+        }
+        Insert: {
+          active?: boolean
+          correct_index: number
+          explanation_pt: string
+          id?: string
+          options_pt: string[]
+          position: number
+          question_pt: string
+        }
+        Update: {
+          active?: boolean
+          correct_index?: number
+          explanation_pt?: string
+          id?: string
+          options_pt?: string[]
+          position?: number
+          question_pt?: string
+        }
+        Relationships: []
+      }
+      game_steps: {
+        Row: {
+          created_at: string
+          details: Json
+          game_key: string
+          id: string
+          proof_path: string | null
+          step_ref: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          game_key: string
+          id?: string
+          proof_path?: string | null
+          step_ref: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          game_key?: string
+          id?: string
+          proof_path?: string | null
+          step_ref?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_steps_game_key_fkey"
+            columns: ["game_key"]
+            isOneToOne: false
+            referencedRelation: "game_catalog"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "game_steps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_steps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news_likes: {
         Row: {
           created_at: string
@@ -1130,6 +1351,94 @@ export type Database = {
           id?: string
           name_en?: string
           name_pt?: string
+        }
+        Relationships: []
+      }
+      reward_redemptions: {
+        Row: {
+          code: string
+          cost_points: number
+          created_at: string
+          id: string
+          request_id: string
+          reward_id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          cost_points: number
+          created_at?: string
+          id?: string
+          request_id: string
+          reward_id: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          cost_points?: number
+          created_at?: string
+          id?: string
+          request_id?: string
+          reward_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards: {
+        Row: {
+          active: boolean
+          cost_points: number
+          created_at: string
+          description_en: string | null
+          description_pt: string | null
+          id: string
+          stock: number | null
+          title_en: string | null
+          title_pt: string
+        }
+        Insert: {
+          active?: boolean
+          cost_points: number
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          id?: string
+          stock?: number | null
+          title_en?: string | null
+          title_pt: string
+        }
+        Update: {
+          active?: boolean
+          cost_points?: number
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          id?: string
+          stock?: number | null
+          title_en?: string | null
+          title_pt?: string
         }
         Relationships: []
       }
@@ -1584,6 +1893,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      answer_game_quiz: {
+        Args: { _attempt_id: string; _choice: number; _question_id: string }
+        Returns: Json
+      }
       booked_people: {
         Args: { _date: string; _experience_id: string; _time: string }
         Returns: number
@@ -1610,6 +1923,25 @@ export type Database = {
           participants: number
         }[]
       }
+      finish_game_quiz: { Args: { _attempt_id: string }; Returns: Json }
+      game_assert_playable: {
+        Args: { _game_key: string }
+        Returns: {
+          category: string
+          key: string
+          sort_order: number
+          total: number
+          unlock_after: string | null
+          verification: string
+          xp: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "game_catalog"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       generate_booking_code: { Args: never; Returns: string }
       generate_route_code: { Args: never; Returns: string }
       get_experience_availability: {
@@ -1632,6 +1964,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_points_summary: { Args: never; Returns: Json }
       my_points_total: { Args: never; Returns: number }
       news_like_counts: {
         Args: { _keys: string[] }
@@ -1643,10 +1976,33 @@ export type Database = {
       owns_business: { Args: { _business_id: string }; Returns: boolean }
       owns_experience: { Args: { _experience_id: string }; Returns: boolean }
       platform_impact_stats: { Args: never; Returns: Json }
+      points_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          display_name: string
+          is_me: boolean
+          rank: number
+          xp: number
+        }[]
+      }
       points_value: { Args: { _reason: string }; Returns: number }
+      redeem_reward: {
+        Args: { _request_id: string; _reward_id: string }
+        Returns: Json
+      }
       route_progress_fully_proven: {
         Args: { _progress_id: string }
         Returns: boolean
+      }
+      start_game_quiz: { Args: { _game_key: string }; Returns: Json }
+      submit_game_step: {
+        Args: {
+          _details: Json
+          _game_key: string
+          _proof_path: string
+          _step_ref: string
+        }
+        Returns: Json
       }
     }
     Enums: {

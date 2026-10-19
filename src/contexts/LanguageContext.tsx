@@ -78,6 +78,7 @@ const dict = {
   modExperiences: { pt: "Atividades", en: "Activities" },
   modInfo: { pt: "Informações Úteis", en: "Useful Info" },
   modAchievements: { pt: "Conquistas", en: "Achievements" },
+  modGames: { pt: "Jogos & Desafios", en: "Games & Challenges" },
   modImpact: { pt: "Impacto Social", en: "Social Impact" },
   // module descriptions
   modMapDesc: { pt: "Mapa interativo com locais autênticos", en: "Interactive map with authentic places" },
@@ -87,7 +88,8 @@ const dict = {
   modItinerariesDesc: { pt: "Cria e partilha roteiros únicos", en: "Create and share unique itineraries" },
   modExperiencesDesc: { pt: "Reserva experiências comunitárias", en: "Book community experiences" },
   modInfoDesc: { pt: "Vistos, moeda, transportes", en: "Visa, currency, transport" },
-  modAchievementsDesc: { pt: "Pontos, níveis e emblemas", en: "Points, levels and badges" },
+  modAchievementsDesc: { pt: "XP, selos, placar e recompensas", en: "XP, badges, leaderboard and rewards" },
+  modGamesDesc: { pt: "Quizzes e desafios que dão XP", en: "Quizzes and challenges that earn XP" },
   modBusinesses: { pt: "🏪 Negócios Locais", en: "🏪 Local Businesses" },
   modCommunityExp: { pt: "👥 Experiências Comunitárias", en: "👥 Community Experiences" },
   modCommunityExpDesc: { pt: "Atividades gratuitas, sem reserva, por província", en: "Free activities, no booking, by province" },
