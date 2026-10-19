@@ -973,6 +973,54 @@ export type Database = {
           },
         ]
       }
+      points_ledger: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          points: number
+          reason: string
+          source_id: string
+          source_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          points: number
+          reason: string
+          source_id: string
+          source_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          points?: number
+          reason?: string
+          source_id?: string
+          source_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_ledger_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "points_ledger_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_provinces: {
         Row: {
           created_at: string
@@ -1584,6 +1632,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_points_total: { Args: never; Returns: number }
       news_like_counts: {
         Args: { _keys: string[] }
         Returns: {
@@ -1594,6 +1643,11 @@ export type Database = {
       owns_business: { Args: { _business_id: string }; Returns: boolean }
       owns_experience: { Args: { _experience_id: string }; Returns: boolean }
       platform_impact_stats: { Args: never; Returns: Json }
+      points_value: { Args: { _reason: string }; Returns: number }
+      route_progress_fully_proven: {
+        Args: { _progress_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"
