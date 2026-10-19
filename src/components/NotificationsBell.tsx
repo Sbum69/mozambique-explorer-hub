@@ -13,6 +13,7 @@ import {
   Sparkles,
   Info,
   Loader2,
+  Store,
   CheckCheck,
   Check,
 } from "lucide-react";
@@ -43,6 +44,7 @@ const ICONS: Record<NotificationType, typeof Bell> = {
   safety: Shield,
   promo: Tag,
   event: Sparkles,
+  business: Store,
 };
 
 const TONE: Record<NotificationType, string> = {
@@ -56,6 +58,7 @@ const TONE: Record<NotificationType, string> = {
   safety: "bg-destructive/15 text-destructive",
   promo: "bg-warning/15 text-warning",
   event: "bg-primary/15 text-primary",
+  business: "bg-primary/15 text-primary",
 };
 
 const TYPE_LABEL: Record<NotificationType, { pt: string; en: string }> = {
@@ -69,6 +72,7 @@ const TYPE_LABEL: Record<NotificationType, { pt: string; en: string }> = {
   safety: { pt: "Segurança", en: "Safety" },
   promo: { pt: "Promoção", en: "Promo" },
   event: { pt: "Evento", en: "Event" },
+  business: { pt: "Negócio", en: "Business" },
 };
 
 interface Props {
@@ -105,7 +109,7 @@ export function NotificationsBell({ variant = "default" }: Props) {
           <Bell className="size-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 size-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center ring-2 ring-background">
-              {unreadCount}
+              {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
         </Button>

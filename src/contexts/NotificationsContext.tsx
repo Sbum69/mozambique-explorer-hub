@@ -10,6 +10,7 @@ import {
 
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  countMyUnread,
   fetchMyNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -38,6 +39,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const userId = isAuthenticated ? (authUser?.id ?? null) : null;
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [unreadTotal, setUnreadTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showingAll, setShowingAll] = useState(false);
@@ -45,6 +47,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async (all = false) => {
     if (!userId) {
       setNotifications([]);
+      setUnreadTotal(0);
       setError(null);
       setLoading(false);
       setShowingAll(false);
@@ -53,7 +56,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      setNotifications(await fetchMyNotifications(userId, all ? 1000 : 50));
+      const [list, unread] = await Promise.all([
+        fetchMyNotifications(userId, all ? 1000 : 50),
+        countMyUnread(userId),
+      ]);
+      setNotifications(list);
+      setUnreadTotal(unread);
       setShowingAll(all);
     } catch (err) {
       setError(err instanceof Error ? err.message : "load-failed");
@@ -70,8 +78,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       if (!userId) return;
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+      setUnreadTotal((c) => Math.max(0, c - 1));
       try {
         await markNotificationRead(id);
+        setUnreadTotal(await countMyUnread(userId));
       } catch {
         await load();
       }
@@ -82,6 +92,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const markAllRead = useCallback(async () => {
     if (!userId) return;
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setUnreadTotal(0);
     try {
       await markAllNotificationsRead(userId);
     } catch {
@@ -92,7 +103,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Ctx>(
     () => ({
       notifications,
-      unreadCount: notifications.filter((n) => !n.read).length,
+      unreadCount: unreadTotal,
       loading,
       error,
       isGuest: !userId,
@@ -102,7 +113,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       showingAll,
       loadAll: () => load(true),
     }),
-    [notifications, loading, error, userId, markRead, markAllRead, load, showingAll],
+    [notifications, unreadTotal, loading, error, userId, markRead, markAllRead, load, showingAll],
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

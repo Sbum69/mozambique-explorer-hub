@@ -10,7 +10,19 @@ export type NotificationType =
   | "reward"
   | "safety"
   | "promo"
-  | "event";
+  | "event"
+  | "business";
+
+/** Exact unread count for the signed-in user (not limited by the loaded page). */
+export async function countMyUnread(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .is("read_at", null);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
 
 export interface AppNotification {
   id: string;
