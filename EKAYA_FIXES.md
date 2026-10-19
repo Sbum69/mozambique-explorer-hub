@@ -860,3 +860,10 @@ Open: Admin has no screen to browse users' progress/photos (backend allows it); 
 - Dados de teste e três contas Auth isoladas removidos. Contagens finais: 13 negócios (9 approved/4 pending), 8 atividades, 2 reservas. Comparação byte-a-byte com fingerprints anteriores não comprovada: a fórmula da captura inicial não foi recuperada; não declarar identidade integral de dados.
 - Limitações: horários com reservas futuras não podem ser desativados individualmente; desativação da atividade bloqueia novas reservas preservando histórico. Fotos comerciais sem upload novo; painel mantém oito reservas visíveis. Verificação de email pública E2E continua BLOCKED; alerta CSRF preexistente requer análise antes de produção.
 - Relatórios separados entregues: implementação/testes e revisão técnica independente. Não publicado; 8E.3 não iniciado.
+
+## 8E.4 — Métricas reais e atalhos (2026-10-19)
+- Auditoria: `docs/8E4-audit.md`; relatório detalhado de implementação/testes: `docs/8E4-report.md`.
+- Resumos por estado, próximas confirmadas, atividades e horários reais; atalhos aos diálogos existentes; reservas recentes por criação real; leituras privadas autorizadas e paginadas.
+- Admin sem KPI/crescimento/ranking/eventos/uptime fictícios; resumo real autorizado e aprovação existente preservada. Sem migration ou escrita de dados.
+- 19 testes unitários/regressão PASS; browser empresarial PT/EN, claro/escuro, 1280px e 390×844 sem overflow/pageerror. Contagens e hashes completos idênticos para bookings/businesses/experiences/availability/notifications. Nenhum dado QA criado.
+- QA integral BLOCKED: sessão disponível só de dono sem atividades/reservas; faltam Admin/turista/segundo dono autorizados e dados QA populados para decisões/fechos. Não alegar 8E.4 integralmente fechado; não iniciar 8E.5; não publicado.
