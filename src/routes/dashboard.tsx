@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { PointsCard } from "@/components/PointsCard";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";

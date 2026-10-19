@@ -198,16 +198,12 @@ function ExperiencesPage() {
         notes: form.notes || undefined,
       });
       setBooked((s) => new Set(s).add(openExp.id));
-      const result = addXP(50);
       setOpenExp(null);
       setConfirmedBooking(booking);
       toast.success(t("bookingConfirmed"), {
-        description: `${booking.experienceTitle[lang]} — +50 XP`,
+        description: booking.experienceTitle[lang],
         icon: <Sparkles className="size-4" />,
       });
-      if (result.leveledUp) {
-        setTimeout(() => toast.success(`${t("levelUp")} Lv ${result.newLevel}`), 400);
-      }
     } catch (e) {
       toast.error(translateBookingError(e instanceof Error ? e.message : "", lang));
     } finally {
