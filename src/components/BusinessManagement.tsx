@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { activityMetrics } from "@/lib/business-dashboard";
 import { useServerFn } from "@tanstack/react-start";
 import { Calendar, Edit, Plus, Save, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -44,7 +45,8 @@ export function BusinessManagement() {
   if (error) return <div role="alert" className="space-y-3"><p>{pt ? "Não foi possível carregar o negócio." : "Could not load your business."}</p><Button onClick={() => void load()}><RefreshCw />{pt ? "Tentar novamente" : "Retry"}</Button></div>;
   if (!data || !business) return <p className="text-muted-foreground">{pt ? "Não existe um negócio associado à tua conta." : "No business is associated with your account."}</p>;
   const activities = data.activities.filter(a => a.business_id === business.id);
-  return <div className="space-y-8">
+  const metrics = activityMetrics(activities, data.availability.filter(s => activities.some(a => a.id === s.experience_id)), [business]);
+  return <div className="space-y-8" aria-busy={loading}>
     {data.businesses.length > 1 && <Options label={pt ? "Negócio" : "Business"} value={business.id} onChange={setSelected} options={data.businesses.map(b => ({ value: b.id, label: b.name }))} />}
     <section className="space-y-4 border-b pb-6">
       <div className="flex justify-between items-start gap-3 flex-wrap"><div><h1 className="text-2xl font-bold break-words">{business.name}</h1><Badge variant="secondary" className="mt-2">{statusText(business.status, pt)}</Badge></div><Button variant="outline" onClick={() => setProfile(true)}><Edit className="size-4" />{pt ? "Editar perfil" : "Edit profile"}</Button></div>
@@ -53,7 +55,17 @@ export function BusinessManagement() {
       <p className="whitespace-pre-line text-muted-foreground">{business.description}</p>
       <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground"><span>{business.category}</span><span>{business.province}</span><span>{obj(business.location, "address")}</span><span>{obj(business.contact, "phone")}</span><span>{obj(business.contact, "email")}</span></div>
     </section>
-    <section className="space-y-4"><div className="flex justify-between gap-3 flex-wrap items-center"><h2 className="text-xl font-bold">{pt ? "As Minhas Atividades" : "My Activities"}</h2><Button onClick={() => setEditor("new")}><Plus className="size-4" />{pt ? "Criar atividade" : "Create activity"}</Button></div>
+    <section className="space-y-4" aria-label={pt ? "Resumo de atividades e horários" : "Activities and schedules summary"}>
+      <dl className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {[[pt ? "Atividades comerciais" : "Commercial activities", metrics.total], [pt ? "Atividades ativas" : "Active activities", metrics.active], [pt ? "Atividades inativas" : "Inactive activities", metrics.inactive], [pt ? "Horários abertos a novas reservas" : "Schedules open to new bookings", metrics.open], [pt ? "Horários fechados a novas reservas" : "Schedules closed to new bookings", metrics.closed], [pt ? "Outros horários indisponíveis" : "Other unavailable schedules", metrics.unavailable]].map(([label,value]) => <div key={label} className="border-l-2 border-primary pl-3"><dt className="text-sm text-muted-foreground">{label}</dt><dd className="text-2xl font-bold tabular-nums">{value}</dd></div>)}
+      </dl>
+      <div className="flex flex-wrap gap-2" aria-label={pt ? "Ações rápidas de gestão" : "Management quick actions"}>
+        <Button variant="outline" onClick={() => setEditor("new")}><Plus className="size-4" />{pt ? "Criar atividade comercial" : "Create commercial activity"}</Button>
+        <Button variant="outline" onClick={() => document.getElementById("business-activities")?.scrollIntoView({ block: "start" })}><Edit className="size-4" />{pt ? "Gerir atividades" : "Manage activities"}</Button>
+        <Options value="" label={pt ? "Gerir disponibilidade" : "Manage availability"} onChange={id => setSchedule(activities.find(a => a.id === id) ?? null)} options={activities.map(a => ({ value:a.id, label:pt ? a.title_pt : a.title_en ?? a.title_pt }))} />
+      </div>
+    </section>
+    <section id="business-activities" className="space-y-4 scroll-mt-24"><div className="flex justify-between gap-3 flex-wrap items-center"><h2 className="text-xl font-bold">{pt ? "As Minhas Atividades" : "My Activities"}</h2><Button onClick={() => setEditor("new")}><Plus className="size-4" />{pt ? "Criar atividade" : "Create activity"}</Button></div>
       {!activities.length && <p className="text-muted-foreground py-6">{pt ? "Ainda não tens atividades." : "You have no activities yet."}</p>}
       <ul className="grid gap-3">{activities.map(a => <li key={a.id} className="border rounded-lg p-4 flex gap-4 flex-wrap items-center">
         {a.images?.[0] && <img src={a.images[0]} alt="" className="size-16 rounded-md object-cover" />}

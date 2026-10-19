@@ -33,7 +33,7 @@ export interface Booking {
   createdAt: string;
 }
 
-const SELECT =
+export const BOOKING_SELECT =
   "id, code, experience_id, business_id, date, time, people, customer_name, customer_phone, customer_email, notes, total_mzn, status, decision_reason, created_at, experiences(title_pt, title_en, description_pt, description_en, images, duration_hours, location, province, businesses(name, contact), destinations(name, slug))";
 
 interface JoinedBusiness {
@@ -54,7 +54,7 @@ interface JoinedExperience {
   destinations: { name: string; slug: string } | { name: string; slug: string }[] | null;
 }
 
-interface BookingRow {
+export interface BookingRow {
   id: string;
   code: string;
   experience_id: string;
@@ -86,7 +86,7 @@ function contactField(value: unknown, key: string): string | null {
   return null;
 }
 
-function mapBooking(row: BookingRow): Booking {
+export function mapBooking(row: BookingRow): Booking {
   const exp = first(row.experiences);
   const destination = exp ? first(exp.destinations) : null;
   const business = exp ? first(exp.businesses) : null;
@@ -182,7 +182,7 @@ export async function createBooking(input: NewBookingInput): Promise<Booking> {
       status: "pending",
       code: "PENDING",
     })
-    .select(SELECT)
+    .select(BOOKING_SELECT)
     .single();
 
   if (error) throw new Error(error.message);
@@ -197,7 +197,7 @@ export async function fetchMyBookings(): Promise<Booking[]> {
 
   const { data, error } = await supabase
     .from("bookings")
-    .select(SELECT)
+    .select(BOOKING_SELECT)
     .eq("customer_id", userId)
     .order("date", { ascending: false })
     .order("time", { ascending: false });
@@ -217,7 +217,7 @@ export async function fetchBusinessBookings(): Promise<Booking[]> {
   if (businessError) throw new Error(businessError.message);
   const { data, error } = await supabase
     .from("bookings")
-    .select(SELECT)
+    .select(BOOKING_SELECT)
     .in("business_id", (businesses ?? []).map(b => b.id))
     .order("created_at", { ascending: false });
 

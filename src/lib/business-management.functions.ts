@@ -1,3 +1,4 @@
+import { readAll } from "@/lib/read-all";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { profileSchema, activitySchema, availabilitySchema } from "@/lib/business-management";
@@ -6,12 +7,12 @@ export const getBusinessManagement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const { data: businesses, error } = await supabase.from("businesses").select("*").eq("owner_id", userId).order("created_at");
+    const { data: businesses, error } = await readAll(offset => supabase.from("businesses").select("*").eq("owner_id", userId).order("created_at").order("id").range(offset, offset + 499));
     if (error) throw new Error(error.message);
     const ids = (businesses ?? []).map(b => b.id);
     const [activities, availability, provinces, categories, destinations] = await Promise.all([
-      supabase.from("experiences").select("*").in("business_id", ids),
-      supabase.from("experience_availability").select("*, experiences!inner(business_id)").in("experiences.business_id", ids).order("day_of_week").order("start_time"),
+      ids.length ? readAll(offset => supabase.from("experiences").select("*").in("business_id", ids).order("id").range(offset, offset + 499)) : Promise.resolve({ data: [], error: null }),
+      ids.length ? readAll(offset => supabase.from("experience_availability").select("*, experiences!inner(business_id)").in("experiences.business_id", ids).order("day_of_week").order("start_time").order("id").range(offset, offset + 499)) : Promise.resolve({ data: [], error: null }),
       supabase.from("provinces").select("id, code, name_pt, name_en, active").order("name_pt"),
       supabase.from("business_categories").select("code, name_pt, name_en, active").order("sort_order"),
       supabase.from("destinations").select("id, name, province, province_id").order("name"),
