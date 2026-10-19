@@ -145,15 +145,11 @@ const BUSINESS_STATUS_LABEL: Record<string, string> = {
 
 function AdminPage() {
   const navigate = useNavigate();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, authUser, isLoading, isAdmin, logout } = useAuth();
   const { lang } = useLang(); const pt = lang === "pt";
   const fetchSummary = useServerFn(getAdminSummary);
-  const summary = useQuery({ queryKey: ["admin-summary"], queryFn: () => fetchSummary(), enabled: isAdmin, staleTime: 30_000 });
+  const summary = useQuery({ queryKey: ["admin-summary", authUser?.id], queryFn: () => fetchSummary(), enabled: !isLoading && isAdmin && !!authUser?.id, staleTime: 30_000 });
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
-
-  useEffect(() => {
-    if (!isAdmin) navigate({ to: "/dashboard" });
-  }, [isAdmin, navigate]);
 
   if (!user || !isAdmin) return null;
 
@@ -632,8 +628,9 @@ const modalInputClass =
 
 function ReportsModal({ onClose }: { onClose: () => void }) {
   const { lang } = useLang(); const pt = lang === "pt";
+  const { authUser, isLoading, isAdmin } = useAuth();
   const fetchSummary = useServerFn(getAdminSummary);
-  const { data, isPending, isError, refetch } = useQuery({ queryKey: ["admin-summary"], queryFn: () => fetchSummary(), staleTime: 30_000 });
+  const { data, isPending, isError, refetch } = useQuery({ queryKey: ["admin-summary", authUser?.id], queryFn: () => fetchSummary(), enabled: !isLoading && isAdmin && !!authUser?.id, staleTime: 30_000 });
   return <ModalShell headerGradient="from-purple-600 to-pink-600" onClose={onClose} header={<h3>{pt ? "Resumo da plataforma" : "Platform summary"}</h3>}>
     {isPending && <p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}
     {isError && <div role="alert"><p>{pt ? "Não foi possível carregar." : "Could not load."}</p><Button onClick={() => void refetch()}>{pt ? "Tentar novamente" : "Retry"}</Button></div>}

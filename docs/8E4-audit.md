@@ -16,3 +16,15 @@
 | Dados e publicação | 2 reservas, 13 negócios, 8 atividades, 48 horários, 6 notificações | Auditoria por consultas somente leitura | Fingerprint inicial parcial | Capturar todas as tabelas públicas relevantes antes/depois; nenhuma escrita QA necessária |
 
 Nenhuma migração necessária: todas as fontes já existem. Preservar Auth/roles/RLS, aprovação e RPC de decisão/fecho. Não alterar dashboard turístico, publicar ou iniciar 8E.5.
+
+## Revalidação — 19-10-2026, 01:40 UTC
+
+| Requisito | Implementação atual | Evidência/ficheiro | Lacuna | Mudança proposta |
+|---|---|---|---|---|
+| Histórico completo | Reservas paginadas de 500 | dashboard.functions.ts | IDs de negócios ainda sujeitos ao limite inicial | Paginar também negócios próprios |
+| Pedidos só após sessão pronta | Chave empresarial inclui utilizador | business-dashboard.tsx | Pedido possível antes da identidade carregar | Ativar leitura só com identidade pronta |
+| Separação de contas Admin | Autorização no servidor; resumo partilhado com modal | admin.tsx | Chave não inclui identidade | Incluir ID nas duas chaves e aguardar sessão |
+| Acesso direto Admin | beforeLoad verifica papel | admin.tsx | Segundo redirect pode correr antes de Auth terminar | Remover redirect redundante; preservar beforeLoad e servidor |
+| Contraste e idioma | Oito combinações renderizam sem overflow | Capturas de revalidação | Ícones Home/Sair/idioma pouco visíveis no escuro | Usar token foreground e rótulo PT/EN |
+
+Métricas, estados, ações e resumos reais já implementados: preservar. Nenhuma alteração de dados, schema, RLS ou workflows proposta.
