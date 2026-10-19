@@ -87,7 +87,7 @@ const dict = {
   modItinerariesDesc: { pt: "Cria e partilha roteiros únicos", en: "Create and share unique itineraries" },
   modExperiencesDesc: { pt: "Reserva experiências comunitárias", en: "Book community experiences" },
   modInfoDesc: { pt: "Vistos, moeda, transportes", en: "Visa, currency, transport" },
-  modAchievementsDesc: { pt: "Badges, XP e recompensas", en: "Badges, XP and rewards" },
+  modAchievementsDesc: { pt: "Pontos, níveis e emblemas", en: "Points, levels and badges" },
   modBusinesses: { pt: "🏪 Negócios Locais", en: "🏪 Local Businesses" },
   modCommunityExp: { pt: "👥 Experiências Comunitárias", en: "👥 Community Experiences" },
   modCommunityExpDesc: { pt: "Atividades gratuitas, sem reserva, por província", en: "Free activities, no booking, by province" },
