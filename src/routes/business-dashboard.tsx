@@ -49,11 +49,11 @@ function decisionError(message: string, pt: boolean): string {
 
 function BusinessDashboardPage() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, authUser } = useAuth();
   const { lang } = useLang();
   const pt = lang === "pt";
   const fetchBookings = useServerFn(getOwnerBookings);
-  const { data: bookings = [], isPending: loading, isError: error, refetch } = useQuery({ queryKey: ["owner-bookings"], queryFn: () => fetchBookings(), staleTime: 30_000 });
+  const { data: bookings = [], isPending: loading, isError: error, refetch } = useQuery({ queryKey: ["owner-bookings", authUser?.id], queryFn: () => fetchBookings(), staleTime: 30_000 });
   const load = async () => { await refetch(); };
   const [busy, setBusy] = useState<string | null>(null);
   const { status: filter } = Route.useSearch();
