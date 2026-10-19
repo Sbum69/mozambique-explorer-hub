@@ -1,21 +1,26 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, LogOut, Check, X, Store, Ban, Flag, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Calendar as CalendarIcon, ArrowLeft, LogOut, Check, X, Store, Ban, Flag, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { BusinessManagement } from "@/components/BusinessManagement";
-import { fetchBusinessBookings, decideBooking, type Booking, type BookingStatus } from "@/lib/bookings";
+import { decideBooking, type Booking, type BookingStatus } from "@/lib/bookings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getOwnerBookings } from "@/lib/dashboard.functions";
+import { bookingMetrics, bookingHasStarted } from "@/lib/business-dashboard";
 import { requireRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/business-dashboard")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({ status: STATUS_FILTERS.includes(search.status as BookingStatus | "all") ? search.status as BookingStatus | "all" : "all" as const }),
   beforeLoad: () => requireRole(["business_small", "business_large"]),
   head: () => ({
     meta: [
@@ -47,30 +52,16 @@ function BusinessDashboardPage() {
   const { logout } = useAuth();
   const { lang } = useLang();
   const pt = lang === "pt";
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const fetchBookings = useServerFn(getOwnerBookings);
+  const { data: bookings = [], isPending: loading, isError: error, refetch } = useQuery({ queryKey: ["owner-bookings"], queryFn: () => fetchBookings(), staleTime: 30_000 });
+  const load = async () => { await refetch(); };
   const [busy, setBusy] = useState<string | null>(null);
-  const [filter, setFilter] = useState<BookingStatus | "all">("all");
+  const { status: filter } = Route.useSearch();
+  const setFilter = (status: BookingStatus | "all") => void navigate({ to: "/business-dashboard", search: { status } });
   const [detail, setDetail] = useState<Booking | null>(null);
   const [reasonAction, setReasonAction] = useState<{ booking: Booking; decision: "rejected" | "cancelled" } | null>(null);
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState("");
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      setBookings(await fetchBusinessBookings());
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const decide = async (booking: Booking, decision: "confirmed" | "completed") => {
     setBusy(booking.id);
@@ -114,9 +105,10 @@ function BusinessDashboardPage() {
     completed: pt ? "Concluída" : "Completed",
   };
   const filterLabels: Record<BookingStatus | "all", string> = { all: pt ? "Todas" : "All", ...labels };
-  const isPast = (b: Booking) => new Date(`${b.date}T${b.time}:00`).getTime() <= Date.now();
+  const isPast = (b: Booking) => bookingHasStarted(b.date, b.time);
   const filtered = filter === "all" ? bookings : bookings.filter((b) => b.status === filter);
-  const counts = Object.fromEntries(STATUS_FILTERS.map((s) => [s, s === "all" ? bookings.length : bookings.filter((b) => b.status === s).length]));
+  const counts = bookingMetrics(bookings);
+  const openBookings = (status: BookingStatus | "all") => { setFilter(status); document.getElementById("business-bookings")?.scrollIntoView({ block: "start" }); };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -135,8 +127,20 @@ function BusinessDashboardPage() {
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-10">
+        <section className="space-y-4" aria-label={pt ? "Resumo de reservas" : "Bookings summary"}>
+          <h2 className="text-xl font-bold">{pt ? "Resumo de reservas" : "Bookings summary"}</h2>
+          {loading ? <p aria-busy="true">{pt ? "A carregar reservas…" : "Loading bookings…"}</p> : error ? <div role="alert"><p>{pt ? "Não foi possível carregar as métricas." : "Could not load metrics."}</p><Button variant="outline" onClick={() => void load()}>{pt ? "Tentar novamente" : "Retry"}</Button></div> : <>
+            <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {STATUS_FILTERS.map(s => <div key={s} className="border-l-2 border-primary pl-3"><dt className="text-sm text-muted-foreground">{pt ? "Reservas" : "Bookings"} · {filterLabels[s]}</dt><dd className="text-2xl font-bold tabular-nums">{counts[s]}</dd></div>)}
+              <div className="border-l-2 border-primary pl-3"><dt className="text-sm text-muted-foreground">{pt ? "Confirmadas futuras" : "Upcoming confirmed"}</dt><dd className="text-2xl font-bold tabular-nums">{counts.upcoming}</dd></div>
+            </dl>
+            {!bookings.length && <p className="text-muted-foreground">{pt ? "Ainda não há reservas." : "No bookings yet."}</p>}
+          </>}
+          <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => openBookings("pending")}><Check className="size-4" />{pt ? "Abrir reservas pendentes" : "Open pending bookings"}</Button><Button variant="outline" onClick={() => openBookings("all")}><CalendarIcon className="size-4" />{pt ? "Ver todas as reservas" : "View all bookings"}</Button></div>
+        </section>
         <BusinessManagement />
-        <section className="border-t pt-6 space-y-4">
+        {!loading && !error && <section className="space-y-3"><h2 className="text-xl font-bold">{pt ? "Reservas recentes" : "Recent bookings"}</h2>{!bookings.length ? <p className="text-muted-foreground">{pt ? "Sem reservas recentes." : "No recent bookings."}</p> : <ul className="divide-y">{bookings.slice(0,5).map(b => <li key={b.id} className="py-3"><Button variant="link" className="h-auto p-0 whitespace-normal text-left" onClick={() => setDetail(b)}>{b.experienceTitle[lang] || b.code}</Button><p className="text-sm text-muted-foreground">{b.code} · {new Date(b.createdAt).toLocaleString(pt ? "pt-PT" : "en-GB")} · {labels[b.status]}</p></li>)}</ul>}</section>}
+        <section id="business-bookings" className="border-t pt-6 space-y-4 scroll-mt-24">
           <div className="flex justify-between items-center gap-3 flex-wrap">
             <h2 className="text-xl font-bold">{pt ? "Reservas" : "Bookings"}</h2>
             <Button variant="ghost" size="sm" onClick={() => void load()} aria-label={pt ? "Atualizar" : "Refresh"}>
@@ -146,7 +150,7 @@ function BusinessDashboardPage() {
           <div className="flex gap-2 flex-wrap" role="group" aria-label={pt ? "Filtrar por estado" : "Filter by status"}>
             {STATUS_FILTERS.map((s) => (
               <Button key={s} size="sm" variant={filter === s ? "default" : "outline"} onClick={() => setFilter(s)} aria-pressed={filter === s}>
-                {filterLabels[s]} ({counts[s]})
+                {filterLabels[s]} ({loading || error ? "—" : counts[s]})
               </Button>
             ))}
           </div>
@@ -164,9 +168,9 @@ function BusinessDashboardPage() {
               {filtered.map((b) => (
                 <li key={b.id} className="border rounded-lg p-4 space-y-3">
                   <div className="flex justify-between gap-3 flex-wrap">
-                    <button type="button" className="text-left font-semibold break-words underline-offset-4 hover:underline" onClick={() => setDetail(b)}>
+                    <Button variant="link" className="h-auto p-0 text-left font-semibold break-words whitespace-normal" onClick={() => setDetail(b)}>
                       {b.experienceTitle[lang]}
-                    </button>
+                    </Button>
                     <Badge variant="secondary">{labels[b.status]}</Badge>
                   </div>
                   <p className="font-mono text-xs text-muted-foreground">{b.code}</p>
