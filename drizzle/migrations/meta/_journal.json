@@ -197,6 +197,13 @@
       "when": 1792411793396,
       "tag": "0027_public_impact_stats_9b",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792412576765,
+      "tag": "0028_notify_owner_on_tourist_cancel_12",
+      "breakpoints": true
     }
   ]
 }
