@@ -211,6 +211,13 @@
       "when": 1792413172340,
       "tag": "0029_points_ledger_10",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792413397219,
+      "tag": "0030_points_ledger_revoke_writes_10",
+      "breakpoints": true
     }
   ]
 }
