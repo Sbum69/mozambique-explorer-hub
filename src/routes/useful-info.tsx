@@ -183,7 +183,7 @@ const CATEGORIES: Category[] = [
     id: "sustentavel", emoji: "🌍", title: l("Turismo Sustentável", "Sustainable Tourism"), gradient: "from-green-500 to-teal-600", icon: Info,
     pills: [
       { label: l("Princípio", "Principle"), value: l("Respeito", "Respect") },
-      { label: l("Local", "Local"), value: l("85% beneficia comunidades", "85% benefits communities") },
+      { label: l("Local", "Local"), value: l("Gasto que fica nas comunidades", "Spending that stays local") },
       { label: l("Visão", "Vision"), value: l("Turismo regenerativo", "Regenerative tourism") },
     ],
     subs: [
