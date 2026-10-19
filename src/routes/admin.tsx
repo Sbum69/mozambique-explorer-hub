@@ -1,3 +1,9 @@
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getAdminSummary } from "@/lib/dashboard.functions";
+import { useLang } from "@/contexts/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminBusinessesModal } from "@/components/AdminBusinesses";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -140,6 +146,9 @@ const BUSINESS_STATUS_LABEL: Record<string, string> = {
 function AdminPage() {
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
+  const { lang } = useLang(); const pt = lang === "pt";
+  const fetchSummary = useServerFn(getAdminSummary);
+  const summary = useQuery({ queryKey: ["admin-summary"], queryFn: () => fetchSummary(), enabled: isAdmin, staleTime: 30_000 });
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
 
   useEffect(() => {
@@ -149,26 +158,11 @@ function AdminPage() {
   if (!user || !isAdmin) return null;
 
   const kpis = [
-    { label: "Turistas Ativos", value: "8.432", growth: "+34%", icon: Users, gradient: "from-blue-500 to-blue-700" },
-    { label: "Negócios Registados", value: "342", growth: "+18%", icon: Store, gradient: "from-green-500 to-green-700" },
-    { label: "Receita (Comunidades)", value: "$2.1M", growth: "+42%", icon: DollarSign, gradient: "from-orange-500 to-orange-700" },
-    { label: "Taxa de Conversão", value: "68%", growth: "+12%", icon: TrendingUp, gradient: "from-purple-500 to-purple-700" },
+    { label: pt ? "Perfis registados" : "Registered profiles", value: summary.data?.profiles, icon: Users },
+    { label: pt ? "Negócios registados" : "Registered businesses", value: summary.data?.businesses, icon: Store },
+    { label: pt ? "Atividades comerciais" : "Commercial activities", value: summary.data?.activities, icon: Activity },
+    { label: pt ? "Reservas" : "Bookings", value: summary.data?.bookings, icon: Clock },
   ];
-
-  const pending = [
-    { name: "Restaurante Mar Azul", owner: "João Silva", category: "Gastronomia", date: "2026-02-25", icon: MapPin },
-    { name: "Tour Cultural Histórico", owner: "Maria Santos", category: "Cultura", date: "2026-02-24", icon: Award },
-    { name: "Loja de Artesanato Local", owner: "António Costa", category: "Artesanato", date: "2026-02-23", icon: MapPin },
-  ];
-
-  const topPlaces = [
-    { name: "Fortaleza de São Sebastião", visits: "2 435", revenue: "$12 450" },
-    { name: "Praia da Fortaleza", visits: "1 892", revenue: "$9 230" },
-    { name: "Mercado de Artesanato", visits: "1 654", revenue: "$8 120" },
-    { name: "Restaurante Ancora d'Ouro", visits: "1 423", revenue: "$15 680" },
-    { name: "Capela Nossa Senhora", visits: "1 187", revenue: "$4 560" },
-  ];
-
   const quickActions = [
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users, color: "text-blue-600 bg-blue-100" },
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store, color: "text-amber-600 bg-amber-100" },
@@ -185,206 +179,45 @@ function AdminPage() {
   ];
 
 
-  const activity = [
-    { color: "bg-green-500", text: "Novo negócio aprovado: Café Moçambique", time: "há 2 horas" },
-    { color: "bg-blue-500", text: "124 novos utilizadores registados hoje", time: "há 4 horas" },
-    { color: "bg-orange-500", text: "Receita mensal atingiu $180K", time: "há 6 horas" },
-    { color: "bg-purple-500", text: "15 avaliações moderadas", time: "há 8 horas" },
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg">
+      <header className="border-b bg-card text-card-foreground">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="size-12 rounded-xl bg-gradient-to-br from-orange-500 to-blue-600 flex items-center justify-center shadow-lg">
               <Shield className="size-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold">Painel de Administração</h1>
-              <p className="text-xs text-white/70">Governança Inteligente do Turismo</p>
+              <h1 className="text-lg font-bold">{pt ? "Painel de Administração" : "Administration"}</h1>
+              <p className="text-xs text-muted-foreground">Ekaya Explore</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline text-sm text-white/80">{user.displayName ?? user.username}</span>
-            <button
+          <div className="flex items-center gap-3"><LanguageToggle />
+            <span className="hidden sm:inline text-sm text-muted-foreground">{user.displayName ?? user.username}</span>
+            <Button variant="outline"
               onClick={() => {
                 void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
             >
-              <LogOut className="size-4" /> Sair
-            </button>
+              <LogOut className="size-4" /> {pt ? "Sair" : "Sign out"}
+            </Button>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        {/* Welcome */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-blue-600 text-white p-6 shadow-lg">
-          <div className="absolute -top-10 -right-10 size-40 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 size-40 rounded-full bg-white/10 blur-3xl" />
-          <div className="relative flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-2xl font-bold">Bem-vindo de volta, {user.username}!</h2>
-              <p className="text-white/85 mt-1">Aqui está o resumo de hoje.</p>
-            </div>
-            <button
-              onClick={() => navigate({ to: "/dashboard" })}
-              className="rounded-lg bg-white/15 hover:bg-white/25 px-4 py-2 text-sm font-medium backdrop-blur"
-            >
-              Ver Site Principal
-            </button>
-          </div>
-        </div>
-
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {kpis.map((k, i) => (
-            <motion.div
-              key={k.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
-            >
-              <div className="flex items-center justify-between">
-                <div className={`size-12 rounded-xl bg-gradient-to-br ${k.gradient} text-white flex items-center justify-center`}>
-                  <k.icon className="size-6" />
-                </div>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 rounded-full px-2 py-0.5">
-                  <TrendingUp className="size-3" /> {k.growth}
-                </span>
-              </div>
-              <p className="mt-3 text-2xl font-bold">{k.value}</p>
-              <p className="text-sm text-gray-500">{k.label}</p>
-            </motion.div>
-          ))}
-        </div>
-
+        <section className="flex flex-wrap justify-between gap-3"><h2 className="text-2xl font-bold">{pt ? "Resumo da plataforma" : "Platform summary"}</h2><Button variant="outline" onClick={() => navigate({ to: "/home" })}>{pt ? "Ver site principal" : "View main site"}</Button></section>
+        {summary.isPending && <p aria-busy="true">{pt ? "A carregar resumo…" : "Loading summary…"}</p>}
+        {summary.isError && <div role="alert"><p>{pt ? "Não foi possível carregar o resumo." : "Could not load summary."}</p><Button onClick={() => void summary.refetch()}>{pt ? "Tentar novamente" : "Retry"}</Button></div>}
+        {summary.data && <dl className="grid grid-cols-2 lg:grid-cols-4 gap-4">{kpis.map(k => <div key={k.label} className="border-l-2 border-primary pl-3"><k.icon className="size-5 text-primary" /><dt className="text-sm text-muted-foreground mt-2">{k.label}</dt><dd className="text-2xl font-bold">{k.value}</dd></div>)}</dl>}
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left col */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="size-9 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
-                    <Clock className="size-5" />
-                  </span>
-                  <h3 className="font-bold">Aprovações Pendentes</h3>
-                </div>
-                <span className="text-xs font-semibold rounded-full bg-orange-100 text-orange-700 px-2 py-1">
-                  {pending.length} pendentes
-                </span>
-              </div>
-              <ul className="space-y-3">
-                {pending.map((p) => (
-                  <li key={p.name} className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 p-3 hover:bg-gray-50">
-                    <span className="size-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                      <p.icon className="size-5" />
-                    </span>
-                    <div className="flex-1 min-w-[180px]">
-                      <p className="font-semibold text-sm">{p.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {p.owner} · {p.category} · {p.date}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="size-8 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 flex items-center justify-center" aria-label="Aprovar">
-                        <CheckCircle className="size-4" />
-                      </button>
-                      <button className="size-8 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center" aria-label="Rejeitar">
-                        <XCircle className="size-4" />
-                      </button>
-                      <button className="size-8 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center" aria-label="Ver">
-                        <Eye className="size-4" />
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold">Locais Mais Visitados</h3>
-                <button className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-                  <Download className="size-4" /> Exportar
-                </button>
-              </div>
-              <ul className="space-y-3">
-                {topPlaces.map((p, i) => (
-                  <li key={p.name} className="flex items-center gap-3">
-                    <span className="size-8 rounded-lg bg-gradient-to-br from-orange-500 to-blue-500 text-white text-sm font-bold flex items-center justify-center shrink-0">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.visits} visitas</p>
-                    </div>
-                    <span className="text-sm font-semibold text-green-600">{p.revenue}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <section className="space-y-3"><h3 className="font-bold">{pt ? "Aprovações de negócios pendentes" : "Pending business approvals"}</h3><p>{summary.data?.pending ?? "—"}</p><Button variant="outline" onClick={() => setActiveModal("businesses")}>{pt ? "Aprovação de Negócios" : "Business approvals"}</Button></section>
+            <section className="space-y-3"><h3 className="font-bold">{pt ? "Negócios recentes" : "Recent businesses"}</h3>{summary.data?.recent.length === 0 && <p>{pt ? "Sem negócios registados." : "No registered businesses."}</p>}<ul className="divide-y">{summary.data?.recent.map(b => <li key={b.id} className="py-3"><p className="font-medium break-words">{b.name}</p><p className="text-sm text-muted-foreground">{new Date(b.created_at).toLocaleString(pt ? "pt-PT" : "en-GB")} · {({ pending:pt ? "Pendente" : "Pending", approved:pt ? "Aprovado" : "Approved", rejected:pt ? "Rejeitado" : "Rejected", suspended:pt ? "Suspenso" : "Suspended" })[b.status]}</p></li>)}</ul></section>
           </div>
-
-          {/* Right col */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <h3 className="font-bold mb-3">Ações Rápidas</h3>
-              <div className="space-y-2">
-                {quickActions.map((a) => (
-                  <motion.button
-                    key={a.key}
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    onClick={() => setActiveModal(a.key)}
-                    className="w-full flex items-center gap-3 rounded-xl border border-gray-100 p-3 text-left hover:bg-gray-50"
-                  >
-                    <span className={`size-9 rounded-lg ${a.color} flex items-center justify-center`}>
-                      <a.icon className="size-5" />
-                    </span>
-                    <span className="font-medium text-sm">{a.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-              <h3 className="font-bold mb-3">Atividade Recente</h3>
-              <ul className="space-y-3">
-                {activity.map((a, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className={`size-2.5 rounded-full mt-2 ${a.color}`} />
-                    <div className="flex-1">
-                      <p className="text-sm">{a.text}</p>
-                      <p className="text-xs text-gray-500">{a.time}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-2xl p-5 text-white bg-gradient-to-br from-green-600 to-emerald-700 shadow-lg">
-              <h3 className="font-bold mb-3">Estado do Sistema</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex justify-between"><span>API Status</span><span className="font-semibold">Online</span></li>
-                <li className="flex justify-between"><span>Database</span><span className="font-semibold">Healthy</span></li>
-                <li className="flex justify-between"><span>Uptime</span><span className="font-semibold">99.9%</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Governance banner */}
-        <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 shadow-lg">
-          <h3 className="text-xl font-bold mb-4">Governança Inteligente</h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            <GovFeature icon={<BarChart3 className="size-5" />} title="Analytics Avançados" desc="Métricas em tempo real de todo o ecossistema." />
-            <GovFeature icon={<Heart className="size-5" />} title="Impacto Social" desc="Acompanhamento do impacto nas comunidades." />
-            <GovFeature icon={<AlertCircle className="size-5" />} title="Alertas Inteligentes" desc="Notificações automáticas de eventos críticos." />
-          </div>
+          <section className="space-y-3"><h3 className="font-bold">{pt ? "Ações rápidas" : "Quick actions"}</h3><div className="grid gap-2">{quickActions.map(a => <Button key={a.key} variant="outline" className="justify-start h-auto py-3 whitespace-normal text-left" onClick={() => setActiveModal(a.key)}><a.icon className="size-4 shrink-0" />{pt ? a.label : ({ users:"Manage users",businesses:"Business approvals",routes:"Manage routes",routeProgress:"Progress and proofs",community:"Community moderation",communityReports:"Reports",communityExperiences:"Community experiences",provinces:"Manage provinces",addBusiness:"Add business",reports:"Summary",settings:"Settings" })[a.key]}</Button>)}</div></section>
         </div>
       </div>
 
@@ -400,7 +233,7 @@ function AdminPage() {
         {activeModal === "communityExperiences" && <CommunityExperiencesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "addBusiness" && <AddBusinessModal onClose={() => setActiveModal(null)} />}
-        {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} /> }
         {activeModal === "settings" && <SettingsModal onClose={() => setActiveModal(null)} />}
       </AnimatePresence>
     </div>
@@ -798,47 +631,14 @@ const modalInputClass =
 /* ---------- Reports modal ---------- */
 
 function ReportsModal({ onClose }: { onClose: () => void }) {
-  const stats = [
-    { label: "Receita Total", value: "$2.1M", growth: "+42%", color: "text-green-600" },
-    { label: "Novos Utilizadores", value: "8.432", growth: "+34%", color: "text-blue-600" },
-    { label: "Negócios Ativos", value: "342", growth: "+18%", color: "text-purple-600" },
-  ];
-  const reports = [
-    { icon: Users, label: "Relatório de Utilizadores", color: "text-blue-600 bg-blue-100" },
-    { icon: DollarSign, label: "Relatório Financeiro", color: "text-green-600 bg-green-100" },
-    { icon: Store, label: "Relatório de Negócios", color: "text-purple-600 bg-purple-100" },
-    { icon: Heart, label: "Relatório de Impacto Social", color: "text-pink-600 bg-pink-100" },
-    { icon: Activity, label: "Relatório de Atividades", color: "text-orange-600 bg-orange-100" },
-  ];
-  return (
-    <ModalShell headerGradient="from-purple-600 to-pink-600" onClose={onClose} header={<h3 className="text-lg font-bold">Relatórios</h3>}>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-500">{s.label}</p>
-            <p className="text-xl font-bold mt-1">{s.value}</p>
-            <p className={`text-xs mt-1 ${s.color}`}>{s.growth}</p>
-          </div>
-        ))}
-      </div>
-      <ul className="space-y-2">
-        {reports.map((r) => (
-          <li key={r.label} className="flex items-center gap-3 rounded-xl border border-gray-100 p-3">
-            <span className={`size-10 rounded-lg ${r.color} flex items-center justify-center`}>
-              <r.icon className="size-5" />
-            </span>
-            <p className="flex-1 font-medium text-sm">{r.label}</p>
-            <button className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs font-semibold inline-flex items-center gap-1">
-              <Eye className="size-3" /> Ver
-            </button>
-            <button className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs font-semibold inline-flex items-center gap-1">
-              <Download className="size-3" /> Exportar
-            </button>
-          </li>
-        ))}
-      </ul>
-    </ModalShell>
-  );
+  const { lang } = useLang(); const pt = lang === "pt";
+  const fetchSummary = useServerFn(getAdminSummary);
+  const { data, isPending, isError, refetch } = useQuery({ queryKey: ["admin-summary"], queryFn: () => fetchSummary(), staleTime: 30_000 });
+  return <ModalShell headerGradient="from-purple-600 to-pink-600" onClose={onClose} header={<h3>{pt ? "Resumo da plataforma" : "Platform summary"}</h3>}>
+    {isPending && <p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}
+    {isError && <div role="alert"><p>{pt ? "Não foi possível carregar." : "Could not load."}</p><Button onClick={() => void refetch()}>{pt ? "Tentar novamente" : "Retry"}</Button></div>}
+    {data && <dl className="grid grid-cols-2 gap-4">{[[pt ? "Perfis" : "Profiles",data.profiles],[pt ? "Negócios" : "Businesses",data.businesses],[pt ? "Atividades" : "Activities",data.activities],[pt ? "Reservas" : "Bookings",data.bookings]].map(([label,value]) => <div key={label}><dt>{label}</dt><dd className="text-xl font-bold">{value}</dd></div>)}</dl>}
+  </ModalShell>;
 }
 
 /* ---------- Settings modal ---------- */
