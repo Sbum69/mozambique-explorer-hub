@@ -1593,6 +1593,7 @@ export type Database = {
       }
       owns_business: { Args: { _business_id: string }; Returns: boolean }
       owns_experience: { Args: { _experience_id: string }; Returns: boolean }
+      platform_impact_stats: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"
