@@ -11,9 +11,11 @@ export const POINT_VALUES = {
   route_completed: 150,
 } as const;
 
-export type PointsReason = keyof typeof POINT_VALUES;
+export type PointsReason = keyof typeof POINT_VALUES | "game_completed" | "reward_redeemed";
 
 export const REASON_LABELS: Record<PointsReason, { pt: string; en: string }> = {
+  game_completed: { pt: "Jogo concluído", en: "Game completed" },
+  reward_redeemed: { pt: "Recompensa resgatada", en: "Reward redeemed" },
   booking_completed: { pt: "Atividade concluída", en: "Activity completed" },
   route_stop_proof: { pt: "Paragem de roteiro comprovada", en: "Route stop proven" },
   route_completed: { pt: "Roteiro concluído", en: "Route completed" },
@@ -48,14 +50,14 @@ export function levelFor(total: number) {
 export interface PointsTx {
   id: string;
   points: number;
-  kind: "award" | "reversal";
+  kind: "award" | "reversal" | "redemption";
   reason: PointsReason;
   createdAt: string;
 }
 
-export async function fetchMyPoints(limit = 10): Promise<{ total: number; recent: PointsTx[] }> {
+export async function fetchMyPoints(limit = 10): Promise<{ total: number; balance: number; recent: PointsTx[] }> {
   const [totalRes, listRes] = await Promise.all([
-    supabase.rpc("my_points_total"),
+    supabase.rpc("my_points_summary"),
     supabase
       .from("points_ledger")
       .select("id, points, kind, reason, created_at")
@@ -65,7 +67,9 @@ export async function fetchMyPoints(limit = 10): Promise<{ total: number; recent
   if (totalRes.error) throw new Error(totalRes.error.message);
   if (listRes.error) throw new Error(listRes.error.message);
   return {
-    total: Number(totalRes.data ?? 0),
+    // total = XP (never reduced by redemptions); balance = redeemable points.
+    total: Number((totalRes.data as { xp?: number } | null)?.xp ?? 0),
+    balance: Number((totalRes.data as { balance?: number } | null)?.balance ?? 0),
     recent: (listRes.data ?? []).map((r) => ({
       id: r.id,
       points: r.points,

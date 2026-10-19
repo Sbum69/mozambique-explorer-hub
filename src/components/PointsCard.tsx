@@ -41,7 +41,7 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
     );
   }
 
-  const { total, recent } = q.data;
+  const { total, balance, recent } = q.data;
   const lv = levelFor(total);
   const fmtDate = (s: string) => new Date(s).toLocaleDateString(pt ? "pt-PT" : "en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
@@ -65,7 +65,8 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
         </div>
         <div className="text-right">
           <p className="text-3xl font-bold flex items-center gap-1 justify-end"><Star className="size-5 text-primary fill-current" />{total.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">{pt ? "pontos" : "points"}</p>
+          <p className="text-xs text-muted-foreground">XP</p>
+          <p className="text-xs mt-1"><span className="font-semibold">{balance.toLocaleString()}</span> {pt ? "pontos resgatáveis" : "redeemable points"}</p>
         </div>
       </div>
 
@@ -73,7 +74,7 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
         <Progress value={lv.progress} className="h-2" aria-label={pt ? "Progresso de nível" : "Level progress"} />
         <p className="text-xs text-muted-foreground mt-2">
           {lv.next
-            ? (pt ? `Faltam ${lv.toNext} pontos para ${lv.next.name.pt}` : `${lv.toNext} points to ${lv.next.name.en}`)
+            ? (pt ? `Faltam ${lv.toNext} XP para ${lv.next.name.pt}` : `${lv.toNext} XP to ${lv.next.name.en}`)
             : (pt ? "Atingiste o nível máximo." : "You reached the top level.")}
         </p>
       </div>
@@ -83,8 +84,8 @@ export function PointsCard({ historyLimit = 5, showLevels = false }: { historyLi
         {recent.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {pt
-              ? `Ainda sem pontos. Ganhas ${POINT_VALUES.booking_completed} por atividade concluída, ${POINT_VALUES.route_stop_proof} por paragem de roteiro com foto e ${POINT_VALUES.route_completed} por roteiro concluído com todas as provas.`
-              : `No points yet. You earn ${POINT_VALUES.booking_completed} per completed activity, ${POINT_VALUES.route_stop_proof} per route stop with a photo and ${POINT_VALUES.route_completed} per route completed with every proof.`}
+              ? `Ainda sem pontos. Ganhas ${POINT_VALUES.booking_completed} por atividade concluída, ${POINT_VALUES.route_stop_proof} por paragem de roteiro com foto, ${POINT_VALUES.route_completed} por roteiro concluído com todas as provas e XP por cada jogo verificado concluído.`
+              : `No points yet. You earn ${POINT_VALUES.booking_completed} per completed activity, ${POINT_VALUES.route_stop_proof} per route stop with a photo, ${POINT_VALUES.route_completed} per route completed with every proof and XP for each verified game completed.`}
           </p>
         ) : (
           <ul className="divide-y">
