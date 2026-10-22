@@ -9,111 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UsefulInfoRouteImport } from './routes/useful-info'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
-import { Route as MapRouteImport } from './routes/map'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ItinerariesRouteImport } from './routes/itineraries'
-import { Route as ImpactRouteImport } from './routes/impact'
-import { Route as HomeRouteImport } from './routes/home'
-import { Route as GamificationRouteImport } from './routes/gamification'
-import { Route as GamesRouteImport } from './routes/games'
-import { Route as FavoritesRouteImport } from './routes/favorites'
-import { Route as ExperiencesRouteImport } from './routes/experiences'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CultureHistoryRouteImport } from './routes/culture-history'
-import { Route as CommunityRouteImport } from './routes/community'
-import { Route as BusinessRegisterRouteImport } from './routes/business-register'
-import { Route as BusinessDashboardRouteImport } from './routes/business-dashboard'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BusinessDashboardRouteImport } from './routes/business-dashboard'
+import { Route as BusinessRegisterRouteImport } from './routes/business-register'
+import { Route as CommunityRouteImport } from './routes/community'
+import { Route as CultureHistoryRouteImport } from './routes/culture-history'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ExperiencesRouteImport } from './routes/experiences'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as GamesRouteImport } from './routes/games'
+import { Route as GamificationRouteImport } from './routes/gamification'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as ImpactRouteImport } from './routes/impact'
+import { Route as ItinerariesRouteImport } from './routes/itineraries'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as UsefulInfoRouteImport } from './routes/useful-info'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
+import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
 
-const UsefulInfoRoute = UsefulInfoRouteImport.update({
-  id: '/useful-info',
-  path: '/useful-info',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsAlertsRoute = NewsAlertsRouteImport.update({
-  id: '/news-alerts',
-  path: '/news-alerts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MapRoute = MapRouteImport.update({
-  id: '/map',
-  path: '/map',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ItinerariesRoute = ItinerariesRouteImport.update({
-  id: '/itineraries',
-  path: '/itineraries',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImpactRoute = ImpactRouteImport.update({
-  id: '/impact',
-  path: '/impact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamificationRoute = GamificationRouteImport.update({
-  id: '/gamification',
-  path: '/gamification',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesRoute = GamesRouteImport.update({
-  id: '/games',
-  path: '/games',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FavoritesRoute = FavoritesRouteImport.update({
-  id: '/favorites',
-  path: '/favorites',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExperiencesRoute = ExperiencesRouteImport.update({
-  id: '/experiences',
-  path: '/experiences',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CultureHistoryRoute = CultureHistoryRouteImport.update({
-  id: '/culture-history',
-  path: '/culture-history',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
-  id: '/business-register',
-  path: '/business-register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessDashboardRoute = BusinessDashboardRouteImport.update({
-  id: '/business-dashboard',
-  path: '/business-dashboard',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -121,19 +41,99 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const BusinessDashboardRoute = BusinessDashboardRouteImport.update({
+  id: '/business-dashboard',
+  path: '/business-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VoucherRewardIdRoute = VoucherRewardIdRouteImport.update({
-  id: '/voucher/$rewardId',
-  path: '/voucher/$rewardId',
+const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
+  id: '/business-register',
+  path: '/business-register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CultureHistoryRoute = CultureHistoryRouteImport.update({
+  id: '/culture-history',
+  path: '/culture-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExperiencesRoute = ExperiencesRouteImport.update({
+  id: '/experiences',
+  path: '/experiences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamificationRoute = GamificationRouteImport.update({
+  id: '/gamification',
+  path: '/gamification',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpactRoute = ImpactRouteImport.update({
+  id: '/impact',
+  path: '/impact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItinerariesRoute = ItinerariesRouteImport.update({
+  id: '/itineraries',
+  path: '/itineraries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsAlertsRoute = NewsAlertsRouteImport.update({
+  id: '/news-alerts',
+  path: '/news-alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsefulInfoRoute = UsefulInfoRouteImport.update({
+  id: '/useful-info',
+  path: '/useful-info',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItineraryIdRoute = ItineraryIdRouteImport.update({
   id: '/itinerary/$id',
   path: '/itinerary/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VoucherRewardIdRoute = VoucherRewardIdRouteImport.update({
+  id: '/voucher/$rewardId',
+  path: '/voucher/$rewardId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -305,123 +305,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/useful-info': {
-      id: '/useful-info'
-      path: '/useful-info'
-      fullPath: '/useful-info'
-      preLoaderRoute: typeof UsefulInfoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news-alerts': {
-      id: '/news-alerts'
-      path: '/news-alerts'
-      fullPath: '/news-alerts'
-      preLoaderRoute: typeof NewsAlertsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/map': {
-      id: '/map'
-      path: '/map'
-      fullPath: '/map'
-      preLoaderRoute: typeof MapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/itineraries': {
-      id: '/itineraries'
-      path: '/itineraries'
-      fullPath: '/itineraries'
-      preLoaderRoute: typeof ItinerariesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/impact': {
-      id: '/impact'
-      path: '/impact'
-      fullPath: '/impact'
-      preLoaderRoute: typeof ImpactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gamification': {
-      id: '/gamification'
-      path: '/gamification'
-      fullPath: '/gamification'
-      preLoaderRoute: typeof GamificationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games': {
-      id: '/games'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof GamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favorites': {
-      id: '/favorites'
-      path: '/favorites'
-      fullPath: '/favorites'
-      preLoaderRoute: typeof FavoritesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/experiences': {
-      id: '/experiences'
-      path: '/experiences'
-      fullPath: '/experiences'
-      preLoaderRoute: typeof ExperiencesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/culture-history': {
-      id: '/culture-history'
-      path: '/culture-history'
-      fullPath: '/culture-history'
-      preLoaderRoute: typeof CultureHistoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business-register': {
-      id: '/business-register'
-      path: '/business-register'
-      fullPath: '/business-register'
-      preLoaderRoute: typeof BusinessRegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/business-dashboard': {
-      id: '/business-dashboard'
-      path: '/business-dashboard'
-      fullPath: '/business-dashboard'
-      preLoaderRoute: typeof BusinessDashboardRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -431,18 +319,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/business-dashboard': {
+      id: '/business-dashboard'
+      path: '/business-dashboard'
+      fullPath: '/business-dashboard'
+      preLoaderRoute: typeof BusinessDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/voucher/$rewardId': {
-      id: '/voucher/$rewardId'
-      path: '/voucher/$rewardId'
-      fullPath: '/voucher/$rewardId'
-      preLoaderRoute: typeof VoucherRewardIdRouteImport
+    '/business-register': {
+      id: '/business-register'
+      path: '/business-register'
+      fullPath: '/business-register'
+      preLoaderRoute: typeof BusinessRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/culture-history': {
+      id: '/culture-history'
+      path: '/culture-history'
+      fullPath: '/culture-history'
+      preLoaderRoute: typeof CultureHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/experiences': {
+      id: '/experiences'
+      path: '/experiences'
+      fullPath: '/experiences'
+      preLoaderRoute: typeof ExperiencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gamification': {
+      id: '/gamification'
+      path: '/gamification'
+      fullPath: '/gamification'
+      preLoaderRoute: typeof GamificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impact': {
+      id: '/impact'
+      path: '/impact'
+      fullPath: '/impact'
+      preLoaderRoute: typeof ImpactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/itineraries': {
+      id: '/itineraries'
+      path: '/itineraries'
+      fullPath: '/itineraries'
+      preLoaderRoute: typeof ItinerariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news-alerts': {
+      id: '/news-alerts'
+      path: '/news-alerts'
+      fullPath: '/news-alerts'
+      preLoaderRoute: typeof NewsAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/useful-info': {
+      id: '/useful-info'
+      path: '/useful-info'
+      fullPath: '/useful-info'
+      preLoaderRoute: typeof UsefulInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/itinerary/$id': {
@@ -450,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/itinerary/$id'
       fullPath: '/itinerary/$id'
       preLoaderRoute: typeof ItineraryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voucher/$rewardId': {
+      id: '/voucher/$rewardId'
+      path: '/voucher/$rewardId'
+      fullPath: '/voucher/$rewardId'
+      preLoaderRoute: typeof VoucherRewardIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
