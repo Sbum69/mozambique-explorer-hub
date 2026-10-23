@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Menu, X, Home, LayoutDashboard, Bookmark, Bell, Map, Compass, Trophy,
   Activity, BookOpen, Sparkles, Heart, Users, Info, ArrowRight, Crown,
-  LogOut, LogIn, Shield, Gamepad2, type LucideIcon,
+  LogOut, LogIn, Shield, Gamepad2, CalendarCheck, SlidersHorizontal, Store, type LucideIcon,
 } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -18,6 +18,8 @@ interface NavItem {
   icon: LucideIcon;
   label: { pt: string; en: string };
   badge?: string;
+  /** Requires an account: hidden for guests so they are never bounced to /login. */
+  privateOnly?: boolean;
 }
 
 const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
@@ -25,8 +27,10 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     title: { pt: "Geral", en: "General" },
     items: [
       { to: "/home", icon: Home, label: { pt: "Home", en: "Home" } },
-      { to: "/dashboard", icon: LayoutDashboard, label: { pt: "Painel", en: "Dashboard" } },
-      { to: "/favorites", icon: Bookmark, label: { pt: "Favoritos", en: "Favorites" } },
+      { to: "/dashboard", icon: LayoutDashboard, label: { pt: "Painel", en: "Dashboard" }, privateOnly: true },
+      { to: "/bookings", icon: CalendarCheck, label: { pt: "Minhas Reservas", en: "My Bookings" }, privateOnly: true },
+      { to: "/favorites", icon: Bookmark, label: { pt: "Favoritos", en: "Favorites" }, privateOnly: true },
+      { to: "/preferences", icon: SlidersHorizontal, label: { pt: "Editar Preferências", en: "Edit Preferences" }, privateOnly: true },
       { to: "/news-alerts", icon: Bell, label: { pt: "Notícias & Avisos", en: "News & Alerts" }, badge: "NOVO" },
     ],
   },
@@ -34,10 +38,12 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
     title: { pt: "Explorar", en: "Explore" },
     items: [
       { to: "/map", icon: Map, label: { pt: "Mapa", en: "Map" } },
-      { to: "/experiences", icon: Compass, label: { pt: "Experiências", en: "Experiences" } },
+      { to: "/experiences", icon: Compass, label: { pt: "Atividades", en: "Activities" } },
+      { to: "/community-experiences", icon: Users, label: { pt: "Experiências Comunitárias", en: "Community Experiences" } },
+      { to: "/businesses", icon: Store, label: { pt: "Negócios Locais", en: "Local Businesses" } },
       { to: "/itineraries", icon: Heart, label: { pt: "Roteiros", en: "Itineraries" } },
-      { to: "/gamification", icon: Trophy, label: { pt: "Conquistas", en: "Achievements" } },
-      { to: "/games", icon: Gamepad2, label: { pt: "🎮 Jogar Desafios", en: "🎮 Play Challenges" }, badge: "NOVO" },
+      { to: "/gamification", icon: Trophy, label: { pt: "Conquistas", en: "Achievements" }, privateOnly: true },
+      { to: "/games", icon: Gamepad2, label: { pt: "🎮 Jogar Desafios", en: "🎮 Play Challenges" }, badge: "NOVO", privateOnly: true },
       { to: "/impact", icon: Activity, label: { pt: "Impacto Social", en: "Social Impact" } },
     ],
   },
@@ -53,13 +59,17 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
 
 export function AppSidebar() {
   const [open, setOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { lang } = useLang();
   const navigate = useNavigate();
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
 
   const close = () => setOpen(false);
   const isAdmin = user?.role === "admin";
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => isAuthenticated || !item.privateOnly),
+  })).filter((section) => section.items.length > 0);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -157,7 +167,7 @@ export function AppSidebar() {
 
         {/* Nav sections */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
-          {SECTIONS.map((section, sIdx) => (
+          {sections.map((section, sIdx) => (
             <div key={sIdx}>
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-2 mb-2">
                 {section.title[lang]}
@@ -222,7 +232,7 @@ export function AppSidebar() {
               variant="default"
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90"
               onClick={() => {
-                navigate({ to: "/dashboard" });
+                navigate({ to: "/admin" });
                 close();
               }}
             >
@@ -230,30 +240,41 @@ export function AppSidebar() {
               {lang === "pt" ? "Painel Admin" : "Admin Panel"}
             </Button>
           )}
-          {user ? (
+          {isAuthenticated ? (
             <Button
               variant="outline"
               className="w-full"
               onClick={() => {
-                logout();
                 close();
-                navigate({ to: "/login" });
+                void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
             >
               <LogOut className="size-4" />
               {lang === "pt" ? "Sair" : "Sign out"}
             </Button>
           ) : (
-            <Button
-              className="w-full bg-primary hover:bg-primary/90"
-              onClick={() => {
-                close();
-                navigate({ to: "/login" });
-              }}
-            >
-              <LogIn className="size-4" />
-              {lang === "pt" ? "Entrar" : "Sign in"}
-            </Button>
+            <>
+              <Button
+                className="w-full bg-primary hover:bg-primary/90"
+                onClick={() => {
+                  close();
+                  navigate({ to: "/login" });
+                }}
+              >
+                <LogIn className="size-4" />
+                {lang === "pt" ? "Entrar" : "Sign in"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  close();
+                  navigate({ to: "/signup" });
+                }}
+              >
+                {lang === "pt" ? "Criar conta" : "Create account"}
+              </Button>
+            </>
           )}
         </div>
       </SheetContent>

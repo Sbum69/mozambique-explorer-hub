@@ -11,9 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as BusinessDashboardRouteImport } from './routes/business-dashboard'
 import { Route as BusinessRegisterRouteImport } from './routes/business-register'
+import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as CommunityExperiencesRouteImport } from './routes/community-experiences'
 import { Route as CultureHistoryRouteImport } from './routes/culture-history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
@@ -26,8 +29,14 @@ import { Route as ItinerariesRouteImport } from './routes/itineraries'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UsefulInfoRouteImport } from './routes/useful-info'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as BusinessIdRouteImport } from './routes/business.$id'
+import { Route as CommunityPostIdRouteImport } from './routes/community.$postId'
+import { Route as ExperienceIdRouteImport } from './routes/experience.$id'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
 
@@ -41,6 +50,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessDashboardRoute = BusinessDashboardRouteImport.update({
   id: '/business-dashboard',
   path: '/business-dashboard',
@@ -51,9 +65,19 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/business-register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessesRoute = BusinessesRouteImport.update({
+  id: '/businesses',
+  path: '/businesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityExperiencesRoute = CommunityExperiencesRouteImport.update({
+  id: '/community-experiences',
+  path: '/community-experiences',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CultureHistoryRoute = CultureHistoryRouteImport.update({
@@ -116,6 +140,16 @@ const NewsAlertsRoute = NewsAlertsRouteImport.update({
   path: '/news-alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreferencesRoute = PreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -124,6 +158,26 @@ const SignupRoute = SignupRouteImport.update({
 const UsefulInfoRoute = UsefulInfoRouteImport.update({
   id: '/useful-info',
   path: '/useful-info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessIdRoute = BusinessIdRouteImport.update({
+  id: '/business/$id',
+  path: '/business/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityPostIdRoute = CommunityPostIdRouteImport.update({
+  id: '/$postId',
+  path: '/$postId',
+  getParentRoute: () => CommunityRoute,
+} as any)
+const ExperienceIdRoute = ExperienceIdRouteImport.update({
+  id: '/experience/$id',
+  path: '/experience/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItineraryIdRoute = ItineraryIdRouteImport.update({
@@ -140,9 +194,12 @@ const VoucherRewardIdRoute = VoucherRewardIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
-  '/community': typeof CommunityRoute
+  '/businesses': typeof BusinessesRoute
+  '/community': typeof CommunityRouteWithChildren
+  '/community-experiences': typeof CommunityExperiencesRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -155,17 +212,26 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
+  '/onboarding': typeof OnboardingRoute
+  '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/business/$id': typeof BusinessIdRoute
+  '/community/$postId': typeof CommunityPostIdRoute
+  '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
-  '/community': typeof CommunityRoute
+  '/businesses': typeof BusinessesRoute
+  '/community': typeof CommunityRouteWithChildren
+  '/community-experiences': typeof CommunityExperiencesRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -178,8 +244,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
+  '/onboarding': typeof OnboardingRoute
+  '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/business/$id': typeof BusinessIdRoute
+  '/community/$postId': typeof CommunityPostIdRoute
+  '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -187,9 +259,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/bookings': typeof BookingsRoute
   '/business-dashboard': typeof BusinessDashboardRoute
   '/business-register': typeof BusinessRegisterRoute
-  '/community': typeof CommunityRoute
+  '/businesses': typeof BusinessesRoute
+  '/community': typeof CommunityRouteWithChildren
+  '/community-experiences': typeof CommunityExperiencesRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -202,8 +277,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
+  '/onboarding': typeof OnboardingRoute
+  '/preferences': typeof PreferencesRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/business/$id': typeof BusinessIdRoute
+  '/community/$postId': typeof CommunityPostIdRoute
+  '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
@@ -212,9 +293,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/bookings'
     | '/business-dashboard'
     | '/business-register'
+    | '/businesses'
     | '/community'
+    | '/community-experiences'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -227,17 +311,26 @@ export interface FileRouteTypes {
     | '/login'
     | '/map'
     | '/news-alerts'
+    | '/onboarding'
+    | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/auth/callback'
+    | '/business/$id'
+    | '/community/$postId'
+    | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/bookings'
     | '/business-dashboard'
     | '/business-register'
+    | '/businesses'
     | '/community'
+    | '/community-experiences'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -250,17 +343,26 @@ export interface FileRouteTypes {
     | '/login'
     | '/map'
     | '/news-alerts'
+    | '/onboarding'
+    | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/auth/callback'
+    | '/business/$id'
+    | '/community/$postId'
+    | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/bookings'
     | '/business-dashboard'
     | '/business-register'
+    | '/businesses'
     | '/community'
+    | '/community-experiences'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -273,8 +375,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/map'
     | '/news-alerts'
+    | '/onboarding'
+    | '/preferences'
     | '/signup'
     | '/useful-info'
+    | '/auth/callback'
+    | '/business/$id'
+    | '/community/$postId'
+    | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
   fileRoutesById: FileRoutesById
@@ -282,9 +390,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  BookingsRoute: typeof BookingsRoute
   BusinessDashboardRoute: typeof BusinessDashboardRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
-  CommunityRoute: typeof CommunityRoute
+  BusinessesRoute: typeof BusinessesRoute
+  CommunityRoute: typeof CommunityRouteWithChildren
+  CommunityExperiencesRoute: typeof CommunityExperiencesRoute
   CultureHistoryRoute: typeof CultureHistoryRoute
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
@@ -297,8 +408,13 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MapRoute: typeof MapRoute
   NewsAlertsRoute: typeof NewsAlertsRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PreferencesRoute: typeof PreferencesRoute
   SignupRoute: typeof SignupRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  BusinessIdRoute: typeof BusinessIdRoute
+  ExperienceIdRoute: typeof ExperienceIdRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
   VoucherRewardIdRoute: typeof VoucherRewardIdRoute
 }
@@ -319,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business-dashboard': {
       id: '/business-dashboard'
       path: '/business-dashboard'
@@ -333,11 +456,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/businesses': {
+      id: '/businesses'
+      path: '/businesses'
+      fullPath: '/businesses'
+      preLoaderRoute: typeof BusinessesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/community': {
       id: '/community'
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community-experiences': {
+      id: '/community-experiences'
+      path: '/community-experiences'
+      fullPath: '/community-experiences'
+      preLoaderRoute: typeof CommunityExperiencesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/culture-history': {
@@ -424,6 +561,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preferences': {
+      id: '/preferences'
+      path: '/preferences'
+      fullPath: '/preferences'
+      preLoaderRoute: typeof PreferencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -436,6 +587,34 @@ declare module '@tanstack/react-router' {
       path: '/useful-info'
       fullPath: '/useful-info'
       preLoaderRoute: typeof UsefulInfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business/$id': {
+      id: '/business/$id'
+      path: '/business/$id'
+      fullPath: '/business/$id'
+      preLoaderRoute: typeof BusinessIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/$postId': {
+      id: '/community/$postId'
+      path: '/$postId'
+      fullPath: '/community/$postId'
+      preLoaderRoute: typeof CommunityPostIdRouteImport
+      parentRoute: typeof CommunityRoute
+    }
+    '/experience/$id': {
+      id: '/experience/$id'
+      path: '/experience/$id'
+      fullPath: '/experience/$id'
+      preLoaderRoute: typeof ExperienceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/itinerary/$id': {
@@ -455,12 +634,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CommunityRouteChildren {
+  CommunityPostIdRoute: typeof CommunityPostIdRoute
+}
+
+const CommunityRouteChildren: CommunityRouteChildren = {
+  CommunityPostIdRoute: CommunityPostIdRoute,
+}
+
+const CommunityRouteWithChildren = CommunityRoute._addFileChildren(
+  CommunityRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  BookingsRoute: BookingsRoute,
   BusinessDashboardRoute: BusinessDashboardRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
-  CommunityRoute: CommunityRoute,
+  BusinessesRoute: BusinessesRoute,
+  CommunityRoute: CommunityRouteWithChildren,
+  CommunityExperiencesRoute: CommunityExperiencesRoute,
   CultureHistoryRoute: CultureHistoryRoute,
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,
@@ -473,8 +667,13 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MapRoute: MapRoute,
   NewsAlertsRoute: NewsAlertsRoute,
+  OnboardingRoute: OnboardingRoute,
+  PreferencesRoute: PreferencesRoute,
   SignupRoute: SignupRoute,
   UsefulInfoRoute: UsefulInfoRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  BusinessIdRoute: BusinessIdRoute,
+  ExperienceIdRoute: ExperienceIdRoute,
   ItineraryIdRoute: ItineraryIdRoute,
   VoucherRewardIdRoute: VoucherRewardIdRoute,
 }
@@ -483,10 +682,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

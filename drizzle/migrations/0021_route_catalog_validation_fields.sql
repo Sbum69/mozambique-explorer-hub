@@ -1,0 +1,13 @@
+ALTER TABLE public.routes DROP CONSTRAINT routes_code_format;
+ALTER TABLE public.routes ADD CONSTRAINT routes_code_format CHECK (unique_code ~ '^EK-[A-Z0-9]{3,10}(-[A-Z0-9]{2,6})?$');
+ALTER TABLE public.routes ADD COLUMN IF NOT EXISTS catalog_notes_pt text;
+ALTER TABLE public.routes ADD COLUMN IF NOT EXISTS catalog_notes_en text;
+ALTER TABLE public.routes ADD COLUMN IF NOT EXISTS community_candidates jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE public.routes ADD COLUMN IF NOT EXISTS requires_validation boolean NOT NULL DEFAULT false;
+ALTER TABLE public.route_days ADD COLUMN IF NOT EXISTS is_unassigned boolean NOT NULL DEFAULT false;
+ALTER TABLE public.route_stops ADD COLUMN IF NOT EXISTS validation_status text NOT NULL DEFAULT 'confirmed';
+ALTER TABLE public.route_stops ADD CONSTRAINT route_stops_validation_status_check CHECK (validation_status IN ('confirmed','pending_validation'));
+ALTER TABLE public.route_stops ADD COLUMN IF NOT EXISTS community_candidate boolean NOT NULL DEFAULT false;
+ALTER TABLE public.route_stops ADD COLUMN IF NOT EXISTS community_candidate_reason text;
+COMMENT ON COLUMN public.route_days.is_unassigned IS 'Stops kept as a sequence; day split not yet validated';
+COMMENT ON COLUMN public.route_stops.community_candidate IS 'Potential community articulation only; NOT a confirmed community experience';

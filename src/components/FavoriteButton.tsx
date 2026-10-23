@@ -3,6 +3,7 @@ import { Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { useFavorites, type FavoriteType } from "@/contexts/FavoritesContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
 import { cn } from "@/lib/utils";
 
 interface FavoriteButtonProps {
@@ -35,11 +36,13 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { lang } = useLang();
+  const { requireAccount } = useAuthGate();
   const favorited = isFavorite(itemId, itemType);
 
   const handle = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    if (!requireAccount(lang === "pt" ? "Favoritos" : "Favorites")) return;
     const added = toggleFavorite({ id: itemId, type: itemType, data: itemData });
     if (!showToast) return;
     toast.success(

@@ -1,7 +1,7 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
-import { ArrowLeft, Compass, Clock, Star, MapPin, Users, Check, Sparkles, Calendar, Phone, Mail, User as UserIcon, Store, FileText, CheckCircle2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Compass, Clock, Star, MapPin, Users, Check, Sparkles, Calendar, Phone, Mail, User as UserIcon, Store, FileText, CheckCircle2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,30 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGate } from "@/contexts/AuthGateContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { EXPERIENCES, type Experience, type ExperienceCategory } from "@/data/experiences";
+import { type Experience, type ExperienceCategory } from "@/lib/experiences";
+import { useAvailability, useExperiences } from "@/hooks/useExperiences";
 import { FavoriteButton } from "@/components/FavoriteButton";
-import { addBooking, generateBookingCode, type Booking } from "@/data/bookings";
+import { useBackTarget } from "@/lib/nav";
+import {
+  createBooking,
+  fetchAvailableWeekdays,
+  translateBookingError,
+  type Booking,
+} from "@/lib/bookings";
+
+const WEEKDAY_LABEL: { pt: string; en: string }[] = [
+  { pt: "Domingo", en: "Sunday" },
+  { pt: "Segunda", en: "Monday" },
+  { pt: "Terça", en: "Tuesday" },
+  { pt: "Quarta", en: "Wednesday" },
+  { pt: "Quinta", en: "Thursday" },
+  { pt: "Sexta", en: "Friday" },
+  { pt: "Sábado", en: "Saturday" },
+];
 
 export const Route = createFileRoute("/experiences")({
   head: () => ({
@@ -31,11 +49,9 @@ export const Route = createFileRoute("/experiences")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
+  validateSearch: (search: Record<string, unknown>): { book?: string } =>
+    typeof search.book === "string" ? { book: search.book } : {},
   component: ExperiencesPage,
 });
 
@@ -51,8 +67,10 @@ const CATEGORIES: { id: ExperienceCategory | "all"; emoji: string; labelPt: stri
 
 function ExperiencesPage() {
   const { t, lang } = useLang();
-  const { addXP, user } = useAuth();
+  const { user } = useAuth();
+  const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
+  const backTarget = useBackTarget();
   const preferredInterest = user?.preferences?.interests?.find((i) =>
     CATEGORIES.some((c) => c.id === i),
   ) as ExperienceCategory | undefined;
@@ -63,76 +81,133 @@ function ExperiencesPage() {
   const [booked, setBooked] = useState<Set<string>>(new Set());
   const [openExp, setOpenExp] = useState<Experience | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [weekdays, setWeekdays] = useState<number[]>([]);
   const [form, setForm] = useState({
     date: "",
-    time: "09:00",
+    time: "",
     people: 2,
-    name: user?.username ?? "",
+    name: user?.displayName ?? user?.username ?? "",
     phone: "",
-    email: "",
+    email: user?.email ?? "",
     notes: "",
   });
 
+  const { experiences, loading, error, isEmpty, reload } = useExperiences();
+  const { book: bookId } = Route.useSearch();
+
   const filtered = useMemo(() => {
-    let list = EXPERIENCES;
+    let list = experiences;
     if (provinceId && !showAllDestinations) list = list.filter((e) => e.destinationId === provinceId);
     if (filter !== "all") list = list.filter((e) => e.category === filter);
     return list;
-  }, [filter, provinceId, showAllDestinations]);
+  }, [experiences, filter, provinceId, showAllDestinations]);
 
+  const { slots, loading: loadingSlots, error: slotsError } = useAvailability(
+    openExp?.id ?? null,
+    form.date || null,
+  );
+
+  const selectedSlot = slots.find((s) => s.startTime === form.time) ?? null;
+  const maxPeople = selectedSlot
+    ? Math.max(1, selectedSlot.remainingCapacity)
+    : (openExp?.capacity ?? 20);
+
+  // Keep the party size within what the chosen slot still has free.
+  useEffect(() => {
+    if (selectedSlot && form.people > maxPeople) {
+      setForm((f) => ({ ...f, people: maxPeople }));
+    }
+  }, [selectedSlot, maxPeople, form.people]);
+
+  // Which weekdays this experience actually runs on, from the availability table.
+  useEffect(() => {
+    if (!openExp) {
+      setWeekdays([]);
+      return;
+    }
+    let active = true;
+    fetchAvailableWeekdays(openExp.id)
+      .then((days) => active && setWeekdays(days.sort()))
+      .catch(() => active && setWeekdays([]));
+    return () => {
+      active = false;
+    };
+  }, [openExp]);
+
+  const handleDateChange = (value: string) => {
+    if (value && weekdays.length > 0) {
+      const day = new Date(`${value}T00:00:00`).getDay();
+      if (!weekdays.includes(day)) {
+        toast.error(
+          lang === "pt"
+            ? "Esta experiência não tem horários nesse dia."
+            : "This experience has no times on that day.",
+        );
+        return;
+      }
+    }
+    setForm((f) => ({ ...f, date: value, time: "" }));
+  };
+
+  // Deep link from an experience detail page: open that experience's booking form once.
+  const [bookHandled, setBookHandled] = useState(false);
+  useEffect(() => {
+    if (!bookId || bookHandled || loading) return;
+    const exp = experiences.find((e) => e.id === bookId);
+    setBookHandled(true);
+    if (exp) openBookingModal(exp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId, bookHandled, loading, experiences]);
 
   const openBookingModal = (exp: Experience) => {
     if (booked.has(exp.id)) return;
+    if (!requireAccount(lang === "pt" ? "Reservas" : "Bookings")) return;
     setForm({
       date: "",
-      time: "09:00",
+      time: "",
       people: 2,
-      name: user?.username ?? "",
+      name: user?.displayName ?? user?.username ?? "",
       phone: "",
-      email: "",
+      email: user?.email ?? "",
       notes: "",
     });
     setOpenExp(exp);
   };
 
-  const submitBooking = () => {
-    if (!openExp) return;
-    if (!form.date || !form.name || !form.phone) {
-      toast.error(lang === "pt" ? "Preenche data, nome e telefone" : "Fill in date, name and phone");
+  const submitBooking = async () => {
+    if (!openExp || submitting) return;
+    if (!form.date || !form.time || !form.name || !form.phone) {
+      toast.error(
+        lang === "pt"
+          ? "Preenche data, horário, nome e telefone"
+          : "Fill in date, time, name and phone",
+      );
       return;
     }
-    const booking: Booking = {
-      id: crypto.randomUUID(),
-      experienceId: openExp.id,
-      experienceTitle: openExp.title,
-      host: openExp.host,
-      location: openExp.location,
-      image: openExp.image,
-      priceMzn: openExp.priceMzn,
-      durationHours: openExp.durationHours,
-      date: form.date,
-      time: form.time,
-      people: form.people,
-      customerName: form.name,
-      customerPhone: form.phone,
-      customerEmail: form.email || undefined,
-      notes: form.notes || undefined,
-      totalMzn: openExp.priceMzn * form.people,
-      status: "pending",
-      createdAt: Date.now(),
-      code: generateBookingCode(),
-    };
-    addBooking(booking);
-    setBooked((s) => new Set(s).add(openExp.id));
-    const result = addXP(50);
-    setOpenExp(null);
-    setConfirmedBooking(booking);
-    toast.success(t("bookingConfirmed"), {
-      description: `${booking.experienceTitle[lang]} — +50 XP`,
-      icon: <Sparkles className="size-4" />,
-    });
-    if (result.leveledUp) {
-      setTimeout(() => toast.success(`${t("levelUp")} Lv ${result.newLevel}`), 400);
+    setSubmitting(true);
+    try {
+      const booking = await createBooking({
+        experienceId: openExp.id,
+        date: form.date,
+        time: form.time,
+        people: form.people,
+        customerName: form.name,
+        customerPhone: form.phone,
+        customerEmail: form.email || undefined,
+        notes: form.notes || undefined,
+      });
+      setBooked((s) => new Set(s).add(openExp.id));
+      setOpenExp(null);
+      setConfirmedBooking(booking);
+      toast.success(t("bookingConfirmed"), {
+        description: booking.experienceTitle[lang],
+        icon: <Sparkles className="size-4" />,
+      });
+    } catch (e) {
+      toast.error(translateBookingError(e instanceof Error ? e.message : "", lang));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -142,7 +217,7 @@ function ExperiencesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button onClick={() => navigate({ to: "/dashboard" })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
+            <button onClick={() => navigate({ to: backTarget })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
               <ArrowLeft className="size-4" /> {t("backToDashboard")}
             </button>
           </div>
@@ -194,6 +269,41 @@ function ExperiencesPage() {
             </button>
           ))}
         </div>
+
+        {loading && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {[0, 1, 2].map((i) => (
+              <Card key={i} className="h-72 animate-pulse border-0 shadow-[var(--shadow-soft)] bg-muted/40" />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              {lang === "pt"
+                ? "Não foi possível carregar as experiências. Verifica a ligação e tenta novamente."
+                : "We couldn't load the experiences. Check your connection and try again."}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void reload()}>
+              {lang === "pt" ? "Tentar novamente" : "Try again"}
+            </Button>
+          </Card>
+        )}
+
+        {isEmpty && (
+          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
+            {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+          </Card>
+        )}
+
+        {!loading && !error && !isEmpty && filtered.length === 0 && (
+          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
+            {lang === "pt"
+              ? "Nenhuma experiência corresponde a estes filtros."
+              : "No experience matches these filters."}
+          </Card>
+        )}
 
         {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -307,18 +417,108 @@ function ExperiencesPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="col-span-2">
                   <Label>{lang === "pt" ? "Data" : "Date"} *</Label>
-                  <Input type="date" value={form.date} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
+                  <Input
+                    type="date"
+                    value={form.date}
+                    min={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                  />
+                  {weekdays.length > 0 && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {lang === "pt" ? "Dias com horários: " : "Days with times: "}
+                      {weekdays.map((d) => WEEKDAY_LABEL[d][lang]).join(", ")}
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <Label>{lang === "pt" ? "Hora" : "Time"}</Label>
-                  <Input type="time" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} />
+
+                {form.date && (
+                  <div className="col-span-2 rounded-lg border bg-muted/30 p-3">
+                    <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                      {lang === "pt" ? "Escolhe o horário" : "Choose a time"} *
+                    </p>
+                    {loadingSlots && (
+                      <p className="text-xs text-muted-foreground animate-pulse">
+                        {lang === "pt" ? "A verificar disponibilidade..." : "Checking availability..."}
+                      </p>
+                    )}
+                    {slotsError && (
+                      <p className="text-xs text-muted-foreground">
+                        {lang === "pt"
+                          ? "Não foi possível verificar a disponibilidade. Tenta novamente."
+                          : "We couldn't check availability. Please try again."}
+                      </p>
+                    )}
+                    {!loadingSlots && !slotsError && slots.length === 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {lang === "pt" ? "Sem horários nesta data." : "No times on this date."}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {slots.map((slot) => (
+                        <button
+                          key={slot.startTime}
+                          type="button"
+                          disabled={!slot.available}
+                          onClick={() => setForm((f) => ({ ...f, time: slot.startTime }))}
+                          className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                            form.time === slot.startTime
+                              ? "border-primary bg-primary/10 font-semibold"
+                              : "bg-background hover:bg-muted/60"
+                          } ${slot.available ? "" : "opacity-50 cursor-not-allowed"}`}
+                        >
+                          {slot.startTime}–{slot.endTime} ·{" "}
+                          {slot.available
+                            ? `${slot.remainingCapacity} ${lang === "pt" ? "lugares" : "seats"}`
+                            : lang === "pt" ? "sem lugares" : "no seats"}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedSlot && !selectedSlot.available && (
+                      <p className="mt-2 text-xs text-rose-600">
+                        {lang === "pt"
+                          ? "Sem lugares disponíveis para este horário."
+                          : "No seats available for this time."}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="col-span-2">
+                  <Label>{lang === "pt" ? "Número de pessoas" : "Number of people"}</Label>
+                  <div className="mt-1 flex items-center gap-3">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setForm((f) => ({ ...f, people: Math.max(1, f.people - 1) }))}
+                      disabled={form.people <= 1}
+                      aria-label={lang === "pt" ? "Menos pessoas" : "Fewer people"}
+                    >
+                      <Minus className="size-4" />
+                    </Button>
+                    <span className="min-w-8 text-center text-lg font-semibold">{form.people}</span>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setForm((f) => ({ ...f, people: Math.min(maxPeople, f.people + 1) }))}
+                      disabled={form.people >= maxPeople}
+                      aria-label={lang === "pt" ? "Mais pessoas" : "More people"}
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground">
+                      {selectedSlot
+                        ? `${lang === "pt" ? "Máximo agora" : "Max now"}: ${maxPeople}`
+                        : openExp.capacity
+                          ? `${lang === "pt" ? "Capacidade" : "Capacity"}: ${openExp.capacity}`
+                          : ""}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <Label>{lang === "pt" ? "Pessoas" : "People"}</Label>
-                  <Input type="number" min={1} max={20} value={form.people} onChange={(e) => setForm((f) => ({ ...f, people: Math.max(1, Number(e.target.value) || 1) }))} />
-                </div>
+
                 <div>
                   <Label>{lang === "pt" ? "Nome" : "Name"} *</Label>
                   <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
@@ -327,7 +527,7 @@ function ExperiencesPage() {
                   <Label>{lang === "pt" ? "Telefone" : "Phone"} *</Label>
                   <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+258..." />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <Label>Email</Label>
                   <Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
                 </div>
@@ -344,8 +544,14 @@ function ExperiencesPage() {
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpenExp(null)}>{t("back")}</Button>
-                <Button className="bg-gradient-to-r from-warning to-primary text-white border-0" onClick={submitBooking}>
-                  {lang === "pt" ? "Enviar pedido de reserva" : "Send booking request"}
+                <Button
+                  className="bg-gradient-to-r from-warning to-primary text-white border-0"
+                  onClick={() => void submitBooking()}
+                  disabled={submitting || !form.date || !form.time || !selectedSlot?.available}
+                >
+                  {submitting
+                    ? (lang === "pt" ? "A reservar..." : "Booking...")
+                    : (lang === "pt" ? "Enviar pedido de reserva" : "Send booking request")}
                 </Button>
               </DialogFooter>
             </>
@@ -387,7 +593,7 @@ function ExperiencesPage() {
                   <DetailRow icon={<Users className="size-4" />} label={lang === "pt" ? "Pessoas" : "People"} value={String(confirmedBooking.people)} />
                   <DetailRow icon={<Clock className="size-4" />} label={lang === "pt" ? "Duração" : "Duration"} value={`${confirmedBooking.durationHours}h`} />
                   <DetailRow icon={<UserIcon className="size-4" />} label={lang === "pt" ? "Reservado por" : "Booked by"} value={confirmedBooking.customerName} />
-                  <DetailRow icon={<Phone className="size-4" />} label={lang === "pt" ? "Contacto" : "Phone"} value={confirmedBooking.customerPhone} />
+                  <DetailRow icon={<Phone className="size-4" />} label={lang === "pt" ? "Contacto" : "Phone"} value={confirmedBooking.customerPhone ?? "—"} />
                   {confirmedBooking.customerEmail && <DetailRow icon={<Mail className="size-4" />} label="Email" value={confirmedBooking.customerEmail} />}
                   {confirmedBooking.notes && <DetailRow icon={<FileText className="size-4" />} label={lang === "pt" ? "Notas" : "Notes"} value={confirmedBooking.notes} />}
                 </div>
@@ -405,10 +611,10 @@ function ExperiencesPage() {
                   className="bg-gradient-to-r from-warning to-primary text-white border-0"
                   onClick={() => {
                     setConfirmedBooking(null);
-                    navigate({ to: "/business-dashboard" });
+                    navigate({ to: "/bookings" });
                   }}
                 >
-                  <Store className="size-4" /> {lang === "pt" ? "Ir ao painel do anfitrião" : "Go to host's dashboard"}
+                  <Calendar className="size-4" /> {lang === "pt" ? "Ver as minhas reservas" : "See my bookings"}
                 </Button>
               </DialogFooter>
             </>

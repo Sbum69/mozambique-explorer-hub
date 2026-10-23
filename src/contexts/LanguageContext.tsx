@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 export type Lang = "pt" | "en";
 
 const dict = {
+  confirmEmailFirst: { pt: "O teu email ainda não foi confirmado. Abre a ligação que te enviámos ou pede uma nova.", en: "Your email is not confirmed yet. Open the link we sent you or request a new one." },
   // generic
   appName: { pt: "Ekaya Explore", en: "Ekaya Explore" },
   tagline: {
@@ -74,9 +75,10 @@ const dict = {
   modFavorites: { pt: "Meus Favoritos", en: "My Favorites" },
   modNews: { pt: "Notícias & Avisos", en: "News & Alerts" },
   modItineraries: { pt: "Roteiros", en: "Itineraries" },
-  modExperiences: { pt: "Experiências", en: "Experiences" },
+  modExperiences: { pt: "Atividades", en: "Activities" },
   modInfo: { pt: "Informações Úteis", en: "Useful Info" },
   modAchievements: { pt: "Conquistas", en: "Achievements" },
+  modGames: { pt: "Jogos & Desafios", en: "Games & Challenges" },
   modImpact: { pt: "Impacto Social", en: "Social Impact" },
   // module descriptions
   modMapDesc: { pt: "Mapa interativo com locais autênticos", en: "Interactive map with authentic places" },
@@ -86,7 +88,12 @@ const dict = {
   modItinerariesDesc: { pt: "Cria e partilha roteiros únicos", en: "Create and share unique itineraries" },
   modExperiencesDesc: { pt: "Reserva experiências comunitárias", en: "Book community experiences" },
   modInfoDesc: { pt: "Vistos, moeda, transportes", en: "Visa, currency, transport" },
-  modAchievementsDesc: { pt: "Badges, XP e recompensas", en: "Badges, XP and rewards" },
+  modAchievementsDesc: { pt: "XP, selos, placar e recompensas", en: "XP, badges, leaderboard and rewards" },
+  modGamesDesc: { pt: "Quizzes e desafios que dão XP", en: "Quizzes and challenges that earn XP" },
+  modBusinesses: { pt: "🏪 Negócios Locais", en: "🏪 Local Businesses" },
+  modCommunityExp: { pt: "👥 Experiências Comunitárias", en: "👥 Community Experiences" },
+  modCommunityExpDesc: { pt: "Atividades gratuitas, sem reserva, por província", en: "Free activities, no booking, by province" },
+  modBusinessesDesc: { pt: "Descobre negócios comunitários e as suas experiências", en: "Discover community businesses and their experiences" },
   modImpactDesc: { pt: "O teu contributo às comunidades", en: "Your contribution to communities" },
   comingSoon: { pt: "Em breve", en: "Coming soon" },
   // interests
@@ -135,7 +142,7 @@ const dict = {
   selectStart: { pt: "Origem", en: "From" },
   selectEnd: { pt: "Destino", en: "To" },
   // experiences
-  expTitle: { pt: "Experiências Comunitárias", en: "Community Experiences" },
+  expTitle: { pt: "Atividades", en: "Activities" },
   expSub: { pt: "Reserva atividades autênticas guiadas por locais", en: "Book authentic activities guided by locals" },
   bookNow: { pt: "Reservar", en: "Book now" },
   booked: { pt: "Reservado!", en: "Booked!" },
@@ -196,7 +203,46 @@ const dict = {
   kpiArtisans: { pt: "Artesãos Apoiados", en: "Artisans Supported" },
   kpiCommunities: { pt: "Comunidades Ativas", en: "Active Communities" },
   kpiSatisfaction: { pt: "Satisfação dos Visitantes", en: "Visitor Satisfaction" },
+  // community (real, Supabase-backed)
+  communityFeedEmpty: { pt: "Ainda não existem publicações nesta comunidade.", en: "There are no posts in this community yet." },
+  communityNewPost: { pt: "Nova publicação", en: "New post" },
+  communityEditPost: { pt: "Editar publicação", en: "Edit post" },
+  communityPostTitle: { pt: "Título", en: "Title" },
+  communityPostContent: { pt: "Conteúdo", en: "Content" },
+  communityProvince: { pt: "Província", en: "Province" },
+  communityDestination: { pt: "Destino (opcional)", en: "Destination (optional)" },
+  communityExperience: { pt: "Experiência (opcional)", en: "Experience (optional)" },
+  communityRoute: { pt: "Roteiro (opcional)", en: "Route (optional)" },
+  communityPublish: { pt: "Publicar", en: "Publish" },
+  communitySave: { pt: "Guardar", en: "Save" },
+  communityDelete: { pt: "Eliminar", en: "Delete" },
+  communityDeleteConfirm: { pt: "Eliminar esta publicação?", en: "Delete this post?" },
+  communitySearch: { pt: "Pesquisar publicações", en: "Search posts" },
+  communityAllProvinces: { pt: "Todas as províncias", en: "All provinces" },
+  communityMostPopular: { pt: "Mais populares", en: "Most popular" },
+  communityLike: { pt: "Gosto", en: "Like" },
+  communityDislike: { pt: "Não gosto", en: "Dislike" },
+  communityReport: { pt: "Denunciar", en: "Report" },
+  communityReportReason: { pt: "Motivo", en: "Reason" },
+  communityReportDescription: { pt: "Descrição (opcional)", en: "Description (optional)" },
+  communityReportSent: { pt: "Obrigado. A publicação foi enviada para análise.", en: "Thank you. The post was sent for review." },
+  communityPostCreated: { pt: "Publicação criada.", en: "Post created." },
+  communityPostUpdated: { pt: "Publicação atualizada.", en: "Post updated." },
+  communityPostDeleted: { pt: "Publicação eliminada.", en: "Post deleted." },
+  communityRequiredFields: { pt: "Preenche título, conteúdo, categoria e província.", en: "Fill in title, content, category and province." },
+  communityLoadError: { pt: "Não foi possível carregar a comunidade.", en: "Could not load the community." },
+  communityRelated: { pt: "Relacionado", en: "Related" },
+  communityBack: { pt: "Voltar à Comunidade", en: "Back to Community" },
+  communityOpen: { pt: "Ver publicação", en: "View post" },
+  communityLoading: { pt: "A carregar…", en: "Loading…" },
+  communityImageSoon: { pt: "Imagens serão ativadas quando o armazenamento seguro estiver disponível.", en: "Images will be enabled once secure storage is available." },
+  reasonSpam: { pt: "Spam", en: "Spam" },
+  reasonInappropriate: { pt: "Conteúdo inapropriado", en: "Inappropriate content" },
+  reasonMisleading: { pt: "Informação enganosa", en: "Misleading information" },
+  reasonOffensive: { pt: "Conteúdo ofensivo", en: "Offensive content" },
+  reasonOther: { pt: "Outro", en: "Other" },
 } as const;
+
 
 export type DictKey = keyof typeof dict;
 

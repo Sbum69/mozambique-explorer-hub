@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -34,8 +34,14 @@ import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
 
-import { DESTINATIONS } from "@/data/destinations";
-import { EXPERIENCES, type ExperienceCategory } from "@/data/experiences";
+import { useDestinations } from "@/hooks/useDestinations";
+import { type ExperienceCategory } from "@/lib/experiences";
+import { useExperiences } from "@/hooks/useExperiences";
+import { useRecommendations } from "@/hooks/useRecommendations";
+import { CommunityExperienceCard, CommunityExperienceDialog } from "@/components/CommunityExperienceCard";
+import type { CommunityExperience } from "@/lib/community-experiences";
+import { useRouteCatalogue } from "@/hooks/useRoutes";
+import { routeCover, routePriceMzn, routeStopCount } from "@/lib/routes";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
 
@@ -56,11 +62,7 @@ export const Route = createFileRoute("/home")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
   component: HomePage,
 });
 
@@ -112,11 +114,15 @@ const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
 );
 
 function HomePage() {
-  const { user, needsOnboarding, logout } = useAuth();
+  const { user, needsOnboarding, logout, isGuest: guestRole, isAuthenticated } = useAuth();
+  const isGuest = guestRole || !isAuthenticated;
   const { t, lang } = useLang();
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
+  const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
+  const { publicRoutes } = useRouteCatalogue(null);
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
@@ -140,23 +146,23 @@ function HomePage() {
   const maxDays = bucketMax(applied.days);
 
   const recoItineraries = useMemo(() => {
-    return SAMPLE_ITINERARIES.filter((it) => itineraryDays(it) <= maxDays + 1).slice(0, 4);
-  }, [maxDays]);
+    return publicRoutes.filter((r) => r.durationDays <= maxDays + 1).slice(0, 4);
+  }, [maxDays, publicRoutes]);
+
 
   const recoExperiences = useMemo(() => {
-    const pool = EXPERIENCES.filter((e) => {
+    const pool = experiences.filter((e) => {
       const matchDest = applied.destId === "any" || e.destinationId === applied.destId;
       const matchInt =
         applied.interests.length === 0 ||
         applied.interests.includes(e.category as Interest);
       return matchDest && matchInt;
     });
-    return (pool.length ? pool : EXPERIENCES).slice(0, 4);
-  }, [applied]);
+    return (pool.length ? pool : experiences).slice(0, 4);
+  }, [applied, experiences]);
 
   const recoStories = STORY_STOPS.slice(0, 3);
 
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,28 +189,48 @@ function HomePage() {
           <div className="flex items-center gap-2">
             <NotificationsBell variant="onDark" />
             <LanguageToggle />
-            <Button
-              asChild
-              size="sm"
-              className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
-            >
-              <Link to="/dashboard">
-                <LayoutDashboard className="size-4" />
-                {t("dashboard")}
-              </Link>
-            </Button>
-            <Button
-
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10 hover:text-white"
-              onClick={() => {
-                logout();
-                navigate({ to: "/login" });
-              }}
-            >
-              {t("logout")}
-            </Button>
+            {isGuest ? (
+              <>
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
+                >
+                  <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 hover:text-white"
+                >
+                  <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
+                >
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="size-4" />
+                    {t("dashboard")}
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10 hover:text-white"
+                  onClick={() => {
+                    void logout().then(() => navigate({ to: "/login", replace: true }));
+                  }}
+                >
+                  {t("logout")}
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -213,7 +239,9 @@ function HomePage() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-4 py-1.5 text-sm">
               <Sparkles className="size-3.5" />
-              {lang === "pt" ? `Olá, ${user.displayName}` : `Hi, ${user.displayName}`}
+              {lang === "pt"
+                ? `Olá, ${user?.displayName ?? "Convidado"}`
+                : `Hi, ${user?.displayName ?? "Guest"}`}
             </div>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight max-w-3xl leading-[1.05]">
               {lang === "pt"
@@ -259,13 +287,25 @@ function HomePage() {
                     <SelectItem value="any">
                       {lang === "pt" ? "Qualquer destino" : "Any destination"}
                     </SelectItem>
-                    {DESTINATIONS.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
+                    {destinations.map((d) => (
+                      <SelectItem key={d.id} value={d.slug}>
                         {d.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {loadingDestinations && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+                  </p>
+                )}
+                {destinationsError && (
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {lang === "pt"
+                      ? "Não foi possível carregar os destinos. Tenta novamente mais tarde."
+                      : "We couldn't load the destinations. Please try again later."}
+                  </p>
+                )}
               </div>
 
               {/* Days */}
@@ -328,6 +368,9 @@ function HomePage() {
         </section>
       </div>
 
+      {/* ============ PERSONALISED (from saved preferences) ============ */}
+      <PersonalSection lang={lang as Lang} />
+
       {/* ============ RECOMMENDATIONS ============ */}
       <section id="reco" className="px-6 sm:px-10 py-16 max-w-6xl mx-auto">
         <div className="flex items-end justify-between flex-wrap gap-4">
@@ -358,28 +401,28 @@ function HomePage() {
             >
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="relative aspect-[16/10]">
-                  <img src={it.image} alt={it.name} className="size-full object-cover" loading="lazy" decoding="async" />
-                  <Badge className="absolute top-3 left-3">{it.difficulty}</Badge>
+                  <img src={routeCover(it)} alt={it.title} className="size-full object-cover" loading="lazy" decoding="async" />
+                  {it.province && <Badge className="absolute top-3 left-3">{it.province.name[lang]}</Badge>}
                 </div>
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-1 text-xs text-warning mb-1.5">
-                    <Star className="size-3.5 fill-current" />
-                    <span className="font-semibold">{it.rating}</span>
-                    <span className="text-muted-foreground">({it.totalReviews})</span>
-                  </div>
-                  <h3 className="font-semibold leading-tight">{it.name}</h3>
+                  <p className="text-xs font-mono text-muted-foreground mb-1.5">{it.code}</p>
+                  <h3 className="font-semibold leading-tight">{it.title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                     {it.description}
                   </p>
                   <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="size-3.5" /> {it.duration}
+                      <Clock className="size-3.5" /> {it.durationDays} {lang === "pt" ? "dias" : "days"}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <MapPin className="size-3.5" /> {it.stops}{" "}
+                      <MapPin className="size-3.5" /> {routeStopCount(it)}{" "}
                       {lang === "pt" ? "paragens" : "stops"}
                     </span>
-                    <span className="ml-auto font-semibold text-foreground">${it.cost}</span>
+                    {routePriceMzn(it) > 0 && (
+                      <span className="ml-auto font-semibold text-foreground">
+                        {routePriceMzn(it).toLocaleString("pt-MZ")} MZN
+                      </span>
+                    )}
                   </div>
                   <Button asChild size="sm" variant="outline" className="mt-4 w-full">
                     <Link to="/itinerary/$id" params={{ id: it.id }}>
@@ -390,6 +433,7 @@ function HomePage() {
               </Card>
             </motion.div>
           ))}
+
         </RecoRow>
 
         {/* Experiences */}
@@ -437,6 +481,21 @@ function HomePage() {
               </Card>
             </motion.div>
           ))}
+          {loadingExperiences && (
+            <Card className="h-56 animate-pulse bg-muted/40" />
+          )}
+          {experiencesError && (
+            <Card className="p-5 text-sm text-muted-foreground">
+              {lang === "pt"
+                ? "Não foi possível carregar as experiências agora."
+                : "We couldn't load the experiences right now."}
+            </Card>
+          )}
+          {!loadingExperiences && !experiencesError && recoExperiences.length === 0 && (
+            <Card className="p-5 text-sm text-muted-foreground">
+              {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+            </Card>
+          )}
         </RecoRow>
 
         {/* Story stops */}
@@ -499,11 +558,11 @@ function HomePage() {
               },
               {
                 icon: Sparkles,
-                title: lang === "pt" ? "Explora e ganha XP" : "Explore and earn XP",
+                title: lang === "pt" ? "Explora e ganha pontos" : "Explore and earn points",
                 desc:
                   lang === "pt"
-                    ? "Visita locais offline e desbloqueia recompensas."
-                    : "Visit places offline and unlock rewards.",
+                    ? "Conclui atividades e roteiros com prova para subir de nível."
+                    : "Complete activities and proven routes to level up.",
               },
             ].map((step, i) => (
               <Card key={i} className="text-center">
@@ -636,5 +695,183 @@ function RecoRow({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
     </div>
+  );
+}
+
+// ---- Personalised recommendations, built from the saved profile preferences ----
+function PersonalSection({ lang }: { lang: Lang }) {
+  const {
+    personalised,
+    preferences,
+    preferredDestination,
+    recommendedExperiences,
+    recommendedDestinations,
+    recommendedCommunity,
+    loading,
+    error,
+  } = useRecommendations(4);
+  const [openCommunity, setOpenCommunity] = useState<CommunityExperience | null>(null);
+
+  const interestLabel = (id: string) =>
+    INTEREST_OPTIONS.find((opt) => opt.id === (id as Interest))?.label[lang] ?? id;
+
+  return (
+    <section className="px-6 sm:px-10 pt-14 max-w-6xl mx-auto">
+      <div>
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight inline-flex items-center gap-2">
+          <Sparkles className="size-6 text-primary" />
+          {personalised
+            ? lang === "pt"
+              ? "Recomendado para ti"
+              : "Recommended for you"
+            : lang === "pt"
+              ? "Explora o que Moçambique tem para oferecer"
+              : "Explore what Mozambique has to offer"}
+        </h2>
+        <p className="mt-2 text-muted-foreground">
+          {personalised ? (
+            <>
+              {lang === "pt" ? "Com base " : "Based on "}
+              {preferredDestination
+                ? `${lang === "pt" ? "no teu destino " : "on your destination "}${preferredDestination.name}`
+                : lang === "pt"
+                  ? "nas tuas preferências"
+                  : "on your preferences"}
+              {preferences.interests?.length
+                ? ` · ${preferences.interests.map(interestLabel).slice(0, 3).join(", ")}`
+                : ""}
+              {" · "}
+              <Link to="/preferences" className="underline hover:text-foreground">
+                {lang === "pt" ? "editar preferências" : "edit preferences"}
+              </Link>
+            </>
+          ) : (
+            <>
+              {lang === "pt"
+                ? "Completa as tuas preferências para receberes sugestões à tua medida."
+                : "Complete your preferences to get suggestions tailored to you."}{" "}
+              <Link to="/preferences" className="underline hover:text-foreground">
+                {lang === "pt" ? "definir preferências" : "set preferences"}
+              </Link>
+            </>
+          )}
+        </p>
+      </div>
+
+      {loading && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Card key={i} className="h-56 animate-pulse bg-muted/40" />
+          ))}
+        </div>
+      )}
+
+      {!loading && error && (
+        <Card className="mt-6 p-5 text-sm text-muted-foreground">
+          {lang === "pt"
+            ? "Não foi possível carregar as recomendações agora. Tenta novamente."
+            : "We couldn't load the recommendations right now. Please try again."}
+        </Card>
+      )}
+
+      {!loading && !error && personalised && recommendedExperiences.length > 0 && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {recommendedExperiences.map(({ item, reasons, matchesProvince }) => (
+            <Card key={item.id} className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <div className="relative aspect-[16/10]">
+                <img
+                  src={item.image}
+                  alt={item.title[lang]}
+                  className="size-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <Badge variant="secondary" className="absolute top-3 left-3 capitalize">
+                  {item.category}
+                </Badge>
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold leading-tight">{item.title[lang]}</h3>
+                <p className="mt-1 text-xs text-muted-foreground inline-flex items-center gap-1">
+                  <MapPin className="size-3" /> {item.location}
+                </p>
+                {(reasons.length > 0 || matchesProvince) && (
+                  <p className="mt-2 text-xs text-primary font-medium">
+                    {lang === "pt" ? "Combina com " : "Matches "}
+                    {reasons.length > 0
+                      ? reasons.map(interestLabel).slice(0, 2).join(" e ")
+                      : (preferredDestination?.name ?? item.province ?? "")}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="size-3.5" /> {item.durationHours}h
+                  </span>
+                  <span className="ml-auto font-semibold text-foreground">{item.priceMzn} MZN</span>
+                </div>
+                <Button asChild size="sm" variant="outline" className="mt-4 w-full">
+                  <Link to="/experiences">{lang === "pt" ? "Ver detalhes" : "View details"}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && personalised && recommendedDestinations.length > 0 && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {recommendedDestinations.map(({ item, reasons }) => (
+            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="relative aspect-[16/9]">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="size-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold leading-tight">{item.name}</h3>
+                <p className="text-xs text-muted-foreground">{item.region[lang]}</p>
+                {reasons.length > 0 && (
+                  <p className="mt-2 text-xs text-primary font-medium">
+                    {lang === "pt" ? "Baseado nos teus interesses" : "Based on your interests"}
+                  </p>
+                )}
+                <Button asChild size="sm" variant="outline" className="mt-4 w-full">
+                  <Link to="/map">{lang === "pt" ? "Ver no mapa" : "View on map"}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && personalised && recommendedCommunity.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xl font-semibold">{lang === "pt" ? "Grátis e sem reserva" : "Free, no booking"}</h3>
+            <Link to="/community-experiences" className="text-sm text-primary hover:underline">
+              {lang === "pt" ? "Ver todas" : "See all"}
+            </Link>
+          </div>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {recommendedCommunity.map(({ item }) => (
+              <CommunityExperienceCard key={item.id} item={item} onOpen={() => setOpenCommunity(item)} />
+            ))}
+          </div>
+          <CommunityExperienceDialog item={openCommunity} onClose={() => setOpenCommunity(null)} />
+        </div>
+      )}
+
+      {!loading && !error && personalised && recommendedExperiences.length === 0 && (
+        <Card className="mt-6 p-5 text-sm text-muted-foreground">
+          {lang === "pt"
+            ? "Ainda não há experiências suficientes para recomendar. Explora tudo o que existe abaixo."
+            : "There aren't enough experiences to recommend yet. Explore everything below."}
+        </Card>
+      )}
+    </section>
   );
 }
