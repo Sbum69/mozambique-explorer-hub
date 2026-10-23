@@ -1,6 +1,15 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { requireAuthenticatedUser } from "@/lib/auth";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast as sonner } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLang } from "@/contexts/LanguageContext";
+import {
+  fetchAchievements, isUnlocked, submitGameStep, uploadGameProof, startQuiz, answerQuiz, finishQuiz,
+  gameErrorText, BADGES, badgeStatus, type GameState, type QuizQuestion, type StepResult,
+} from "@/lib/games";
 import {
   ArrowLeft, Zap, Lock, CheckCircle, X, Trophy, Award,
   MapPin, Camera, Users, Brain, Clock, Heart, AlertCircle,
@@ -11,8 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
 import { TreasureStopPicker } from "@/components/TreasureStopPicker";
-import { getCheckedStops, saveCheckedStops } from "@/data/treasure-stops";
-import { getGameTask, getGameLogs, addGameLog } from "@/data/game-tasks";
+import { getGameTask } from "@/data/game-tasks";
 import {
   ExperienceTask, ItineraryTask, TimeOfDayTask, EventTask, ShareTask, WordTask,
 } from "@/components/GameTaskFields";
@@ -30,6 +38,8 @@ export const Route = createFileRoute("/games")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: GamesPage,
 });
 
@@ -103,172 +113,123 @@ const INITIAL_GAMES: Game[] = [
   { id: "g21", title: "Embaixador Ekaya", description: "Partilha 2 conquistas.", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 250, difficulty: "medium", status: "available", progress: 0, total: 2, badge: "Embaixador", action: "Começar", detail: "Partilha conquistas e ajuda outros viajantes." },
 ];
 
-interface SelloDef { id: string; name: string; emoji: string; description: string; requirement: string; earned: boolean; }
-const SELLOS: SelloDef[] = [
-  { id: "s1", name: "Explorador de Praias", emoji: "🏖️", description: "Visitou 5 praias", requirement: "5 praias diferentes", earned: false },
-  { id: "s2", name: "Amigo da Comunidade", emoji: "🤝", description: "3 experiências locais", requirement: "3 experiências", earned: false },
-  { id: "s3", name: "Historiador", emoji: "📜", description: "5 quizzes completados", requirement: "5 quizzes", earned: false },
-  { id: "s4", name: "Ekaya Master", emoji: "👑", description: "Todos os roteiros de um destino", requirement: "100% de um destino", earned: false },
-  { id: "s5", name: "Fotógrafo Cultural", emoji: "📸", description: "10 elementos com foto", requirement: "10 fotos", earned: false },
-  { id: "s6", name: "Caçador de Tesouros", emoji: "🗺️", description: "Tesouros encontrados", requirement: "Story Stops", earned: true },
-  { id: "s7", name: "Contador de Histórias", emoji: "✍️", description: "Notas em 10 lugares", requirement: "10 notas", earned: false },
-  { id: "s8", name: "Madrugador", emoji: "🌅", description: "5 locais ao nascer do sol", requirement: "5 amanheceres", earned: false },
-];
-
-const POINT_SYSTEM = [
-  { emoji: "🗺️", label: "Visitar Story Stop", pts: "+30 pts" },
-  { emoji: "⏱️", label: "Completar roteiro", pts: "+300 pts" },
-  { emoji: "🤝", label: "Experiência comunitária", pts: "+200 pts" },
-  { emoji: "🧠", label: "Acertar quiz", pts: "+10 pts" },
-  { emoji: "📸", label: "Desafio de fotografia", pts: "+100 pts" },
-  { emoji: "👥", label: "Desafio social", pts: "+90 pts" },
-];
-
-interface QuizQ { question: string; options: string[]; correct: number; explanation: string; }
-const QUIZ_BANK: QuizQ[] = [
-  { question: "Em que ano Moçambique se tornou independente?", options: ["1965", "1975", "1980", "1992"], correct: 1, explanation: "Moçambique conquistou a independência a 25 de Junho de 1975." },
-  { question: "Qual é a moeda oficial de Moçambique?", options: ["Kwanza", "Metical", "Rand", "Escudo"], correct: 1, explanation: "A moeda oficial é o Metical (MZN)." },
-  { question: "Quem foi o primeiro Presidente de Moçambique?", options: ["Eduardo Mondlane", "Samora Machel", "Joaquim Chissano", "Armando Guebuza"], correct: 1, explanation: "Samora Machel foi o primeiro Presidente do país independente." },
-  { question: "Qual é o prato nacional?", options: ["Cachupa", "Matapa com Xima", "Funje", "Muamba"], correct: 1, explanation: "Matapa com Xima é considerado o prato nacional." },
-  { question: "Que animal está na bandeira de Moçambique?", options: ["Leão", "Águia", "Nenhum (tem um AK-47)", "Elefante"], correct: 2, explanation: "A bandeira não tem animais — tem um AK-47, único caso no mundo." },
-  { question: "Qual é o género musical tradicional mais conhecido?", options: ["Kizomba", "Marrabenta", "Semba", "Kuduro"], correct: 1, explanation: "A Marrabenta é o género musical urbano mais emblemático." },
-  { question: "Quantas províncias tem Moçambique?", options: ["9", "10", "11", "12"], correct: 2, explanation: "Moçambique tem 11 províncias, incluindo a Cidade de Maputo." },
-  { question: "Qual a língua mais falada no norte de Moçambique?", options: ["Changana", "Sena", "Makhuwa", "Ronga"], correct: 2, explanation: "O Makhuwa é a língua bantu mais falada no norte." },
-  { question: "Como se diz 'Obrigado' em Changana?", options: ["Asante", "Kanimambo", "Inkomu", "Obrigadu"], correct: 2, explanation: "Em Changana, 'Obrigado' diz-se 'Inkomu'." },
-  { question: "Qual destas é uma praia no arquipélago de Bazaruto?", options: ["Tofo", "Wimbi", "Benguerra", "Ponta do Ouro"], correct: 2, explanation: "Benguerra é uma das ilhas do arquipélago de Bazaruto." },
-];
-
 const DIFF_BADGE: Record<Difficulty, { label: string; cls: string }> = {
   easy: { label: "Fácil", cls: "bg-green-100 text-green-700 border-green-200" },
   medium: { label: "Médio", cls: "bg-amber-100 text-amber-700 border-amber-200" },
   hard: { label: "Difícil", cls: "bg-red-100 text-red-700 border-red-200" },
 };
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function applyState(base: Game[], state: GameState | undefined): Game[] {
+  if (!state) return base;
+  const byKey = new Map(state.catalog.map((c) => [c.key, c]));
+  return base.flatMap((g) => {
+    const c = byKey.get(g.id);
+    if (!c) return [];
+    const done = !!state.completed[g.id];
+    const progress = done ? c.total : Math.min(c.total, state.progress[g.id] ?? 0);
+    const status: GameStatus = done ? "completed" : !isUnlocked(c, state.completed) ? "locked" : progress > 0 ? "in_progress" : "available";
+    return [{ ...g, points: c.xp, total: c.total, progress, status, action: status === "in_progress" ? "Continuar" : g.special === "quiz" ? "Jogar Quiz" : "Começar" }];
+  });
 }
 
 function GamesPage() {
   const navigate = useNavigate();
-  const [games, setGames] = useState<Game[]>(INITIAL_GAMES);
-  const [totalPoints, setTotalPoints] = useState(0);
+  const qc = useQueryClient();
+  const { authUser } = useAuth();
+  const { lang } = useLang();
+  const pt = lang === "pt";
+  const uid = authUser?.id;
+  const q = useQuery({ queryKey: ["achievements", uid], queryFn: fetchAchievements, enabled: !!uid });
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"jogos" | "selos">("jogos");
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const [pointsKey, setPointsKey] = useState(0);
+  const [quizGame, setQuizGame] = useState<Game | null>(null);
 
+  const games = useMemo(() => applyState(INITIAL_GAMES, q.data?.state), [q.data]);
   const filteredGames = useMemo(
     () => (activeCategory === "all" ? games : games.filter((g) => g.category === activeCategory)),
     [games, activeCategory]
   );
-
   const completed = games.filter((g) => g.status === "completed").length;
   const inProgress = games.filter((g) => g.status === "in_progress").length;
-  const earnedSelos = SELLOS.filter((s) => s.earned).length;
+  const badges = q.data ? BADGES.map((b) => ({ b, st: badgeStatus(b, q.data.badgeInput) })) : [];
+  const earnedSelos = badges.filter((x) => x.st.earned).length;
+  const xpEarned = q.data ? q.data.state.catalog.filter((c) => q.data.state.completed[c.key]).reduce((n, c) => n + c.xp, 0) : 0;
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const addPoints = (pts: number) => {
-    setTotalPoints((p) => p + pts);
-    setPointsKey((k) => k + 1);
-  };
-
-  const confirmGame = (game: Game) => {
-    setGames((prev) =>
-      prev.map((g) => {
-        if (g.id !== game.id) return g;
-        const newProgress = Math.min(g.total, g.progress + 1);
-        const newStatus: GameStatus = newProgress >= g.total ? "completed" : "in_progress";
-        return { ...g, progress: newProgress, status: newStatus };
-      })
-    );
-    addPoints(game.points);
-    showToast(`+${game.points} pontos! 🎉`);
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["achievements", uid] });
+    qc.invalidateQueries({ queryKey: ["my-points", uid] });
+    qc.invalidateQueries({ queryKey: ["leaderboard", uid] });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-purple-50/40">
-      {/* Header */}
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
           <button
             onClick={() => navigate({ to: "/dashboard" })}
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
-            <ArrowLeft className="size-4" /> Voltar
+            <ArrowLeft className="size-4" /> {pt ? "Voltar" : "Back"}
           </button>
-          <h1 className="font-bold text-sm sm:text-base">🎮 Jogos & Desafios</h1>
-          <motion.div
-            key={pointsKey}
-            initial={{ scale: 1.2 }}
-            animate={{ scale: 1 }}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow"
-          >
-            <Zap className="size-4" /> {totalPoints}
-          </motion.div>
+          <h1 className="font-bold text-sm sm:text-base">🎮 {pt ? "Jogos & Desafios" : "Games & Challenges"}</h1>
+          <Button asChild size="sm" variant="outline" className="gap-1">
+            <Link to="/gamification"><Trophy className="size-4" />{pt ? "Conquistas" : "Achievements"}</Link>
+          </Button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Hero stats */}
+        {q.isError && (
+          <div className="mb-4 rounded-xl border p-4 flex items-center gap-3 text-sm">
+            <AlertCircle className="size-5 text-destructive" />
+            <span className="flex-1">{pt ? "Não foi possível carregar o teu progresso." : "We couldn't load your progress."}</span>
+            <Button size="sm" variant="outline" onClick={() => q.refetch()}>{pt ? "Tentar novamente" : "Try again"}</Button>
+          </div>
+        )}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl bg-gradient-to-br from-purple-600 via-violet-600 to-indigo-700 text-white p-6 sm:p-8 shadow-xl"
+          className="rounded-3xl bg-gradient-to-br from-primary to-secondary text-primary-foreground p-6 sm:p-8 shadow-xl"
         >
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: "Pontos Totais", value: totalPoints, icon: "⚡" },
-              { label: "Concluídos", value: completed, icon: "✅" },
-              { label: "Em Progresso", value: inProgress, icon: "⏳" },
-              { label: "Selos", value: `${earnedSelos}/${SELLOS.length}`, icon: "🏅" },
-            ].map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="rounded-2xl bg-white/15 backdrop-blur p-4"
-              >
+              { label: pt ? "XP de jogos" : "Game XP", value: q.isLoading ? "…" : xpEarned, icon: "⚡" },
+              { label: pt ? "Concluídos" : "Completed", value: q.isLoading ? "…" : completed, icon: "✅" },
+              { label: pt ? "Em progresso" : "In progress", value: q.isLoading ? "…" : inProgress, icon: "⏳" },
+              { label: pt ? "Selos" : "Badges", value: q.isLoading ? "…" : `${earnedSelos}/${BADGES.length}`, icon: "🏅" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-2xl bg-background/15 backdrop-blur p-4">
                 <div className="text-2xl">{s.icon}</div>
                 <p className="text-3xl font-bold mt-1">{s.value}</p>
                 <p className="text-xs opacity-80">{s.label}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
+          <p className="text-xs opacity-90 mt-4">
+            {pt
+              ? "O progresso fica guardado na tua conta. O XP só é atribuído por jogos verificados (quiz corrigido no servidor ou foto de prova)."
+              : "Progress is saved to your account. XP is only awarded for verified games (server-scored quiz or proof photo)."}
+          </p>
         </motion.div>
 
-        {/* Tabs */}
         <div className="mt-8 flex gap-2 border-b">
           {(["jogos", "selos"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-3 font-semibold text-sm capitalize transition-colors relative ${
+              className={`px-5 py-3 font-semibold text-sm transition-colors relative ${
                 activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tab === "jogos" ? "🎮 Jogos" : "🏅 Selos"}
-              {activeTab === tab && (
-                <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
+              {tab === "jogos" ? (pt ? "🎮 Jogos" : "🎮 Games") : (pt ? "🏅 Selos" : "🏅 Badges")}
+              {activeTab === tab && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
             </button>
           ))}
         </div>
 
         {activeTab === "jogos" && (
           <>
-            {/* Categories filter */}
             <div className="mt-5 flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
               {CATEGORIES.map((cat) => {
                 const active = activeCategory === cat.id;
@@ -277,9 +238,7 @@ function GamesPage() {
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
                     className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                      active
-                        ? "bg-primary text-primary-foreground border-primary shadow"
-                        : "bg-card hover:bg-muted border-border text-foreground"
+                      active ? "bg-primary text-primary-foreground border-primary shadow" : "bg-card hover:bg-muted border-border text-foreground"
                     }`}
                   >
                     <cat.icon className="size-4" />
@@ -288,13 +247,11 @@ function GamesPage() {
                 );
               })}
             </div>
-
-            {/* Grid */}
             <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredGames.map((game, i) => (
                 <GameCard key={game.id} game={game} index={i} onOpen={() => {
-                  if (game.status === "locked") return;
-                  if (game.special === "quiz") setShowQuiz(true);
+                  if (game.status === "locked" || game.status === "completed" || !q.data) return;
+                  if (game.special === "quiz") setQuizGame(game);
                   else setSelectedGame(game);
                 }} />
               ))}
@@ -303,88 +260,47 @@ function GamesPage() {
         )}
 
         {activeTab === "selos" && (
-          <>
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {SELLOS.map((s, i) => (
-                <motion.div
-                  key={s.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.04 }}
-                  className={`rounded-2xl p-5 text-center border-2 ${
-                    s.earned ? "bg-amber-50 border-amber-300" : "bg-muted/30 border-muted"
-                  }`}
-                >
-                  <div className={`mx-auto size-20 rounded-full flex items-center justify-center text-4xl shadow-inner ${
-                    s.earned ? "bg-gradient-to-br from-amber-200 to-orange-300" : "bg-muted"
-                  }`}>
-                    {s.earned ? s.emoji : <Lock className="size-7 text-muted-foreground" />}
-                  </div>
-                  <h3 className="mt-3 font-bold text-sm">{s.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
-                  <Badge variant="outline" className="mt-2 text-[10px]">{s.requirement}</Badge>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Pontuação */}
-            <h3 className="mt-10 mb-4 text-xl font-bold flex items-center gap-2">
-              <Trophy className="size-5 text-amber-500" /> Sistema de Pontuação
-            </h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {POINT_SYSTEM.map((p) => (
-                <div key={p.label} className="flex items-center gap-3 bg-card border rounded-xl p-3">
-                  <div className="text-2xl">{p.emoji}</div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{p.label}</p>
-                  </div>
-                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">{p.pts}</Badge>
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {badges.map(({ b, st }) => (
+              <div key={b.id} className={`rounded-2xl p-5 text-center border-2 ${st.earned ? "bg-accent/40 border-primary" : "bg-muted/30 border-muted"}`}>
+                <div className={`mx-auto size-20 rounded-full flex items-center justify-center text-4xl ${st.earned ? "bg-primary/20" : "bg-muted"}`}>
+                  {st.earned ? b.emoji : <Lock className="size-7 text-muted-foreground" />}
                 </div>
-              ))}
-            </div>
-          </>
+                <h3 className="mt-3 font-bold text-sm">{b.name[lang]}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{b.requirement[lang]}</p>
+                <Badge variant="outline" className="mt-2 text-[10px]">{st.have}/{st.need}</Badge>
+              </div>
+            ))}
+          </div>
         )}
       </main>
 
-      {/* Game Detail Modal */}
       <AnimatePresence>
-        {selectedGame && (
+        {selectedGame && q.data && uid && (
           <GameDetailModal
             game={selectedGame}
+            userId={uid}
+            doneRefs={q.data.state.steps.filter((s) => s.gameKey === selectedGame.id).map((s) => s.stepRef)}
+            history={q.data.state.steps.filter((s) => s.gameKey === selectedGame.id).map((s) => s.createdAt)}
             onClose={() => setSelectedGame(null)}
-            onConfirm={() => {
-              const g = selectedGame;
-              setSelectedGame(null);
-              setTimeout(() => confirmGame(g), 50);
+            onSaved={(r) => {
+              refresh();
+              sonner.success(r.completed
+                ? (r.xp_awarded > 0 ? (pt ? `Jogo concluído! +${r.xp_awarded} XP` : `Game completed! +${r.xp_awarded} XP`) : (pt ? "Jogo concluído (sem XP)" : "Game completed (no XP)"))
+                : (pt ? `Progresso guardado: ${r.progress}/${r.total}` : `Progress saved: ${r.progress}/${r.total}`));
             }}
           />
         )}
       </AnimatePresence>
 
-      {/* Quiz Modal */}
       <AnimatePresence>
-        {showQuiz && (
+        {quizGame && (
           <QuizModal
-            onClose={() => setShowQuiz(false)}
-            onFinish={(pts) => {
-              addPoints(pts);
-              showToast(`Quiz! +${pts} pontos 🧠`);
-            }}
+            game={quizGame}
+            attempts={q.data?.state.quizAttempts.filter((a) => a.gameKey === quizGame.id && a.finishedAt).length ?? 0}
+            onClose={() => setQuizGame(null)}
+            onFinished={refresh}
           />
-        )}
-      </AnimatePresence>
-
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ y: -80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -80, opacity: 0 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-foreground text-background px-5 py-3 rounded-full shadow-2xl font-semibold text-sm"
-          >
-            {toast}
-          </motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -456,13 +372,19 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
   );
 }
 
-function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: () => void; onConfirm: () => void }) {
-  const [success, setSuccess] = useState(false);
+function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: {
+  game: Game; userId: string; doneRefs: string[]; history: string[]; onClose: () => void; onSaved: (r: StepResult) => void;
+}) {
+  const { lang } = useLang();
+  const pt = lang === "pt";
+  const [success, setSuccess] = useState<StepResult | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveErr, setSaveErr] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const task = getGameTask(game.id);
   const isTreasure = !!task.stops;
-  const [doneStops, setDoneStops] = useState<string[]>(() => (isTreasure ? getCheckedStops(game.id) : []));
+  const doneStops = doneRefs;
   const [selectedStop, setSelectedStop] = useState<string | null>(null);
   const [experienceId, setExperienceId] = useState<string | null>(null);
   const [itinerarySel, setItinerarySel] = useState<{ itineraryId: string; stopId: number } | null>(null);
@@ -473,7 +395,6 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
   const [labels, setLabels] = useState<Record<string, string>>({});
   const pct = (game.progress / game.total) * 100;
   const requiresPhoto = !!task.photo;
-  const logs = getGameLogs(game.id);
 
   const setLabel = (k: string, v?: string) => setLabels((p) => ({ ...p, [k]: v ?? "" }));
 
@@ -490,19 +411,24 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
     return null;
   })();
 
-  const handleConfirm = () => {
-    if (missing) return;
-    if (isTreasure && selectedStop) {
-      const next = [...doneStops, selectedStop];
-      saveCheckedStops(game.id, next);
-      setDoneStops(next);
+  const handleConfirm = async () => {
+    if (missing || saving) return;
+    setSaving(true); setSaveErr(null);
+    try {
+      const proofPath = requiresPhoto && photo ? await uploadGameProof(userId, photo) : null;
+      const stepRef = isTreasure ? selectedStop : task.timeOfDay && timeOfDay ? timeOfDay.moment : null;
+      const details: Record<string, string> = {};
+      for (const [k, v] of Object.entries(labels)) if (v) details[k] = v.slice(0, 200);
+      if (note.trim()) details.note = note.trim().slice(0, 1000);
+      const r = await submitGameStep(game.id, stepRef, proofPath, details);
+      setSuccess(r);
+      onSaved(r);
+      setTimeout(onClose, 1500);
+    } catch (e) {
+      setSaveErr(gameErrorText((e as Error).message, pt));
+    } finally {
+      setSaving(false);
     }
-    const detailLabel = [labels.experience, labels.itinerary, labels.timeOfDay, labels.event, labels.word]
-      .filter(Boolean)
-      .join(" · ");
-    addGameLog(game.id, detailLabel || note.trim() || game.title);
-    setSuccess(true);
-    setTimeout(() => onConfirm(), 1300);
   };
 
   return (
@@ -539,8 +465,8 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
           {success ? (
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="py-8 text-center">
               <CheckCircle className="size-20 text-green-500 mx-auto mb-3" />
-              <p className="font-bold text-lg">Conquista registada!</p>
-              <p className="text-sm text-muted-foreground">+{game.points} pontos</p>
+              <p className="font-bold text-lg">{success.completed ? (pt ? "Jogo concluído!" : "Game completed!") : (pt ? "Progresso guardado" : "Progress saved")}</p>
+              <p className="text-sm text-muted-foreground">{success.progress}/{success.total}{success.xp_awarded > 0 ? ` · +${success.xp_awarded} XP` : ""}</p>
             </motion.div>
           ) : (
             <>
@@ -562,13 +488,18 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
                 <p className="text-sm"><span className="text-muted-foreground">Selo:</span> <strong>{game.badge}</strong></p>
               </div>
 
-              {logs.length > 0 && (
+              {game.points === 0 && (
+                <p className="text-xs rounded-xl border p-3 text-muted-foreground">
+                  {pt ? "Este desafio não pode ser verificado pelo sistema: o progresso fica guardado, mas não dá XP." : "This challenge can't be verified by the system: progress is saved but gives no XP."}
+                </p>
+              )}
+              {history.length > 0 && (
                 <div className="rounded-xl border p-3">
                   <p className="text-xs font-bold uppercase text-muted-foreground mb-1">Registos anteriores</p>
                   <ul className="space-y-1">
-                    {logs.slice(-4).map((l, i) => (
+                    {history.slice(0, 4).map((at, i) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-center gap-1">
-                        <CheckCircle className="size-3 text-green-600 shrink-0" /> {l.label}
+                        <CheckCircle className="size-3 text-primary shrink-0" /> {new Date(at).toLocaleString(pt ? "pt-PT" : "en-GB")}
                       </li>
                     ))}
                   </ul>
@@ -639,12 +570,13 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
                 <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
               )}
 
+              {saveErr && <p className="text-sm text-destructive">{saveErr}</p>}
               <Button
                 onClick={handleConfirm}
-                disabled={!!missing}
+                disabled={!!missing || saving}
                 className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
               >
-                {missing ?? "Confirmar conquista"}
+                {missing ?? (saving ? (pt ? "A guardar…" : "Saving…") : (pt ? "Guardar progresso" : "Save progress"))}
               </Button>
 
 
@@ -657,141 +589,138 @@ function GameDetailModal({ game, onClose, onConfirm }: { game: Game; onClose: ()
   );
 }
 
-function QuizModal({ onClose, onFinish }: { onClose: () => void; onFinish: (pts: number) => void }) {
-  const [questions] = useState<QuizQ[]>(() => shuffle(QUIZ_BANK).slice(0, 7));
+function QuizModal({ game, attempts, onClose, onFinished }: { game: Game; attempts: number; onClose: () => void; onFinished: () => void }) {
+  const { lang } = useLang();
+  const pt = lang === "pt";
+  const [session, setSession] = useState<{ id: string; questions: QuizQuestion[] } | null>(null);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{ correct: boolean; correct_index: number; explanation: string } | null>(null);
   const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
+  const [result, setResult] = useState<{ correct: number; total: number; passed: boolean; xp_awarded: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
-  const q = questions[current];
-  const isLast = current === questions.length - 1;
-
-  const choose = (idx: number) => {
-    if (selected !== null) return;
-    setSelected(idx);
-    if (idx === q.correct) setScore((s) => s + 1);
+  const begin = async () => {
+    setBusy(true); setErr(null);
+    try {
+      const s = await startQuiz(game.id);
+      setSession({ id: s.attempt_id, questions: s.questions });
+      setCurrent(0); setSelected(null); setFeedback(null); setScore(0); setResult(null);
+    } catch (e) { setErr(gameErrorText((e as Error).message, pt)); }
+    finally { setBusy(false); }
   };
 
-  const next = () => {
-    if (isLast) {
-      const pts = score * 10 + (selected === q.correct ? 10 : 0);
-      // already counted via setScore above asynchronously; compute fresh
-      const finalScore = score + (selected === q.correct && selected !== null ? 0 : 0);
-      setDone(true);
-      setTimeout(() => onFinish(finalScore * 10), 100);
-      void pts;
-    } else {
-      setCurrent((c) => c + 1);
-      setSelected(null);
-    }
+  const q = session?.questions[current];
+  const isLast = !!session && current === session.questions.length - 1;
+
+  const choose = async (idx: number) => {
+    if (!session || !q || selected !== null || busy) return;
+    setSelected(idx); setBusy(true);
+    try {
+      const f = await answerQuiz(session.id, q.id, idx);
+      setFeedback(f);
+      if (f.correct) setScore((s) => s + 1);
+    } catch (e) { setErr(gameErrorText((e as Error).message, pt)); setSelected(null); }
+    finally { setBusy(false); }
+  };
+
+  const next = async () => {
+    if (!session) return;
+    if (!isLast) { setCurrent((c) => c + 1); setSelected(null); setFeedback(null); return; }
+    setBusy(true);
+    try { setResult(await finishQuiz(session.id)); onFinished(); }
+    catch (e) { setErr(gameErrorText((e as Error).message, pt)); }
+    finally { setBusy(false); }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-foreground/70 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
         className="bg-card rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden"
+        role="dialog" aria-label={game.title}
       >
-        <div className="bg-gradient-to-br from-purple-600 to-violet-700 text-white p-5">
+        <div className="bg-gradient-to-br from-primary to-secondary text-primary-foreground p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Brain className="size-5" />
-              <p className="font-bold">Quiz Moçambique</p>
-            </div>
-            <button onClick={onClose} className="size-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30">
-              <X className="size-4" />
-            </button>
+            <div className="flex items-center gap-2"><Brain className="size-5" /><p className="font-bold">{game.title}</p></div>
+            <button onClick={onClose} aria-label={pt ? "Fechar" : "Close"} className="size-8 rounded-full bg-background/20 flex items-center justify-center"><X className="size-4" /></button>
           </div>
-          {!done && (
+          {session && !result && (
             <>
               <div className="flex justify-between text-xs opacity-90 mb-1">
-                <span>Pergunta {current + 1} de {questions.length}</span>
-                <span>Pontos: {score * 10}</span>
+                <span>{pt ? "Pergunta" : "Question"} {current + 1} / {session.questions.length}</span>
+                <span>{pt ? "Certas" : "Correct"}: {score}</span>
               </div>
-              <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  animate={{ width: `${((current + 1) / questions.length) * 100}%` }}
-                  className="h-full bg-white"
-                />
+              <div className="h-2 bg-background/20 rounded-full overflow-hidden">
+                <motion.div animate={{ width: `${((current + 1) / session.questions.length) * 100}%` }} className="h-full bg-background" />
               </div>
             </>
           )}
         </div>
 
         <div className="p-6">
-          {done ? (
+          {err && <p className="mb-3 text-sm text-destructive flex gap-2"><AlertCircle className="size-4 shrink-0" />{err}</p>}
+          {!session ? (
+            <div className="space-y-3 text-sm">
+              <p className="font-semibold">{pt ? "Regras" : "Rules"}</p>
+              <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                <li>{pt ? "7 perguntas sorteadas pelo servidor." : "7 questions drawn by the server."}</li>
+                <li>{pt ? "Cada resposta é final e corrigida no servidor." : "Each answer is final and scored on the server."}</li>
+                <li>{pt ? "Aprovas com 70% (5 de 7). Podes repetir até aprovar." : "Pass with 70% (5 of 7). You can retry until you pass."}</li>
+                <li>{pt ? `Ao aprovar: +${game.points} XP, uma única vez.` : `On passing: +${game.points} XP, once.`}</li>
+              </ul>
+              <p className="text-xs text-muted-foreground">{pt ? `Tentativas anteriores: ${attempts}` : `Previous attempts: ${attempts}`}</p>
+              <Button className="w-full" disabled={busy} onClick={begin}>{pt ? "Começar quiz" : "Start quiz"}</Button>
+            </div>
+          ) : result ? (
             <div className="text-center py-6">
-              <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring" }}>
-                <Trophy className="size-20 text-amber-500 mx-auto" />
-              </motion.div>
-              <h3 className="text-2xl font-bold mt-3">Parabéns!</h3>
-              <p className="text-muted-foreground">Acertaste {score} de {questions.length}</p>
-              <p className="text-3xl font-bold mt-2 text-primary">{Math.round((score / questions.length) * 100)}%</p>
-              <p className="text-sm text-amber-600 font-semibold mt-1">+{score * 10} pontos</p>
+              <Trophy className={`size-20 mx-auto ${result.passed ? "text-primary" : "text-muted-foreground"}`} />
+              <h3 className="text-2xl font-bold mt-3">{result.passed ? (pt ? "Aprovado!" : "Passed!") : (pt ? "Ainda não" : "Not yet")}</h3>
+              <p className="text-muted-foreground">{pt ? `Acertaste ${result.correct} de ${result.total}` : `You got ${result.correct} of ${result.total}`}</p>
+              <p className="text-sm font-semibold mt-1 text-primary">
+                {result.xp_awarded > 0 ? `+${result.xp_awarded} XP` : result.passed ? (pt ? "Já concluído antes" : "Already completed") : (pt ? "Precisas de 70% para aprovar" : "You need 70% to pass")}
+              </p>
               <div className="flex gap-2 mt-6">
-                <Button variant="outline" className="flex-1" onClick={onClose}>Fechar</Button>
-                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-violet-700 text-white" onClick={() => window.location.reload()}>
-                  Jogar Novamente
-                </Button>
+                <Button variant="outline" className="flex-1" onClick={onClose}>{pt ? "Fechar" : "Close"}</Button>
+                {!result.passed && <Button className="flex-1" disabled={busy} onClick={begin}>{pt ? "Tentar novamente" : "Try again"}</Button>}
               </div>
             </div>
-          ) : (
+          ) : q ? (
             <>
               <h3 className="font-bold text-lg mb-4">{q.question}</h3>
               <div className="space-y-2">
                 {q.options.map((opt, idx) => {
-                  const isCorrect = idx === q.correct;
-                  const isPicked = selected === idx;
                   let cls = "border-border hover:bg-muted/50";
-                  if (selected !== null) {
-                    if (isCorrect) cls = "border-green-500 bg-green-50 text-green-700";
-                    else if (isPicked) cls = "border-red-500 bg-red-50 text-red-700";
+                  if (feedback) {
+                    if (idx === feedback.correct_index) cls = "border-primary bg-primary/10";
+                    else if (idx === selected) cls = "border-destructive bg-destructive/10";
                     else cls = "border-border bg-muted/30 text-muted-foreground";
                   }
                   return (
-                    <button
-                      key={idx}
-                      onClick={() => choose(idx)}
-                      disabled={selected !== null}
-                      className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${cls}`}
-                    >
-                      <span className="font-bold mr-2">{String.fromCharCode(65 + idx)}.</span>
-                      {opt}
+                    <button key={idx} onClick={() => choose(idx)} disabled={selected !== null}
+                      className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${cls}`}>
+                      <span className="font-bold mr-2">{String.fromCharCode(65 + idx)}.</span>{opt}
                     </button>
                   );
                 })}
               </div>
-
-              {selected !== null && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`mt-4 p-3 rounded-xl flex items-start gap-2 text-sm ${
-                    selected === q.correct ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {selected === q.correct ? <CheckCircle className="size-5 shrink-0" /> : <AlertCircle className="size-5 shrink-0" />}
-                  <p>{q.explanation}</p>
-                </motion.div>
+              {feedback && (
+                <div className={`mt-4 p-3 rounded-xl flex items-start gap-2 text-sm ${feedback.correct ? "bg-primary/10" : "bg-destructive/10"}`}>
+                  {feedback.correct ? <CheckCircle className="size-5 shrink-0 text-primary" /> : <AlertCircle className="size-5 shrink-0 text-destructive" />}
+                  <p>{feedback.explanation}</p>
+                </div>
               )}
-
-              <Button
-                disabled={selected === null}
-                onClick={next}
-                className="w-full mt-4 bg-gradient-to-r from-purple-600 to-violet-700 text-white"
-              >
-                {isLast ? "Ver Resultado" : "Próxima Pergunta"}
+              <Button disabled={!feedback || busy} onClick={next} className="w-full mt-4">
+                {isLast ? (pt ? "Ver resultado" : "See result") : (pt ? "Próxima pergunta" : "Next question")}
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </motion.div>
     </motion.div>

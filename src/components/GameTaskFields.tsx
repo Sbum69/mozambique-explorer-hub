@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Heart, Route as RouteIcon, Sunrise, Sunset, CalendarDays, Share2, Check, Languages, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EXPERIENCES } from "@/data/experiences";
-import { SAMPLE_ITINERARIES, getUserItineraries, type Itinerary } from "@/data/itineraries";
+import { useExperiences } from "@/hooks/useExperiences";
+import { SAMPLE_ITINERARIES, type Itinerary } from "@/data/itineraries";
 
 function Wrap({ title, hint, icon: Icon, children }: { title: string; hint?: string; icon: typeof Heart; children: React.ReactNode }) {
   return (
@@ -24,10 +24,17 @@ export function ExperienceTask({
   value: string | null;
   onChange: (id: string | null, label?: string) => void;
 }) {
+  const { experiences, loading, error } = useExperiences();
+
   return (
     <Wrap title="Escolhe a experiência" hint="Seleciona a experiência comunitária em que participaste." icon={Heart}>
       <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-        {EXPERIENCES.map((e) => {
+        {loading && <p className="text-xs text-muted-foreground animate-pulse">A carregar experiências...</p>}
+        {error && <p className="text-xs text-muted-foreground">Não foi possível carregar as experiências.</p>}
+        {!loading && !error && experiences.length === 0 && (
+          <p className="text-xs text-muted-foreground">Ainda não existem experiências disponíveis.</p>
+        )}
+        {experiences.map((e) => {
           const active = value === e.id;
           return (
             <button
@@ -58,7 +65,7 @@ export function ItineraryTask({
   value: { itineraryId: string; stopId: number } | null;
   onChange: (v: { itineraryId: string; stopId: number } | null, label?: string) => void;
 }) {
-  const list = useMemo<Itinerary[]>(() => [...SAMPLE_ITINERARIES, ...getUserItineraries()], []);
+  const list = useMemo<Itinerary[]>(() => SAMPLE_ITINERARIES, []);
   const [openId, setOpenId] = useState<string | null>(value?.itineraryId ?? null);
   const current = list.find((i) => i.id === openId);
 

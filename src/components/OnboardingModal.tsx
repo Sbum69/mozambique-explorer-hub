@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,39 +6,102 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
-import { DESTINATIONS, INTERESTS } from "@/data/destinations";
+import { INTERESTS } from "@/data/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
+import { useProvinces } from "@/hooks/useProvinces";
 import { Check, ChevronLeft, ChevronRight, MapPin, Star, TrendingUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OnboardingModalProps {
   open: boolean;
   onComplete: () => void;
+  /** Current preferences, so editing starts from what the user already chose. */
+  initial?: { province?: string; provinces?: string[]; durationDays?: number; interests?: string[] };
 }
 
-export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
+export function OnboardingModal({ open, onComplete, initial }: OnboardingModalProps) {
   const { setPreferences } = useAuth();
   const { t, lang } = useLang();
+  const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
+  const { provinces, loading: loadingProvinces } = useProvinces();
   const [step, setStep] = useState(0);
-  const [province, setProvince] = useState<string | null>(null);
-  const [days, setDays] = useState(7);
-  const [interests, setInterests] = useState<string[]>([]);
+  /** Featured destination slug (optional, kept for the existing profiles.province field). */
+  const [province, setProvince] = useState<string | null>(initial?.province ?? null);
+  /** The ONE destination province (provinces.code). */
+  const [provinceCode, setProvinceCode] = useState<string | null>(initial?.provinces?.[0] ?? null);
+  const [days, setDays] = useState(initial?.durationDays ?? 7);
+  const [interests, setInterests] = useState<string[]>(initial?.interests ?? []);
+
+  // Saved preferences may arrive after the first render (profile still loading): adopt them once.
+  const initialCode = initial?.provinces?.[0];
+  const initialSlug = initial?.province;
+  useEffect(() => {
+    if (initialCode) setProvinceCode((c) => c ?? initialCode);
+    if (initialSlug) setProvince((c) => c ?? initialSlug);
+  }, [initialCode, initialSlug]);
+  const initialDays = initial?.durationDays;
+  const initialInterests = initial?.interests?.join(",");
+  const syncedRest = useRef(false);
+  useEffect(() => {
+    if (syncedRest.current || (initialDays == null && !initialInterests)) return;
+    syncedRest.current = true;
+    if (initialDays != null) setDays(initialDays);
+    if (initialInterests) setInterests(initialInterests.split(","));
+  }, [initialDays, initialInterests]);
+
+  // Older profiles only have the destination slug: derive its province once destinations load.
+  useEffect(() => {
+    if (provinceCode || !province) return;
+    const d = destinations.find((x) => x.slug === province);
+    if (d?.province) setProvinceCode(d.province);
+  }, [destinations, province, provinceCode]);
 
   const totalSteps = 3;
 
-  const canNext = step === 0 ? !!province : step === 1 ? days >= 1 : interests.length >= 2;
+  const canNext = step === 0 ? !!provinceCode : step === 1 ? days >= 1 : interests.length >= 2;
+
+  const [saving, setSaving] = useState(false);
+
+  const savePrefs = async (prefs: { durationDays: number; interests: string[] }, code = provinceCode) => {
+    if (!code) return;
+    const provinceCode_ = code;
+    // profiles.province keeps a destination slug when the chosen province has one; otherwise the province code.
+    const slug =
+      (province && destinations.find((d) => d.slug === province && d.province === provinceCode_)?.slug) ??
+      destinations.find((d) => d.province === provinceCode_)?.slug ??
+      provinceCode_;
+    setSaving(true);
+    try {
+      await setPreferences({ ...prefs, province: slug, provinces: [provinceCode_] });
+    } finally {
+      setSaving(false);
+    }
+    onComplete();
+  };
+
+  /** Single choice: picking a province replaces the previous one. */
+  const pickProvince = (code: string) => {
+    setProvinceCode(code);
+    setProvince((cur) => (cur && destinations.find((d) => d.slug === cur)?.province === code ? cur : null));
+  };
+  const pickDestination = (slug: string, code?: string | null) => {
+    setProvince(slug);
+    if (code) setProvinceCode(code);
+  };
 
   const handleNext = () => {
     if (step < totalSteps - 1) {
       setStep((s) => s + 1);
     } else {
-      setPreferences({ province: province!, durationDays: days, interests });
-      onComplete();
+      void savePrefs({ durationDays: days, interests });
     }
   };
 
   const handleSkip = () => {
-    setPreferences({ province: province ?? "maputo", durationDays: 3, interests: [] });
-    onComplete();
+    // Existing skip behaviour: keep the current choice, else the first destination's province.
+    const code = provinceCode ?? destinations[0]?.province ?? null;
+    if (!code) return;
+    void savePrefs({ durationDays: 3, interests: [] }, code);
   };
 
   const toggleInterest = (id: string) => {
@@ -91,9 +154,31 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                 <h3 className="text-xl font-semibold mb-5 flex items-center gap-2">
                   <MapPin className="size-5 text-primary" /> {t("chooseDestination")}
                 </h3>
+                {loadingDestinations && (
+                  <p className="text-sm text-muted-foreground animate-pulse">
+                    {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+                  </p>
+                )}
+                {destinationsError && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      {lang === "pt"
+                        ? "Não foi possível carregar os destinos. Verifica a ligação e tenta novamente."
+                        : "We couldn't load the destinations. Check your connection and try again."}
+                    </p>
+                    <Button size="sm" variant="outline" onClick={() => void reload()}>
+                      {lang === "pt" ? "Tentar novamente" : "Try again"}
+                    </Button>
+                  </div>
+                )}
+                {isEmpty && (
+                  <p className="text-sm text-muted-foreground">
+                    {lang === "pt" ? "Ainda não existem destinos disponíveis." : "No destinations available yet."}
+                  </p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {DESTINATIONS.map((d, i) => {
-                    const selected = province === d.id;
+                  {destinations.map((d, i) => {
+                    const selected = !!provinceCode && province === d.slug && provinceCode === d.province;
                     return (
                       <motion.button
                         key={d.id}
@@ -102,7 +187,8 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
                         whileHover={{ y: -4 }}
-                        onClick={() => setProvince(d.id)}
+                        onClick={() => pickDestination(d.slug, d.province)}
+                        aria-pressed={selected}
                         className={cn(
                           "group relative text-left rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-card",
                           selected
@@ -155,6 +241,42 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
                       </motion.button>
                     );
                   })}
+                </div>
+
+                {/* Destination province: exactly one, chosen directly from the real province list */}
+                <div className="mt-8">
+                  <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+                    <MapPin className="size-4 text-primary" />
+                    {lang === "pt" ? "Ou escolhe diretamente a província de destino" : "Or pick your destination province directly"}
+                  </h3>
+                  {loadingProvinces ? (
+                    <p className="text-sm text-muted-foreground animate-pulse">
+                      {lang === "pt" ? "A carregar províncias..." : "Loading provinces..."}
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={lang === "pt" ? "Província de destino" : "Destination province"}>
+                      {provinces.map((p) => {
+                        const selected = provinceCode === p.code;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => pickProvince(p.code)}
+                            role="radio"
+                            aria-checked={selected}
+                            className={cn(
+                              "rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors",
+                              selected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/40 text-muted-foreground",
+                            )}
+                          >
+                            {p.name[lang]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -266,7 +388,7 @@ export function OnboardingModal({ open, onComplete }: OnboardingModalProps) {
           </Button>
           <Button
             onClick={handleNext}
-            disabled={!canNext}
+            disabled={!canNext || saving}
             size="lg"
             className="gap-1.5 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95 transition-all"
           >

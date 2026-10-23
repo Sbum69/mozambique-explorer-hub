@@ -13,12 +13,16 @@ import {
   Phone,
   User as UserIcon,
   Lock,
+  Mail,
   Check,
   Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { useAuth, type BusinessInfo } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { registerBusinessAccount } from "@/lib/business-registration.functions";
+import { getAuthCallbackUrl } from "@/lib/app-url";
+import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 
 export const Route = createFileRoute("/business-register")({
   head: () => ({
@@ -34,40 +38,28 @@ export const Route = createFileRoute("/business-register")({
   component: BusinessRegisterPage,
 });
 
-const CATEGORIES_LARGE = [
-  "Alojamento",
-  "Restaurante",
-  "Bar e Discoteca",
-  "Agência de Turismo",
-  "Transporte Turístico",
-  "Centro Cultural",
-  "Outro",
-];
+// Categories and provinces now come from the database (business_categories / provinces).
 
-const CATEGORIES_SMALL = [
-  "Artesanato Local",
-  "Comida de Rua",
-  "Guia Turístico Individual",
-  "Vendedor Ambulante",
-  "Banca de Mercado",
-  "Serviços Tradicionais",
-  "Outro",
-];
 
 function BusinessRegisterPage() {
   const navigate = useNavigate();
-  const { registerBusiness } = useAuth();
   const [step, setStep] = useState<1 | 2>(1);
   const [businessType, setBusinessType] = useState<"small" | "large" | null>(null);
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   // form state
   const [businessName, setBusinessName] = useState("");
   const [category, setCategory] = useState("");
+  const [provinceCode, setProvinceCode] = useState("");
   const [location, setLocation] = useState("");
+  const { provinces, loading: loadingProvinces } = useProvinces();
+  const { categories, loading: loadingCategories } = useBusinessCategories();
   const [description, setDescription] = useState("");
   const [contact, setContact] = useState("");
-  const [username, setUsername] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -82,10 +74,10 @@ function BusinessRegisterPage() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!businessType) return;
-    if (!businessName || !category || !location || !description || !contact || !username || !password) {
+    if (!businessName || !category || !provinceCode || !location || !description || !contact || !ownerName || !email || !password) {
       toast.error("Preenche todos os campos obrigatórios");
       return;
     }
@@ -98,21 +90,35 @@ function BusinessRegisterPage() {
       return;
     }
 
-    const businessData: BusinessInfo = {
-      businessName,
-      businessType,
-      category,
-      location,
-      description,
-      contact,
-      verified: false,
-    };
+    setSubmitting(true);
+    const result = await registerBusinessAccount({
+      data: {
+        businessName,
+        businessType,
+        category,
+        provinceCode,
+        location,
+        description,
+        contact,
+        displayName: ownerName,
+        email,
+        password,
+        redirectTo: getAuthCallbackUrl(),
+      },
+    }).catch(() => ({ ok: false, error: "Sem ligação. Tenta novamente." }) as const);
 
-    const result = registerBusiness(businessData, username, password);
     if (!result.ok) {
+      setSubmitting(false);
       toast.error(result.error ?? "Não foi possível registar");
       return;
     }
+
+    // The password only ever reaches Supabase Auth; here it just opens the session.
+    if (!result.needsConfirmation) {
+      await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    }
+    setNeedsConfirmation(!!result.needsConfirmation);
+    setSubmitting(false);
     setDone(true);
   };
 
@@ -140,17 +146,18 @@ function BusinessRegisterPage() {
             <div>
               <p className="font-semibold text-blue-900">Aguardando Verificação</p>
               <p className="text-sm text-blue-800 mt-1">
-                Um administrador irá rever e aprovar o teu negócio em breve. Podes começar a
-                configurar o teu perfil enquanto isso.
+                {needsConfirmation
+                  ? "Enviámos uma ligação para o teu email: confirma a conta para entrares. Um administrador irá rever e aprovar o teu negócio em breve."
+                  : "Um administrador irá rever e aprovar o teu negócio em breve. Podes começar a configurar o teu perfil enquanto isso."}
               </p>
             </div>
           </div>
 
           <button
-            onClick={() => navigate({ to: "/business-dashboard" })}
+            onClick={() => navigate({ to: needsConfirmation ? "/login" : "/business-dashboard" })}
             className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold shadow-lg hover:opacity-95 transition"
           >
-            Ir para Dashboard
+            {needsConfirmation ? "Ir para o login" : "Ir para Dashboard"}
           </button>
         </motion.div>
       </div>
@@ -264,13 +271,21 @@ function BusinessRegisterPage() {
                 </Field>
                 <Field icon={<Tag className="size-4" />} label="Categoria *">
                   <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} required>
-                    <option value="">Selecionar...</option>
-                    {(businessType === "large" ? CATEGORIES_LARGE : CATEGORIES_SMALL).map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                    <option value="">{loadingCategories ? "A carregar..." : "Selecionar..."}</option>
+                    {categories.map((c) => (
+                      <option key={c.code} value={c.code}>{c.name.pt}</option>
                     ))}
                   </select>
                 </Field>
-                <Field icon={<MapPin className="size-4" />} label="Localização *">
+                <Field icon={<MapPin className="size-4" />} label="Província *">
+                  <select value={provinceCode} onChange={(e) => setProvinceCode(e.target.value)} className={inputClass} required>
+                    <option value="">{loadingProvinces ? "A carregar..." : "Selecionar..."}</option>
+                    {provinces.map((p) => (
+                      <option key={p.id} value={p.code}>{p.name.pt}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field icon={<MapPin className="size-4" />} label="Cidade / Localização *">
                   <input value={location} onChange={(e) => setLocation(e.target.value)} className={inputClass} required />
                 </Field>
                 <Field icon={<FileText className="size-4" />} label="Descrição *">
@@ -286,22 +301,26 @@ function BusinessRegisterPage() {
               </div>
 
               <div className="grid gap-4">
-                <Field icon={<UserIcon className="size-4" />} label="Nome de Utilizador *">
-                  <input value={username} onChange={(e) => setUsername(e.target.value)} className={inputClass} required />
+                <Field icon={<UserIcon className="size-4" />} label="Nome do Responsável *">
+                  <input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} className={inputClass} required />
+                </Field>
+                <Field icon={<Mail className="size-4" />} label="Email *">
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} autoComplete="email" required />
                 </Field>
                 <Field icon={<Lock className="size-4" />} label="Palavra-passe (mín. 6) *">
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} required minLength={6} />
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} autoComplete="new-password" required minLength={6} />
                 </Field>
                 <Field icon={<Lock className="size-4" />} label="Confirmar Palavra-passe *">
-                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} required minLength={6} />
+                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} autoComplete="new-password" required minLength={6} />
                 </Field>
               </div>
 
               <button
                 type="submit"
-                className={`mt-8 w-full py-4 rounded-xl bg-gradient-to-r ${gradient} text-white font-semibold shadow-lg hover:opacity-95 transition`}
+                disabled={submitting}
+                className={`mt-8 w-full py-4 rounded-xl bg-gradient-to-r ${gradient} text-white font-semibold shadow-lg hover:opacity-95 transition disabled:opacity-70`}
               >
-                Registar Negócio
+                {submitting ? "A registar..." : "Registar Negócio"}
               </button>
             </motion.form>
           )}

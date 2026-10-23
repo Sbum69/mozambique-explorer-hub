@@ -1,25 +1,28 @@
-import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
-  MapPin, Sun, CloudSun, Moon, ArrowRight,
+  MapPin, Sun, ArrowRight, Store, Users as UsersIcon, Gamepad2,
   type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
+import { PointsCard } from "@/components/PointsCard";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
-import { DESTINATIONS } from "@/data/destinations";
-import { SAMPLE_ITINERARIES } from "@/data/itineraries";
-import { DESTINATION_ITINERARY } from "@/data/destination-itinerary-map";
+import { useDestinations } from "@/hooks/useDestinations";
+import { useRouteCatalogue } from "@/hooks/useRoutes";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { personalizeRoutes } from "@/lib/routes";
+
+import { requireAuthenticatedUser } from "@/lib/auth";
 
 
 export const Route = createFileRoute("/dashboard")({
@@ -33,11 +36,8 @@ export const Route = createFileRoute("/dashboard")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem("ekaya.auth.user")) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  ssr: false,
+  beforeLoad: requireAuthenticatedUser,
   component: DashboardPage,
 });
 
@@ -55,9 +55,12 @@ const MODULES: ModuleDef[] = [
   { to: "/favorites", icon: Bookmark, titleKey: "modFavorites", descKey: "modFavoritesDesc", gradient: "from-pink-500 to-rose-500" },
   { to: "/news-alerts", icon: Bell, titleKey: "modNews", descKey: "modNewsDesc", gradient: "from-red-500 to-orange-500" },
   { to: "/itineraries", icon: Compass, titleKey: "modItineraries", descKey: "modItinerariesDesc", gradient: "from-primary to-primary-glow" },
+  { to: "/community-experiences", icon: UsersIcon, titleKey: "modCommunityExp", descKey: "modCommunityExpDesc", gradient: "from-emerald-500 to-teal-500" },
+  { to: "/businesses", icon: Store, titleKey: "modBusinesses", descKey: "modBusinessesDesc", gradient: "from-amber-500 to-orange-500" },
   { to: "/experiences", icon: Heart, titleKey: "modExperiences", descKey: "modExperiencesDesc", gradient: "from-success to-emerald-400" },
   { to: "/useful-info", icon: Info, titleKey: "modInfo", descKey: "modInfoDesc", gradient: "from-purple-500 to-violet-500" },
   { to: "/gamification", icon: Trophy, titleKey: "modAchievements", descKey: "modAchievementsDesc", gradient: "from-warning to-yellow-500" },
+  { to: "/games", icon: Gamepad2, titleKey: "modGames", descKey: "modGamesDesc", gradient: "from-primary to-secondary" },
   { to: "/impact", icon: Activity, titleKey: "modImpact", descKey: "modImpactDesc", gradient: "from-pink-500 to-fuchsia-500" },
 ];
 
@@ -66,28 +69,29 @@ function DashboardPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
   const [showChangeDest, setShowChangeDest] = useState(false);
+  const { destinations } = useDestinations();
+  const { publicRoutes } = useRouteCatalogue(null);
+  const personalPrefs = usePersonalPrefs();
+
 
   if (!user) return null;
 
-  const province = DESTINATIONS.find((d) => d.id === user.preferences?.province);
-  const xpToNext = (user.level + 1) * 1000;
-  const xpProgress = Math.min(100, (user.xp / xpToNext) * 100);
+  const province = destinations.find((d) => d.slug === user.preferences?.province);
 
-  const recommendedItinerary = province
-    ? SAMPLE_ITINERARIES.find((it) => it.id === DESTINATION_ITINERARY[province.id])
+  // Official itinerary of the chosen province, read from the database (no mock data).
+  const personalized = personalPrefs.hasPrefs ? personalizeRoutes(publicRoutes, personalPrefs) : null;
+  const recommendedItinerary = personalized
+    ? personalized.exact[0] ?? personalized.otherDuration[0] ?? personalized.otherInProvince[0] ?? null
     : null;
   const tripDays = user.preferences?.durationDays ?? 3;
   const daySlices = recommendedItinerary
-    ? Array.from({ length: Math.min(tripDays, 5) }).map((_, idx) => {
-        const stops = recommendedItinerary.route;
-        return {
-          day: idx + 1,
-          morning: stops[(idx * 3) % stops.length]?.name ?? stops[(idx * 3) % stops.length]?.title ?? "Explorar a região",
-          afternoon: stops[(idx * 3 + 1) % stops.length]?.name ?? stops[(idx * 3 + 1) % stops.length]?.title ?? "Passeio local",
-          evening: stops[(idx * 3 + 2) % stops.length]?.name ?? stops[(idx * 3 + 2) % stops.length]?.title ?? "Jantar típico",
-        };
-      })
+    ? recommendedItinerary.days.slice(0, Math.min(tripDays, recommendedItinerary.days.length)).map((day) => ({
+        day: day.dayNumber,
+        title: day.title,
+        stops: day.stops,
+      }))
     : [];
+
 
 
   return (
@@ -113,7 +117,7 @@ function DashboardPage() {
               </span>
               <span className="font-medium">{user.displayName}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { logout(); navigate({ to: "/login" }); }}>
+            <Button variant="ghost" size="sm" onClick={() => { void logout().then(() => navigate({ to: "/login", replace: true })); }}>
               {t("logout")}
             </Button>
           </div>
@@ -152,26 +156,32 @@ function DashboardPage() {
 
               </div>
 
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <Stat label={t("level")} value={user.level} />
+              <div className="grid grid-cols-2 gap-4 text-center">
                 <Stat label={t("visited")} value={user.visitedPlaces} />
                 <Stat label={t("km")} value={user.kmExplored} />
               </div>
             </div>
-            {user.role !== "guest" && (
-              <div className="mt-6">
-                <div className="flex justify-between text-xs mb-2 opacity-90">
-                  <span>{t("xp")}: {user.xp}</span>
-                  <span>{xpToNext}</span>
-                </div>
-                <Progress value={xpProgress} className="h-2 bg-white/20" />
-              </div>
-            )}
           </Card>
         </motion.div>
 
+        <div className="mt-8"><PointsCard /></div>
+
         {/* Personalized itinerary */}
-        {recommendedItinerary && province && (
+        {!recommendedItinerary && (
+          <Card className="mt-8 p-5 flex flex-wrap items-center justify-between gap-3 border-0 shadow-[var(--shadow-soft)]">
+            <p className="text-sm text-muted-foreground">
+              {!personalPrefs.hasPrefs
+                ? (lang === "pt" ? "Configura as tuas preferências para veres roteiros para ti." : "Set your preferences to see itineraries for you.")
+                : (lang === "pt" ? "Ainda não existem roteiros para a tua província. Vê sugestões noutras regiões." : "No itineraries for your province yet. See suggestions in other regions.")}
+            </p>
+            <Button asChild variant="outline" className="gap-2">
+              {personalPrefs.hasPrefs
+                ? <Link to="/itineraries" search={{ personal: true }}>{lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" /></Link>
+                : <Link to="/preferences">{lang === "pt" ? "Configurar preferências" : "Set preferences"} <ArrowRight className="size-4" /></Link>}
+            </Button>
+          </Card>
+        )}
+        {recommendedItinerary && (
           <motion.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -185,15 +195,15 @@ function DashboardPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {lang === "pt"
-                    ? `Itinerário para ${tripDays} dias em ${province.name}`
-                    : `Itinerary for ${tripDays} days in ${province.name}`}
+                    ? `${recommendedItinerary.title} · ${recommendedItinerary.durationDays} dias · ${recommendedItinerary.province?.name.pt ?? ""}`
+                    : `${recommendedItinerary.titleEn ?? recommendedItinerary.title} · ${recommendedItinerary.durationDays} days · ${recommendedItinerary.province?.name.en ?? ""}`}
                   {user.preferences?.interests?.length
                     ? `${lang === "pt" ? " · baseado em " : " · based on "}${user.preferences.interests.slice(0, 3).join(", ")}`
                     : ""}
                 </p>
               </div>
               <Button asChild variant="outline" className="gap-2">
-                <Link to="/itineraries">
+                <Link to="/itineraries" search={{ personal: true }}>
                   {lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -215,21 +225,28 @@ function DashboardPage() {
                       {i < daySlices.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
                     </div>
                     <div className="flex-1 pb-4 space-y-1.5">
-                      <p className="text-sm font-semibold">{lang === "pt" ? "Dia" : "Day"} {d.day}</p>
+                      <p className="text-sm font-semibold">
+                        {lang === "pt" ? "Dia" : "Day"} {d.day}
+                        {d.title ? ` — ${d.title}` : ""}
+                      </p>
 
-                      <div className="flex items-start gap-2 text-sm">
-                        <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
-                        <span>{d.morning}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <CloudSun className="size-4 text-orange-500 mt-0.5 shrink-0" />
-                        <span>{d.afternoon}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-sm">
-                        <Moon className="size-4 text-indigo-500 mt-0.5 shrink-0" />
-                        <span>{d.evening}</span>
-                      </div>
+                      {d.stops.length === 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          {lang === "pt" ? "Sem paragens definidas." : "No stops defined."}
+                        </p>
+                      )}
+                      {d.stops.map((stop) => (
+                        <div key={stop.id} className="flex items-start gap-2 text-sm">
+                          {stop.kind === "experience" ? (
+                            <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                          ) : (
+                            <MapPin className="size-4 text-primary mt-0.5 shrink-0" />
+                          )}
+                          <span>{stop.title}</span>
+                        </div>
+                      ))}
                     </div>
+
                   </motion.div>
                 ))}
               </div>

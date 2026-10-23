@@ -1,7 +1,9 @@
-import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthGateProvider } from "@/contexts/AuthGateContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
@@ -29,7 +31,7 @@ function NotFoundComponent() {
   );
 }
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -70,16 +72,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
   return (
+    <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <NotificationsProvider>
-          <FavoritesProvider>
-            <Outlet />
-            <Toaster />
-          </FavoritesProvider>
-        </NotificationsProvider>
+        <AuthGateProvider>
+          <NotificationsProvider>
+            <FavoritesProvider>
+              <Outlet />
+              <Toaster />
+            </FavoritesProvider>
+          </NotificationsProvider>
+        </AuthGateProvider>
       </AuthProvider>
     </LanguageProvider>
+    </QueryClientProvider>
   );
 }

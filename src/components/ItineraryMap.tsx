@@ -1,25 +1,30 @@
-import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { directionsUrls } from "@/lib/visits";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { carRouteUrl } from "@/lib/itinerary-routing";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, CircleMarker, LayersControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Navigation, Loader2, Car, Bike, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Itinerary, ItineraryStop } from "@/data/itineraries";
-import { ITINERARY_STOP_COORDS, DEFAULT_MZ_CENTER } from "@/data/itinerary-coords";
+import type { RouteStop } from "@/lib/routes";
 
 type Mode = "driving" | "cycling" | "walking";
 
-function stopColor(type: ItineraryStop["type"]) {
-  return type === "business" ? "#2563eb" : type === "waypoint" ? "#9333ea" : "#f97316";
+/** Center fallback (approx. Mozambique center) when no stop has coordinates yet. */
+const DEFAULT_MZ_CENTER: [number, number] = [-18.5, 35.5];
+
+function stopColor(kind: RouteStop["kind"]) {
+  return kind === "experience" ? "#2563eb" : kind === "community" ? "#16a34a" : kind === "custom" ? "#64748b" : "#9333ea";
 }
 
-function numberedIcon(n: number, color: string, sponsored?: boolean) {
+function numberedIcon(n: number, color: string) {
   return L.divIcon({
     className: "ekaya-itin-pin",
     html: `<div style="
       width: 34px; height: 34px;
       background:${color};
-      border:3px solid ${sponsored ? "#facc15" : "white"};
+      border:3px solid white;
       border-radius:50%;
       color:white;font-weight:700;font-size:14px;
       display:flex;align-items:center;justify-content:center;
@@ -42,60 +47,76 @@ function FitAll({ points }: { points: [number, number][] }) {
 }
 
 interface Props {
-  itinerary: Itinerary;
+  /** Stops in visiting order; coordinates come from the real destination rows. */
+  stops: RouteStop[];
   lang?: "pt" | "en";
 }
 
-export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
-  const stopsWithCoords = useMemo(() => {
-    return itinerary.route
-      .map((s) => {
-        const key = `${itinerary.id}:${s.id}`;
-        const coord =
-          ITINERARY_STOP_COORDS[key] ??
-          (s.lat != null && s.lng != null ? ([s.lat, s.lng] as [number, number]) : null);
-        return coord ? { stop: s, coord } : null;
-      })
-      .filter((v): v is { stop: ItineraryStop; coord: [number, number] } => v !== null);
-  }, [itinerary]);
+export function ItineraryMap({ stops, lang = "pt" }: Props) {
+  const stopsWithCoords = useMemo(
+    () =>
+      stops
+        .map((stop) => (stop.coords ? { stop, coord: stop.coords } : null))
+        .filter((v): v is { stop: RouteStop; coord: [number, number] } => v !== null),
+    [stops],
+  );
 
-  const points = stopsWithCoords.map((s) => s.coord);
+  const points = useMemo(() => stopsWithCoords.map((s) => s.coord), [stopsWithCoords]);
   const [mode, setMode] = useState<Mode>("driving");
   const [route, setRoute] = useState<[number, number][] | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: number; duration: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+  const request = useRef(0);
+  useEffect(() => {
+    request.current += 1;
+    setRoute(null); setRouteInfo(null); setLoading(false);
+    return () => { request.current += 1; };
+  }, [points]);
 
   async function computeRoute(m: Mode) {
-    if (points.length < 2) return;
+    const url = carRouteUrl(points);
+    if (m !== "driving" || !url) return;
+    const version = ++request.current;
     setLoading(true);
+    setRoute(null); setRouteInfo(null);
     setMode(m);
     try {
-      const profile = m === "driving" ? "driving" : m === "cycling" ? "cycling" : "foot";
-      const coordsStr = points.map(([lat, lng]) => `${lng},${lat}`).join(";");
-      const url = `https://router.project-osrm.org/route/v1/${profile}/${coordsStr}?overview=full&geometries=geojson`;
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error("Routing unavailable");
       const data = await res.json();
+      if (version !== request.current) return;
       if (data.routes?.[0]) {
         const coords: [number, number][] = data.routes[0].geometry.coordinates.map(
           ([lng, lat]: [number, number]) => [lat, lng],
         );
         setRoute(coords);
         setRouteInfo({ distance: data.routes[0].distance, duration: data.routes[0].duration });
-      }
+      } else throw new Error("No route");
     } catch (e) {
-      console.error(e);
+      if (version === request.current) toast.error(lang === "pt" ? "Não foi possível calcular o percurso de carro." : "Could not calculate the driving route.");
     } finally {
-      setLoading(false);
+      if (version === request.current) setLoading(false);
     }
   }
 
   function locateMe() {
-    if (!navigator.geolocation) return;
+    const pt = lang === "pt";
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error(pt ? "Este dispositivo não suporta localização." : "This device doesn't support location.");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => setUserLoc([pos.coords.latitude, pos.coords.longitude]),
-      (err) => console.error(err),
-      { enableHighAccuracy: true },
+      (err) =>
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? pt ? "Permissão recusada. Permite a localização nas definições do browser." : "Permission denied. Allow location in your browser settings."
+            : err.code === err.TIMEOUT
+              ? pt ? "A localização demorou demasiado. Tenta novamente." : "Location timed out. Try again."
+              : pt ? "Localização indisponível." : "Location unavailable.",
+        ),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }
 
@@ -112,29 +133,29 @@ export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <div className="inline-flex rounded-lg border bg-background p-1 shadow-sm">
-          <button
+          <Button variant="ghost" size="sm" disabled={loading || points.length < 2}
             onClick={() => computeRoute("driving")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1 ${mode === "driving" && route ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             <Car className="h-3.5 w-3.5" /> {lang === "pt" ? "Carro" : "Car"}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm" disabled title={lang === "pt" ? "O serviço atual não calcula percursos de bicicleta" : "The current service does not calculate cycling routes"}
             onClick={() => computeRoute("cycling")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1 ${mode === "cycling" && route ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             <Bike className="h-3.5 w-3.5" /> {lang === "pt" ? "Bicicleta" : "Bike"}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm" disabled title={lang === "pt" ? "O serviço atual não calcula percursos a pé" : "The current service does not calculate walking routes"}
             onClick={() => computeRoute("walking")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1 ${mode === "walking" && route ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             <User className="h-3.5 w-3.5" /> {lang === "pt" ? "A pé" : "Walk"}
-          </button>
+          </Button>
         </div>
         <Button variant="outline" size="sm" onClick={locateMe} className="gap-1">
           <Navigation className="h-3.5 w-3.5" /> {lang === "pt" ? "Minha localização" : "My location"}
         </Button>
-        <Button variant="outline" size="sm" onClick={openInGmaps}>
+        <Button variant="outline" size="sm" disabled={points.length === 0} onClick={openInGmaps}>
           {lang === "pt" ? "Abrir no Google Maps" : "Open in Google Maps"}
         </Button>
         {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -144,6 +165,9 @@ export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
           </span>
         )}
       </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        {lang === "pt" ? "Estimativas OSRM apenas para carro. Linha tracejada: ordem das paragens, não um percurso calculado. Bicicleta e a pé: sem cálculo disponível." : "OSRM estimates for driving only. Dashed line: stop order, not a calculated route. Cycling and walking: no calculation available."}
+      </p>
 
       <div className="h-[480px] w-full rounded-xl overflow-hidden border shadow-sm">
         <MapContainer center={center} zoom={11} scrollWheelZoom style={{ height: "100%", width: "100%" }}>
@@ -182,42 +206,28 @@ export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
           )}
 
           {stopsWithCoords.map(({ stop, coord }, i) => (
-            <Marker key={stop.id} position={coord} icon={numberedIcon(i + 1, stopColor(stop.type), stop.sponsored)}>
+            <Marker key={stop.id} position={coord} icon={numberedIcon(i + 1, stopColor(stop.kind))}>
               <Popup>
                 <div style={{ minWidth: 200 }}>
                   <p style={{ fontSize: 10, textTransform: "uppercase", color: "#666", margin: 0, fontWeight: 700 }}>
-                    {stop.type === "business"
-                      ? lang === "pt" ? "Negócio" : "Business"
-                      : stop.type === "waypoint"
-                      ? "Waypoint"
-                      : lang === "pt" ? "História" : "Story"}
+                    {stop.kind === "experience"
+                      ? lang === "pt" ? "Atividade" : "Activity"
+                      : stop.kind === "community"
+                        ? lang === "pt" ? "Experiência comunitária" : "Community experience"
+                        : stop.kind === "custom"
+                          ? lang === "pt" ? "Paragem" : "Stop"
+                          : lang === "pt" ? "Destino" : "Destination"}
                   </p>
-                  <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{stop.name ?? stop.title}</h3>
-                  {stop.description && (
-                    <p style={{ fontSize: 12, color: "#555", margin: "0 0 6px" }}>{stop.description}</p>
+                  <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{lang === "en" && stop.titleEn ? stop.titleEn : stop.title}</h3>
+                  {stop.destinationName && (
+                    <p style={{ fontSize: 12, color: "#555", margin: "0 0 6px" }}>{stop.destinationName}</p>
                   )}
                   <p style={{ fontSize: 10, color: "#888", margin: 0 }}>
                     📍 {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
                   </p>
-                  <button
-                    onClick={() =>
-                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${coord[0]},${coord[1]}`, "_blank")
-                    }
-                    style={{
-                      marginTop: 8,
-                      width: "100%",
-                      padding: "6px 10px",
-                      background: "#f97316",
-                      color: "white",
-                      border: "none",
-                      borderRadius: 6,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    🧭 {lang === "pt" ? "Como chegar" : "Get directions"}
-                  </button>
+                  <p style={{ fontSize: 12, fontWeight: 600, margin: "8px 0 0", display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    🧭 {(() => { const u = directionsUrls(coord); return ([["Google Maps", u.google], ["Waze", u.waze], ["Apple Maps", u.apple]] as const).map(([l, h]) => <a key={l} href={h} target="_blank" rel="noopener noreferrer">{l}</a>); })()}
+                  </p>
                 </div>
               </Popup>
             </Marker>
@@ -225,11 +235,11 @@ export function ItineraryMap({ itinerary, lang = "pt" }: Props) {
         </MapContainer>
       </div>
 
-      {points.length < itinerary.route.length && (
+      {points.length < stops.length && (
         <p className="text-xs text-muted-foreground mt-2">
           {lang === "pt"
-            ? `${itinerary.route.length - points.length} paragem(ns) sem coordenadas GPS.`
-            : `${itinerary.route.length - points.length} stop(s) without GPS coordinates.`}
+            ? `${stops.length - points.length} paragem(ns) sem coordenadas GPS.`
+            : `${stops.length - points.length} stop(s) without GPS coordinates.`}
         </p>
       )}
     </div>
