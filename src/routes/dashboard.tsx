@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -21,6 +22,7 @@ import { useDestinations } from "@/hooks/useDestinations";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
 import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
 import { personalizeRoutes } from "@/lib/routes";
+import { fetchMyVisits } from "@/lib/visits";
 
 import { requireAuthenticatedUser } from "@/lib/auth";
 
@@ -65,13 +67,21 @@ const MODULES: ModuleDef[] = [
 ];
 
 function DashboardPage() {
-  const { user, logout, needsOnboarding } = useAuth();
+  const { user, authUser, logout, needsOnboarding } = useAuth();
   const { t, lang } = useLang();
   const navigate = useNavigate();
   const [showChangeDest, setShowChangeDest] = useState(false);
   const { destinations } = useDestinations();
   const { publicRoutes } = useRouteCatalogue(null);
   const personalPrefs = usePersonalPrefs();
+  const userId = authUser?.id ?? null;
+  // Visited count comes from destination_visits (RLS: own rows only), keyed by user identity.
+  const visits = useQuery({
+    queryKey: ["destination-visits", userId],
+    queryFn: () => fetchMyVisits(userId as string),
+    enabled: !!userId,
+  });
+  const visitedValue = visits.isError ? "—" : visits.data ? visits.data.size : "…";
 
 
   if (!user) return null;
@@ -156,9 +166,8 @@ function DashboardPage() {
 
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <Stat label={t("visited")} value={user.visitedPlaces} />
-                <Stat label={t("km")} value={user.kmExplored} />
+              <div className="grid gap-4 text-center">
+                <Stat label={t("visited")} value={visitedValue} />
               </div>
             </div>
           </Card>
@@ -292,7 +301,7 @@ function DashboardPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-xl bg-white/15 backdrop-blur px-3 py-2 min-w-[70px]">
       <p className="text-2xl font-bold">{value}</p>
