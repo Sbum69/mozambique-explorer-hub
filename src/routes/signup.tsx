@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
+import { getAuthenticatedUser, postAuthTarget, validateAuthReturnSearch } from "@/lib/auth";
 
 export const Route = createFileRoute("/signup")({
   ssr: false,
-  beforeLoad: async () => {
+  validateSearch: validateAuthReturnSearch,
+  beforeLoad: async ({ search }) => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: await postAuthTarget(user.id) });
+    if (user) throw redirect({ to: search.redirect ?? (await postAuthTarget(user.id)) });
   },
   head: () => ({
     meta: [
@@ -38,6 +39,8 @@ interface FieldErrors {
 function SignupPage() {
   const { registerUser } = useAuth();
   const navigate = useNavigate();
+  const { redirect: returnTo } = Route.useSearch();
+  const loginSearch = returnTo ? { redirect: returnTo } : {};
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
@@ -80,13 +83,13 @@ function SignupPage() {
 
     setSuccess(true);
     setNeedsConfirmation(!!res.needsConfirmation);
-    if (!res.needsConfirmation) setTimeout(() => navigate({ to: "/onboarding" }), 1500);
+    if (!res.needsConfirmation) setTimeout(() => navigate({ to: returnTo ?? "/onboarding" }), 1500);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-orange-50 via-background to-blue-50">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-        <Link to="/login" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link to="/login" search={loginSearch} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="size-4" /> Voltar
         </Link>
         <Card className="p-8 shadow-xl border-0">
@@ -114,7 +117,7 @@ function SignupPage() {
                     : "A preparar a tua experiência… vamos personalizar a tua viagem."}
                 </p>
                 {needsConfirmation && (
-                  <Link to="/login" className="mt-6 inline-flex font-semibold text-primary hover:underline">
+                  <Link to="/login" search={loginSearch} className="mt-6 inline-flex font-semibold text-primary hover:underline">
                     Voltar ao login
                   </Link>
                 )}
@@ -181,7 +184,7 @@ function SignupPage() {
 
                 <p className="text-center text-sm text-muted-foreground mt-6">
                   Já tens conta?{" "}
-                  <Link to="/login" className="text-orange-600 font-semibold hover:underline">Entrar</Link>
+                  <Link to="/login" search={loginSearch} className="text-orange-600 font-semibold hover:underline">Entrar</Link>
                 </p>
               </motion.div>
             )}

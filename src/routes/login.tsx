@@ -13,13 +13,14 @@ import { toast } from "sonner";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 
 import hero from "@/assets/hero-mozambique.jpg";
-import { getAuthenticatedUser, roleLandingTarget } from "@/lib/auth";
+import { getAuthenticatedUser, roleLandingTarget, validateAuthReturnSearch } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
-  beforeLoad: async () => {
+  validateSearch: validateAuthReturnSearch,
+  beforeLoad: async ({ search }) => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: await roleLandingTarget(user.id) });
+    if (user) throw redirect({ to: search.redirect ?? (await roleLandingTarget(user.id)) });
   },
   head: () => ({
     meta: [
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { redirect: returnTo } = Route.useSearch();
   const { login, loginAsGuest } = useAuth();
   const { t } = useLang();
   const [email, setEmail] = useState("");
@@ -57,6 +59,7 @@ function LoginPage() {
     setUnconfirmed(false);
     toast.success(t("welcomeBack"));
     const authenticated = await getAuthenticatedUser();
+    if (authenticated && returnTo) return navigate({ to: returnTo });
     navigate({ to: authenticated ? await roleLandingTarget(authenticated.id) : "/home" });
   };
 
