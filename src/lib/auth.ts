@@ -4,6 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AppRole = "tourist" | "business_small" | "business_large" | "admin";
 
+/** Internal pages login/signup may return to. A whitelist, so `?redirect=` can never point elsewhere. */
+export const AUTH_RETURN_PATHS = ["/business-register"] as const;
+export type AuthReturnPath = (typeof AUTH_RETURN_PATHS)[number];
+
+export function parseAuthReturn(value: unknown): AuthReturnPath | undefined {
+  return AUTH_RETURN_PATHS.find((path) => path === value);
+}
+
+/** Search schema shared by /login and /signup. */
+export function validateAuthReturnSearch(search: Record<string, unknown>): {
+  redirect?: AuthReturnPath;
+} {
+  const target = parseAuthReturn(search.redirect);
+  return target ? { redirect: target } : {};
+}
+
 export async function getAuthenticatedUser() {
   const { data, error } = await supabase.auth.getUser();
   return error ? null : data.user;
