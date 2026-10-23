@@ -53,6 +53,24 @@ or an offline cache; do not rely on the app being available offline.
 - Access to a Supabase project with the schema, database functions, Storage buckets, and Auth
   settings expected by the application.
 
+On Ubuntu and other Linux distributions, install Bun using its official installer (it is not
+available in the default Ubuntu `apt` repositories):
+
+```sh
+curl -fsSL https://bun.sh/install | bash
+```
+
+Open a new terminal, or reload your Bash configuration, then verify the installation:
+
+```sh
+source ~/.bashrc
+bun --version
+```
+
+If the installer reports that `unzip` is missing, install it with `sudo apt install unzip` and run
+the Bun installer again. See the [official Bun installation guide](https://bun.sh/docs/installation)
+for other operating systems and shells.
+
 ### Install and run locally
 
 ```sh
