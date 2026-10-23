@@ -65,27 +65,3 @@ export const TREASURE_STOPS_BY_GAME: Record<string, TreasureStop[]> = {
 export function getTreasureStops(gameId: string): TreasureStop[] {
   return TREASURE_STOPS_BY_GAME[gameId] ?? [...STORY_STOPS, ...NEIGHBOURHOOD_STOPS, ...BEACH_STOPS];
 }
-
-const KEY = "ekaya.treasure.stops";
-
-export function getCheckedStops(gameId: string): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(KEY);
-    const all = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
-    return all[gameId] ?? [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveCheckedStops(gameId: string, ids: string[]) {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const all = raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
-    all[gameId] = ids;
-    localStorage.setItem(KEY, JSON.stringify(all));
-  } catch {
-    /* ignore */
-  }
-}

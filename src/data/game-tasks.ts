@@ -49,33 +49,3 @@ export const GAME_TASKS: Record<string, GameTask> = {
 export function getGameTask(gameId: string): GameTask {
   return GAME_TASKS[gameId] ?? {};
 }
-
-const KEY = "ekaya.game.logs";
-
-export interface GameLogEntry {
-  gameId: string;
-  at: string;
-  label: string;
-}
-
-export function getGameLogs(gameId: string): GameLogEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(KEY);
-    const all = raw ? (JSON.parse(raw) as Record<string, GameLogEntry[]>) : {};
-    return all[gameId] ?? [];
-  } catch {
-    return [];
-  }
-}
-
-export function addGameLog(gameId: string, label: string) {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const all = raw ? (JSON.parse(raw) as Record<string, GameLogEntry[]>) : {};
-    all[gameId] = [...(all[gameId] ?? []), { gameId, at: new Date().toISOString(), label }];
-    localStorage.setItem(KEY, JSON.stringify(all));
-  } catch {
-    /* ignore */
-  }
-}

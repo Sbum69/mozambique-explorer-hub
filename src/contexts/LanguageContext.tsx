@@ -4,6 +4,15 @@ export type Lang = "pt" | "en";
 
 const dict = {
   confirmEmailFirst: { pt: "O teu email ainda não foi confirmado. Abre a ligação que te enviámos ou pede uma nova.", en: "Your email is not confirmed yet. Open the link we sent you or request a new one." },
+  accountLoadErrorTitle: {
+    pt: "Não foi possível carregar a tua conta",
+    en: "We couldn't load your account",
+  },
+  accountLoadError: {
+    pt: "Não conseguimos ler o teu perfil e permissões. Verifica a ligação e tenta novamente.",
+    en: "We couldn't read your profile and permissions. Check your connection and try again.",
+  },
+  retry: { pt: "Tentar novamente", en: "Try again" },
   // generic
   appName: { pt: "Ekaya Explore", en: "Ekaya Explore" },
   tagline: {
@@ -66,7 +75,6 @@ const dict = {
   xp: { pt: "XP", en: "XP" },
   visited: { pt: "Visitados", en: "Visited" },
   itineraries: { pt: "Roteiros", en: "Itineraries" },
-  km: { pt: "KM", en: "KM" },
   modules: { pt: "Módulos", en: "Modules" },
   logout: { pt: "Sair", en: "Sign out" },
   // module names
