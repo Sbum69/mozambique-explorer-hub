@@ -106,8 +106,6 @@ const CATEGORIES: Category[] = [
     icon: Info,
     pills: [
       { label: l("Nível", "Level"), value: l("Moderado", "Moderate") },
-      { label: l("Polícia", "Police"), value: same("119") },
-      { label: l("Médica", "Medical"), value: same("117 / 112") },
     ],
     subs: [
       {
@@ -125,7 +123,7 @@ const CATEGORIES: Category[] = [
         title: l("Números de emergência", "Emergency numbers"),
         items: [
           l("Polícia: 119", "Police: 119"),
-          l("Emergência médica: 117 / 112", "Medical emergency: 117 / 112"),
+          l("Emergência médica: 117", "Medical emergency: 117"),
           l("Bombeiros: 198", "Fire brigade: 198"),
         ],
       },
