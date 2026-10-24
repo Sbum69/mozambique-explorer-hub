@@ -18,7 +18,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { useLang } from "@/contexts/LanguageContext";
-import { cancelMyBooking, fetchMyBookings, type Booking, type BookingStatus } from "@/lib/bookings";
+import { bookingReasonText, cancelMyBooking, fetchMyBookings, type Booking, type BookingStatus } from "@/lib/bookings";
 import { requireAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/bookings")({
@@ -43,6 +43,7 @@ const STATUS_STYLE: Record<BookingStatus, { pt: string; en: string; className: s
   rejected: { pt: "Rejeitada", en: "Rejected", className: "bg-rose-100 text-rose-700" },
   cancelled: { pt: "Cancelada", en: "Cancelled", className: "bg-muted text-muted-foreground" },
   completed: { pt: "Concluída", en: "Completed", className: "bg-blue-100 text-blue-700" },
+  no_show: { pt: "Não compareceu", en: "No-show", className: "bg-orange-100 text-orange-700" },
 };
 
 type TabId = "all" | "pending" | "confirmed" | "closed";
@@ -51,7 +52,7 @@ const TABS: { id: TabId; pt: string; en: string; match: (s: BookingStatus) => bo
   { id: "all", pt: "Todas", en: "All", match: () => true },
   { id: "pending", pt: "Pendentes", en: "Pending", match: (s) => s === "pending" },
   { id: "confirmed", pt: "Confirmadas", en: "Confirmed", match: (s) => s === "confirmed" },
-  { id: "closed", pt: "Concluídas / Rejeitadas", en: "Completed / Rejected", match: (s) => s === "completed" || s === "rejected" },
+  { id: "closed", pt: "Encerradas", en: "Closed", match: (s) => s === "completed" || s === "rejected" || s === "cancelled" || s === "no_show" },
 ];
 
 function BookingsPage() {
@@ -268,7 +269,7 @@ function BookingsPage() {
                 <p className="text-xs text-muted-foreground">{pt ? "Esta reserva foi rejeitada pelo anfitrião." : "This booking was rejected by the host."}</p>
               )}
               {open.decisionReason && (
-                <p className="text-xs text-muted-foreground">{pt ? "Motivo: " : "Reason: "}{open.decisionReason}</p>
+                <p className="text-xs text-muted-foreground">{pt ? "Motivo: " : "Reason: "}{bookingReasonText(open.decisionReason, lang)}</p>
               )}
               {open.status === "confirmed" && (
                 <p className="text-xs text-muted-foreground">{pt ? "Reservas confirmadas não podem ser canceladas aqui. Contacta o negócio." : "Confirmed bookings can't be cancelled here. Contact the business."}</p>

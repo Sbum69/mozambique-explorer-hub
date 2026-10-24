@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type BookingStatus = "pending" | "confirmed" | "completed" | "rejected" | "cancelled";
+export type BookingStatus = "pending" | "confirmed" | "completed" | "rejected" | "cancelled" | "no_show";
 
 export interface ImpactStats {
   generated_at: string;
@@ -13,7 +13,8 @@ export interface ImpactStats {
     public_routes: number;
     accounts: number;
     bookings_total: number;
-    bookings_by_status: Record<BookingStatus, number>;
+    /** no_show is only returned once migration 0037 is applied. */
+    bookings_by_status: Record<Exclude<BookingStatus, "no_show">, number> & { no_show?: number };
     activities_by_province: Record<string, number>;
   };
   verified: {

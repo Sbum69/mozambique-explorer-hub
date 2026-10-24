@@ -1,7 +1,27 @@
 import { supabase } from "@/integrations/supabase/client";
 import { IMAGE_BY_SLUG } from "@/lib/destinations";
 
-export type BookingStatus = "pending" | "confirmed" | "rejected" | "cancelled" | "completed";
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "rejected"
+  | "cancelled"
+  | "completed"
+  | "no_show";
+
+/** Reason stored by the scheduled expiry of pending bookings whose start has passed. */
+export const AUTO_EXPIRED_REASON = "AUTO_EXPIRED";
+
+/** Human text for a booking's decision reason; system codes are translated, free text is kept. */
+export function bookingReasonText(reason: string | null, lang: "pt" | "en"): string | null {
+  if (!reason) return null;
+  if (reason === AUTO_EXPIRED_REASON) {
+    return lang === "pt"
+      ? "Expirou sem resposta do negócio antes da data."
+      : "Expired without an answer from the business before the date.";
+  }
+  return reason;
+}
 
 export interface Booking {
   id: string;
@@ -227,13 +247,13 @@ export async function fetchBusinessBookings(): Promise<Booking[]> {
 
 /**
  * Decisão da empresa sobre uma reserva, validada de forma atómica no servidor:
- * confirmar/rejeitar uma pendente, cancelar uma confirmada ou concluí-la após a
- * data/hora. Rejeição e cancelamento exigem motivo (guardado na reserva e
- * incluído na notificação do turista pelo trigger da base de dados).
+ * confirmar/rejeitar uma pendente, cancelar uma confirmada, concluí-la ou marcá-la
+ * como não comparência após a data/hora. Rejeição e cancelamento exigem motivo
+ * (guardado na reserva e incluído na notificação do turista pelo trigger da base de dados).
  */
 export async function decideBooking(
   id: string,
-  decision: "confirmed" | "rejected" | "cancelled" | "completed",
+  decision: "confirmed" | "rejected" | "cancelled" | "completed" | "no_show",
   reason?: string,
 ): Promise<void> {
   const { error } = await supabase.rpc("business_decide_booking", {
