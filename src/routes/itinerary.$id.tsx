@@ -57,6 +57,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { Camera, Users, Image as ImageIcon } from "lucide-react";
+import { LOCATION_PROMPT_TEXT, PROOF_STATUS_LABEL, requestPreciseLocation } from "@/lib/geo";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/itinerary/$id")({
@@ -232,15 +233,20 @@ function ItineraryDetailPage() {
     setProofSaving(true);
     try {
       const path = await uploadStopProof(userId, proofFile);
-      // optional GPS — never blocks completion, never stored elsewhere
-      const pos = await new Promise<GeolocationPosition | null>((resolve) => {
-        if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
-        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 5000, maximumAge: 60000 });
-      });
-      await toggleStopCompleted(progress.id, proofStop.id, true, { photoPath: path, lat: pos?.coords.latitude ?? null, lng: pos?.coords.longitude ?? null });
+      // Location is only sent to the server's distance check; refusing it leaves the proof pending.
+      const location = await requestPreciseLocation();
+      const result = await toggleStopCompleted(progress.id, proofStop.id, true, { photoPath: path, location });
       await refreshProgress();
       setProofStop(null);
-      toast.success(lang === "pt" ? "Paragem concluída com prova fotográfica!" : "Stop completed with photo proof!");
+      if (result?.review_status === "verified") {
+        toast.success(lang === "pt" ? "Paragem concluída e prova verificada!" : "Stop completed and proof verified!");
+      } else {
+        toast.success(
+          lang === "pt"
+            ? "Prova enviada. Fica pendente de verificação; os pontos são atribuídos quando for aprovada."
+            : "Proof sent. It is pending verification; points are awarded once it is approved.",
+        );
+      }
     } catch (e) {
       const m = e instanceof Error ? e.message : "";
       toast.error(m === "too_large" ? (lang === "pt" ? "Máximo 8 MB." : "Max 8 MB.") : m === "invalid_type" ? (lang === "pt" ? "Escolhe uma imagem." : "Choose an image.") : (lang === "pt" ? "Não foi possível guardar a prova." : "Could not save the proof."));
@@ -509,6 +515,11 @@ function ItineraryDetailPage() {
                                   <ImageIcon className="size-4 mr-1" />{lang === "pt" ? "Ver prova" : "View proof"}
                                 </Button>
                               )}
+                              {progress?.proofStatus[stop.id] && (
+                                <Badge variant={progress.proofStatus[stop.id] === "rejected" ? "destructive" : progress.proofStatus[stop.id] === "pending" ? "secondary" : "default"}>
+                                  {lang === "pt" ? "Prova: " : "Proof: "}{PROOF_STATUS_LABEL[progress.proofStatus[stop.id]][lang]}
+                                </Badge>
+                              )}
                             </div>
                           </div>
                           <Button variant="ghost" size="icon" disabled={busy || proofSaving || progressLoading || progressError}
@@ -644,6 +655,10 @@ function ItineraryDetailPage() {
             <span>{proofFile ? proofFile.name : lang === "pt" ? "Tirar / escolher fotografia" : "Take / choose photo"}</span>
             <input type="file" accept="image/*" capture="environment" className="sr-only" aria-label={lang === "pt" ? "Fotografia da paragem" : "Stop photo"} onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
           </label>
+          <p className="flex gap-2 text-xs text-muted-foreground">
+            <MapPin className="size-4 shrink-0" />
+            {LOCATION_PROMPT_TEXT[lang]}
+          </p>
           <Button onClick={() => void saveProof()} disabled={!proofFile || proofSaving} className="w-full">
             {proofSaving && <Loader2 className="size-4 animate-spin mr-2" />}
             {lang === "pt" ? "Guardar e concluir" : "Save and complete"}

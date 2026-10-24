@@ -267,6 +267,13 @@
       "when": 1792818573343,
       "tag": "0037_commercial_flow_8e5",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792821209298,
+      "tag": "0038_rewards_and_located_proofs",
+      "breakpoints": true
     }
   ]
 }

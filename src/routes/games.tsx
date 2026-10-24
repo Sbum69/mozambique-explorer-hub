@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast as sonner } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLang } from "@/contexts/LanguageContext";
+import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import {
   fetchAchievements, isUnlocked, submitGameStep, uploadGameProof, startQuiz, answerQuiz, finishQuiz,
   gameErrorText, BADGES, badgeStatus, type GameState, type QuizQuestion, type StepResult,
@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
 import { TreasureStopPicker } from "@/components/TreasureStopPicker";
 import { getGameTask } from "@/data/game-tasks";
+import { LOCATION_PROMPT_TEXT, requestPreciseLocation } from "@/lib/geo";
 import {
   ExperienceTask, ItineraryTask, TimeOfDayTask, EventTask, ShareTask, WordTask,
 } from "@/components/GameTaskFields";
@@ -83,34 +84,37 @@ const COLOR_MAP: Record<string, string> = {
   social: "from-teal-500 to-green-600",
 };
 
-const INITIAL_GAMES: Game[] = [
+/** Game texts (title, description, badge, detail) live in the PT/EN dictionary: gameTitle_<id> etc. */
+type GameBase = Omit<Game, "title" | "description" | "badge" | "detail">;
+
+const INITIAL_GAMES: GameBase[] = [
   // Tesouro
-  { id: "g1", title: "Explorador de Story Stops", description: "Visita 5 Story Stops na cidade.", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 150, difficulty: "medium", status: "in_progress", progress: 2, total: 5, badge: "Caçador de Tesouros", action: "Continuar", detail: "Cada Story Stop revela uma história única do local. Visita pelo menos 5 para completar." },
-  { id: "g2", title: "Bairro Completo", description: "Descobre todos os pontos de um bairro.", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 200, difficulty: "hard", status: "available", progress: 0, total: 8, badge: "Explorador Urbano", action: "Começar", detail: "Visita os 8 pontos marcados num bairro à tua escolha." },
-  { id: "g3", title: "Rota das Praias", description: "Conhece 3 praias diferentes.", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 180, difficulty: "medium", status: "available", progress: 0, total: 3, badge: "Explorador de Praias", action: "Começar", detail: "Visita 3 praias distintas em Moçambique e regista a tua presença." },
-  { id: "g4", title: "Aventura na Ilha", description: "Explora um arquipélago completo.", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 250, difficulty: "hard", status: "locked", progress: 0, total: 4, badge: "Insular", action: "Bloqueado", detail: "Desbloqueia após completar 'Rota das Praias'." },
+  { id: "g1", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 150, difficulty: "medium", status: "in_progress", progress: 2, total: 5, action: "Continuar" },
+  { id: "g2", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 200, difficulty: "hard", status: "available", progress: 0, total: 8, action: "Começar" },
+  { id: "g3", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 180, difficulty: "medium", status: "available", progress: 0, total: 3, action: "Começar" },
+  { id: "g4", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 250, difficulty: "hard", status: "locked", progress: 0, total: 4, action: "Bloqueado" },
   // Foto
-  { id: "g5", title: "Foto com História", description: "Tira fotos a 3 locais históricos.", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 100, difficulty: "easy", status: "in_progress", progress: 1, total: 3, badge: "Fotógrafo Cultural", action: "Continuar", detail: "Documenta locais com importância histórica." },
-  { id: "g6", title: "Sabores de Moçambique", description: "Fotografa 3 pratos típicos.", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 120, difficulty: "easy", status: "available", progress: 0, total: 3, badge: "Foodie", action: "Começar", detail: "Matapa, caril de caranguejo, frango à zambeziana..." },
-  { id: "g7", title: "Cores da Comunidade", description: "Captura 4 momentos comunitários.", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 140, difficulty: "medium", status: "available", progress: 0, total: 4, badge: "Olhar Atento", action: "Começar", detail: "Sempre com permissão das pessoas fotografadas." },
-  { id: "g8", title: "Retrato de Artesão", description: "Conhece e fotografa um artesão.", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 90, difficulty: "easy", status: "available", progress: 0, total: 1, badge: "Embaixador", action: "Começar", detail: "Pede sempre permissão e oferece uma cópia da foto." },
+  { id: "g5", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 100, difficulty: "easy", status: "in_progress", progress: 1, total: 3, action: "Continuar" },
+  { id: "g6", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 120, difficulty: "easy", status: "available", progress: 0, total: 3, action: "Começar" },
+  { id: "g7", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 140, difficulty: "medium", status: "available", progress: 0, total: 4, action: "Começar" },
+  { id: "g8", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 90, difficulty: "easy", status: "available", progress: 0, total: 1, action: "Começar" },
   // Experiência
-  { id: "g9", title: "Amigo da Comunidade", description: "Participa numa experiência comunitária.", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 200, difficulty: "medium", status: "available", progress: 0, total: 1, badge: "Amigo da Comunidade", action: "Começar", detail: "Reserva uma experiência local através da plataforma." },
-  { id: "g10", title: "Mercado Vivo", description: "Compra algo direto a um produtor local.", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 130, difficulty: "easy", status: "in_progress", progress: 0, total: 1, badge: "Apoio Local", action: "Continuar", detail: "Visita um mercado tradicional e apoia produtores locais." },
-  { id: "g11", title: "Aprende uma Palavra", description: "Aprende 3 palavras em línguas locais.", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 80, difficulty: "easy", status: "available", progress: 0, total: 3, badge: "Poliglota Local", action: "Começar", detail: "Escreve a palavra que aprendeste para registar a conquista.", special: "aprende-palavra" },
-  { id: "g12", title: "Saída de Pesca", description: "Participa numa pescaria tradicional.", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 220, difficulty: "hard", status: "locked", progress: 0, total: 1, badge: "Pescador", action: "Bloqueado", detail: "Desbloqueia após 'Amigo da Comunidade'." },
+  { id: "g9", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 200, difficulty: "medium", status: "available", progress: 0, total: 1, action: "Começar" },
+  { id: "g10", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 130, difficulty: "easy", status: "in_progress", progress: 0, total: 1, action: "Continuar" },
+  { id: "g11", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 80, difficulty: "easy", status: "available", progress: 0, total: 3, action: "Começar", special: "aprende-palavra" },
+  { id: "g12", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 220, difficulty: "hard", status: "locked", progress: 0, total: 1, action: "Bloqueado" },
   // Conhecimento
-  { id: "g13", title: "Quiz do Destino", description: "Responde a 7 perguntas sobre Moçambique.", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 50, difficulty: "medium", status: "available", progress: 0, total: 5, badge: "Historiador", action: "Jogar Quiz", detail: "Quiz com 10 perguntas embaralhadas, 7 por sessão.", special: "quiz" },
-  { id: "g14", title: "Curiosidades de Moçambique", description: "Descobre factos surpreendentes.", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 60, difficulty: "easy", status: "available", progress: 0, total: 5, badge: "Curioso", action: "Jogar Quiz", detail: "Quiz curto com factos surpreendentes.", special: "quiz" },
-  { id: "g15", title: "Mestre das Línguas", description: "Aprende vocabulário avançado.", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 70, difficulty: "hard", status: "locked", progress: 0, total: 5, badge: "Linguista", action: "Bloqueado", detail: "Desbloqueia após 'Aprende uma Palavra'." },
+  { id: "g13", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 50, difficulty: "medium", status: "available", progress: 0, total: 5, action: "Jogar Quiz", special: "quiz" },
+  { id: "g14", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 60, difficulty: "easy", status: "available", progress: 0, total: 5, action: "Jogar Quiz", special: "quiz" },
+  { id: "g15", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 70, difficulty: "hard", status: "locked", progress: 0, total: 5, action: "Bloqueado" },
   // Tempo
-  { id: "g16", title: "Roteiro Completo", description: "Completa um roteiro de 6 paragens.", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 300, difficulty: "hard", status: "available", progress: 0, total: 6, badge: "Mestre dos Roteiros", action: "Começar", detail: "Conclui todas as paragens no tempo previsto." },
-  { id: "g17", title: "Do Nascer ao Pôr-do-Sol", description: "Captura amanhecer e entardecer.", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 160, difficulty: "medium", status: "available", progress: 0, total: 2, badge: "Madrugador", action: "Começar", detail: "Regista dois momentos do mesmo dia." },
-  { id: "g18", title: "Maratona Cultural", description: "3 eventos culturais em 7 dias.", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 240, difficulty: "hard", status: "locked", progress: 0, total: 3, badge: "Maratonista Cultural", action: "Bloqueado", detail: "Desbloqueia após completar um 'Roteiro Completo'." },
+  { id: "g16", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 300, difficulty: "hard", status: "available", progress: 0, total: 6, action: "Começar" },
+  { id: "g17", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 160, difficulty: "medium", status: "available", progress: 0, total: 2, action: "Começar" },
+  { id: "g18", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 240, difficulty: "hard", status: "locked", progress: 0, total: 3, action: "Bloqueado" },
   // Social
-  { id: "g19", title: "Leva Alguém Contigo", description: "Convida amigo a explorar.", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 100, difficulty: "easy", status: "available", progress: 0, total: 1, badge: "Companheiro", action: "Começar", detail: "Partilha um roteiro com alguém e visita juntos." },
-  { id: "g20", title: "Conta a Tua História", description: "Escreve 3 notas sobre lugares.", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 90, difficulty: "easy", status: "in_progress", progress: 1, total: 3, badge: "Contador de Histórias", action: "Continuar", detail: "Escreve a tua nota para um lugar visitado.", special: "conta-historia" },
-  { id: "g21", title: "Embaixador Ekaya", description: "Partilha 2 conquistas.", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 250, difficulty: "medium", status: "available", progress: 0, total: 2, badge: "Embaixador", action: "Começar", detail: "Partilha conquistas e ajuda outros viajantes." },
+  { id: "g19", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 100, difficulty: "easy", status: "available", progress: 0, total: 1, action: "Começar" },
+  { id: "g20", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 90, difficulty: "easy", status: "in_progress", progress: 1, total: 3, action: "Continuar", special: "conta-historia" },
+  { id: "g21", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 250, difficulty: "medium", status: "available", progress: 0, total: 2, action: "Começar" },
 ];
 
 const DIFF_BADGE: Record<Difficulty, { label: string; cls: string }> = {
@@ -119,7 +123,12 @@ const DIFF_BADGE: Record<Difficulty, { label: string; cls: string }> = {
   hard: { label: "Difícil", cls: "bg-red-100 text-red-700 border-red-200" },
 };
 
-function applyState(base: Game[], state: GameState | undefined): Game[] {
+function localizeGame(g: GameBase, t: (key: DictKey) => string): Game {
+  const text = (kind: "Title" | "Desc" | "Badge" | "Detail") => t(`game${kind}_${g.id}` as DictKey);
+  return { ...g, title: text("Title"), description: text("Desc"), badge: text("Badge"), detail: text("Detail") };
+}
+
+function applyState(base: GameBase[], state: GameState | undefined): GameBase[] {
   if (!state) return base;
   const byKey = new Map(state.catalog.map((c) => [c.key, c]));
   return base.flatMap((g) => {
@@ -136,7 +145,7 @@ function GamesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { authUser } = useAuth();
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const pt = lang === "pt";
   const uid = authUser?.id;
   const q = useQuery({ queryKey: ["achievements", uid], queryFn: fetchAchievements, enabled: !!uid });
@@ -145,7 +154,7 @@ function GamesPage() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [quizGame, setQuizGame] = useState<Game | null>(null);
 
-  const games = useMemo(() => applyState(INITIAL_GAMES, q.data?.state), [q.data]);
+  const games = useMemo(() => applyState(INITIAL_GAMES, q.data?.state).map((g) => localizeGame(g, t)), [q.data, t]);
   const filteredGames = useMemo(
     () => (activeCategory === "all" ? games : games.filter((g) => g.category === activeCategory)),
     [games, activeCategory]
@@ -416,11 +425,12 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
     setSaving(true); setSaveErr(null);
     try {
       const proofPath = requiresPhoto && photo ? await uploadGameProof(userId, photo) : null;
+      const location = proofPath ? await requestPreciseLocation() : null;
       const stepRef = isTreasure ? selectedStop : task.timeOfDay && timeOfDay ? timeOfDay.moment : null;
       const details: Record<string, string> = {};
       for (const [k, v] of Object.entries(labels)) if (v) details[k] = v.slice(0, 200);
       if (note.trim()) details.note = note.trim().slice(0, 1000);
-      const r = await submitGameStep(game.id, stepRef, proofPath, details);
+      const r = await submitGameStep(game.id, stepRef, proofPath, details, location);
       setSuccess(r);
       onSaved(r);
       setTimeout(onClose, 1500);
@@ -567,7 +577,16 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
               )}
 
               {requiresPhoto && (!isTreasure || selectedStop) && (
-                <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
+                <>
+                  <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
+                  <p className="flex gap-2 text-xs text-muted-foreground">
+                    <MapPin className="size-4 shrink-0" />
+                    {LOCATION_PROMPT_TEXT[lang]}{" "}
+                    {pt
+                      ? "Os desafios ainda não têm locais de referência, por isso a prova fica registada como não verificada, sem afetar os pontos."
+                      : "Challenges have no reference places yet, so the proof is recorded as unverified, without affecting points."}
+                  </p>
+                </>
               )}
 
               {saveErr && <p className="text-sm text-destructive">{saveErr}</p>}

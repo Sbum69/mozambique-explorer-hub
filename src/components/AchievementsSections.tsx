@@ -145,6 +145,11 @@ export function RewardsSection() {
                   <li key={r.id} className="rounded-xl border p-4 flex flex-col gap-2">
                     <p className="font-semibold">{title}</p>
                     {desc && <p className="text-xs text-muted-foreground">{desc}</p>}
+                    {(() => {
+                      const biz = r.businesses as { name: string } | null;
+                      const parts = [biz?.name, r.valid_until ? `${pt ? "Válida até" : "Valid until"} ${r.valid_until}` : null].filter(Boolean);
+                      return parts.length ? <p className="text-xs text-muted-foreground">{parts.join(" · ")}</p> : null;
+                    })()}
                     <div className="flex items-center justify-between mt-auto">
                       <span className="text-sm font-semibold text-primary">{r.cost_points} {pt ? "pontos" : "points"}</span>
                       <Button size="sm" disabled={soldOut || balance < r.cost_points || busy === r.id} onClick={() => redeem(r.id)}>

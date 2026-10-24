@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { PreciseLocation, ProofReviewStatus } from "@/lib/geo";
 import { IMAGE_BY_SLUG } from "@/lib/destinations";
 import { validMapCoordinate } from "@/lib/itinerary-routing";
 import type { Json } from "@/integrations/supabase/types";
@@ -534,6 +535,8 @@ export interface RouteProgress {
   completedStopIds: string[];
   /** route_stop_id -> private photo path */
   proofPaths: Record<string, string>;
+  /** Verification state of each stop proof (verified, pending, approved, rejected). */
+  proofStatus: Record<string, ProofReviewStatus>;
 }
 
 function mapProgress(row: {
@@ -543,7 +546,7 @@ function mapProgress(row: {
   status: string;
   started_at: string;
   completed_at: string | null;
-  route_stop_progress: { route_stop_id: string; photo_path: string | null }[] | null;
+  route_stop_progress: { route_stop_id: string; photo_path: string | null; review_status: string }[] | null;
 }): RouteProgress {
   return {
     id: row.id,
@@ -554,11 +557,12 @@ function mapProgress(row: {
     completedAt: row.completed_at,
     completedStopIds: (row.route_stop_progress ?? []).map((s) => s.route_stop_id),
     proofPaths: Object.fromEntries((row.route_stop_progress ?? []).filter((s) => s.photo_path).map((s) => [s.route_stop_id, s.photo_path as string])),
+    proofStatus: Object.fromEntries((row.route_stop_progress ?? []).map((s) => [s.route_stop_id, s.review_status as ProofReviewStatus])),
   };
 }
 
 const PROGRESS_SELECT =
-  "id, route_id, current_day, status, started_at, completed_at, route_stop_progress(route_stop_id, photo_path)";
+  "id, route_id, current_day, status, started_at, completed_at, route_stop_progress(route_stop_id, photo_path, review_status)";
 
 export async function fetchRouteProgress(routeId: string, userId: string): Promise<RouteProgress | null> {
   const { data, error } = await supabase
@@ -605,18 +609,35 @@ export async function proofUrl(path: string): Promise<string | null> {
   return data?.signedUrl ?? null;
 }
 
+export interface StopProofResult {
+  review_status: ProofReviewStatus;
+  location_verified: boolean | null;
+  distance_m: number | null;
+  accuracy_m: number | null;
+}
+
+/**
+ * Completing a stop sends the photo and, when the tourist allows it, the current position to the
+ * server, which checks the distance to the stop and stores only the result (never the coordinates).
+ */
 export async function toggleStopCompleted(
   progressId: string,
   stopId: string,
   completed: boolean,
-  proof?: { photoPath: string; lat?: number | null; lng?: number | null },
-) {
+  proof?: { photoPath: string; location: PreciseLocation | null },
+): Promise<StopProofResult | null> {
   if (completed) {
     if (!proof?.photoPath) throw new Error("PHOTO_REQUIRED");
-    const { error } = await supabase
-      .from("route_stop_progress")
-      .insert({ progress_id: progressId, route_stop_id: stopId, photo_path: proof.photoPath, lat: proof.lat ?? null, lng: proof.lng ?? null });
-    if (error && !/duplicate key/i.test(error.message)) throw new Error(error.message);
+    const { data, error } = await supabase.rpc("submit_stop_proof", {
+      _progress_id: progressId,
+      _route_stop_id: stopId,
+      _photo_path: proof.photoPath,
+      _lat: proof.location?.lat,
+      _lng: proof.location?.lng,
+      _accuracy_m: proof.location?.accuracy,
+    });
+    if (error) throw new Error(error.message);
+    return data as unknown as StopProofResult;
   } else {
     const { error } = await supabase
       .from("route_stop_progress")
@@ -625,6 +646,7 @@ export async function toggleStopCompleted(
       .eq("route_stop_id", stopId);
     if (error) throw new Error(error.message);
   }
+  return null;
 }
 
 export async function setProgressDay(progressId: string, day: number) {
@@ -779,4 +801,15 @@ export function personalizeRoutes(
       .sort(byFit),
   };
   return res;
+}
+
+/** Admin decision on a pending stop proof; approving awards the stop points once (server trigger). */
+export async function reviewStopProof(progressId: string, stopId: string, approve: boolean): Promise<ProofReviewStatus> {
+  const { data, error } = await supabase.rpc("review_stop_proof", {
+    _progress_id: progressId,
+    _route_stop_id: stopId,
+    _approve: approve,
+  });
+  if (error) throw new Error(error.message);
+  return data as ProofReviewStatus;
 }

@@ -6,12 +6,14 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminBusinessesModal } from "@/components/AdminBusinesses";
+import { AdminRewardsModal } from "@/components/AdminRewards";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   LogOut,
+  Gift,
   TrendingUp,
   Clock,
   Download,
@@ -119,7 +121,8 @@ type ModalKey =
   | "communityReports"
   | "communityExperiences"
   | "routeProgress"
-  | "businesses";
+  | "businesses"
+  | "rewards";
 
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
@@ -164,6 +167,7 @@ function AdminPage() {
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store, color: "text-amber-600 bg-amber-100" },
     { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
     { key: "routeProgress" as const, label: "Progresso e Provas", icon: Compass, color: "text-teal-600 bg-teal-100" },
+    { key: "rewards" as const, label: "Recompensas", icon: Gift, color: "text-rose-600 bg-rose-100" },
     { key: "community" as const, label: "Moderação da Comunidade", icon: MessageSquare, color: "text-pink-600 bg-pink-100" },
     { key: "communityReports" as const, label: "Denúncias", icon: Flag, color: "text-red-600 bg-red-100" },
     { key: "communityExperiences" as const, label: "Experiências Comunitárias", icon: Users, color: "text-emerald-600 bg-emerald-100" },
@@ -216,7 +220,7 @@ function AdminPage() {
             <section className="space-y-3"><h3 className="font-bold">{pt ? "Aprovações de negócios pendentes" : "Pending business approvals"}</h3><p>{summary.data?.pending ?? "—"}</p><Button variant="outline" onClick={() => setActiveModal("businesses")}>{pt ? "Aprovação de Negócios" : "Business approvals"}</Button></section>
             <section className="space-y-3"><h3 className="font-bold">{pt ? "Negócios recentes" : "Recent businesses"}</h3>{summary.data?.recent.length === 0 && <p>{pt ? "Sem negócios registados." : "No registered businesses."}</p>}<ul className="divide-y">{summary.data?.recent.map(b => <li key={b.id} className="py-3"><p className="font-medium break-words">{b.name}</p><p className="text-sm text-muted-foreground">{new Date(b.created_at).toLocaleString(pt ? "pt-PT" : "en-GB")} · {({ pending:pt ? "Pendente" : "Pending", approved:pt ? "Aprovado" : "Approved", rejected:pt ? "Rejeitado" : "Rejected", suspended:pt ? "Suspenso" : "Suspended" })[b.status]}</p></li>)}</ul></section>
           </div>
-          <section className="space-y-3"><h3 className="font-bold">{pt ? "Ações rápidas" : "Quick actions"}</h3><div className="grid gap-2">{quickActions.map(a => <Button key={a.key} variant="outline" className="justify-start h-auto py-3 whitespace-normal text-left" onClick={() => setActiveModal(a.key)}><a.icon className="size-4 shrink-0" />{pt ? a.label : ({ users:"Manage users",businesses:"Business approvals",routes:"Manage routes",routeProgress:"Progress and proofs",community:"Community moderation",communityReports:"Reports",communityExperiences:"Community experiences",provinces:"Manage provinces",addBusiness:"Add business",reports:"Summary",settings:"Settings" })[a.key]}</Button>)}</div></section>
+          <section className="space-y-3"><h3 className="font-bold">{pt ? "Ações rápidas" : "Quick actions"}</h3><div className="grid gap-2">{quickActions.map(a => <Button key={a.key} variant="outline" className="justify-start h-auto py-3 whitespace-normal text-left" onClick={() => setActiveModal(a.key)}><a.icon className="size-4 shrink-0" />{pt ? a.label : ({ users:"Manage users",businesses:"Business approvals",routes:"Manage routes",routeProgress:"Progress and proofs",rewards:"Rewards",community:"Community moderation",communityReports:"Reports",communityExperiences:"Community experiences",provinces:"Manage provinces",addBusiness:"Add business",reports:"Summary",settings:"Settings" })[a.key]}</Button>)}</div></section>
         </div>
       </div>
 
@@ -225,6 +229,7 @@ function AdminPage() {
         {activeModal === "routes" && <RoutesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "routeProgress" && <AdminRouteProgressModal onClose={() => setActiveModal(null)} />}
         {activeModal === "businesses" && <AdminBusinessesModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "rewards" && <AdminRewardsModal onClose={() => setActiveModal(null)} />}
         {activeModal === "community" && <CommunityModerationModal onClose={() => setActiveModal(null)} />}
         {activeModal === "communityReports" && <CommunityReportsModal onClose={() => setActiveModal(null)} />}
 

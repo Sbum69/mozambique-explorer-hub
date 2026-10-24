@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { PreciseLocation } from "@/lib/geo";
+import { maputoToday } from "@/lib/rewards";
 
 /**
  * Games ↔ achievements bridge. The database is the only authority:
@@ -62,11 +64,26 @@ export async function uploadGameProof(userId: string, dataUrl: string): Promise<
   return path;
 }
 
-export interface StepResult { progress: number; total: number; completed: boolean; xp_awarded: number }
+export interface StepResult {
+  progress: number;
+  total: number;
+  completed: boolean;
+  xp_awarded: number;
+  /** Server location check for photo steps; null while game places have no reference coordinates. */
+  location_verified: boolean | null;
+}
 
-export async function submitGameStep(gameKey: string, stepRef: string | null, proofPath: string | null, details: Record<string, string>) {
+/** The position (when allowed) only feeds the server's distance check; it is never stored. */
+export async function submitGameStep(
+  gameKey: string,
+  stepRef: string | null,
+  proofPath: string | null,
+  details: Record<string, string>,
+  location: PreciseLocation | null = null,
+) {
   const { data, error } = await supabase.rpc("submit_game_step", {
     _game_key: gameKey, _step_ref: stepRef ?? "", _proof_path: proofPath ?? "", _details: details,
+    _lat: location?.lat, _lng: location?.lng, _accuracy_m: location?.accuracy,
   });
   if (error) throw new Error(error.message);
   return data as unknown as StepResult;
@@ -109,6 +126,8 @@ export function gameErrorText(msg: string, pt: boolean): string {
     insufficient_balance: ["Saldo de pontos insuficiente.", "Not enough points."],
     out_of_stock: ["Recompensa esgotada.", "Reward out of stock."],
     reward_unavailable: ["Recompensa indisponível.", "Reward unavailable."],
+    reward_expired: ["Esta recompensa já expirou.", "This reward has expired."],
+    own_reward: ["Não podes resgatar uma recompensa do teu próprio negócio.", "You can't redeem a reward from your own business."],
   };
   const hit = Object.keys(map).find((k) => msg.includes(k));
   return hit ? map[hit][pt ? 0 : 1] : (pt ? "Não foi possível guardar. Tenta novamente." : "Could not save. Please try again.");
@@ -156,12 +175,18 @@ export async function fetchLeaderboard(limit = 20) {
 
 export async function fetchRewards() {
   const [rw, rd] = await Promise.all([
-    supabase.from("rewards").select("id, title_pt, title_en, description_pt, description_en, cost_points, stock, active").eq("active", true).order("cost_points"),
+    supabase.from("rewards").select("id, title_pt, title_en, description_pt, description_en, cost_points, stock, active, valid_until, business_id, businesses(name, status)").eq("active", true).order("cost_points"),
     supabase.from("reward_redemptions").select("id, reward_id, cost_points, code, created_at, rewards(title_pt, title_en)").order("created_at", { ascending: false }).limit(100),
   ]);
   if (rw.error) throw new Error(rw.error.message);
   if (rd.error) throw new Error(rd.error.message);
-  return { rewards: rw.data ?? [], redemptions: rd.data ?? [] };
+  // Only rewards a tourist can actually redeem: in date and from an approved business (or the platform).
+  const today = maputoToday();
+  const rewards = (rw.data ?? []).filter((r) => {
+    const biz = r.businesses as { name: string; status: string } | null;
+    return (r.valid_until === null || r.valid_until >= today) && (r.business_id === null || biz?.status === "approved");
+  });
+  return { rewards, redemptions: rd.data ?? [] };
 }
 
 export async function redeemReward(rewardId: string, requestId: string) {

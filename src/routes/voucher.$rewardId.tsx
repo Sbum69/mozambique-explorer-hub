@@ -39,14 +39,17 @@ function VoucherPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reward_redemptions")
-        .select("id, code, cost_points, created_at, rewards(title_pt, title_en, description_pt, description_en)")
+        .select("id, code, cost_points, created_at, used_at, rewards(title_pt, title_en, description_pt, description_en, valid_until, businesses(name))")
         .eq("id", rewardId)
         .maybeSingle();
       if (error) throw new Error(error.message);
       return data;
     },
   });
-  const rw = q.data?.rewards as { title_pt: string; title_en: string | null; description_pt: string | null; description_en: string | null } | null | undefined;
+  const rw = q.data?.rewards as {
+    title_pt: string; title_en: string | null; description_pt: string | null; description_en: string | null;
+    valid_until: string | null; businesses: { name: string } | null;
+  } | null | undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,7 +66,13 @@ function VoucherPage() {
             {((lang === "en" && rw?.description_en) || rw?.description_pt) && (
               <p className="text-sm text-muted-foreground">{(lang === "en" && rw?.description_en) || rw?.description_pt}</p>
             )}
+            {rw?.businesses?.name && <p className="text-sm">{pt ? "Válido em" : "Valid at"} <strong>{rw.businesses.name}</strong></p>}
             <p className="font-mono text-2xl tracking-wider">{q.data.code}</p>
+            <p className={`text-sm font-medium ${q.data.used_at ? "text-muted-foreground" : "text-primary"}`}>
+              {q.data.used_at
+                ? `${pt ? "Já usado em" : "Already used on"} ${new Date(q.data.used_at).toLocaleString(pt ? "pt-PT" : "en-GB")}`
+                : pt ? "Por usar — mostra este código no negócio." : "Not used yet — show this code at the business."}
+            </p>
             <Button size="sm" variant="outline" className="gap-1" onClick={() => { navigator.clipboard?.writeText(q.data!.code); toast.success(pt ? "Copiado" : "Copied"); }}>
               <Copy className="size-4" />{pt ? "Copiar código" : "Copy code"}
             </Button>
