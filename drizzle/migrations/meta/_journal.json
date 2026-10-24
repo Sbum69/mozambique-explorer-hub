@@ -274,6 +274,13 @@
       "when": 1792821209298,
       "tag": "0038_rewards_and_located_proofs",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792848620032,
+      "tag": "0039_admin_management",
+      "breakpoints": true
     }
   ]
 }

@@ -1928,6 +1928,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_assign_business_owner: {
+        Args: { _business_id: string; _email: string }
+        Returns: Json
+      }
       admin_business_owner_emails: {
         Args: never
         Returns: {
@@ -1942,6 +1946,22 @@ export type Database = {
           _reason?: string
         }
         Returns: undefined
+      }
+      admin_set_business_status: {
+        Args: {
+          _business_id: string
+          _reason?: string
+          _status: Database["public"]["Enums"]["business_status"]
+        }
+        Returns: Json
+      }
+      admin_set_user_role: {
+        Args: {
+          _grant: boolean
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: string[]
       }
       answer_game_quiz: {
         Args: { _attempt_id: string; _choice: number; _question_id: string }
