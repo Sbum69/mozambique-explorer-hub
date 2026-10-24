@@ -104,9 +104,7 @@ const CATEGORIES: Category[] = [
     title: l("Segurança para Turistas", "Safety for Tourists"),
     gradient: "from-blue-500 to-blue-600",
     icon: Info,
-    pills: [
-      { label: l("Nível", "Level"), value: l("Moderado", "Moderate") },
-    ],
+    pills: [{ label: l("Nível", "Level"), value: l("Moderado", "Moderate") }],
     subs: [
       {
         title: l("Boas práticas", "Good practices"),
