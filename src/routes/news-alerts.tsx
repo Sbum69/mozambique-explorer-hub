@@ -46,12 +46,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useEngagement } from "@/lib/news-engagement";
 import { toast } from "sonner";
-import {
-  EVENTS,
-  WEATHER,
-  ROAD_ALERTS,
-  TRAVEL_TIPS,
-} from "@/data/news-extra";
+import { EVENTS, WEATHER, ROAD_ALERTS, TRAVEL_TIPS } from "@/data/news-extra";
 import { cn } from "@/lib/utils";
 import { useBackTarget } from "@/lib/nav";
 
@@ -61,11 +56,13 @@ export const Route = createFileRoute("/news-alerts")({
       { title: "Notícias & Avisos — Ekaya Explore" },
       {
         name: "description",
-        content:
-          "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique.",
+        content: "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique.",
       },
       { property: "og:title", content: "Notícias & Avisos — Ekaya Explore" },
-      { property: "og:description", content: "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique." },
+      {
+        property: "og:description",
+        content: "Notícias, eventos, clima, estradas e dicas para viajar em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -77,9 +74,27 @@ type Tab = "news" | "events" | "weather" | "roads" | "tips";
 
 const TABS: { id: Tab; pt: string; en: string; icon: typeof Newspaper; grad: string }[] = [
   { id: "news", pt: "Notícias", en: "News", icon: Newspaper, grad: "from-red-500 to-red-700" },
-  { id: "events", pt: "Eventos", en: "Events", icon: Calendar, grad: "from-orange-500 to-pink-500" },
-  { id: "weather", pt: "Temperatura", en: "Weather", icon: Thermometer, grad: "from-cyan-500 to-blue-500" },
-  { id: "roads", pt: "Estradas", en: "Roads", icon: AlertTriangle, grad: "from-orange-500 to-orange-700" },
+  {
+    id: "events",
+    pt: "Eventos",
+    en: "Events",
+    icon: Calendar,
+    grad: "from-orange-500 to-pink-500",
+  },
+  {
+    id: "weather",
+    pt: "Temperatura",
+    en: "Weather",
+    icon: Thermometer,
+    grad: "from-cyan-500 to-blue-500",
+  },
+  {
+    id: "roads",
+    pt: "Estradas",
+    en: "Roads",
+    icon: AlertTriangle,
+    grad: "from-orange-500 to-orange-700",
+  },
   { id: "tips", pt: "Dicas", en: "Tips", icon: Info, grad: "from-purple-500 to-pink-500" },
 ];
 
@@ -188,7 +203,10 @@ interface LiveNews {
 }
 
 function stripHtml(s: string) {
-  return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  return s
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function useLiveNews(lang: "pt" | "en") {
@@ -221,7 +239,7 @@ function useLiveNews(lang: "pt" | "en") {
             description: desc.length > 200 ? desc.slice(0, 200) + "…" : desc,
             pubDate: it.pubDate,
             thumbnail: it.thumbnail || it.enclosure?.link || undefined,
-            source: sourceMatch ? sourceMatch[1] : (data.feed?.title || "Google News"),
+            source: sourceMatch ? sourceMatch[1] : data.feed?.title || "Google News",
           };
         });
         setItems(parsed);
@@ -250,7 +268,9 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
   const featured = useMemo(() => {
     const q = query.trim().toLowerCase();
     return [...live.items]
-      .filter((n) => !q || n.title.toLowerCase().includes(q) || n.description.toLowerCase().includes(q))
+      .filter(
+        (n) => !q || n.title.toLowerCase().includes(q) || n.description.toLowerCase().includes(q),
+      )
       .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
       .slice(0, 4);
   }, [live.items, query]);
@@ -260,7 +280,8 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
   const onLike = async (key: string) => {
     if (!requireAccount(lang === "pt" ? "Gostos" : "Likes")) return;
     const r = await likes.toggle(key);
-    if (!r.ok) toast.error(lang === "pt" ? "Não foi possível guardar o gosto." : "Couldn't save like.");
+    if (!r.ok)
+      toast.error(lang === "pt" ? "Não foi possível guardar o gosto." : "Couldn't save like.");
   };
 
   const fmtLive = (d: string) => {
@@ -339,11 +360,13 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                 className="group flex gap-3 rounded-xl border bg-card p-3 hover:shadow-md transition-all"
               >
                 {it.thumbnail ? (
-                  <img loading="lazy" decoding="async"
+                  <img
+                    loading="lazy"
+                    decoding="async"
                     src={it.thumbnail}
                     alt={it.title}
                     className="size-20 rounded-lg object-cover shrink-0"
-                    onError={(e) => ((e.currentTarget.style.display = "none"))}
+                    onError={(e) => (e.currentTarget.style.display = "none")}
                   />
                 ) : (
                   <div className="size-20 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
@@ -353,7 +376,9 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-600 mb-1">
                     <span className="uppercase truncate">{it.source}</span>
-                    <span className="text-muted-foreground font-normal">· {fmtLive(it.pubDate)}</span>
+                    <span className="text-muted-foreground font-normal">
+                      · {fmtLive(it.pubDate)}
+                    </span>
                   </div>
                   <h4 className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                     {it.title}
@@ -374,75 +399,79 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
         {lang === "pt" ? "Notícias em destaque" : "Featured stories"}
       </h2>
       <div className="space-y-4">
-        {live.loading && (
-          <div className="rounded-2xl border bg-card h-48 animate-pulse" />
-        )}
+        {live.loading && <div className="rounded-2xl border bg-card h-48 animate-pulse" />}
         {featured.map((n, i) => {
           const liked = likes.mine.has(n.link);
           const count = likes.counts[n.link] ?? 0;
           return (
-          <motion.article
-            key={n.link}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="bg-card rounded-2xl shadow-sm border overflow-hidden grid md:grid-cols-3 gap-0"
-          >
-            <div className="relative h-48 md:h-auto bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-950/40 dark:to-orange-950/40">
-              {n.thumbnail ? (
-                <img src={n.thumbnail} alt={n.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Newspaper className="size-16 text-red-300" />
+            <motion.article
+              key={n.link}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className="bg-card rounded-2xl shadow-sm border overflow-hidden grid md:grid-cols-3 gap-0"
+            >
+              <div className="relative h-48 md:h-auto bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-950/40 dark:to-orange-950/40">
+                {n.thumbnail ? (
+                  <img
+                    src={n.thumbnail}
+                    alt={n.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Newspaper className="size-16 text-red-300" />
+                  </div>
+                )}
+                {i === 0 && (
+                  <div className="absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
+                    <TrendingUp className="size-3" /> {lang === "pt" ? "MAIS RECENTE" : "LATEST"}
+                  </div>
+                )}
+                <div className="absolute bottom-3 left-3">
+                  <Badge variant="outline" className="bg-background/90">
+                    {n.source}
+                  </Badge>
                 </div>
-              )}
-              {i === 0 && (
-                <div className="absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-                  <TrendingUp className="size-3" /> {lang === "pt" ? "MAIS RECENTE" : "LATEST"}
+              </div>
+              <div className="md:col-span-2 p-5">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-2">
+                  <span className="flex items-center gap-1">
+                    <Clock className="size-3" />
+                    {fmtLive(n.pubDate)}
+                  </span>
                 </div>
-              )}
-              <div className="absolute bottom-3 left-3">
-                <Badge variant="outline" className="bg-background/90">
-                  {n.source}
-                </Badge>
+                <h3 className="text-xl font-bold leading-tight mb-2">{n.title}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{n.description}</p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => setSelected(n)}
+                    className="bg-gradient-to-r from-red-500 to-red-700 text-white hover:opacity-90"
+                  >
+                    {lang === "pt" ? "Ler mais" : "Read more"}
+                    <ChevronRight className="size-4" />
+                  </Button>
+                  <ShareButton
+                    payload={{ title: n.title, description: n.description, url: n.link }}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={lang === "pt" ? "Gosto" : "Like"}
+                    aria-pressed={liked}
+                    disabled={likes.busy === n.link}
+                    onClick={() => onLike(n.link)}
+                    className="gap-1"
+                  >
+                    <Heart className={cn("size-4", liked && "fill-destructive text-destructive")} />
+                    <span className="text-xs">{count}</span>
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div className="md:col-span-2 p-5">
-              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-2">
-                <span className="flex items-center gap-1">
-                  <Clock className="size-3" />
-                  {fmtLive(n.pubDate)}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold leading-tight mb-2">{n.title}</h3>
-              <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                {n.description}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => setSelected(n)}
-                  className="bg-gradient-to-r from-red-500 to-red-700 text-white hover:opacity-90"
-                >
-                  {lang === "pt" ? "Ler mais" : "Read more"}
-                  <ChevronRight className="size-4" />
-                </Button>
-                <ShareButton payload={{ title: n.title, description: n.description, url: n.link }} />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={lang === "pt" ? "Gosto" : "Like"}
-                  aria-pressed={liked}
-                  disabled={likes.busy === n.link}
-                  onClick={() => onLike(n.link)}
-                  className="gap-1"
-                >
-                  <Heart className={cn("size-4", liked && "fill-destructive text-destructive")} />
-                  <span className="text-xs">{count}</span>
-                </Button>
-              </div>
-            </div>
-          </motion.article>
+            </motion.article>
           );
         })}
         {!live.loading && featured.length === 0 && (
@@ -462,9 +491,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                   <span className="text-xs text-muted-foreground">{fmtLive(selected.pubDate)}</span>
                 </div>
                 <DialogTitle className="text-2xl">{selected.title}</DialogTitle>
-                <DialogDescription className="text-base">
-                  {selected.description}
-                </DialogDescription>
+                <DialogDescription className="text-base">{selected.description}</DialogDescription>
               </DialogHeader>
               <div className="flex gap-2 pt-2">
                 <Button asChild size="sm">
@@ -473,7 +500,14 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                     <ChevronRight className="size-4" />
                   </a>
                 </Button>
-                <ShareButton size="sm" payload={{ title: selected.title, description: selected.description, url: selected.link }} />
+                <ShareButton
+                  size="sm"
+                  payload={{
+                    title: selected.title,
+                    description: selected.description,
+                    url: selected.link,
+                  }}
+                />
               </div>
             </>
           )}
@@ -494,13 +528,21 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
     if (!requireAccount(lang === "pt" ? "Participar em eventos" : "Join events")) return;
     const r = await part.toggle(id);
     if (!r.ok) {
-      toast.error(lang === "pt" ? "Não foi possível atualizar a participação." : "Couldn't update participation.");
+      toast.error(
+        lang === "pt"
+          ? "Não foi possível atualizar a participação."
+          : "Couldn't update participation.",
+      );
       return;
     }
     toast.success(
       r.active
-        ? lang === "pt" ? "Inscrição confirmada!" : "You're registered!"
-        : lang === "pt" ? "Participação cancelada." : "Participation cancelled.",
+        ? lang === "pt"
+          ? "Inscrição confirmada!"
+          : "You're registered!"
+        : lang === "pt"
+          ? "Participação cancelada."
+          : "Participation cancelled.",
     );
   };
 
@@ -510,72 +552,87 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
         const joined = part.mine.has(ev.id);
         const count = part.counts[ev.id] ?? 0;
         return (
-        <motion.div
-          key={ev.id}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-        >
-          <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
-            <div className="relative h-40 overflow-hidden">
-              <img loading="lazy" decoding="async"
-                src={ev.image}
-                alt={ev.title[lang]}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-              />
-              <div className={`absolute inset-0 bg-gradient-to-t ${ev.gradient} opacity-40`} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <div className="absolute top-3 left-3">
-                <Badge className={`bg-gradient-to-r ${ev.gradient} text-white border-0 text-[10px]`}>
-                  {ev.category[lang]}
-                </Badge>
-              </div>
-              <div className="absolute bottom-3 left-3 right-3 text-white">
-                <div className="flex items-center gap-1 text-[11px] font-medium opacity-95">
-                  <MapPin className="size-3" /> {ev.location}
-                </div>
-                <div className="text-xs font-semibold opacity-95">{ev.date[lang]}</div>
-              </div>
-            </div>
-            <div className="p-5">
-              <h3 className="font-bold text-lg leading-tight mb-2">{ev.title[lang]}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{ev.description[lang]}</p>
-              {joined && (
-                <p className="mb-3 text-xs font-semibold text-success flex items-center gap-1">
-                  ✓ {lang === "pt" ? "Já estás inscrito" : "You're registered"}
-                </p>
-              )}
-              <div className="flex items-center justify-between pt-4 border-t gap-2">
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="flex items-center gap-1" title={lang === "pt" ? "Inscritos no Ekaya" : "Registered on Ekaya"}>
-                    <Users className="size-3" /> {count}
-                  </span>
-                  <span className="font-semibold text-emerald-600">{ev.price[lang]}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                <ShareButton
-                  payload={{
-                    title: ev.title[lang],
-                    description: `${ev.date[lang]} · ${ev.location} — ${ev.description[lang]}`,
-                    url: `${origin}/news-alerts`,
-                  }}
+          <motion.div
+            key={ev.id}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+          >
+            <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
+              <div className="relative h-40 overflow-hidden">
+                <img
+                  loading="lazy"
+                  decoding="async"
+                  src={ev.image}
+                  alt={ev.title[lang]}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
-                <Button
-                  size="sm"
-                  disabled={part.busy === ev.id}
-                  onClick={() => onJoin(ev.id)}
-                  variant={joined ? "outline" : "default"}
-                  className={joined ? "" : `bg-gradient-to-r ${ev.gradient} text-white border-0 hover:opacity-90`}
-                >
-                  {joined
-                    ? lang === "pt" ? "Cancelar participação" : "Cancel"
-                    : lang === "pt" ? "Participar" : "Join"}
-                </Button>
+                <div className={`absolute inset-0 bg-gradient-to-t ${ev.gradient} opacity-40`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute top-3 left-3">
+                  <Badge
+                    className={`bg-gradient-to-r ${ev.gradient} text-white border-0 text-[10px]`}
+                  >
+                    {ev.category[lang]}
+                  </Badge>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <div className="flex items-center gap-1 text-[11px] font-medium opacity-95">
+                    <MapPin className="size-3" /> {ev.location}
+                  </div>
+                  <div className="text-xs font-semibold opacity-95">{ev.date[lang]}</div>
                 </div>
               </div>
-            </div>
-          </Card>
-        </motion.div>
+              <div className="p-5">
+                <h3 className="font-bold text-lg leading-tight mb-2">{ev.title[lang]}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{ev.description[lang]}</p>
+                {joined && (
+                  <p className="mb-3 text-xs font-semibold text-success flex items-center gap-1">
+                    ✓ {lang === "pt" ? "Já estás inscrito" : "You're registered"}
+                  </p>
+                )}
+                <div className="flex items-center justify-between pt-4 border-t gap-2">
+                  <div className="flex items-center gap-3 text-xs">
+                    <span
+                      className="flex items-center gap-1"
+                      title={lang === "pt" ? "Inscritos no Ekaya" : "Registered on Ekaya"}
+                    >
+                      <Users className="size-3" /> {count}
+                    </span>
+                    <span className="font-semibold text-emerald-600">{ev.price[lang]}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <ShareButton
+                      payload={{
+                        title: ev.title[lang],
+                        description: `${ev.date[lang]} · ${ev.location} — ${ev.description[lang]}`,
+                        url: `${origin}/news-alerts`,
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      disabled={part.busy === ev.id}
+                      onClick={() => onJoin(ev.id)}
+                      variant={joined ? "outline" : "default"}
+                      className={
+                        joined
+                          ? ""
+                          : `bg-gradient-to-r ${ev.gradient} text-white border-0 hover:opacity-90`
+                      }
+                    >
+                      {joined
+                        ? lang === "pt"
+                          ? "Cancelar participação"
+                          : "Cancel"
+                        : lang === "pt"
+                          ? "Participar"
+                          : "Join"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         );
       })}
     </div>
@@ -583,10 +640,21 @@ function EventsTab({ lang }: { lang: "pt" | "en" }) {
 }
 
 /* ---------- Weather tab ---------- */
-const WeatherIcon = ({ icon, className }: { icon: "sun" | "cloud" | "rain" | "storm"; className?: string }) => {
+const WeatherIcon = ({
+  icon,
+  className,
+}: {
+  icon: "sun" | "cloud" | "rain" | "storm";
+  className?: string;
+}) => {
   const map = { sun: Sun, cloud: Cloud, rain: CloudRain, storm: CloudLightning };
   const Icon = map[icon];
-  const color = { sun: "text-yellow-500", cloud: "text-gray-400", rain: "text-blue-500", storm: "text-purple-500" }[icon];
+  const color = {
+    sun: "text-yellow-500",
+    cloud: "text-gray-400",
+    rain: "text-blue-500",
+    storm: "text-purple-500",
+  }[icon];
   return <Icon className={cn(color, className)} />;
 };
 
@@ -602,7 +670,9 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
         >
           <Card className="overflow-hidden border-blue-100 dark:border-blue-900">
             <div className="relative h-32 overflow-hidden">
-              <img loading="lazy" decoding="async"
+              <img
+                loading="lazy"
+                decoding="async"
                 src={w.image}
                 alt={w.city}
                 className="absolute inset-0 w-full h-full object-cover"
@@ -614,46 +684,46 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
               </div>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 p-6">
-            <div className="text-center mb-6">
-              <div className="text-6xl font-bold">{w.tempC}°</div>
-              <div className="text-muted-foreground mt-1">{w.condition[lang]}</div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="bg-background/60 rounded-lg p-3">
-                <div className="text-xs text-muted-foreground mb-1">
-                  {lang === "pt" ? "Humidade" : "Humidity"}
-                </div>
-                <div className="flex items-center gap-2">
-                  <CloudRain className="size-4 text-blue-600" />
-                  <span className="font-bold">{w.humidity}%</span>
-                </div>
+              <div className="text-center mb-6">
+                <div className="text-6xl font-bold">{w.tempC}°</div>
+                <div className="text-muted-foreground mt-1">{w.condition[lang]}</div>
               </div>
-              <div className="bg-background/60 rounded-lg p-3">
-                <div className="text-xs text-muted-foreground mb-1">
-                  {lang === "pt" ? "Vento" : "Wind"}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Wind className="size-4" />
-                  <span className="font-bold">{w.windKmh} km/h</span>
-                </div>
-              </div>
-            </div>
-            <div className="border-t border-blue-200/60 dark:border-blue-900/60 pt-4">
-              <div className="text-xs font-semibold mb-3">
-                {lang === "pt" ? "Próximos dias" : "Next days"}
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {w.forecast.map((d, idx) => (
-                  <div key={idx} className="bg-background/60 rounded-lg p-2 text-center">
-                    <div className="text-[11px] text-muted-foreground mb-1.5">
-                      {d.label[lang]}
-                    </div>
-                    <WeatherIcon icon={d.icon} className="size-6 mx-auto mb-1.5" />
-                    <div className="text-sm font-bold">{d.tempC}°</div>
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="bg-background/60 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {lang === "pt" ? "Humidade" : "Humidity"}
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <CloudRain className="size-4 text-blue-600" />
+                    <span className="font-bold">{w.humidity}%</span>
+                  </div>
+                </div>
+                <div className="bg-background/60 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {lang === "pt" ? "Vento" : "Wind"}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Wind className="size-4" />
+                    <span className="font-bold">{w.windKmh} km/h</span>
+                  </div>
+                </div>
               </div>
-            </div>
+              <div className="border-t border-blue-200/60 dark:border-blue-900/60 pt-4">
+                <div className="text-xs font-semibold mb-3">
+                  {lang === "pt" ? "Próximos dias" : "Next days"}
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {w.forecast.map((d, idx) => (
+                    <div key={idx} className="bg-background/60 rounded-lg p-2 text-center">
+                      <div className="text-[11px] text-muted-foreground mb-1.5">
+                        {d.label[lang]}
+                      </div>
+                      <WeatherIcon icon={d.icon} className="size-6 mx-auto mb-1.5" />
+                      <div className="text-sm font-bold">{d.tempC}°</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </Card>
         </motion.div>
@@ -664,9 +734,24 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
 
 /* ---------- Roads tab ---------- */
 const SEVERITY_LABEL = {
-  high: { pt: "ALTO", en: "HIGH", grad: "from-red-500 to-red-700", bg: "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900" },
-  medium: { pt: "MÉDIO", en: "MEDIUM", grad: "from-orange-500 to-orange-700", bg: "bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900" },
-  low: { pt: "BAIXO", en: "LOW", grad: "from-yellow-500 to-yellow-700", bg: "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-900" },
+  high: {
+    pt: "ALTO",
+    en: "HIGH",
+    grad: "from-red-500 to-red-700",
+    bg: "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-900",
+  },
+  medium: {
+    pt: "MÉDIO",
+    en: "MEDIUM",
+    grad: "from-orange-500 to-orange-700",
+    bg: "bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900",
+  },
+  low: {
+    pt: "BAIXO",
+    en: "LOW",
+    grad: "from-yellow-500 to-yellow-700",
+    bg: "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/20 dark:border-yellow-900",
+  },
 } as const;
 
 function RoadsTab({ lang }: { lang: "pt" | "en" }) {
@@ -680,49 +765,61 @@ function RoadsTab({ lang }: { lang: "pt" | "en" }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className={cn("border-2 rounded-2xl shadow-sm overflow-hidden grid md:grid-cols-3", s.bg)}
+            className={cn(
+              "border-2 rounded-2xl shadow-sm overflow-hidden grid md:grid-cols-3",
+              s.bg,
+            )}
           >
             <div className="relative h-40 md:h-full md:col-span-1 overflow-hidden">
-              <img src={r.image} alt={r.location} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              <img
+                src={r.image}
+                alt={r.location}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
               <div className={`absolute inset-0 bg-gradient-to-t ${s.grad} opacity-30`} />
             </div>
             <div className="p-5 md:col-span-2">
-            <div className="flex items-start gap-4">
-              <div className={`size-12 bg-gradient-to-br ${s.grad} rounded-xl flex items-center justify-center text-white shrink-0`}>
-                <AlertTriangle className="size-6" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-2">
-                  <h3 className="font-bold">{r.title[lang]}</h3>
-                  <span className={`px-2 py-0.5 bg-gradient-to-r ${s.grad} text-white rounded-full text-[10px] font-bold`}>
-                    {s[lang]}
-                  </span>
+              <div className="flex items-start gap-4">
+                <div
+                  className={`size-12 bg-gradient-to-br ${s.grad} rounded-xl flex items-center justify-center text-white shrink-0`}
+                >
+                  <AlertTriangle className="size-6" />
                 </div>
-                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="size-3" /> {r.location}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="size-3" /> {r.postedAgo[lang]}
-                  </span>
-                </div>
-                <p className="text-sm mb-3">{r.description[lang]}</p>
-                <div className="grid sm:grid-cols-2 gap-3 bg-background/60 rounded-lg p-3">
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">
-                      {lang === "pt" ? "Duração estimada" : "Estimated duration"}
-                    </div>
-                    <div className="font-semibold text-sm">{r.duration[lang]}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <h3 className="font-bold">{r.title[lang]}</h3>
+                    <span
+                      className={`px-2 py-0.5 bg-gradient-to-r ${s.grad} text-white rounded-full text-[10px] font-bold`}
+                    >
+                      {s[lang]}
+                    </span>
                   </div>
-                  <div>
-                    <div className="text-[11px] text-muted-foreground mb-0.5">
-                      {lang === "pt" ? "Rota alternativa" : "Alternative route"}
+                  <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mb-3">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="size-3" /> {r.location}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="size-3" /> {r.postedAgo[lang]}
+                    </span>
+                  </div>
+                  <p className="text-sm mb-3">{r.description[lang]}</p>
+                  <div className="grid sm:grid-cols-2 gap-3 bg-background/60 rounded-lg p-3">
+                    <div>
+                      <div className="text-[11px] text-muted-foreground mb-0.5">
+                        {lang === "pt" ? "Duração estimada" : "Estimated duration"}
+                      </div>
+                      <div className="font-semibold text-sm">{r.duration[lang]}</div>
                     </div>
-                    <div className="font-semibold text-sm">{r.alternative[lang]}</div>
+                    <div>
+                      <div className="text-[11px] text-muted-foreground mb-0.5">
+                        {lang === "pt" ? "Rota alternativa" : "Alternative route"}
+                      </div>
+                      <div className="font-semibold text-sm">{r.alternative[lang]}</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
           </motion.div>
         );
@@ -732,7 +829,13 @@ function RoadsTab({ lang }: { lang: "pt" | "en" }) {
 }
 
 /* ---------- Tips tab ---------- */
-const TIP_ICON = { camera: Camera, wallet: Wallet, shield: Shield, compass: Compass, utensils: Utensils } as const;
+const TIP_ICON = {
+  camera: Camera,
+  wallet: Wallet,
+  shield: Shield,
+  compass: Compass,
+  utensils: Utensils,
+} as const;
 const TIP_GRAD = {
   camera: "from-purple-500 to-pink-500",
   wallet: "from-emerald-500 to-teal-500",
@@ -755,7 +858,9 @@ function TipsTab({ lang }: { lang: "pt" | "en" }) {
           >
             <Card className="p-5 border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
               <div className="flex items-start gap-4">
-                <div className={`size-12 bg-gradient-to-br ${TIP_GRAD[t.icon]} rounded-xl flex items-center justify-center text-white shrink-0`}>
+                <div
+                  className={`size-12 bg-gradient-to-br ${TIP_GRAD[t.icon]} rounded-xl flex items-center justify-center text-white shrink-0`}
+                >
                   <Icon className="size-6" />
                 </div>
                 <div className="flex-1">
@@ -765,9 +870,7 @@ function TipsTab({ lang }: { lang: "pt" | "en" }) {
                       {t.category[lang]}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {t.body[lang]}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{t.body[lang]}</p>
                 </div>
               </div>
             </Card>

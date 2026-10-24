@@ -14,7 +14,6 @@ import {
   Clock,
   Newspaper,
   LayoutDashboard,
-
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,10 @@ import { useDestinations } from "@/hooks/useDestinations";
 import { type ExperienceCategory } from "@/lib/experiences";
 import { useExperiences } from "@/hooks/useExperiences";
 import { useRecommendations } from "@/hooks/useRecommendations";
-import { CommunityExperienceCard, CommunityExperienceDialog } from "@/components/CommunityExperienceCard";
+import {
+  CommunityExperienceCard,
+  CommunityExperienceDialog,
+} from "@/components/CommunityExperienceCard";
 import type { CommunityExperience } from "@/lib/community-experiences";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
 import { routeCover, routePriceMzn, routeStopCount } from "@/lib/routes";
@@ -57,7 +59,11 @@ export const Route = createFileRoute("/home")({
           "Escolhe destino, dias e tipo de experiência. Ekaya recomenda roteiros, atividades e locais únicos em Moçambique.",
       },
       { property: "og:title", content: "Ekaya — Explora Moçambique para além da superfície" },
-      { property: "og:description", content: "Escolhe destino, dias e tipo de experiência. Ekaya recomenda roteiros, atividades e locais únicos em Moçambique." },
+      {
+        property: "og:description",
+        content:
+          "Escolhe destino, dias e tipo de experiência. Ekaya recomenda roteiros, atividades e locais únicos em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -73,7 +79,11 @@ type Interest = ExperienceCategory | "heritage";
 const INTEREST_OPTIONS: { id: Interest; label: { pt: string; en: string }; emoji: string }[] = [
   { id: "beach", label: { pt: "Praias e natureza", en: "Beaches & nature" }, emoji: "🏖️" },
   { id: "culture", label: { pt: "Cultura e história", en: "Culture & history" }, emoji: "🎭" },
-  { id: "community", label: { pt: "Experiências comunitárias", en: "Community experiences" }, emoji: "👥" },
+  {
+    id: "community",
+    label: { pt: "Experiências comunitárias", en: "Community experiences" },
+    emoji: "👥",
+  },
   { id: "food", label: { pt: "Gastronomia", en: "Food & cuisine" }, emoji: "🍽️" },
   { id: "nature", label: { pt: "Vida selvagem / safaris", en: "Wildlife & safaris" }, emoji: "🦁" },
   { id: "adventure", label: { pt: "Aventura", en: "Adventure" }, emoji: "🚣" },
@@ -120,13 +130,21 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
+  const {
+    destinations,
+    loading: loadingDestinations,
+    error: destinationsError,
+  } = useDestinations();
   const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
   const { publicRoutes } = useRouteCatalogue(null);
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("2-3");
   const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
-  const [applied, setApplied] = useState({ destId: "any", days: "2-3" as DayBucket, interests: ["beach", "community"] as Interest[] });
+  const [applied, setApplied] = useState({
+    destId: "any",
+    days: "2-3" as DayBucket,
+    interests: ["beach", "community"] as Interest[],
+  });
 
   useEffect(() => {
     if (needsOnboarding) setShowOnboarding(true);
@@ -149,13 +167,11 @@ function HomePage() {
     return publicRoutes.filter((r) => r.durationDays <= maxDays + 1).slice(0, 4);
   }, [maxDays, publicRoutes]);
 
-
   const recoExperiences = useMemo(() => {
     const pool = experiences.filter((e) => {
       const matchDest = applied.destId === "any" || e.destinationId === applied.destId;
       const matchInt =
-        applied.interests.length === 0 ||
-        applied.interests.includes(e.category as Interest);
+        applied.interests.length === 0 || applied.interests.includes(e.category as Interest);
       return matchDest && matchInt;
     });
     return (pool.length ? pool : experiences).slice(0, 4);
@@ -163,13 +179,18 @@ function HomePage() {
 
   const recoStories = STORY_STOPS.slice(0, 3);
 
-
   return (
     <div className="min-h-screen bg-background">
       {/* ============ HERO ============ */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={hero} alt="" className="size-full object-cover" loading="lazy" decoding="async" />
+          <img
+            src={hero}
+            alt=""
+            className="size-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-foreground/75 via-foreground/55 to-background" />
         </div>
 
@@ -263,7 +284,6 @@ function HomePage() {
               </Button>
             </div>
           </motion.div>
-
 
           {/* Quick selector card */}
           <motion.div
@@ -401,8 +421,16 @@ function HomePage() {
             >
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="relative aspect-[16/10]">
-                  <img src={routeCover(it)} alt={it.title} className="size-full object-cover" loading="lazy" decoding="async" />
-                  {it.province && <Badge className="absolute top-3 left-3">{it.province.name[lang]}</Badge>}
+                  <img
+                    src={routeCover(it)}
+                    alt={it.title}
+                    className="size-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {it.province && (
+                    <Badge className="absolute top-3 left-3">{it.province.name[lang]}</Badge>
+                  )}
                 </div>
                 <CardContent className="p-4">
                   <p className="text-xs font-mono text-muted-foreground mb-1.5">{it.code}</p>
@@ -412,7 +440,8 @@ function HomePage() {
                   </p>
                   <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
-                      <Clock className="size-3.5" /> {it.durationDays} {lang === "pt" ? "dias" : "days"}
+                      <Clock className="size-3.5" /> {it.durationDays}{" "}
+                      {lang === "pt" ? "dias" : "days"}
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="size-3.5" /> {routeStopCount(it)}{" "}
@@ -433,7 +462,6 @@ function HomePage() {
               </Card>
             </motion.div>
           ))}
-
         </RecoRow>
 
         {/* Experiences */}
@@ -451,7 +479,13 @@ function HomePage() {
             >
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="relative aspect-[16/10]">
-                  <img src={e.image} alt={e.title[lang as Lang]} className="size-full object-cover" loading="lazy" decoding="async" />
+                  <img
+                    src={e.image}
+                    alt={e.title[lang as Lang]}
+                    className="size-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <Badge variant="secondary" className="absolute top-3 left-3 capitalize">
                     {e.category}
                   </Badge>
@@ -468,22 +502,16 @@ function HomePage() {
                     <span className="inline-flex items-center gap-1">
                       <Clock className="size-3.5" /> {e.durationHours}h
                     </span>
-                    <span className="ml-auto font-semibold text-foreground">
-                      {e.priceMzn} MZN
-                    </span>
+                    <span className="ml-auto font-semibold text-foreground">{e.priceMzn} MZN</span>
                   </div>
                   <Button asChild size="sm" variant="outline" className="mt-4 w-full">
-                    <Link to="/experiences">
-                      {lang === "pt" ? "Ver detalhes" : "View details"}
-                    </Link>
+                    <Link to="/experiences">{lang === "pt" ? "Ver detalhes" : "View details"}</Link>
                   </Button>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
-          {loadingExperiences && (
-            <Card className="h-56 animate-pulse bg-muted/40" />
-          )}
+          {loadingExperiences && <Card className="h-56 animate-pulse bg-muted/40" />}
           {experiencesError && (
             <Card className="p-5 text-sm text-muted-foreground">
               {lang === "pt"
@@ -493,7 +521,9 @@ function HomePage() {
           )}
           {!loadingExperiences && !experiencesError && recoExperiences.length === 0 && (
             <Card className="p-5 text-sm text-muted-foreground">
-              {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+              {lang === "pt"
+                ? "Ainda não existem experiências disponíveis."
+                : "No experiences available yet."}
             </Card>
           )}
         </RecoRow>
@@ -604,7 +634,10 @@ function HomePage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {MOCK_NEWS.slice(0, 3).map((n) => (
-            <Card key={n.id} className="h-full flex flex-col p-5 hover:shadow-[var(--shadow-elegant)] transition-shadow">
+            <Card
+              key={n.id}
+              className="h-full flex flex-col p-5 hover:shadow-[var(--shadow-elegant)] transition-shadow"
+            >
               <div className="flex items-center justify-between mb-3">
                 <Badge variant="secondary" className="text-[10px] uppercase">
                   {newsCategoryLabel(n.category, lang)}
@@ -619,9 +652,7 @@ function HomePage() {
               <h3 className="font-bold text-base leading-tight mb-2">{n.title[lang]}</h3>
               <p className="text-sm text-muted-foreground flex-1">{n.summary[lang]}</p>
               <Button asChild variant="link" size="sm" className="self-start mt-3 p-0">
-                <Link to="/news-alerts">
-                  {lang === "pt" ? "Ler mais →" : "Read more →"}
-                </Link>
+                <Link to="/news-alerts">{lang === "pt" ? "Ler mais →" : "Read more →"}</Link>
               </Button>
             </Card>
           ))}
@@ -777,7 +808,10 @@ function PersonalSection({ lang }: { lang: Lang }) {
       {!loading && !error && personalised && recommendedExperiences.length > 0 && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {recommendedExperiences.map(({ item, reasons, matchesProvince }) => (
-            <Card key={item.id} className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+            <Card
+              key={item.id}
+              className="overflow-hidden h-full hover:shadow-lg transition-shadow"
+            >
               <div className="relative aspect-[16/10]">
                 <img
                   src={item.image}
@@ -851,14 +885,20 @@ function PersonalSection({ lang }: { lang: Lang }) {
       {!loading && !error && personalised && recommendedCommunity.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-xl font-semibold">{lang === "pt" ? "Grátis e sem reserva" : "Free, no booking"}</h3>
+            <h3 className="text-xl font-semibold">
+              {lang === "pt" ? "Grátis e sem reserva" : "Free, no booking"}
+            </h3>
             <Link to="/community-experiences" className="text-sm text-primary hover:underline">
               {lang === "pt" ? "Ver todas" : "See all"}
             </Link>
           </div>
           <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {recommendedCommunity.map(({ item }) => (
-              <CommunityExperienceCard key={item.id} item={item} onOpen={() => setOpenCommunity(item)} />
+              <CommunityExperienceCard
+                key={item.id}
+                item={item}
+                onOpen={() => setOpenCommunity(item)}
+              />
             ))}
           </div>
           <CommunityExperienceDialog item={openCommunity} onClose={() => setOpenCommunity(null)} />
