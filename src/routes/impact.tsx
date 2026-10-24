@@ -104,8 +104,8 @@ function Stats() {
     { icon: RouteIcon, n: p.public_routes, label: { pt: "Roteiros públicos", en: "Public routes" }, note: { pt: "Aprovados e ativos", en: "Approved and active" } },
     { icon: Users, n: p.accounts, label: { pt: "Contas registadas", en: "Registered accounts" }, note: { pt: "Inclui contas internas e de teste", en: "Includes internal and test accounts" } },
     { icon: CalendarCheck, n: p.bookings_total, label: { pt: "Reservas registadas", en: "Bookings recorded" },
-      note: { pt: `${s.pending} pendentes · ${s.confirmed} confirmadas · ${s.completed} concluídas · ${s.rejected} rejeitadas · ${s.cancelled} canceladas`,
-              en: `${s.pending} pending · ${s.confirmed} confirmed · ${s.completed} completed · ${s.rejected} rejected · ${s.cancelled} cancelled` } },
+      note: { pt: `${s.pending} pendentes · ${s.confirmed} confirmadas · ${s.completed} concluídas · ${s.no_show ?? 0} não compareceram · ${s.rejected} rejeitadas · ${s.cancelled} canceladas`,
+              en: `${s.pending} pending · ${s.confirmed} confirmed · ${s.completed} completed · ${s.no_show ?? 0} no-shows · ${s.rejected} rejected · ${s.cancelled} cancelled` } },
   ];
   const verified: { icon: LucideIcon; n: number; label: L; rule: L }[] = [
     { icon: CheckCircle2, n: v.completed_bookings, label: { pt: "Reservas concluídas", en: "Completed bookings" }, rule: { pt: "Estado concluída e data já passada", en: "Status completed and date already passed" } },

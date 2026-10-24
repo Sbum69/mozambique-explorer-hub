@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { translateBookingError } from "./bookings";
+import { AUTO_EXPIRED_REASON, bookingReasonText, translateBookingError } from "./bookings";
 
 // Messages raised by the database guards (commercial_booking_guard / bookings_validate_insert).
 describe("SEG-2 booking errors shown to the tourist", () => {
@@ -22,5 +22,16 @@ describe("SEG-2 booking errors shown to the tourist", () => {
     const raw = "Booking is in a final state";
     expect(translateBookingError(raw, "pt")).not.toContain(raw);
     expect(translateBookingError(raw, "en")).toMatch(/couldn't create the booking/);
+  });
+});
+
+describe("8E.5 decision reasons shown to people", () => {
+  it("translates the automatic expiry code in PT and EN", () => {
+    expect(bookingReasonText(AUTO_EXPIRED_REASON, "pt")).toMatch(/Expirou sem resposta/);
+    expect(bookingReasonText(AUTO_EXPIRED_REASON, "en")).toMatch(/Expired without an answer/);
+  });
+  it("keeps a business's own reason as written and hides empty reasons", () => {
+    expect(bookingReasonText("Barco avariado", "en")).toBe("Barco avariado");
+    expect(bookingReasonText(null, "pt")).toBeNull();
   });
 });

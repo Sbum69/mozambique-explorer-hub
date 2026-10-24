@@ -253,6 +253,20 @@
       "when": 1792815381144,
       "tag": "0035_bookings_admin_transitions",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792818573335,
+      "tag": "0036_booking_status_no_show",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792818573343,
+      "tag": "0037_commercial_flow_8e5",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Calendar as CalendarIcon, ArrowLeft, LogOut, Check, X, Store, Ban, Flag, RefreshCw } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, LogOut, Check, X, Store, Ban, Flag, RefreshCw, UserX } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { BusinessManagement } from "@/components/BusinessManagement";
-import { decideBooking, type Booking, type BookingStatus } from "@/lib/bookings";
+import { bookingReasonText, decideBooking, type Booking, type BookingStatus } from "@/lib/bookings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/business-dashboard")({
   component: BusinessDashboardPage,
 });
 
-const STATUS_FILTERS: (BookingStatus | "all")[] = ["all", "pending", "confirmed", "completed", "rejected", "cancelled"];
+const STATUS_FILTERS: (BookingStatus | "all")[] = ["all", "pending", "confirmed", "completed", "no_show", "rejected", "cancelled"];
 
 function decisionError(message: string, pt: boolean): string {
   const m = message.toLowerCase();
@@ -43,6 +43,7 @@ function decisionError(message: string, pt: boolean): string {
   if (m.includes("already_decided") || m.includes("final state")) return pt ? "Esta reserva já foi processada." : "This booking was already processed.";
   if (m.includes("invalid_transition") || m.includes("only the business")) return pt ? "Esta ação não é permitida para esta reserva." : "This action is not allowed for this booking.";
   if (m.includes("booking_not_yet_completed")) return pt ? "Só podes concluir após a data e hora da reserva." : "You can only complete after the booking date and time.";
+  if (m.includes("booking_not_yet_started")) return pt ? "Só podes marcar a não comparência após a data e hora da reserva." : "You can only mark a no-show after the booking date and time.";
   if (m.includes("forbidden")) return pt ? "Esta reserva não pertence ao teu negócio." : "This booking does not belong to your business.";
   return pt ? "Não foi possível atualizar a reserva." : "Could not update the booking.";
 }
@@ -63,7 +64,7 @@ function BusinessDashboardPage() {
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState("");
 
-  const decide = async (booking: Booking, decision: "confirmed" | "completed") => {
+  const decide = async (booking: Booking, decision: "confirmed" | "completed" | "no_show") => {
     setBusy(booking.id);
     try {
       await decideBooking(booking.id, decision);
@@ -103,6 +104,7 @@ function BusinessDashboardPage() {
     rejected: pt ? "Rejeitada" : "Rejected",
     cancelled: pt ? "Cancelada" : "Cancelled",
     completed: pt ? "Concluída" : "Completed",
+    no_show: pt ? "Não compareceu" : "No-show",
   };
   const filterLabels: Record<BookingStatus | "all", string> = { all: pt ? "Todas" : "All", ...labels };
   const isPast = (b: Booking) => bookingHasStarted(b.date, b.time);
@@ -185,7 +187,7 @@ function BusinessDashboardPage() {
                   {b.decisionReason && (
                     <p className="text-sm text-muted-foreground">
                       {pt ? "Motivo: " : "Reason: "}
-                      {b.decisionReason}
+                      {bookingReasonText(b.decisionReason, lang)}
                     </p>
                   )}
                   <div className="flex justify-between gap-3 items-center flex-wrap">
@@ -211,10 +213,16 @@ function BusinessDashboardPage() {
                             {pt ? "Cancelar" : "Cancel"}
                           </Button>
                           {isPast(b) && (
-                            <Button disabled={busy === b.id} variant="outline" size="sm" onClick={() => void decide(b, "completed")}>
-                              <Flag className="size-4" />
-                              {pt ? "Concluir" : "Complete"}
-                            </Button>
+                            <>
+                              <Button disabled={busy === b.id} variant="outline" size="sm" onClick={() => void decide(b, "completed")}>
+                                <Flag className="size-4" />
+                                {pt ? "Concluir" : "Complete"}
+                              </Button>
+                              <Button disabled={busy === b.id} variant="outline" size="sm" onClick={() => void decide(b, "no_show")}>
+                                <UserX className="size-4" />
+                                {pt ? "Não compareceu" : "No-show"}
+                              </Button>
+                            </>
                           )}
                         </>
                       )}
@@ -250,7 +258,7 @@ function BusinessDashboardPage() {
               {detail.customerPhone && (<><dt className="text-muted-foreground">{pt ? "Telefone" : "Phone"}</dt><dd>{detail.customerPhone}</dd></>)}
               {detail.customerEmail && (<><dt className="text-muted-foreground">Email</dt><dd className="break-words">{detail.customerEmail}</dd></>)}
               {detail.notes && (<><dt className="text-muted-foreground">{pt ? "Notas" : "Notes"}</dt><dd className="whitespace-pre-line break-words">{detail.notes}</dd></>)}
-              {detail.decisionReason && (<><dt className="text-muted-foreground">{pt ? "Motivo" : "Reason"}</dt><dd className="break-words">{detail.decisionReason}</dd></>)}
+              {detail.decisionReason && (<><dt className="text-muted-foreground">{pt ? "Motivo" : "Reason"}</dt><dd className="break-words">{bookingReasonText(detail.decisionReason, lang)}</dd></>)}
             </dl>
           )}
         </DialogContent>

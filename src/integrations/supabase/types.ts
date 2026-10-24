@@ -2021,6 +2021,7 @@ export type Database = {
         | "rejected"
         | "cancelled"
         | "completed"
+        | "no_show"
       business_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
@@ -2156,6 +2157,7 @@ export const Constants = {
         "rejected",
         "cancelled",
         "completed",
+        "no_show",
       ],
       business_status: ["pending", "approved", "rejected", "suspended"],
     },
