@@ -45,7 +45,9 @@ import type { CommunityExperience } from "@/lib/community-experiences";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
 import { routeCover, routePriceMzn, routeStopCount } from "@/lib/routes";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
-import { MOCK_NEWS, newsCategoryLabel } from "@/data/news";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getLiveNews } from "@/lib/news.functions";
 
 import hero from "@/assets/hero-mozambique.jpg";
 
@@ -621,8 +623,8 @@ function HomePage() {
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {lang === "pt"
-                ? "Eventos, dicas e alertas para a tua próxima viagem."
-                : "Events, tips and alerts for your next trip."}
+                ? "Últimas notícias sobre Moçambique · Fonte: Google News"
+                : "Latest news about Mozambique · Source: Google News"}
             </p>
           </div>
           <Button asChild variant="ghost" size="sm">
@@ -632,31 +634,7 @@ function HomePage() {
             </Link>
           </Button>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MOCK_NEWS.slice(0, 3).map((n) => (
-            <Card
-              key={n.id}
-              className="h-full flex flex-col p-5 hover:shadow-[var(--shadow-elegant)] transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="secondary" className="text-[10px] uppercase">
-                  {newsCategoryLabel(n.category, lang)}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(n.date).toLocaleDateString(lang === "pt" ? "pt-PT" : "en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                  })}
-                </span>
-              </div>
-              <h3 className="font-bold text-base leading-tight mb-2">{n.title[lang]}</h3>
-              <p className="text-sm text-muted-foreground flex-1">{n.summary[lang]}</p>
-              <Button asChild variant="link" size="sm" className="self-start mt-3 p-0">
-                <Link to="/news-alerts">{lang === "pt" ? "Ler mais →" : "Read more →"}</Link>
-              </Button>
-            </Card>
-          ))}
-        </div>
+        <HomeLiveNews lang={lang} />
       </section>
 
       {/* ============ OFFLINE + IMPACT ============ */}
@@ -913,5 +891,67 @@ function PersonalSection({ lang }: { lang: Lang }) {
         </Card>
       )}
     </section>
+  );
+}
+
+/** The 3 latest headlines of the same live feed as /news-alerts (Google News RSS, cached on the server). */
+function HomeLiveNews({ lang }: { lang: Lang }) {
+  const pt = lang === "pt";
+  const fetchNews = useServerFn(getLiveNews);
+  const q = useQuery({
+    queryKey: ["live-news", lang],
+    queryFn: () => fetchNews({ data: { lang } }),
+    staleTime: 10 * 60 * 1000,
+  });
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString(pt ? "pt-PT" : "en-GB", { day: "2-digit", month: "short" });
+
+  if (q.isPending) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+        {[0, 1, 2].map((k) => (
+          <div key={k} className="h-40 rounded-xl border bg-card animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+  const items = q.data?.status === "ok" ? q.data.items.slice(0, 3) : [];
+  if (!items.length) {
+    return (
+      <p
+        role="status"
+        className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground"
+      >
+        {pt
+          ? "Não foi possível carregar as notícias agora. Tenta novamente mais tarde."
+          : "Couldn't load the news right now. Please try again later."}
+      </p>
+    );
+  }
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((n) => (
+        <Card
+          key={n.link}
+          className="h-full flex flex-col p-5 hover:shadow-[var(--shadow-elegant)] transition-shadow"
+        >
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <Badge variant="secondary" className="text-[10px] uppercase truncate max-w-[60%]">
+              {n.source}
+            </Badge>
+            <span className="text-xs text-muted-foreground">{fmt(n.pubDate)}</span>
+          </div>
+          <h3 className="font-bold text-base leading-tight mb-2 flex-1 line-clamp-4">{n.title}</h3>
+          <Button asChild variant="link" size="sm" className="self-start mt-3 p-0">
+            <a href={n.link} target="_blank" rel="noopener noreferrer">
+              {pt ? "Ler notícia →" : "Read story →"}
+              <span className="sr-only">
+                {pt ? " (abre noutra janela)" : " (opens in a new window)"}
+              </span>
+            </a>
+          </Button>
+        </Card>
+      ))}
+    </div>
   );
 }

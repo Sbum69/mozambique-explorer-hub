@@ -752,6 +752,30 @@ export type Database = {
           },
         ]
       }
+      exchange_rates: {
+        Row: {
+          currency: string
+          fetched_at: string
+          per_usd: number
+          rate_date: string
+          source: string
+        }
+        Insert: {
+          currency: string
+          fetched_at?: string
+          per_usd: number
+          rate_date: string
+          source: string
+        }
+        Update: {
+          currency?: string
+          fetched_at?: string
+          per_usd?: number
+          rate_date?: string
+          source?: string
+        }
+        Relationships: []
+      }
       experience_availability: {
         Row: {
           accepts_new_bookings: boolean

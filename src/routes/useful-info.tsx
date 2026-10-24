@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useBackTarget } from "@/lib/nav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { CurrencyConverter } from "@/components/CurrencyConverter";
 
 export const Route = createFileRoute("/useful-info")({
   head: () => ({
@@ -64,7 +65,6 @@ const CATEGORIES: Category[] = [
     icon: Info,
     pills: [
       { label: l("Moeda", "Currency"), value: same("Metical (MZN)") },
-      { label: l("Câmbio", "Exchange rate"), value: same("~63 MZN/USD") },
       { label: l("Símbolo", "Symbol"), value: same("MT") },
     ],
     subs: [
@@ -692,6 +692,7 @@ function UsefulInfoPage() {
                             </div>
                           ))}
                         </div>
+                        {cat.id === "moeda" && <CurrencyConverter lang={lang} />}
                         <div className="grid md:grid-cols-2 gap-5">
                           {cat.subs.map((sub, idx) => (
                             <div key={idx}>
