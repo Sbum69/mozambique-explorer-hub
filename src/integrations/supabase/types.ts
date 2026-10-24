@@ -1058,6 +1058,9 @@ export type Database = {
           details: Json
           game_key: string
           id: string
+          location_accuracy_m: number | null
+          location_distance_m: number | null
+          location_verified: boolean | null
           proof_path: string | null
           step_ref: string
           user_id: string
@@ -1067,6 +1070,9 @@ export type Database = {
           details?: Json
           game_key: string
           id?: string
+          location_accuracy_m?: number | null
+          location_distance_m?: number | null
+          location_verified?: boolean | null
           proof_path?: string | null
           step_ref: string
           user_id: string
@@ -1076,6 +1082,9 @@ export type Database = {
           details?: Json
           game_key?: string
           id?: string
+          location_accuracy_m?: number | null
+          location_distance_m?: number | null
+          location_verified?: boolean | null
           proof_path?: string | null
           step_ref?: string
           user_id?: string
@@ -1362,6 +1371,8 @@ export type Database = {
           id: string
           request_id: string
           reward_id: string
+          used_at: string | null
+          used_by: string | null
           user_id: string
         }
         Insert: {
@@ -1371,6 +1382,8 @@ export type Database = {
           id?: string
           request_id: string
           reward_id: string
+          used_at?: string | null
+          used_by?: string | null
           user_id: string
         }
         Update: {
@@ -1380,6 +1393,8 @@ export type Database = {
           id?: string
           request_id?: string
           reward_id?: string
+          used_at?: string | null
+          used_by?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1409,6 +1424,7 @@ export type Database = {
       rewards: {
         Row: {
           active: boolean
+          business_id: string | null
           cost_points: number
           created_at: string
           description_en: string | null
@@ -1417,9 +1433,12 @@ export type Database = {
           stock: number | null
           title_en: string | null
           title_pt: string
+          updated_at: string
+          valid_until: string | null
         }
         Insert: {
           active?: boolean
+          business_id?: string | null
           cost_points: number
           created_at?: string
           description_en?: string | null
@@ -1428,9 +1447,12 @@ export type Database = {
           stock?: number | null
           title_en?: string | null
           title_pt: string
+          updated_at?: string
+          valid_until?: string | null
         }
         Update: {
           active?: boolean
+          business_id?: string | null
           cost_points?: number
           created_at?: string
           description_en?: string | null
@@ -1439,8 +1461,18 @@ export type Database = {
           stock?: number | null
           title_en?: string | null
           title_pt?: string
+          updated_at?: string
+          valid_until?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rewards_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       route_days: {
         Row: {
@@ -1541,8 +1573,14 @@ export type Database = {
           id: string
           lat: number | null
           lng: number | null
+          location_accuracy_m: number | null
+          location_distance_m: number | null
+          location_verified: boolean | null
           photo_path: string | null
           progress_id: string
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           route_stop_id: string
         }
         Insert: {
@@ -1550,8 +1588,14 @@ export type Database = {
           id?: string
           lat?: number | null
           lng?: number | null
+          location_accuracy_m?: number | null
+          location_distance_m?: number | null
+          location_verified?: boolean | null
           photo_path?: string | null
           progress_id: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           route_stop_id: string
         }
         Update: {
@@ -1559,8 +1603,14 @@ export type Database = {
           id?: string
           lat?: number | null
           lng?: number | null
+          location_accuracy_m?: number | null
+          location_distance_m?: number | null
+          location_verified?: boolean | null
           photo_path?: string | null
           progress_id?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           route_stop_id?: string
         }
         Relationships: [
@@ -2002,16 +2052,35 @@ export type Database = {
         Args: { _curated?: boolean; _input: Json; _route_id: string }
         Returns: string
       }
+      review_stop_proof: {
+        Args: { _approve: boolean; _progress_id: string; _route_stop_id: string }
+        Returns: string
+      }
       start_game_quiz: { Args: { _game_key: string }; Returns: Json }
       submit_game_step: {
         Args: {
+          _accuracy_m?: number
           _details: Json
           _game_key: string
+          _lat?: number
+          _lng?: number
           _proof_path: string
           _step_ref: string
         }
         Returns: Json
       }
+      submit_stop_proof: {
+        Args: {
+          _accuracy_m?: number
+          _lat?: number
+          _lng?: number
+          _photo_path: string
+          _progress_id: string
+          _route_stop_id: string
+        }
+        Returns: Json
+      }
+      validate_voucher: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
       app_role: "tourist" | "business_small" | "business_large" | "admin"

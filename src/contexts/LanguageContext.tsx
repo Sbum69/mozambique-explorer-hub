@@ -13,6 +13,91 @@ const dict = {
     en: "We couldn't read your profile and permissions. Check your connection and try again.",
   },
   retry: { pt: "Tentar novamente", en: "Try again" },
+  // games (games.tsx) — PT is the original text, EN its translation
+  gameTitle_g1: { pt: "Explorador de Story Stops", en: "Story Stop Explorer" },
+  gameDesc_g1: { pt: "Visita 5 Story Stops na cidade.", en: "Visit 5 Story Stops in the city." },
+  gameBadge_g1: { pt: "Caçador de Tesouros", en: "Treasure Hunter" },
+  gameDetail_g1: { pt: "Cada Story Stop revela uma história única do local. Visita pelo menos 5 para completar.", en: "Each Story Stop reveals a unique story about the place. Visit at least 5 to complete." },
+  gameTitle_g2: { pt: "Bairro Completo", en: "Whole Neighbourhood" },
+  gameDesc_g2: { pt: "Descobre todos os pontos de um bairro.", en: "Discover every point in a neighbourhood." },
+  gameBadge_g2: { pt: "Explorador Urbano", en: "Urban Explorer" },
+  gameDetail_g2: { pt: "Visita os 8 pontos marcados num bairro à tua escolha.", en: "Visit the 8 points marked in a neighbourhood of your choice." },
+  gameTitle_g3: { pt: "Rota das Praias", en: "Beach Route" },
+  gameDesc_g3: { pt: "Conhece 3 praias diferentes.", en: "Get to know 3 different beaches." },
+  gameBadge_g3: { pt: "Explorador de Praias", en: "Beach Explorer" },
+  gameDetail_g3: { pt: "Visita 3 praias distintas em Moçambique e regista a tua presença.", en: "Visit 3 different beaches in Mozambique and record your presence." },
+  gameTitle_g4: { pt: "Aventura na Ilha", en: "Island Adventure" },
+  gameDesc_g4: { pt: "Explora um arquipélago completo.", en: "Explore a whole archipelago." },
+  gameBadge_g4: { pt: "Insular", en: "Islander" },
+  gameDetail_g4: { pt: "Desbloqueia após completar 'Rota das Praias'.", en: "Unlocks after completing 'Beach Route'." },
+  gameTitle_g5: { pt: "Foto com História", en: "Photo with History" },
+  gameDesc_g5: { pt: "Tira fotos a 3 locais históricos.", en: "Take photos of 3 historic places." },
+  gameBadge_g5: { pt: "Fotógrafo Cultural", en: "Cultural Photographer" },
+  gameDetail_g5: { pt: "Documenta locais com importância histórica.", en: "Document places of historical importance." },
+  gameTitle_g6: { pt: "Sabores de Moçambique", en: "Flavours of Mozambique" },
+  gameDesc_g6: { pt: "Fotografa 3 pratos típicos.", en: "Photograph 3 typical dishes." },
+  gameBadge_g6: { pt: "Foodie", en: "Foodie" },
+  gameDetail_g6: { pt: "Matapa, caril de caranguejo, frango à zambeziana...", en: "Matapa, crab curry, Zambezian chicken..." },
+  gameTitle_g7: { pt: "Cores da Comunidade", en: "Colours of the Community" },
+  gameDesc_g7: { pt: "Captura 4 momentos comunitários.", en: "Capture 4 community moments." },
+  gameBadge_g7: { pt: "Olhar Atento", en: "Keen Eye" },
+  gameDetail_g7: { pt: "Sempre com permissão das pessoas fotografadas.", en: "Always with the permission of the people photographed." },
+  gameTitle_g8: { pt: "Retrato de Artesão", en: "Artisan Portrait" },
+  gameDesc_g8: { pt: "Conhece e fotografa um artesão.", en: "Meet and photograph an artisan." },
+  gameBadge_g8: { pt: "Embaixador", en: "Ambassador" },
+  gameDetail_g8: { pt: "Pede sempre permissão e oferece uma cópia da foto.", en: "Always ask permission and offer a copy of the photo." },
+  gameTitle_g9: { pt: "Amigo da Comunidade", en: "Friend of the Community" },
+  gameDesc_g9: { pt: "Participa numa experiência comunitária.", en: "Take part in a community experience." },
+  gameBadge_g9: { pt: "Amigo da Comunidade", en: "Friend of the Community" },
+  gameDetail_g9: { pt: "Reserva uma experiência local através da plataforma.", en: "Book a local experience through the platform." },
+  gameTitle_g10: { pt: "Mercado Vivo", en: "Living Market" },
+  gameDesc_g10: { pt: "Compra algo direto a um produtor local.", en: "Buy something directly from a local producer." },
+  gameBadge_g10: { pt: "Apoio Local", en: "Local Supporter" },
+  gameDetail_g10: { pt: "Visita um mercado tradicional e apoia produtores locais.", en: "Visit a traditional market and support local producers." },
+  gameTitle_g11: { pt: "Aprende uma Palavra", en: "Learn a Word" },
+  gameDesc_g11: { pt: "Aprende 3 palavras em línguas locais.", en: "Learn 3 words in local languages." },
+  gameBadge_g11: { pt: "Poliglota Local", en: "Local Polyglot" },
+  gameDetail_g11: { pt: "Escreve a palavra que aprendeste para registar a conquista.", en: "Write the word you learned to record the achievement." },
+  gameTitle_g12: { pt: "Saída de Pesca", en: "Fishing Trip" },
+  gameDesc_g12: { pt: "Participa numa pescaria tradicional.", en: "Take part in a traditional fishing outing." },
+  gameBadge_g12: { pt: "Pescador", en: "Fisher" },
+  gameDetail_g12: { pt: "Desbloqueia após 'Amigo da Comunidade'.", en: "Unlocks after 'Friend of the Community'." },
+  gameTitle_g13: { pt: "Quiz do Destino", en: "Destination Quiz" },
+  gameDesc_g13: { pt: "Responde a 7 perguntas sobre Moçambique.", en: "Answer 7 questions about Mozambique." },
+  gameBadge_g13: { pt: "Historiador", en: "Historian" },
+  gameDetail_g13: { pt: "Quiz com 10 perguntas embaralhadas, 7 por sessão.", en: "Quiz with 10 shuffled questions, 7 per session." },
+  gameTitle_g14: { pt: "Curiosidades de Moçambique", en: "Mozambique Curiosities" },
+  gameDesc_g14: { pt: "Descobre factos surpreendentes.", en: "Discover surprising facts." },
+  gameBadge_g14: { pt: "Curioso", en: "Curious Mind" },
+  gameDetail_g14: { pt: "Quiz curto com factos surpreendentes.", en: "Short quiz with surprising facts." },
+  gameTitle_g15: { pt: "Mestre das Línguas", en: "Language Master" },
+  gameDesc_g15: { pt: "Aprende vocabulário avançado.", en: "Learn advanced vocabulary." },
+  gameBadge_g15: { pt: "Linguista", en: "Linguist" },
+  gameDetail_g15: { pt: "Desbloqueia após 'Aprende uma Palavra'.", en: "Unlocks after 'Learn a Word'." },
+  gameTitle_g16: { pt: "Roteiro Completo", en: "Complete Route" },
+  gameDesc_g16: { pt: "Completa um roteiro de 6 paragens.", en: "Complete a route with 6 stops." },
+  gameBadge_g16: { pt: "Mestre dos Roteiros", en: "Route Master" },
+  gameDetail_g16: { pt: "Conclui todas as paragens no tempo previsto.", en: "Finish every stop within the planned time." },
+  gameTitle_g17: { pt: "Do Nascer ao Pôr-do-Sol", en: "From Sunrise to Sunset" },
+  gameDesc_g17: { pt: "Captura amanhecer e entardecer.", en: "Capture dawn and dusk." },
+  gameBadge_g17: { pt: "Madrugador", en: "Early Bird" },
+  gameDetail_g17: { pt: "Regista dois momentos do mesmo dia.", en: "Record two moments of the same day." },
+  gameTitle_g18: { pt: "Maratona Cultural", en: "Cultural Marathon" },
+  gameDesc_g18: { pt: "3 eventos culturais em 7 dias.", en: "3 cultural events in 7 days." },
+  gameBadge_g18: { pt: "Maratonista Cultural", en: "Cultural Marathoner" },
+  gameDetail_g18: { pt: "Desbloqueia após completar um 'Roteiro Completo'.", en: "Unlocks after completing a 'Complete Route'." },
+  gameTitle_g19: { pt: "Leva Alguém Contigo", en: "Bring Someone Along" },
+  gameDesc_g19: { pt: "Convida amigo a explorar.", en: "Invite a friend to explore." },
+  gameBadge_g19: { pt: "Companheiro", en: "Companion" },
+  gameDetail_g19: { pt: "Partilha um roteiro com alguém e visita juntos.", en: "Share a route with someone and visit together." },
+  gameTitle_g20: { pt: "Conta a Tua História", en: "Tell Your Story" },
+  gameDesc_g20: { pt: "Escreve 3 notas sobre lugares.", en: "Write 3 notes about places." },
+  gameBadge_g20: { pt: "Contador de Histórias", en: "Storyteller" },
+  gameDetail_g20: { pt: "Escreve a tua nota para um lugar visitado.", en: "Write your note for a place you visited." },
+  gameTitle_g21: { pt: "Embaixador Ekaya", en: "Ekaya Ambassador" },
+  gameDesc_g21: { pt: "Partilha 2 conquistas.", en: "Share 2 achievements." },
+  gameBadge_g21: { pt: "Embaixador", en: "Ambassador" },
+  gameDetail_g21: { pt: "Partilha conquistas e ajuda outros viajantes.", en: "Share achievements and help other travellers." },
   // generic
   appName: { pt: "Ekaya Explore", en: "Ekaya Explore" },
   tagline: {
@@ -254,6 +339,11 @@ const dict = {
 
 export type DictKey = keyof typeof dict;
 
+/** Pure dictionary lookup (used by the provider; also for code outside React and tests). */
+export function translate(key: DictKey, lang: Lang): string {
+  return dict[key]?.[lang] ?? key;
+}
+
 interface LangContextValue {
   lang: Lang;
   setLang: (l: Lang) => void;
@@ -276,7 +366,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, l);
   };
 
-  const t = (key: DictKey) => dict[key]?.[lang] ?? key;
+  const t = (key: DictKey) => translate(key, lang);
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>

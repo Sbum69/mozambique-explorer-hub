@@ -16,6 +16,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getOwnerBookings } from "@/lib/dashboard.functions";
 import { bookingMetrics, bookingHasStarted } from "@/lib/business-dashboard";
+import { BusinessRewards } from "@/components/BusinessRewards";
 import { requireRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/business-dashboard")({
@@ -233,6 +234,7 @@ function BusinessDashboardPage() {
             </ul>
           )}
         </section>
+        <BusinessRewards />
       </main>
 
       <Dialog open={detail !== null} onOpenChange={(open) => { if (!open) setDetail(null); }}>

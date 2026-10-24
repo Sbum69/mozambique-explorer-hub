@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Circle, ImageIcon, MapPin, RefreshCw, Search } from "lucide-react";
+import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -7,14 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { fetchAllRoutesAdmin, proofUrl, routeStopCount, type ItineraryRoute } from "@/lib/routes";
+import { fetchAllRoutesAdmin, proofUrl, reviewStopProof, routeStopCount, type ItineraryRoute } from "@/lib/routes";
+import { PROOF_STATUS_LABEL, type ProofReviewStatus } from "@/lib/geo";
+import { useLang } from "@/contexts/LanguageContext";
 
 interface StopDone {
   stopId: string;
   photoPath: string | null;
   completedAt: string;
-  lat: number | null;
-  lng: number | null;
+  reviewStatus: ProofReviewStatus;
+  locationVerified: boolean | null;
+  distanceM: number | null;
+  accuracyM: number | null;
 }
 
 interface ProgressRow {
@@ -38,7 +43,7 @@ async function loadProgress(): Promise<ProgressRow[]> {
     fetchAllRoutesAdmin(),
     supabase
       .from("route_progress")
-      .select("id, route_id, status, started_at, completed_at, profiles:user_id(display_name), route_stop_progress(route_stop_id, photo_path, completed_at, lat, lng)")
+      .select("id, route_id, status, started_at, completed_at, profiles:user_id(display_name), route_stop_progress(route_stop_id, photo_path, completed_at, review_status, location_verified, location_distance_m, location_accuracy_m)")
       .order("started_at", { ascending: false }),
   ]);
   if (res.error) throw new Error(res.error.message);
@@ -47,12 +52,19 @@ async function loadProgress(): Promise<ProgressRow[]> {
   for (const p of (res.data ?? []) as never as Array<{
     id: string; route_id: string; status: string; started_at: string; completed_at: string | null;
     profiles: { display_name: string | null } | null;
-    route_stop_progress: { route_stop_id: string; photo_path: string | null; completed_at: string; lat: number | null; lng: number | null }[];
+    route_stop_progress: {
+      route_stop_id: string; photo_path: string | null; completed_at: string; review_status: string;
+      location_verified: boolean | null; location_distance_m: number | null; location_accuracy_m: number | null;
+    }[];
   }>) {
     const route = byId.get(p.route_id);
     if (!route) continue;
     const done = new Map<string, StopDone>(
-      (p.route_stop_progress ?? []).map((s) => [s.route_stop_id, { stopId: s.route_stop_id, photoPath: s.photo_path, completedAt: s.completed_at, lat: s.lat, lng: s.lng }]),
+      (p.route_stop_progress ?? []).map((s) => [s.route_stop_id, {
+        stopId: s.route_stop_id, photoPath: s.photo_path, completedAt: s.completed_at,
+        reviewStatus: s.review_status as ProofReviewStatus, locationVerified: s.location_verified,
+        distanceM: s.location_distance_m, accuracyM: s.location_accuracy_m,
+      }]),
     );
     const total = routeStopCount(route);
     const dates = [p.started_at, p.completed_at, ...[...done.values()].map((d) => d.completedAt)].filter(Boolean) as string[];
@@ -192,16 +204,45 @@ function ProgressDetail({ row, onBack }: { row: ProgressRow; onBack: () => void 
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             {day.isUnassigned ? "Distribuição por dias a validar" : `Dia ${day.dayNumber}${day.title ? ` — ${day.title}` : ""}`}
           </h3>
-          {day.stops.map((stop) => <StopLine key={stop.id} title={stop.title} done={row.done.get(stop.id)} />)}
+          {day.stops.map((stop) => <StopLine key={stop.id} progressId={row.id} title={stop.title} done={row.done.get(stop.id)} />)}
         </div>
       ))}
     </div>
   );
 }
 
-function StopLine({ title, done }: { title: string; done?: StopDone }) {
+/** What the server's location check concluded, in plain words (the tourist's coordinates are never stored). */
+function locationText(done: StopDone, pt: boolean): string {
+  if (done.locationVerified === null) {
+    return pt ? "Paragem sem coordenadas de referência: revisão manual." : "Stop without reference coordinates: manual review.";
+  }
+  const dist = done.distanceM != null ? `${Math.round(done.distanceM)} m` : "—";
+  const acc = done.accuracyM != null ? `±${Math.round(done.accuracyM)} m` : pt ? "sem localização" : "no location";
+  return done.locationVerified
+    ? (pt ? `Localização verificada: a ${dist} do local (${acc}).` : `Location verified: ${dist} from the place (${acc}).`)
+    : (pt ? `Localização não verificada: distância ${dist}, precisão ${acc}.` : `Location not verified: distance ${dist}, accuracy ${acc}.`);
+}
+
+function StopLine({ progressId, title, done }: { progressId: string; title: string; done?: StopDone }) {
+  const { lang } = useLang();
+  const pt = lang === "pt";
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<ProofReviewStatus | undefined>(done?.reviewStatus);
+  const [deciding, setDeciding] = useState(false);
+  const decide = async (approve: boolean) => {
+    if (!done) return;
+    setDeciding(true);
+    try {
+      setStatus(await reviewStopProof(progressId, done.stopId, approve));
+      toast.success(approve ? (pt ? "Prova aprovada." : "Proof approved.") : (pt ? "Prova rejeitada." : "Proof rejected."));
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "";
+      toast.error(m.includes("NOT_PENDING") ? (pt ? "Esta prova já foi revista." : "This proof was already reviewed.") : (pt ? "Não foi possível rever a prova." : "Could not review the proof."));
+    } finally {
+      setDeciding(false);
+    }
+  };
   const show = async () => {
     if (!done?.photoPath) return;
     const u = await proofUrl(done.photoPath);
@@ -216,10 +257,19 @@ function StopLine({ title, done }: { title: string; done?: StopDone }) {
           {done ? (
             <div className="text-xs text-muted-foreground space-y-1 mt-1">
               <p>Concluída em {fmt(done.completedAt)}</p>
-              {done.lat != null && done.lng != null ? (
-                <p className="flex items-center gap-1"><MapPin className="size-3" />{Number(done.lat).toFixed(5)}, {Number(done.lng).toFixed(5)} (fornecida pelo dispositivo)</p>
-              ) : (
-                <p>Localização não fornecida</p>
+              <p className="flex items-center gap-1"><MapPin className="size-3" />{locationText(done, pt)}</p>
+              {status && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={status === "rejected" ? "destructive" : status === "pending" ? "secondary" : "default"}>
+                    {pt ? "Prova: " : "Proof: "}{PROOF_STATUS_LABEL[status][lang]}
+                  </Badge>
+                  {status === "pending" && (
+                    <>
+                      <Button size="sm" disabled={deciding} onClick={() => void decide(true)}>{pt ? "Aprovar" : "Approve"}</Button>
+                      <Button size="sm" variant="outline" disabled={deciding} onClick={() => void decide(false)}>{pt ? "Rejeitar" : "Reject"}</Button>
+                    </>
+                  )}
+                </div>
               )}
               {done.photoPath ? (
                 url ? (
