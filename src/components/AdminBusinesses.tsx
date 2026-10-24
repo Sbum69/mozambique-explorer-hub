@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 type Status = "pending" | "approved" | "rejected" | "suspended";
 interface Row {
@@ -206,6 +207,7 @@ export function AdminBusinessesModal({ onClose }: { onClose: () => void }) {
   const [q, setQ] = useState("");
   const [prov, setProv] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [confirm, confirmDialog] = useConfirm();
   const [rejecting, setRejecting] = useState<Row | null>(null);
   const [reason, setReason] = useState("");
   const [suspending, setSuspending] = useState<{ row: Row; open: number | null } | null>(null);
@@ -285,6 +287,7 @@ export function AdminBusinessesModal({ onClose }: { onClose: () => void }) {
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        {confirmDialog}
         <DialogHeader>
           <DialogTitle>{t.title}</DialogTitle>
           <DialogDescription>{t.desc}</DialogDescription>
@@ -394,7 +397,10 @@ export function AdminBusinessesModal({ onClose }: { onClose: () => void }) {
                       <Button
                         size="sm"
                         disabled={busy === r.id}
-                        onClick={() => window.confirm(t.confirmApprove) && decide(r, "approved")}
+                        onClick={async () => {
+                          if (await confirm({ title: t.confirmApprove, confirmLabel: t.approve }))
+                            await decide(r, "approved");
+                        }}
                       >
                         {busy === r.id ? (
                           <Loader2 className="size-4 animate-spin" />

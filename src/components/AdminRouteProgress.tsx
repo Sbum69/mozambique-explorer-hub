@@ -53,18 +53,81 @@ interface ProgressRow {
   total: number;
 }
 
-const STATUS_LABEL = {
-  not_started: "Não iniciado",
-  in_progress: "Em progresso",
-  completed: "Concluído",
-} as const;
 const STATUS_VARIANT = {
   not_started: "outline",
   in_progress: "secondary",
   completed: "default",
 } as const;
-const fmt = (d: string) =>
-  new Date(d).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" });
+const fmtIn = (lang: "pt" | "en") => (d: string) =>
+  new Date(d).toLocaleString(lang === "pt" ? "pt-PT" : "en-GB", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+
+const TXT = {
+  pt: {
+    status: { not_started: "Não iniciado", in_progress: "Em progresso", completed: "Concluído" },
+    title: "Progresso e provas dos roteiros",
+    desc: "Auditoria dos roteiros realizados pelos utilizadores. As fotografias são privadas e abertas com links temporários.",
+    user: "Utilizador",
+    searchUser: "Procurar utilizador",
+    routeOrCode: "Roteiro ou código",
+    searchRoute: "Procurar roteiro",
+    province: "Província",
+    allProvinces: "Todas as províncias",
+    state: "Estado",
+    allStates: "Todos os estados",
+    loading: "A carregar…",
+    error: "Não foi possível carregar o progresso.",
+    retry: "Tentar novamente",
+    empty: "Sem progresso registado.",
+    noProvince: "Sem província",
+    noName: "Utilizador sem nome",
+    started: "Início",
+    lastUpdate: "Última atualização",
+    back: "Voltar à lista",
+    stops: "paragens",
+    unassigned: "Distribuição por dias a validar",
+    day: (n: number) => `Dia ${n}`,
+    completedOn: "Concluída em",
+    viewProof: "Ver prova fotográfica",
+    proofAlt: (s: string) => `Prova fotográfica — ${s}`,
+    noProof: "Sem prova fotográfica",
+    photoFailed: "Não foi possível abrir a fotografia.",
+    notDone: "Não concluída",
+  },
+  en: {
+    status: { not_started: "Not started", in_progress: "In progress", completed: "Completed" },
+    title: "Route progress and proofs",
+    desc: "Audit of the routes users have done. Photos are private and open through temporary links.",
+    user: "User",
+    searchUser: "Search user",
+    routeOrCode: "Route or code",
+    searchRoute: "Search route",
+    province: "Province",
+    allProvinces: "All provinces",
+    state: "Status",
+    allStates: "All statuses",
+    loading: "Loading…",
+    error: "Could not load progress.",
+    retry: "Try again",
+    empty: "No progress recorded.",
+    noProvince: "No province",
+    noName: "Unnamed user",
+    started: "Started",
+    lastUpdate: "Last update",
+    back: "Back to list",
+    stops: "stops",
+    unassigned: "Day distribution to validate",
+    day: (n: number) => `Day ${n}`,
+    completedOn: "Completed on",
+    viewProof: "View photo proof",
+    proofAlt: (s: string) => `Photo proof — ${s}`,
+    noProof: "No photo proof",
+    photoFailed: "Could not open the photo.",
+    notDone: "Not completed",
+  },
+} as const;
 
 /** Admin-only audit of route progress + private photo proofs (RLS grants admins read; photos via signed URLs). */
 async function loadProgress(): Promise<ProgressRow[]> {
@@ -127,7 +190,7 @@ async function loadProgress(): Promise<ProgressRow[]> {
           : "in_progress";
     rows.push({
       id: p.id,
-      userName: p.profiles?.display_name || "Utilizador sem nome",
+      userName: p.profiles?.display_name || "",
       route,
       startedAt: p.started_at,
       lastUpdate: dates.sort().at(-1) ?? p.started_at,
@@ -140,6 +203,9 @@ async function loadProgress(): Promise<ProgressRow[]> {
 }
 
 export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
+  const { lang } = useLang();
+  const t = TXT[lang];
+  const fmt = fmtIn(lang);
   const [rows, setRows] = useState<ProgressRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -161,9 +227,11 @@ export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
 
   const provinces = useMemo(() => {
     const m = new Map<string, string>();
-    rows.forEach((r) => r.route.province && m.set(r.route.province.code, r.route.province.name.pt));
+    rows.forEach(
+      (r) => r.route.province && m.set(r.route.province.code, r.route.province.name[lang]),
+    );
     return [...m.entries()];
-  }, [rows]);
+  }, [rows, lang]);
 
   const filtered = rows.filter((r) => {
     const rq = routeQ.trim().toLowerCase();
@@ -185,36 +253,33 @@ export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Progresso e provas dos roteiros</DialogTitle>
-              <DialogDescription>
-                Auditoria dos roteiros realizados pelos utilizadores. As fotografias são privadas e
-                abertas com links temporários.
-              </DialogDescription>
+              <DialogTitle>{t.title}</DialogTitle>
+              <DialogDescription>{t.desc}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-2 sm:grid-cols-4">
               <div className="relative">
                 <Search className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-8"
-                  placeholder="Utilizador"
-                  aria-label="Procurar utilizador"
+                  placeholder={t.user}
+                  aria-label={t.searchUser}
                   value={userQ}
                   onChange={(e) => setUserQ(e.target.value)}
                 />
               </div>
               <Input
-                placeholder="Roteiro ou código"
-                aria-label="Procurar roteiro"
+                placeholder={t.routeOrCode}
+                aria-label={t.searchRoute}
                 value={routeQ}
                 onChange={(e) => setRouteQ(e.target.value)}
               />
               <select
-                aria-label="Província"
-                className="h-9 rounded-md border bg-background px-2 text-sm"
+                aria-label={t.province}
+                className="h-9 rounded-md border border-input bg-background text-foreground px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
               >
-                <option value="all">Todas as províncias</option>
+                <option value="all">{t.allProvinces}</option>
                 {provinces.map(([code, name]) => (
                   <option key={code} value={code}>
                     {name}
@@ -222,30 +287,30 @@ export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
                 ))}
               </select>
               <select
-                aria-label="Estado"
-                className="h-9 rounded-md border bg-background px-2 text-sm"
+                aria-label={t.state}
+                className="h-9 rounded-md border border-input bg-background text-foreground px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as typeof status)}
               >
-                <option value="all">Todos os estados</option>
-                <option value="in_progress">Em progresso</option>
-                <option value="completed">Concluído</option>
+                <option value="all">{t.allStates}</option>
+                <option value="in_progress">{t.status.in_progress}</option>
+                <option value="completed">{t.status.completed}</option>
               </select>
             </div>
             {loading ? (
-              <p className="text-sm text-muted-foreground py-6 text-center">A carregar…</p>
+              <p className="text-sm text-muted-foreground py-6 text-center" aria-busy="true">
+                {t.loading}
+              </p>
             ) : error ? (
-              <div className="text-center py-6 space-y-2">
-                <p className="text-sm text-destructive">Não foi possível carregar o progresso.</p>
-                <Button size="sm" variant="outline" onClick={() => setTick((t) => t + 1)}>
+              <div className="text-center py-6 space-y-2" role="alert">
+                <p className="text-sm text-destructive">{t.error}</p>
+                <Button size="sm" variant="outline" onClick={() => setTick((n) => n + 1)}>
                   <RefreshCw className="size-4" />
-                  Tentar novamente
+                  {t.retry}
                 </Button>
               </div>
             ) : filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-6 text-center">
-                Sem progresso registado.
-              </p>
+              <p className="text-sm text-muted-foreground py-6 text-center">{t.empty}</p>
             ) : (
               <div className="space-y-2">
                 {filtered.map((r) => {
@@ -254,17 +319,17 @@ export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
                     <button
                       key={r.id}
                       onClick={() => setOpen(r)}
-                      className="w-full text-left rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+                      className="w-full text-left rounded-lg border p-3 hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <div className="flex flex-wrap items-center gap-2 justify-between">
                         <div className="min-w-0">
-                          <p className="font-semibold truncate">{r.userName}</p>
+                          <p className="font-semibold truncate">{r.userName || t.noName}</p>
                           <p className="text-sm text-muted-foreground truncate">
                             {r.route.title} · {r.route.code} ·{" "}
-                            {r.route.province?.name.pt ?? "Sem província"}
+                            {r.route.province?.name[lang] ?? t.noProvince}
                           </p>
                         </div>
-                        <Badge variant={STATUS_VARIANT[r.status]}>{STATUS_LABEL[r.status]}</Badge>
+                        <Badge variant={STATUS_VARIANT[r.status]}>{t.status[r.status]}</Badge>
                       </div>
                       <div className="mt-2 flex items-center gap-3">
                         <Progress value={pct} className="h-2 flex-1" />
@@ -273,7 +338,7 @@ export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Início: {fmt(r.startedAt)} · Última atualização: {fmt(r.lastUpdate)}
+                        {t.started}: {fmt(r.startedAt)} · {t.lastUpdate}: {fmt(r.lastUpdate)}
                       </p>
                     </button>
                   );
@@ -288,31 +353,35 @@ export function AdminRouteProgressModal({ onClose }: { onClose: () => void }) {
 }
 
 function ProgressDetail({ row, onBack }: { row: ProgressRow; onBack: () => void }) {
+  const { lang } = useLang();
+  const t = TXT[lang];
+  const fmt = fmtIn(lang);
   const pct = row.total ? Math.round((row.done.size / row.total) * 100) : 0;
   return (
     <div className="space-y-4">
       <Button variant="ghost" size="sm" onClick={onBack}>
         <ArrowLeft className="size-4" />
-        Voltar à lista
+        {t.back}
       </Button>
       <DialogHeader>
         <DialogTitle>{row.route.title}</DialogTitle>
         <DialogDescription>
-          {row.route.code} · {row.route.province?.name.pt ?? "Sem província"}
+          {row.route.code} · {row.route.province?.name[lang] ?? t.noProvince}
         </DialogDescription>
       </DialogHeader>
       <div className="rounded-lg border p-3 space-y-2 text-sm">
         <p>
-          <span className="text-muted-foreground">Utilizador:</span> <strong>{row.userName}</strong>
+          <span className="text-muted-foreground">{t.user}:</span>{" "}
+          <strong>{row.userName || t.noName}</strong>
         </p>
         <p>
-          <span className="text-muted-foreground">Estado:</span> {STATUS_LABEL[row.status]} · Início{" "}
-          {fmt(row.startedAt)}
+          <span className="text-muted-foreground">{t.state}:</span> {t.status[row.status]} ·{" "}
+          {t.started} {fmt(row.startedAt)}
         </p>
         <div className="flex items-center gap-3">
           <Progress value={pct} className="h-2.5 flex-1" />
           <span className="font-medium">
-            {row.done.size}/{row.total} paragens · {pct}%
+            {row.done.size}/{row.total} {t.stops} · {pct}%
           </span>
         </div>
       </div>
@@ -320,8 +389,8 @@ function ProgressDetail({ row, onBack }: { row: ProgressRow; onBack: () => void 
         <div key={day.id} className="space-y-2">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             {day.isUnassigned
-              ? "Distribuição por dias a validar"
-              : `Dia ${day.dayNumber}${day.title ? ` — ${day.title}` : ""}`}
+              ? t.unassigned
+              : `${t.day(day.dayNumber)}${day.title ? ` — ${day.title}` : ""}`}
           </h3>
           {day.stops.map((stop) => (
             <StopLine
@@ -371,6 +440,8 @@ function StopLine({
 }) {
   const { lang } = useLang();
   const pt = lang === "pt";
+  const t = TXT[lang];
+  const fmt = fmtIn(lang);
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [status, setStatus] = useState<ProofReviewStatus | undefined>(done?.reviewStatus);
@@ -422,7 +493,9 @@ function StopLine({
           <p className="font-medium">{title}</p>
           {done ? (
             <div className="text-xs text-muted-foreground space-y-1 mt-1">
-              <p>Concluída em {fmt(done.completedAt)}</p>
+              <p>
+                {t.completedOn} {fmt(done.completedAt)}
+              </p>
               <p className="flex items-center gap-1">
                 <MapPin className="size-3" />
                 {locationText(done, pt)}
@@ -462,22 +535,22 @@ function StopLine({
                 url ? (
                   <img
                     src={url}
-                    alt={`Prova fotográfica — ${title}`}
+                    alt={t.proofAlt(title)}
                     className="mt-2 max-h-64 rounded-md border object-contain"
                   />
                 ) : (
                   <Button size="sm" variant="outline" className="mt-1" onClick={show}>
                     <ImageIcon className="size-4" />
-                    Ver prova fotográfica
+                    {t.viewProof}
                   </Button>
                 )
               ) : (
-                <p>Sem prova fotográfica</p>
+                <p>{t.noProof}</p>
               )}
-              {failed && <p className="text-destructive">Não foi possível abrir a fotografia.</p>}
+              {failed && <p className="text-destructive">{t.photoFailed}</p>}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">Não concluída</p>
+            <p className="text-xs text-muted-foreground">{t.notDone}</p>
           )}
         </div>
       </div>
