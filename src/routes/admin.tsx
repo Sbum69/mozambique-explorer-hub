@@ -159,8 +159,15 @@ const TONE_TEXT = {
 } as const;
 
 const CHIP = "text-xs px-2 py-0.5 rounded-full font-semibold";
-const FIELD =
-  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
+/** Field look without a width, for inline toolbars; FIELD adds w-full for stacked forms. */
+const FIELD_BASE =
+  "rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
+const FIELD = `${FIELD_BASE} w-full`;
+/** Approve / reject colours: white text ≥ 4.5:1 (green-700 4.9, red-700 6.4, red-600 4.8 in dark) and a
+ *  button edge ≥ 3:1 against the dark card. The label always says the action, not only the colour. */
+const APPROVE_BTN = "bg-green-700 text-white hover:bg-green-800 focus-visible:ring-green-700";
+const REJECT_BTN =
+  "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700 dark:bg-red-600 dark:hover:bg-red-700";
 
 const ROLE_COLOR: Record<PlatformRole, string> = {
   tourist: "bg-blue-700",
@@ -698,7 +705,7 @@ function UsersModal({ onClose }: { onClose: () => void }) {
           value={filter}
           onChange={(e) => setFilter(e.target.value as typeof filter)}
           aria-label={t.filter}
-          className={`${FIELD} sm:w-auto`}
+          className={`${FIELD_BASE} w-full sm:w-auto`}
         >
           <option value="all">{t.all}</option>
           <option value="tourist">{t.tourist}</option>
@@ -1058,7 +1065,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
               value={pickerDay}
               onChange={(e) => setPickerDay(Number(e.target.value))}
               aria-label={t.dayLabel}
-              className={`${FIELD} w-auto`}
+              className={FIELD_BASE}
             >
               {days.map((_, index) => (
                 <option key={index} value={index}>
@@ -1070,7 +1077,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
               value={pickerValue}
               onChange={(e) => setPickerValue(e.target.value)}
               aria-label={t.pickStop}
-              className={`${FIELD} flex-1 min-w-[220px] w-auto`}
+              className={`${FIELD_BASE} flex-1 min-w-[220px]`}
             >
               <option value="">{t.pickStop}</option>
               {destinations.map((d) => (
@@ -1178,7 +1185,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t.search}
               aria-label={t.search}
-              className={`${FIELD} flex-1 min-w-[200px] w-auto`}
+              className={`${FIELD_BASE} flex-1 min-w-[200px]`}
             />
             <FilterPill active={onlyPending} onClick={() => setOnlyPending((v) => !v)}>
               {t.pending(pendingRoutes)}
@@ -1187,7 +1194,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
               value={provinceFilter}
               onChange={(e) => setProvinceFilter(e.target.value)}
               aria-label={t.provinceFilter}
-              className={`${FIELD} w-auto`}
+              className={FIELD_BASE}
             >
               <option value="all">{t.allProvinces}</option>
               {provinces.map((p) => (
@@ -1260,7 +1267,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
                       {route.reviewStatus !== "approved" && (
                         <Button
                           size="sm"
-                          className="h-7 px-2 text-xs"
+                          className={`h-7 px-2 text-xs ${APPROVE_BTN}`}
                           onClick={async () => {
                             if (
                               !(await confirm({
@@ -1281,8 +1288,7 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
                       {route.reviewStatus === "pending" && (
                         <Button
                           size="sm"
-                          variant="destructive"
-                          className="h-7 px-2 text-xs"
+                          className={`h-7 px-2 text-xs ${REJECT_BTN}`}
                           onClick={async () => {
                             const answer = await confirm({
                               title: t.rejectQ(route.title),
@@ -1475,8 +1481,7 @@ function CommunityModerationModal({ onClose }: { onClose: () => void }) {
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button
                   size="sm"
-                  variant="outline"
-                  className={action}
+                  className={`${action} ${APPROVE_BTN}`}
                   disabled={busy === p.id}
                   onClick={() => void moderate(p.id, "published")}
                 >
@@ -1484,8 +1489,7 @@ function CommunityModerationModal({ onClose }: { onClose: () => void }) {
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className={action}
+                  className={`${action} ${REJECT_BTN}`}
                   disabled={busy === p.id}
                   onClick={() => void moderate(p.id, "rejected")}
                 >
@@ -1994,7 +1998,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
           </div>
           <p className="text-sm text-muted-foreground">{t.count(visible.length)}</p>
           <select
-            className={`${FIELD} w-auto py-1.5`}
+            className={`${FIELD_BASE} py-1.5`}
             aria-label={t.provinceFilter}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -2070,7 +2074,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
                 {it.status !== "approved" && (
                   <Button
                     size="sm"
-                    className="h-7 px-2 text-xs"
+                    className={`h-7 px-2 text-xs ${APPROVE_BTN}`}
                     onClick={() => void decide(it, "approved")}
                   >
                     {t.approve}
@@ -2079,8 +2083,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
                 {it.status === "pending" && (
                   <Button
                     size="sm"
-                    variant="destructive"
-                    className="h-7 px-2 text-xs"
+                    className={`h-7 px-2 text-xs ${REJECT_BTN}`}
                     onClick={() => void decide(it, "rejected")}
                   >
                     {t.reject}
