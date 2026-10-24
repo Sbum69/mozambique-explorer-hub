@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminBusinessesModal } from "@/components/AdminBusinesses";
 import { AdminRewardsModal } from "@/components/AdminRewards";
+import { AdminBookingsModal } from "@/components/AdminBookings";
+import { AdminExperiencesModal } from "@/components/AdminExperiences";
+import { adminErrorText, setUserRole, type ManagedRole } from "@/lib/admin";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,20 +17,13 @@ import {
   Shield,
   LogOut,
   Gift,
-  TrendingUp,
   Clock,
-  Download,
   MapPin,
-  Award,
   CheckCircle,
   XCircle,
   Eye,
   Users,
   FileText,
-  Settings,
-  BarChart3,
-  Heart,
-  AlertCircle,
   Search,
   Mail,
   Store,
@@ -35,12 +31,7 @@ import {
   Edit,
   Trash2,
   X,
-  Building,
-  Phone,
-  Upload,
-  DollarSign,
   Activity,
-  Tag,
   MessageSquare,
   Compass,
   Loader2,
@@ -114,15 +105,15 @@ type ModalKey =
   | "users"
   | "routes"
   | "provinces"
-  | "addBusiness"
   | "reports"
-  | "settings"
   | "community"
   | "communityReports"
   | "communityExperiences"
   | "routeProgress"
   | "businesses"
-  | "rewards";
+  | "rewards"
+  | "bookings"
+  | "experiences";
 
 
 const ROLE_LABEL: Record<PlatformRole, string> = {
@@ -165,6 +156,8 @@ function AdminPage() {
   const quickActions = [
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users, color: "text-blue-600 bg-blue-100" },
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store, color: "text-amber-600 bg-amber-100" },
+    { key: "bookings" as const, label: "Reservas", icon: Clock, color: "text-sky-600 bg-sky-100" },
+    { key: "experiences" as const, label: "Atividades Comerciais", icon: Activity, color: "text-lime-600 bg-lime-100" },
     { key: "routes" as const, label: "Gerir Roteiros", icon: Compass, color: "text-indigo-600 bg-indigo-100" },
     { key: "routeProgress" as const, label: "Progresso e Provas", icon: Compass, color: "text-teal-600 bg-teal-100" },
     { key: "rewards" as const, label: "Recompensas", icon: Gift, color: "text-rose-600 bg-rose-100" },
@@ -173,9 +166,7 @@ function AdminPage() {
     { key: "communityExperiences" as const, label: "Experiências Comunitárias", icon: Users, color: "text-emerald-600 bg-emerald-100" },
     { key: "provinces" as const, label: "Gerir Províncias", icon: MapPin, color: "text-orange-600 bg-orange-100" },
 
-    { key: "addBusiness" as const, label: "Adicionar Negócio", icon: MapPin, color: "text-green-600 bg-green-100" },
     { key: "reports" as const, label: "Relatórios", icon: FileText, color: "text-purple-600 bg-purple-100" },
-    { key: "settings" as const, label: "Configurações", icon: Settings, color: "text-gray-600 bg-gray-100" },
   ];
 
 
@@ -220,7 +211,7 @@ function AdminPage() {
             <section className="space-y-3"><h3 className="font-bold">{pt ? "Aprovações de negócios pendentes" : "Pending business approvals"}</h3><p>{summary.data?.pending ?? "—"}</p><Button variant="outline" onClick={() => setActiveModal("businesses")}>{pt ? "Aprovação de Negócios" : "Business approvals"}</Button></section>
             <section className="space-y-3"><h3 className="font-bold">{pt ? "Negócios recentes" : "Recent businesses"}</h3>{summary.data?.recent.length === 0 && <p>{pt ? "Sem negócios registados." : "No registered businesses."}</p>}<ul className="divide-y">{summary.data?.recent.map(b => <li key={b.id} className="py-3"><p className="font-medium break-words">{b.name}</p><p className="text-sm text-muted-foreground">{new Date(b.created_at).toLocaleString(pt ? "pt-PT" : "en-GB")} · {({ pending:pt ? "Pendente" : "Pending", approved:pt ? "Aprovado" : "Approved", rejected:pt ? "Rejeitado" : "Rejected", suspended:pt ? "Suspenso" : "Suspended" })[b.status]}</p></li>)}</ul></section>
           </div>
-          <section className="space-y-3"><h3 className="font-bold">{pt ? "Ações rápidas" : "Quick actions"}</h3><div className="grid gap-2">{quickActions.map(a => <Button key={a.key} variant="outline" className="justify-start h-auto py-3 whitespace-normal text-left" onClick={() => setActiveModal(a.key)}><a.icon className="size-4 shrink-0" />{pt ? a.label : ({ users:"Manage users",businesses:"Business approvals",routes:"Manage routes",routeProgress:"Progress and proofs",rewards:"Rewards",community:"Community moderation",communityReports:"Reports",communityExperiences:"Community experiences",provinces:"Manage provinces",addBusiness:"Add business",reports:"Summary",settings:"Settings" })[a.key]}</Button>)}</div></section>
+          <section className="space-y-3"><h3 className="font-bold">{pt ? "Ações rápidas" : "Quick actions"}</h3><div className="grid gap-2">{quickActions.map(a => <Button key={a.key} variant="outline" className="justify-start h-auto py-3 whitespace-normal text-left" onClick={() => setActiveModal(a.key)}><a.icon className="size-4 shrink-0" />{pt ? a.label : ({ users:"Manage users",businesses:"Business approvals",routes:"Manage routes",routeProgress:"Progress and proofs",rewards:"Rewards",community:"Community moderation",communityReports:"Reports",communityExperiences:"Community experiences",provinces:"Manage provinces",reports:"Summary",bookings:"Bookings",experiences:"Commercial activities" })[a.key]}</Button>)}</div></section>
         </div>
       </div>
 
@@ -230,26 +221,16 @@ function AdminPage() {
         {activeModal === "routeProgress" && <AdminRouteProgressModal onClose={() => setActiveModal(null)} />}
         {activeModal === "businesses" && <AdminBusinessesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "rewards" && <AdminRewardsModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "bookings" && <AdminBookingsModal onClose={() => setActiveModal(null)} />}
+        {activeModal === "experiences" && <AdminExperiencesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "community" && <CommunityModerationModal onClose={() => setActiveModal(null)} />}
         {activeModal === "communityReports" && <CommunityReportsModal onClose={() => setActiveModal(null)} />}
 
 
         {activeModal === "communityExperiences" && <CommunityExperiencesModal onClose={() => setActiveModal(null)} />}
         {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
-        {activeModal === "addBusiness" && <AddBusinessModal onClose={() => setActiveModal(null)} />}
         {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} /> }
-        {activeModal === "settings" && <SettingsModal onClose={() => setActiveModal(null)} />}
       </AnimatePresence>
-    </div>
-  );
-}
-
-function GovFeature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
-  return (
-    <div className="rounded-xl bg-white/10 backdrop-blur p-4">
-      <div className="size-10 rounded-lg bg-white/20 flex items-center justify-center">{icon}</div>
-      <p className="mt-3 font-semibold">{title}</p>
-      <p className="text-sm text-white/80 mt-1">{desc}</p>
     </div>
   );
 }
@@ -417,7 +398,35 @@ function ProvincesModal({ onClose }: { onClose: () => void }) {
 
 /* ---------- Users modal ---------- */
 
+const MANAGED_ROLES: ManagedRole[] = ["business_small", "business_large", "admin"];
+const ROLE_TXT = {
+  pt: { roles: "Papéis", grant: "Dar", revoke: "Retirar", updated: "Papéis atualizados." },
+  en: { roles: "Roles", grant: "Grant", revoke: "Remove", updated: "Roles updated." },
+} as const;
+const ROLE_LABEL_EN: Record<PlatformRole, string> = {
+  tourist: "Tourist",
+  business_small: "Small business",
+  business_large: "Large business",
+  admin: "Administrator",
+};
+
 function UsersModal({ onClose }: { onClose: () => void }) {
+  const { lang } = useLang();
+  const rt = ROLE_TXT[lang];
+  const roleLabel = (r: PlatformRole) => (lang === "pt" ? ROLE_LABEL[r] : ROLE_LABEL_EN[r]);
+  const [busyRole, setBusyRole] = useState<string | null>(null);
+  const changeRole = async (u: PlatformUser, role: ManagedRole, grant: boolean) => {
+    setBusyRole(u.id + role);
+    try {
+      const roles = (await setUserRole(u.id, role, grant)) as PlatformRole[];
+      setUsers((list) => list.map((x) => (x.id === u.id ? { ...x, roles } : x)));
+      toast.success(rt.updated);
+    } catch (e) {
+      toast.error(adminErrorText(e instanceof Error ? e.message : "", lang));
+    } finally {
+      setBusyRole(null);
+    }
+  };
   const [users, setUsers] = useState<PlatformUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -527,6 +536,24 @@ function UsersModal({ onClose }: { onClose: () => void }) {
                 <p className="text-xs text-gray-500 mt-0.5">
                   Registado em {new Date(u.createdAt).toLocaleDateString("pt-PT")}
                 </p>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs text-gray-500">{rt.roles}:</span>
+                  {MANAGED_ROLES.map((role) => {
+                    const has = u.roles.includes(role);
+                    return (
+                      <button
+                        key={role}
+                        type="button"
+                        disabled={busyRole === u.id + role}
+                        onClick={() => void changeRole(u, role, !has)}
+                        aria-pressed={has}
+                        className={`text-xs px-2 py-0.5 rounded-full border ${has ? "bg-gray-800 text-white border-gray-800" : "bg-white text-gray-700 border-gray-300"} disabled:opacity-50`}
+                      >
+                        {has ? `${rt.revoke} · ` : `${rt.grant} · `}{roleLabel(role)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </li>
           ))}
@@ -536,101 +563,6 @@ function UsersModal({ onClose }: { onClose: () => void }) {
     </ModalShell>
   );
 }
-
-/* ---------- Add Business modal ---------- */
-
-function AddBusinessModal({ onClose }: { onClose: () => void }) {
-  const [type, setType] = useState<"small" | "large">("small");
-  const [files, setFiles] = useState<FileList | null>(null);
-
-  return (
-    <ModalShell
-      headerGradient="from-green-600 to-blue-600"
-      onClose={onClose}
-      header={<h3 className="text-lg font-bold">Adicionar Negócio</h3>}
-      footer={
-        <>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 font-medium">Cancelar</button>
-          <button
-            onClick={() => {
-              alert("Negócio adicionado!");
-              onClose();
-            }}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-blue-600 text-white font-medium"
-          >
-            Adicionar Negócio
-          </button>
-        </>
-      }
-    >
-      <div className="space-y-5">
-        <div>
-          <p className="text-sm font-semibold mb-2">Tipo de Negócio</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setType("small")}
-              className={`p-4 rounded-xl border-2 text-left transition ${type === "small" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}
-            >
-              <Store className="size-6 text-green-600" />
-              <p className="font-semibold mt-2">Negócio Pequeno</p>
-            </button>
-            <button
-              onClick={() => setType("large")}
-              className={`p-4 rounded-xl border-2 text-left transition ${type === "large" ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"}`}
-            >
-              <Building className="size-6 text-purple-600" />
-              <p className="font-semibold mt-2">Negócio Grande</p>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-3">
-          <input placeholder="Nome do Negócio *" className={modalInputClass} />
-          <input placeholder="Nome do Proprietário *" className={modalInputClass} />
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-            <input type="email" placeholder="Email" className={`${modalInputClass} pl-9`} />
-          </div>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-            <input type="tel" placeholder="+258 XX XXX XXXX" className={`${modalInputClass} pl-9`} />
-          </div>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div className="relative">
-            <Tag className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-            <select className={`${modalInputClass} pl-9`}>
-              <option value="">Categoria...</option>
-              <option>gastronomia</option>
-              <option>artesanato</option>
-              <option>alojamento</option>
-              <option>turismo</option>
-              <option>transporte</option>
-              <option>outros</option>
-            </select>
-          </div>
-          <input placeholder="Endereço *" className={modalInputClass} />
-        </div>
-
-        <textarea rows={4} placeholder="Descrição" className={modalInputClass} />
-
-        <label className="block rounded-xl border-2 border-dashed border-gray-300 hover:border-green-500 p-6 text-center cursor-pointer transition">
-          <Upload className="mx-auto size-8 text-gray-400" />
-          <p className="mt-2 text-sm font-semibold">Selecionar Imagens</p>
-          <p className="text-xs text-gray-500">PNG, JPG até 5MB cada</p>
-          {files && files.length > 0 && (
-            <p className="mt-2 text-xs text-green-600 font-semibold">{files.length} imagem(s) selecionada(s)</p>
-          )}
-          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => setFiles(e.target.files)} />
-        </label>
-      </div>
-    </ModalShell>
-  );
-}
-
-const modalInputClass =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500";
 
 /* ---------- Reports modal ---------- */
 
@@ -644,91 +576,6 @@ function ReportsModal({ onClose }: { onClose: () => void }) {
     {isError && <div role="alert"><p>{pt ? "Não foi possível carregar." : "Could not load."}</p><Button onClick={() => void refetch()}>{pt ? "Tentar novamente" : "Retry"}</Button></div>}
     {data && <dl className="grid grid-cols-2 gap-4">{[[pt ? "Perfis" : "Profiles",data.profiles],[pt ? "Negócios" : "Businesses",data.businesses],[pt ? "Atividades" : "Activities",data.activities],[pt ? "Reservas" : "Bookings",data.bookings]].map(([label,value]) => <div key={label}><dt>{label}</dt><dd className="text-xl font-bold">{value}</dd></div>)}</dl>}
   </ModalShell>;
-}
-
-/* ---------- Settings modal ---------- */
-
-function Toggle({ defaultChecked = false, color = "bg-blue-600" }: { defaultChecked?: boolean; color?: string }) {
-  const [on, setOn] = useState(defaultChecked);
-  return (
-    <button
-      onClick={() => setOn((v) => !v)}
-      className={`relative w-11 h-6 rounded-full transition ${on ? color : "bg-gray-300"}`}
-      aria-pressed={on}
-    >
-      <span className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white transition-transform ${on ? "translate-x-5" : ""}`} />
-    </button>
-  );
-}
-
-function SettingsModal({ onClose }: { onClose: () => void }) {
-  return (
-    <ModalShell
-      headerGradient="from-gray-800 to-gray-900"
-      onClose={onClose}
-      header={<h3 className="text-lg font-bold">Configurações</h3>}
-      footer={
-        <>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 font-medium">Voltar</button>
-          <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium">Guardar Alterações</button>
-        </>
-      }
-    >
-      <div className="space-y-5">
-        <Section icon={<Shield className="size-5" />} iconColor="text-blue-600 bg-blue-100" title="Configurações Gerais">
-          <SettingRow label="Nome da Plataforma" value="Ekaya Explore" action={<button className="text-sm text-blue-600 hover:underline">Editar</button>} />
-          <SettingRow label="Email de Contacto" value="hello@ekaya.mz" action={<button className="text-sm text-blue-600 hover:underline">Editar</button>} />
-        </Section>
-        <Section icon={<Shield className="size-5" />} iconColor="text-red-600 bg-red-100" title="Segurança">
-          <SettingRow label="Autenticação de Dois Fatores" action={<Toggle defaultChecked color="bg-red-500" />} />
-          <SettingRow label="Alterar Senha" action={<button className="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-semibold">Alterar</button>} />
-        </Section>
-        <Section icon={<CheckCircle className="size-5" />} iconColor="text-green-600 bg-green-100" title="Aprovações Automáticas">
-          <SettingRow label="Negócios Pequenos" action={<Toggle color="bg-green-500" />} />
-          <SettingRow label="Negócios Grandes (requer aprovação manual)" action={<Toggle defaultChecked color="bg-green-500" />} />
-        </Section>
-        <Section icon={<MessageSquare className="size-5" />} iconColor="text-purple-600 bg-purple-100" title="Notificações">
-          <SettingRow label="Novos Registos" action={<Toggle defaultChecked color="bg-purple-500" />} />
-          <SettingRow label="Relatórios Diários" action={<Toggle defaultChecked color="bg-purple-500" />} />
-        </Section>
-
-        <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-4">
-          <div className="flex items-center gap-2 text-red-700 font-bold">
-            <AlertCircle className="size-5" /> Zona de Perigo
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button className="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm">Limpar Cache</button>
-            <button className="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm">Exportar Dados</button>
-            <button className="px-3 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm">Reset Sistema</button>
-          </div>
-        </div>
-      </div>
-    </ModalShell>
-  );
-}
-
-function Section({ icon, iconColor, title, children }: { icon: React.ReactNode; iconColor: string; title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-gray-100 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <span className={`size-9 rounded-lg ${iconColor} flex items-center justify-center`}>{icon}</span>
-        <h4 className="font-bold">{title}</h4>
-      </div>
-      <div className="space-y-2">{children}</div>
-    </div>
-  );
-}
-
-function SettingRow({ label, value, action }: { label: string; value?: string; action: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-3 py-2">
-      <div>
-        <p className="text-sm font-medium">{label}</p>
-        {value && <p className="text-xs text-gray-500">{value}</p>}
-      </div>
-      {action}
-    </div>
-  );
 }
 
 /* ---------- Itineraries (roteiros) modal — real data, admin-only through RLS ---------- */
