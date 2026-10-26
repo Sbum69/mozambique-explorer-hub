@@ -7,6 +7,7 @@ import { AuthGateProvider } from "@/contexts/AuthGateContext";
 import { LanguageProvider, useLang } from "@/contexts/LanguageContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { DEFAULT_LANG, readLangCookie } from "@/lib/lang-pref";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
@@ -38,6 +39,8 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // The HTML depends on the language cookie: shared caches must not mix languages.
+  headers: () => ({ Vary: "Cookie" }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -68,7 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     // The theme script sets class/style on <html> before React hydrates.
-    <html lang="pt" suppressHydrationWarning>
+    <html lang={readLangCookie() ?? DEFAULT_LANG} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
+import { DEFAULT_LANG, readLangCookie, readStoredLang, writeLangPref } from "@/lib/lang-pref";
+
 export type Lang = "pt" | "en";
 
 const dict = {
@@ -494,19 +496,28 @@ interface LangContextValue {
 }
 
 const LanguageContext = createContext<LangContextValue | null>(null);
-const STORAGE_KEY = "ekaya.lang";
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("pt");
+  // Same value on server and client (the cookie), so the first render already has the right language.
+  const [lang, setLangState] = useState<Lang>(() => readLangCookie() ?? DEFAULT_LANG);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
-    if (stored === "pt" || stored === "en") setLangState(stored);
+    // Choice saved before the cookie existed: apply it once and move it to the cookie.
+    if (readLangCookie()) return;
+    const stored = readStoredLang();
+    if (stored) {
+      setLangState(stored);
+      writeLangPref(stored);
+    }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const setLang = (l: Lang) => {
     setLangState(l);
-    localStorage.setItem(STORAGE_KEY, l);
+    writeLangPref(l);
   };
 
   const t = (key: DictKey) => translate(key, lang);
