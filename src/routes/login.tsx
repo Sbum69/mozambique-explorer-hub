@@ -27,7 +27,10 @@ export const Route = createFileRoute("/login")({
       { title: "Entrar — Ekaya Explore" },
       { name: "description", content: "Acede à tua conta Ekaya Explore e descobre Moçambique." },
       { property: "og:title", content: "Entrar — Ekaya Explore" },
-      { property: "og:description", content: "Acede à tua conta Ekaya Explore e descobre Moçambique." },
+      {
+        property: "og:description",
+        content: "Acede à tua conta Ekaya Explore e descobre Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -72,7 +75,11 @@ function LoginPage() {
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left visual */}
       <div className="relative hidden lg:block overflow-hidden">
-        <img src={hero} alt="Costa de Moçambique" className="absolute inset-0 size-full object-cover" />
+        <img
+          src={hero}
+          alt="Costa de Moçambique"
+          className="absolute inset-0 size-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-secondary/30 to-foreground/60" />
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-2 font-bold text-2xl">
@@ -91,9 +98,7 @@ function LoginPage() {
             </h1>
             <p className="mt-4 text-lg text-white/90 max-w-md">{t("heroSub")}</p>
           </motion.div>
-          <div className="text-sm text-white/70">
-            🇲🇿 Moçambique · {new Date().getFullYear()}
-          </div>
+          <div className="text-sm text-white/70">🇲🇿 Moçambique · {new Date().getFullYear()}</div>
         </div>
       </div>
 
@@ -194,7 +199,12 @@ function LoginPage() {
               <UserPlus className="size-4" />
               {t("continueAsGuest")}
             </Button>
-            <Button asChild variant="outline" size="lg" className="w-full h-11 gap-2 bg-success/5 border-success/30 text-success hover:bg-success/10 hover:text-success">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full h-11 gap-2 bg-success/5 border-success/30 text-success hover:bg-success/10 hover:text-success"
+            >
               <Link to="/business-register">
                 <Store className="size-4" />
                 {t("registerBusiness")}

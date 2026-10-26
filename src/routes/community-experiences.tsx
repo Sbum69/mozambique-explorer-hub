@@ -6,7 +6,13 @@ import { ArrowLeft, Search, Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -18,7 +24,10 @@ import {
   type CommunityCategory,
   type CommunityExperience,
 } from "@/lib/community-experiences";
-import { CommunityExperienceCard, CommunityExperienceDialog } from "@/components/CommunityExperienceCard";
+import {
+  CommunityExperienceCard,
+  CommunityExperienceDialog,
+} from "@/components/CommunityExperienceCard";
 import { CommunitySubmitDialog } from "@/components/CommunitySubmitDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
@@ -31,16 +40,25 @@ export const Route = createFileRoute("/community-experiences")({
   head: () => ({
     meta: [
       { title: "Experiências Comunitárias gratuitas — Ekaya Explore" },
-      { name: "description", content: "Atividades gratuitas e sem reserva em todas as províncias de Moçambique: praias, cultura, mercados, natureza e comunidades." },
+      {
+        name: "description",
+        content:
+          "Atividades gratuitas e sem reserva em todas as províncias de Moçambique: praias, cultura, mercados, natureza e comunidades.",
+      },
       { property: "og:title", content: "Experiências Comunitárias gratuitas — Ekaya Explore" },
-      { property: "og:description", content: "Atividades de lazer gratuitas, organizadas por província, em Moçambique." },
+      {
+        property: "og:description",
+        content: "Atividades de lazer gratuitas, organizadas por província, em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
   ssr: false,
   validateSearch: (search: Record<string, unknown>): { open?: string } =>
-    typeof search.open === "string" && /^[0-9a-f-]{36}$/i.test(search.open) ? { open: search.open } : {},
+    typeof search.open === "string" && /^[0-9a-f-]{36}$/i.test(search.open)
+      ? { open: search.open }
+      : {},
   component: CommunityExperiencesPage,
 });
 
@@ -78,20 +96,45 @@ function CommunityExperiencesPage() {
         if (hit) setOpen(hit);
         else {
           console.warn("[community-experiences] deep link id not found or not public", openId);
-          toast.error(pt ? "Esta experiência comunitária não está disponível." : "This community experience is not available.");
+          toast.error(
+            pt
+              ? "Esta experiência comunitária não está disponível."
+              : "This community experience is not available.",
+          );
         }
       })
-      .catch(() => active && toast.error(pt ? "Não foi possível abrir a experiência." : "Couldn't open the experience."));
-    return () => { active = false; };
+      .catch(
+        () =>
+          active &&
+          toast.error(
+            pt ? "Não foi possível abrir a experiência." : "Couldn't open the experience.",
+          ),
+      );
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openId]);
   // Personalised split only while no explicit province is chosen; never mixes other provinces into the main list.
   const personal = prefs.hasPrefs && provinceId === ALL;
-  const fit = (it: CommunityExperience) => communityInterestMatches(it.category, prefs.interests).length;
-  const mainItems = personal ? items.filter((it) => prefs.provinces.includes(it.provinceCode)).sort((a, b) => fit(b) - fit(a)) : items;
-  const otherItems = personal ? items.filter((it) => !prefs.provinces.includes(it.provinceCode)).sort((a, b) => fit(b) - fit(a)) : [];
-  const provinceNames = prefs.provinces.map((c) => provinces.find((p) => p.code === c)?.name[lang] ?? c).join(", ");
-  const propose = () => { if (requireAccount(pt ? "Propor experiência" : "Propose experience")) setProposing(true); };
+  const fit = (it: CommunityExperience) =>
+    communityInterestMatches(it.category, prefs.interests).length;
+  const mainItems = personal
+    ? items
+        .filter((it) => prefs.provinces.includes(it.provinceCode))
+        .sort((a, b) => fit(b) - fit(a))
+    : items;
+  const otherItems = personal
+    ? items
+        .filter((it) => !prefs.provinces.includes(it.provinceCode))
+        .sort((a, b) => fit(b) - fit(a))
+    : [];
+  const provinceNames = prefs.provinces
+    .map((c) => provinces.find((p) => p.code === c)?.name[lang] ?? c)
+    .join(", ");
+  const propose = () => {
+    if (requireAccount(pt ? "Propor experiência" : "Propose experience")) setProposing(true);
+  };
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -121,7 +164,9 @@ function CommunityExperiencesPage() {
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
           <AppSidebar />
           <Button variant="ghost" size="icon" asChild aria-label={pt ? "Voltar" : "Back"}>
-            <Link to={back}><ArrowLeft className="size-5" /></Link>
+            <Link to={back}>
+              <ArrowLeft className="size-5" />
+            </Link>
           </Button>
           <h1 className="font-bold text-lg flex items-center gap-2 flex-1 truncate">
             <Users className="size-5 text-primary" />
@@ -138,9 +183,22 @@ function CommunityExperiencesPage() {
             : "Free leisure activities, no booking needed, organised by province."}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={propose}><Plus className="size-4" />{pt ? "Propor experiência" : "Propose experience"}</Button>
-          <Button size="sm" variant="outline" onClick={() => navigate({ to: "/map", search: { category: category === "all" ? undefined : category } })}>
-            <MapIcon className="size-4" />{pt ? "Ver no mapa" : "View on map"}
+          <Button size="sm" onClick={propose}>
+            <Plus className="size-4" />
+            {pt ? "Propor experiência" : "Propose experience"}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              navigate({
+                to: "/map",
+                search: { category: category === "all" ? undefined : category },
+              })
+            }
+          >
+            <MapIcon className="size-4" />
+            {pt ? "Ver no mapa" : "View on map"}
           </Button>
         </div>
 
@@ -162,13 +220,19 @@ function CommunityExperiencesPage() {
             <SelectContent>
               <SelectItem value={ALL}>{pt ? "Todas as províncias" : "All provinces"}</SelectItem>
               {provinces.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name[lang]}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name[lang]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label={pt ? "Categoria" : "Category"}>
+        <div
+          className="flex flex-wrap gap-2"
+          role="tablist"
+          aria-label={pt ? "Categoria" : "Category"}
+        >
           {COMMUNITY_CATEGORIES.map((c) => (
             <Button
               key={c.id}
@@ -185,13 +249,18 @@ function CommunityExperiencesPage() {
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[0, 1, 2, 3, 4, 5].map((i) => <Card key={i} className="h-72 animate-pulse bg-muted/40" />)}
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <Card key={i} className="h-72 animate-pulse bg-muted/40" />
+            ))}
           </div>
         ) : error ? (
           <Card className="p-6 text-center space-y-3">
-            <p className="text-muted-foreground">{pt ? "Não foi possível carregar as atividades." : "Couldn't load the activities."}</p>
+            <p className="text-muted-foreground">
+              {pt ? "Não foi possível carregar as atividades." : "Couldn't load the activities."}
+            </p>
             <Button variant="outline" size="sm" onClick={() => setTick((t) => t + 1)}>
-              <RefreshCw className="size-4 mr-1" />{pt ? "Tentar novamente" : "Try again"}
+              <RefreshCw className="size-4 mr-1" />
+              {pt ? "Tentar novamente" : "Try again"}
             </Button>
           </Card>
         ) : items.length === 0 ? (
@@ -202,13 +271,19 @@ function CommunityExperiencesPage() {
           <>
             {personal && (
               <h2 className="text-xl font-bold">
-                {pt ? `Experiências comunitárias perto do teu destino — ${provinceNames}` : `Community experiences near your destination — ${provinceNames}`}
+                {pt
+                  ? `Experiências comunitárias perto do teu destino — ${provinceNames}`
+                  : `Community experiences near your destination — ${provinceNames}`}
               </h2>
             )}
-            <p className="text-sm text-muted-foreground">{mainItems.length} {pt ? "atividades" : "activities"}</p>
+            <p className="text-sm text-muted-foreground">
+              {mainItems.length} {pt ? "atividades" : "activities"}
+            </p>
             {mainItems.length === 0 ? (
               <Card className="p-6 text-center text-muted-foreground">
-                {pt ? "Ainda não existem experiências comunitárias para estas preferências na tua província." : "There are no community experiences for these preferences in your province yet."}
+                {pt
+                  ? "Ainda não existem experiências comunitárias para estas preferências na tua província."
+                  : "There are no community experiences for these preferences in your province yet."}
               </Card>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -219,8 +294,15 @@ function CommunityExperiencesPage() {
             )}
             {otherItems.length > 0 && (
               <section className="space-y-3 border-t pt-6">
-                <h2 className="text-xl font-bold">{pt ? "Descobre outras regiões" : "Discover other regions"}</h2>
-                <p className="text-sm text-muted-foreground">{pt ? "Experiências noutras províncias — não fazem parte da tua seleção." : "Experiences in other provinces — not part of your selection."} ({otherItems.length})</p>
+                <h2 className="text-xl font-bold">
+                  {pt ? "Descobre outras regiões" : "Discover other regions"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {pt
+                    ? "Experiências noutras províncias — não fazem parte da tua seleção."
+                    : "Experiences in other provinces — not part of your selection."}{" "}
+                  ({otherItems.length})
+                </p>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {otherItems.map((it) => (
                     <CommunityExperienceCard key={it.id} item={it} onOpen={() => setOpen(it)} />
@@ -232,8 +314,21 @@ function CommunityExperiencesPage() {
         )}
       </main>
 
-      <CommunityExperienceDialog item={open} onClose={() => { setOpen(null); if (openId) void navigate({ to: "/community-experiences", search: {}, replace: true }); }} mapCategory={category} />
-      {isAuthenticated && authUser && <CommunitySubmitDialog open={proposing} onClose={() => setProposing(false)} userId={authUser.id} />}
+      <CommunityExperienceDialog
+        item={open}
+        onClose={() => {
+          setOpen(null);
+          if (openId) void navigate({ to: "/community-experiences", search: {}, replace: true });
+        }}
+        mapCategory={category}
+      />
+      {isAuthenticated && authUser && (
+        <CommunitySubmitDialog
+          open={proposing}
+          onClose={() => setProposing(false)}
+          userId={authUser.id}
+        />
+      )}
     </div>
   );
 }

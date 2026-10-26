@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { MapPin, CheckCircle, Navigation, BookOpen, Waves, Building2, Palmtree } from "lucide-react";
+import {
+  MapPin,
+  CheckCircle,
+  Navigation,
+  BookOpen,
+  Waves,
+  Building2,
+  Palmtree,
+} from "lucide-react";
 import { getTreasureStops, type TreasureStop } from "@/data/treasure-stops";
 
 const KIND_META: Record<TreasureStop["kind"], { icon: typeof MapPin; label: string }> = {
@@ -55,7 +63,9 @@ export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Pr
                   <p className="text-xs text-muted-foreground truncate">
                     {Meta.label} · {s.place}
                   </p>
-                  {s.hint && <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.hint}</p>}
+                  {s.hint && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.hint}</p>
+                  )}
                 </div>
                 {done ? (
                   <CheckCircle className="size-4 text-green-600 shrink-0" />

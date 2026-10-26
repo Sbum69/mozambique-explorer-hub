@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -18,9 +24,16 @@ export const Route = createFileRoute("/businesses")({
   head: () => ({
     meta: [
       { title: "Negócios Locais — Ekaya Explore" },
-      { name: "description", content: "Descobre negócios locais registados no Ekaya em todas as províncias de Moçambique." },
+      {
+        name: "description",
+        content:
+          "Descobre negócios locais registados no Ekaya em todas as províncias de Moçambique.",
+      },
       { property: "og:title", content: "Negócios Locais — Ekaya Explore" },
-      { property: "og:description", content: "Descobre negócios locais registados no Ekaya em Moçambique." },
+      {
+        property: "og:description",
+        content: "Descobre negócios locais registados no Ekaya em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -74,7 +87,9 @@ function BusinessesPage() {
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
           <AppSidebar />
           <Button variant="ghost" size="icon" asChild aria-label={pt ? "Voltar" : "Back"}>
-            <Link to={back}><ArrowLeft className="size-5" /></Link>
+            <Link to={back}>
+              <ArrowLeft className="size-5" />
+            </Link>
           </Button>
           <h1 className="font-bold text-lg flex items-center gap-2 flex-1">
             <Store className="size-5 text-primary" />
@@ -109,7 +124,9 @@ function BusinessesPage() {
             <SelectContent>
               <SelectItem value={ALL}>{pt ? "Todas as províncias" : "All provinces"}</SelectItem>
               {provinces.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name[lang]}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name[lang]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -120,7 +137,9 @@ function BusinessesPage() {
             <SelectContent>
               <SelectItem value={ALL}>{pt ? "Todas as categorias" : "All categories"}</SelectItem>
               {categories.map((c) => (
-                <SelectItem key={c.code} value={c.code}>{c.name[lang]}</SelectItem>
+                <SelectItem key={c.code} value={c.code}>
+                  {c.name[lang]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -128,7 +147,9 @@ function BusinessesPage() {
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
-            {[0, 1, 2].map((i) => <div key={i} className="h-56 rounded-xl bg-muted animate-pulse" />)}
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-56 rounded-xl bg-muted animate-pulse" />
+            ))}
             <span className="sr-only">{pt ? "A carregar negócios…" : "Loading businesses…"}</span>
           </div>
         ) : error ? (
@@ -137,7 +158,8 @@ function BusinessesPage() {
               {pt ? "Não foi possível carregar os negócios." : "Could not load businesses."}
             </p>
             <Button variant="outline" onClick={() => setTick((t) => t + 1)}>
-              <RefreshCw className="size-4 mr-1" />{pt ? "Tentar novamente" : "Try again"}
+              <RefreshCw className="size-4 mr-1" />
+              {pt ? "Tentar novamente" : "Try again"}
             </Button>
           </Card>
         ) : items.length === 0 ? (
@@ -148,10 +170,19 @@ function BusinessesPage() {
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              {items.length} {pt ? (items.length === 1 ? "negócio" : "negócios") : (items.length === 1 ? "business" : "businesses")}
+              {items.length}{" "}
+              {pt
+                ? items.length === 1
+                  ? "negócio"
+                  : "negócios"
+                : items.length === 1
+                  ? "business"
+                  : "businesses"}
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((b) => <BusinessCard key={b.id} b={b} />)}
+              {items.map((b) => (
+                <BusinessCard key={b.id} b={b} />
+              ))}
             </div>
           </>
         )}
@@ -176,21 +207,33 @@ function BusinessCard({ b }: { b: PublicBusiness }) {
         <div className="p-4 flex-1 flex flex-col gap-2">
           <div className="flex items-start gap-2">
             <h2 className="font-bold flex-1">{b.name}</h2>
-            {b.verified && <BadgeCheck className="size-4 text-primary shrink-0" aria-label={pt ? "Verificado" : "Verified"} />}
+            {b.verified && (
+              <BadgeCheck
+                className="size-4 text-primary shrink-0"
+                aria-label={pt ? "Verificado" : "Verified"}
+              />
+            )}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {b.category && <Badge variant="secondary">{b.category[lang]}</Badge>}
             {b.province && (
-              <Badge variant="outline" className="gap-1"><MapPin className="size-3" />{b.province[lang]}</Badge>
+              <Badge variant="outline" className="gap-1">
+                <MapPin className="size-3" />
+                {b.province[lang]}
+              </Badge>
             )}
           </div>
-          {b.description && <p className="text-sm text-muted-foreground line-clamp-2">{b.description}</p>}
+          {b.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">{b.description}</p>
+          )}
           <div className="mt-auto pt-2 flex items-center justify-between text-sm">
             <span className="text-muted-foreground flex items-center gap-1">
               <Compass className="size-4" />
               {b.experienceCount} {pt ? "experiências" : "experiences"}
             </span>
-            <span className="text-primary font-medium">{pt ? "Ver detalhes" : "View details"} →</span>
+            <span className="text-primary font-medium">
+              {pt ? "Ver detalhes" : "View details"} →
+            </span>
           </div>
         </div>
       </Card>

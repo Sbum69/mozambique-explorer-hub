@@ -1,7 +1,17 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Flag, Loader2, MapPin, ThumbsDown, ThumbsUp, Compass, Sparkles, Route as RouteIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Flag,
+  Loader2,
+  MapPin,
+  ThumbsDown,
+  ThumbsUp,
+  Compass,
+  Sparkles,
+  Route as RouteIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AppSidebar } from "@/components/AppSidebar";
@@ -10,7 +20,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
-import { fetchCommunityPost, toggleReaction, type CommunityPost, type ReactionValue } from "@/lib/community";
+import {
+  fetchCommunityPost,
+  toggleReaction,
+  type CommunityPost,
+  type ReactionValue,
+} from "@/lib/community";
 import { ReportDialog } from "@/routes/community";
 
 export const Route = createFileRoute("/community/$postId")({
@@ -18,9 +33,15 @@ export const Route = createFileRoute("/community/$postId")({
   head: () => ({
     meta: [
       { title: "Publicação da Comunidade — Ekaya Explore" },
-      { name: "description", content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique." },
+      {
+        name: "description",
+        content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique.",
+      },
       { property: "og:title", content: "Publicação da Comunidade — Ekaya Explore" },
-      { property: "og:description", content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique." },
+      {
+        property: "og:description",
+        content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique.",
+      },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -120,7 +141,9 @@ function CommunityPostPage() {
                 )}
                 <span className="text-xs text-gray-500">
                   {new Date(post.createdAt).toLocaleDateString(pt ? "pt-PT" : "en-US", {
-                    day: "2-digit", month: "short", year: "numeric",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
                   })}
                 </span>
               </div>
@@ -128,24 +151,38 @@ function CommunityPostPage() {
               <h2 className="mt-3 text-2xl font-bold text-gray-900">{post.title}</h2>
               <p className="mt-1 text-sm text-gray-500">{post.authorName}</p>
 
-              {post.imageUrl && <img src={post.imageUrl} alt="" className="mt-4 rounded-xl w-full object-cover" />}
+              {post.imageUrl && (
+                <img src={post.imageUrl} alt="" className="mt-4 rounded-xl w-full object-cover" />
+              )}
 
-              <p className="mt-4 text-gray-700 leading-relaxed whitespace-pre-line">{post.content}</p>
+              <p className="mt-4 text-gray-700 leading-relaxed whitespace-pre-line">
+                {post.content}
+              </p>
 
               {(post.destinationName || post.experienceTitle || post.routeTitle) && (
                 <div className="mt-6 border-t border-gray-100 pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t("communityRelated")}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {t("communityRelated")}
+                  </p>
                   <ul className="mt-2 space-y-1 text-sm text-gray-700">
                     {post.destinationName && (
-                      <li className="inline-flex items-center gap-2"><Compass className="size-4 text-blue-600" /> {post.destinationName}</li>
+                      <li className="inline-flex items-center gap-2">
+                        <Compass className="size-4 text-blue-600" /> {post.destinationName}
+                      </li>
                     )}
                     {post.experienceTitle && (
-                      <li className="inline-flex items-center gap-2"><Sparkles className="size-4 text-purple-600" /> {post.experienceTitle}</li>
+                      <li className="inline-flex items-center gap-2">
+                        <Sparkles className="size-4 text-purple-600" /> {post.experienceTitle}
+                      </li>
                     )}
                     {post.routeTitle && (
                       <li className="inline-flex items-center gap-2">
                         <RouteIcon className="size-4 text-indigo-600" />
-                        <Link to="/itinerary/$id" params={{ id: post.routeId! }} className="hover:underline">
+                        <Link
+                          to="/itinerary/$id"
+                          params={{ id: post.routeId! }}
+                          className="hover:underline"
+                        >
                           {post.routeTitle}
                         </Link>
                       </li>
@@ -159,7 +196,9 @@ function CommunityPostPage() {
                   <button
                     onClick={() => void react("like")}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
-                      post.myReaction === "like" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700 hover:bg-green-50"
+                      post.myReaction === "like"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-green-50"
                     }`}
                   >
                     <ThumbsUp className="size-4" /> {post.likes}
@@ -167,7 +206,9 @@ function CommunityPostPage() {
                   <button
                     onClick={() => void react("dislike")}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
-                      post.myReaction === "dislike" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-700 hover:bg-red-50"
+                      post.myReaction === "dislike"
+                        ? "bg-red-50 text-red-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-red-50"
                     }`}
                   >
                     <ThumbsDown className="size-4" /> {post.dislikes}

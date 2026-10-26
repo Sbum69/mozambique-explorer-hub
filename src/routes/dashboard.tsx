@@ -3,8 +3,21 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Map, BookOpen, Bookmark, Bell, Compass, Heart, Info, Trophy, Activity,
-  MapPin, Sun, ArrowRight, Store, Users as UsersIcon, Gamepad2,
+  Map,
+  BookOpen,
+  Bookmark,
+  Bell,
+  Compass,
+  Heart,
+  Info,
+  Trophy,
+  Activity,
+  MapPin,
+  Sun,
+  ArrowRight,
+  Store,
+  Users as UsersIcon,
+  Gamepad2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,14 +39,19 @@ import { fetchMyVisits } from "@/lib/visits";
 
 import { requireAuthenticatedUser } from "@/lib/auth";
 
-
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Painel — Ekaya Explore" },
-      { name: "description", content: "Hub central com mapa, roteiros, experiências, gamificação e impacto." },
+      {
+        name: "description",
+        content: "Hub central com mapa, roteiros, experiências, gamificação e impacto.",
+      },
       { property: "og:title", content: "Painel — Ekaya Explore" },
-      { property: "og:description", content: "Hub central com mapa, roteiros, experiências, gamificação e impacto." },
+      {
+        property: "og:description",
+        content: "Hub central com mapa, roteiros, experiências, gamificação e impacto.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -52,18 +70,90 @@ interface ModuleDef {
 }
 
 const MODULES: ModuleDef[] = [
-  { to: "/map", icon: Map, titleKey: "modMap", descKey: "modMapDesc", gradient: "from-secondary to-blue-400" },
-  { to: "/culture-history", icon: BookOpen, titleKey: "modCulture", descKey: "modCultureDesc", gradient: "from-orange-500 to-red-500" },
-  { to: "/favorites", icon: Bookmark, titleKey: "modFavorites", descKey: "modFavoritesDesc", gradient: "from-pink-500 to-rose-500" },
-  { to: "/news-alerts", icon: Bell, titleKey: "modNews", descKey: "modNewsDesc", gradient: "from-red-500 to-orange-500" },
-  { to: "/itineraries", icon: Compass, titleKey: "modItineraries", descKey: "modItinerariesDesc", gradient: "from-primary to-primary-glow" },
-  { to: "/community-experiences", icon: UsersIcon, titleKey: "modCommunityExp", descKey: "modCommunityExpDesc", gradient: "from-emerald-500 to-teal-500" },
-  { to: "/businesses", icon: Store, titleKey: "modBusinesses", descKey: "modBusinessesDesc", gradient: "from-amber-500 to-orange-500" },
-  { to: "/experiences", icon: Heart, titleKey: "modExperiences", descKey: "modExperiencesDesc", gradient: "from-success to-emerald-400" },
-  { to: "/useful-info", icon: Info, titleKey: "modInfo", descKey: "modInfoDesc", gradient: "from-purple-500 to-violet-500" },
-  { to: "/gamification", icon: Trophy, titleKey: "modAchievements", descKey: "modAchievementsDesc", gradient: "from-warning to-yellow-500" },
-  { to: "/games", icon: Gamepad2, titleKey: "modGames", descKey: "modGamesDesc", gradient: "from-primary to-secondary" },
-  { to: "/impact", icon: Activity, titleKey: "modImpact", descKey: "modImpactDesc", gradient: "from-pink-500 to-fuchsia-500" },
+  {
+    to: "/map",
+    icon: Map,
+    titleKey: "modMap",
+    descKey: "modMapDesc",
+    gradient: "from-secondary to-blue-400",
+  },
+  {
+    to: "/culture-history",
+    icon: BookOpen,
+    titleKey: "modCulture",
+    descKey: "modCultureDesc",
+    gradient: "from-orange-500 to-red-500",
+  },
+  {
+    to: "/favorites",
+    icon: Bookmark,
+    titleKey: "modFavorites",
+    descKey: "modFavoritesDesc",
+    gradient: "from-pink-500 to-rose-500",
+  },
+  {
+    to: "/news-alerts",
+    icon: Bell,
+    titleKey: "modNews",
+    descKey: "modNewsDesc",
+    gradient: "from-red-500 to-orange-500",
+  },
+  {
+    to: "/itineraries",
+    icon: Compass,
+    titleKey: "modItineraries",
+    descKey: "modItinerariesDesc",
+    gradient: "from-primary to-primary-glow",
+  },
+  {
+    to: "/community-experiences",
+    icon: UsersIcon,
+    titleKey: "modCommunityExp",
+    descKey: "modCommunityExpDesc",
+    gradient: "from-emerald-500 to-teal-500",
+  },
+  {
+    to: "/businesses",
+    icon: Store,
+    titleKey: "modBusinesses",
+    descKey: "modBusinessesDesc",
+    gradient: "from-amber-500 to-orange-500",
+  },
+  {
+    to: "/experiences",
+    icon: Heart,
+    titleKey: "modExperiences",
+    descKey: "modExperiencesDesc",
+    gradient: "from-success to-emerald-400",
+  },
+  {
+    to: "/useful-info",
+    icon: Info,
+    titleKey: "modInfo",
+    descKey: "modInfoDesc",
+    gradient: "from-purple-500 to-violet-500",
+  },
+  {
+    to: "/gamification",
+    icon: Trophy,
+    titleKey: "modAchievements",
+    descKey: "modAchievementsDesc",
+    gradient: "from-warning to-yellow-500",
+  },
+  {
+    to: "/games",
+    icon: Gamepad2,
+    titleKey: "modGames",
+    descKey: "modGamesDesc",
+    gradient: "from-primary to-secondary",
+  },
+  {
+    to: "/impact",
+    icon: Activity,
+    titleKey: "modImpact",
+    descKey: "modImpactDesc",
+    gradient: "from-pink-500 to-fuchsia-500",
+  },
 ];
 
 function DashboardPage() {
@@ -83,26 +173,30 @@ function DashboardPage() {
   });
   const visitedValue = visits.isError ? "—" : visits.data ? visits.data.size : "…";
 
-
   if (!user) return null;
 
   const province = destinations.find((d) => d.slug === user.preferences?.province);
 
   // Official itinerary of the chosen province, read from the database (no mock data).
-  const personalized = personalPrefs.hasPrefs ? personalizeRoutes(publicRoutes, personalPrefs) : null;
+  const personalized = personalPrefs.hasPrefs
+    ? personalizeRoutes(publicRoutes, personalPrefs)
+    : null;
   const recommendedItinerary = personalized
-    ? personalized.exact[0] ?? personalized.otherDuration[0] ?? personalized.otherInProvince[0] ?? null
+    ? (personalized.exact[0] ??
+      personalized.otherDuration[0] ??
+      personalized.otherInProvince[0] ??
+      null)
     : null;
   const tripDays = user.preferences?.durationDays ?? 3;
   const daySlices = recommendedItinerary
-    ? recommendedItinerary.days.slice(0, Math.min(tripDays, recommendedItinerary.days.length)).map((day) => ({
-        day: day.dayNumber,
-        title: day.title,
-        stops: day.stops,
-      }))
+    ? recommendedItinerary.days
+        .slice(0, Math.min(tripDays, recommendedItinerary.days.length))
+        .map((day) => ({
+          day: day.dayNumber,
+          title: day.title,
+          stops: day.stops,
+        }))
     : [];
-
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
@@ -127,7 +221,13 @@ function DashboardPage() {
               </span>
               <span className="font-medium">{user.displayName}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { void logout().then(() => navigate({ to: "/login", replace: true })); }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                void logout().then(() => navigate({ to: "/login", replace: true }));
+              }}
+            >
               {t("logout")}
             </Button>
           </div>
@@ -141,18 +241,24 @@ function DashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div>
                 <p className="text-sm opacity-90">{t("hello")},</p>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{user.displayName} 👋</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                  {user.displayName} 👋
+                </h1>
                 {province ? (
                   <>
                     <p className="mt-2 text-sm opacity-90">
-                      {lang === "pt" ? "A explorar" : "Exploring"} <strong>{province.name}</strong> · {tripDays} {t("days")}
-                      {user.preferences?.interests?.length ? ` · ${user.preferences.interests.slice(0, 3).join(", ")}` : ""}
+                      {lang === "pt" ? "A explorar" : "Exploring"} <strong>{province.name}</strong>{" "}
+                      · {tripDays} {t("days")}
+                      {user.preferences?.interests?.length
+                        ? ` · ${user.preferences.interests.slice(0, 3).join(", ")}`
+                        : ""}
                     </p>
                     <button
                       onClick={() => setShowChangeDest(true)}
                       className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
                     >
-                      <MapPin className="size-3.5" /> {lang === "pt" ? "Mudar destino" : "Change destination"}
+                      <MapPin className="size-3.5" />{" "}
+                      {lang === "pt" ? "Mudar destino" : "Change destination"}
                     </button>
                   </>
                 ) : (
@@ -160,10 +266,10 @@ function DashboardPage() {
                     onClick={() => setShowChangeDest(true)}
                     className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
                   >
-                    <MapPin className="size-3.5" /> {lang === "pt" ? "Escolher destino" : "Choose destination"}
+                    <MapPin className="size-3.5" />{" "}
+                    {lang === "pt" ? "Escolher destino" : "Choose destination"}
                   </button>
                 )}
-
               </div>
 
               <div className="grid gap-4 text-center">
@@ -173,20 +279,33 @@ function DashboardPage() {
           </Card>
         </motion.div>
 
-        <div className="mt-8"><PointsCard /></div>
+        <div className="mt-8">
+          <PointsCard />
+        </div>
 
         {/* Personalized itinerary */}
         {!recommendedItinerary && (
           <Card className="mt-8 p-5 flex flex-wrap items-center justify-between gap-3 border-0 shadow-[var(--shadow-soft)]">
             <p className="text-sm text-muted-foreground">
               {!personalPrefs.hasPrefs
-                ? (lang === "pt" ? "Configura as tuas preferências para veres roteiros para ti." : "Set your preferences to see itineraries for you.")
-                : (lang === "pt" ? "Ainda não existem roteiros para a tua província. Vê sugestões noutras regiões." : "No itineraries for your province yet. See suggestions in other regions.")}
+                ? lang === "pt"
+                  ? "Configura as tuas preferências para veres roteiros para ti."
+                  : "Set your preferences to see itineraries for you."
+                : lang === "pt"
+                  ? "Ainda não existem roteiros para a tua província. Vê sugestões noutras regiões."
+                  : "No itineraries for your province yet. See suggestions in other regions."}
             </p>
             <Button asChild variant="outline" className="gap-2">
-              {personalPrefs.hasPrefs
-                ? <Link to="/itineraries" search={{ personal: true }}>{lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" /></Link>
-                : <Link to="/preferences">{lang === "pt" ? "Configurar preferências" : "Set preferences"} <ArrowRight className="size-4" /></Link>}
+              {personalPrefs.hasPrefs ? (
+                <Link to="/itineraries" search={{ personal: true }}>
+                  {lang === "pt" ? "Ver completo" : "View full"} <ArrowRight className="size-4" />
+                </Link>
+              ) : (
+                <Link to="/preferences">
+                  {lang === "pt" ? "Configurar preferências" : "Set preferences"}{" "}
+                  <ArrowRight className="size-4" />
+                </Link>
+              )}
             </Button>
           </Card>
         )}
@@ -255,7 +374,6 @@ function DashboardPage() {
                         </div>
                       ))}
                     </div>
-
                   </motion.div>
                 ))}
               </div>
@@ -277,7 +395,9 @@ function DashboardPage() {
             >
               <Link to={m.to as never}>
                 <Card className="group relative overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all duration-300 cursor-pointer h-full p-6 bg-card">
-                  <div className={`size-12 rounded-xl bg-gradient-to-br ${m.gradient} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
+                  <div
+                    className={`size-12 rounded-xl bg-gradient-to-br ${m.gradient} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}
+                  >
                     <m.icon className="size-6" />
                   </div>
                   <h3 className="mt-4 font-bold text-lg">{t(m.titleKey)}</h3>
@@ -297,7 +417,6 @@ function DashboardPage() {
         onComplete={() => setShowChangeDest(false)}
       />
     </div>
-
   );
 }
 

@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Gamepad2, Camera, CalendarCheck, Map as MapIcon, Trophy, Info } from "lucide-react";
+import {
+  ArrowLeft,
+  Gamepad2,
+  Camera,
+  CalendarCheck,
+  Map as MapIcon,
+  Trophy,
+  Info,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,7 +15,11 @@ import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PointsCard } from "@/components/PointsCard";
-import { ChallengesAndBadges, Leaderboard, RewardsSection } from "@/components/AchievementsSections";
+import {
+  ChallengesAndBadges,
+  Leaderboard,
+  RewardsSection,
+} from "@/components/AchievementsSections";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { POINT_VALUES } from "@/lib/points";
 
@@ -15,9 +27,15 @@ export const Route = createFileRoute("/gamification")({
   head: () => ({
     meta: [
       { title: "Pontos e níveis — Ekaya Explore" },
-      { name: "description", content: "Ganha pontos por atividades concluídas e roteiros comprovados em Moçambique." },
+      {
+        name: "description",
+        content: "Ganha pontos por atividades concluídas e roteiros comprovados em Moçambique.",
+      },
       { property: "og:title", content: "Pontos e níveis — Ekaya Explore" },
-      { property: "og:description", content: "Ganha pontos por atividades concluídas e roteiros comprovados em Moçambique." },
+      {
+        property: "og:description",
+        content: "Ganha pontos por atividades concluídas e roteiros comprovados em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -31,10 +49,34 @@ function GamificationPage() {
   const { lang } = useLang();
   const pt = lang === "pt";
   const rules = [
-    { icon: CalendarCheck, pts: POINT_VALUES.booking_completed, text: pt ? "Atividade reservada e marcada como concluída pelo anfitrião, depois da data." : "Booked activity marked completed by the host after its date." },
-    { icon: Camera, pts: POINT_VALUES.route_stop_proof, text: pt ? "Paragem de roteiro concluída com foto de prova (uma vez por paragem)." : "Route stop completed with a proof photo (once per stop)." },
-    { icon: Gamepad2, pts: 0, text: pt ? "Jogo verificado concluído (quiz aprovado no servidor ou desafio com fotos de prova): XP indicado em cada jogo, uma vez por jogo." : "Verified game completed (server-passed quiz or challenge with proof photos): XP shown on each game, once per game." },
-    { icon: MapIcon, pts: POINT_VALUES.route_completed, text: pt ? "Roteiro terminado com prova em todas as paragens (uma vez por roteiro)." : "Route finished with proof at every stop (once per route)." },
+    {
+      icon: CalendarCheck,
+      pts: POINT_VALUES.booking_completed,
+      text: pt
+        ? "Atividade reservada e marcada como concluída pelo anfitrião, depois da data."
+        : "Booked activity marked completed by the host after its date.",
+    },
+    {
+      icon: Camera,
+      pts: POINT_VALUES.route_stop_proof,
+      text: pt
+        ? "Paragem de roteiro concluída com foto de prova (uma vez por paragem)."
+        : "Route stop completed with a proof photo (once per stop).",
+    },
+    {
+      icon: Gamepad2,
+      pts: 0,
+      text: pt
+        ? "Jogo verificado concluído (quiz aprovado no servidor ou desafio com fotos de prova): XP indicado em cada jogo, uma vez por jogo."
+        : "Verified game completed (server-passed quiz or challenge with proof photos): XP shown on each game, once per game.",
+    },
+    {
+      icon: MapIcon,
+      pts: POINT_VALUES.route_completed,
+      text: pt
+        ? "Roteiro terminado com prova em todas as paragens (uma vez por roteiro)."
+        : "Route finished with proof at every stop (once per route).",
+    },
   ];
   return (
     <div className="min-h-screen bg-background">
@@ -43,7 +85,10 @@ function GamificationPage() {
           <div className="flex items-center gap-1">
             <AppSidebar />
             <Button asChild variant="ghost" size="sm" className="gap-1">
-              <Link to="/dashboard"><ArrowLeft className="size-4" />{pt ? "Perfil" : "Profile"}</Link>
+              <Link to="/dashboard">
+                <ArrowLeft className="size-4" />
+                {pt ? "Perfil" : "Profile"}
+              </Link>
             </Button>
           </div>
           <LanguageToggle />

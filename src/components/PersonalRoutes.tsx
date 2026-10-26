@@ -20,7 +20,13 @@ interface Props {
   user?: unknown;
 }
 
-function Grid({ routes, renderCard }: { routes: ItineraryRoute[]; renderCard: Props["renderCard"] }) {
+function Grid({
+  routes,
+  renderCard,
+}: {
+  routes: ItineraryRoute[];
+  renderCard: Props["renderCard"];
+}) {
   return <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">{routes.map(renderCard)}</div>;
 }
 
@@ -45,11 +51,23 @@ export function PersonalSections({ routes, loading, error, lang, renderCard, onS
     return (
       <Card className="p-6 mb-8 text-center space-y-3">
         <SlidersHorizontal className="size-8 mx-auto text-primary" />
-        <p className="font-semibold">{pt ? "Ainda não tens preferências de viagem guardadas." : "You haven't saved travel preferences yet."}</p>
-        <p className="text-sm text-muted-foreground">{pt ? "Escolhe a província, os dias e os interesses para veres roteiros feitos para ti." : "Pick a province, days and interests to see itineraries made for you."}</p>
+        <p className="font-semibold">
+          {pt
+            ? "Ainda não tens preferências de viagem guardadas."
+            : "You haven't saved travel preferences yet."}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {pt
+            ? "Escolhe a província, os dias e os interesses para veres roteiros feitos para ti."
+            : "Pick a province, days and interests to see itineraries made for you."}
+        </p>
         <div className="flex flex-wrap justify-center gap-2">
-          <Button asChild><Link to="/preferences">{pt ? "Configurar preferências" : "Set preferences"}</Link></Button>
-          <Button variant="outline" onClick={onShowAll}>{pt ? "Ver todos os roteiros" : "See all itineraries"}</Button>
+          <Button asChild>
+            <Link to="/preferences">{pt ? "Configurar preferências" : "Set preferences"}</Link>
+          </Button>
+          <Button variant="outline" onClick={onShowAll}>
+            {pt ? "Ver todos os roteiros" : "See all itineraries"}
+          </Button>
         </div>
       </Card>
     );
@@ -58,12 +76,17 @@ export function PersonalSections({ routes, loading, error, lang, renderCard, onS
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-muted-foreground py-16 justify-center">
-        <Loader2 className="size-5 animate-spin" />{pt ? "A carregar roteiros..." : "Loading itineraries..."}
+        <Loader2 className="size-5 animate-spin" />
+        {pt ? "A carregar roteiros..." : "Loading itineraries..."}
       </div>
     );
   }
   if (error) {
-    return <Card className="p-6 mb-8 text-center text-destructive">{pt ? "Não foi possível carregar os roteiros." : "Couldn't load the itineraries."}</Card>;
+    return (
+      <Card className="p-6 mb-8 text-center text-destructive">
+        {pt ? "Não foi possível carregar os roteiros." : "Couldn't load the itineraries."}
+      </Card>
+    );
   }
 
   const res = personalizeRoutes(routes, prefs);
@@ -80,16 +103,25 @@ export function PersonalSections({ routes, loading, error, lang, renderCard, onS
           {interestNames ? ` · ${interestNames}` : ""}
         </p>
         <div className="flex gap-2">
-          <Button asChild size="sm" variant="outline"><Link to="/preferences">{pt ? "Editar preferências" : "Edit preferences"}</Link></Button>
-          <Button size="sm" variant="ghost" onClick={onShowAll}>{pt ? "Catálogo completo" : "Full catalogue"}</Button>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/preferences">{pt ? "Editar preferências" : "Edit preferences"}</Link>
+          </Button>
+          <Button size="sm" variant="ghost" onClick={onShowAll}>
+            {pt ? "Catálogo completo" : "Full catalogue"}
+          </Button>
         </div>
       </Card>
 
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2"><Compass className="size-6 text-primary" />{pt ? "Roteiros para ti" : "Itineraries for you"}</h2>
+        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <Compass className="size-6 text-primary" />
+          {pt ? "Roteiros para ti" : "Itineraries for you"}
+        </h2>
         {mainCount === 0 && (
           <Card className="p-6 text-center text-muted-foreground">
-            {pt ? "Ainda não existem resultados para estas preferências nesta província." : "There are no results for these preferences in this province yet."}
+            {pt
+              ? "Ainda não existem resultados para estas preferências nesta província."
+              : "There are no results for these preferences in this province yet."}
           </Card>
         )}
         {res.exact.length > 0 && <Grid routes={res.exact} renderCard={renderCard} />}
@@ -102,14 +134,24 @@ export function PersonalSections({ routes, loading, error, lang, renderCard, onS
         )}
         {res.otherDuration.length > 0 && (
           <div className="space-y-3">
-            <h3 className="font-semibold">{pt ? `Com outra duração (pediste ${days} dias)` : `Different length (you chose ${days} days)`}</h3>
+            <h3 className="font-semibold">
+              {pt
+                ? `Com outra duração (pediste ${days} dias)`
+                : `Different length (you chose ${days} days)`}
+            </h3>
             <Grid routes={res.otherDuration} renderCard={renderCard} />
           </div>
         )}
         {res.otherInProvince.length > 0 && (
           <div className="space-y-3">
-            <h3 className="font-semibold">{pt ? `Outros roteiros em ${provinceNames}` : `Other itineraries in ${provinceNames}`}</h3>
-            <p className="text-sm text-muted-foreground">{pt ? "Não correspondem aos teus interesses, mas são da tua província." : "They don't match your interests, but are in your province."}</p>
+            <h3 className="font-semibold">
+              {pt ? `Outros roteiros em ${provinceNames}` : `Other itineraries in ${provinceNames}`}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {pt
+                ? "Não correspondem aos teus interesses, mas são da tua província."
+                : "They don't match your interests, but are in your province."}
+            </p>
             <Grid routes={res.otherInProvince} renderCard={renderCard} />
           </div>
         )}
@@ -117,8 +159,15 @@ export function PersonalSections({ routes, loading, error, lang, renderCard, onS
 
       {res.otherRegions.length > 0 && (
         <section className="space-y-4 border-t pt-8">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2"><MapPinned className="size-6 text-primary" />{pt ? "Descobre outras regiões de Moçambique" : "Discover other regions of Mozambique"}</h2>
-          <p className="text-sm text-muted-foreground">{pt ? "Sugestões noutras províncias — não fazem parte da tua seleção." : "Suggestions in other provinces — not part of your selection."}</p>
+          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <MapPinned className="size-6 text-primary" />
+            {pt ? "Descobre outras regiões de Moçambique" : "Discover other regions of Mozambique"}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {pt
+              ? "Sugestões noutras províncias — não fazem parte da tua seleção."
+              : "Suggestions in other provinces — not part of your selection."}
+          </p>
           <Grid routes={res.otherRegions} renderCard={renderCard} />
         </section>
       )}

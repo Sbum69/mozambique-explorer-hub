@@ -37,7 +37,8 @@ const TXT = {
     expired: "Esta ligação expirou ou já foi usada",
     expiredSub: "Se já confirmaste a conta, podes entrar. Caso contrário, pede uma nova ligação.",
     invalid: "Ligação de confirmação inválida",
-    invalidSub: "A ligação está incompleta ou não é válida. Pede uma nova ligação ou volta ao login.",
+    invalidSub:
+      "A ligação está incompleta ou não é válida. Pede uma nova ligação ou volta ao login.",
     login: "Ir para o login",
   },
   en: {
@@ -46,7 +47,8 @@ const TXT = {
     confirmedSub: "Your account is active. Sign in with your email and password.",
     redirecting: "Email confirmed! Opening your account…",
     expired: "This link has expired or was already used",
-    expiredSub: "If you already confirmed your account, you can sign in. Otherwise request a new link.",
+    expiredSub:
+      "If you already confirmed your account, you can sign in. Otherwise request a new link.",
     invalid: "Invalid confirmation link",
     invalidSub: "The link is incomplete or not valid. Request a new link or go back to login.",
     login: "Go to login",
@@ -82,7 +84,9 @@ function AuthCallbackPage() {
 
       let confirmedNow = false;
       if (hasError) {
-        setStatus(errorCode === "otp_expired" || errorCode === "access_denied" ? "expired" : "invalid");
+        setStatus(
+          errorCode === "otp_expired" || errorCode === "access_denied" ? "expired" : "invalid",
+        );
         return;
       }
       if (tokenHash && type && EMAIL_OTP_TYPES.includes(type)) {
@@ -125,7 +129,9 @@ function AuthCallbackPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-background via-card to-accent/30">
-      <div className="absolute top-4 right-4"><LanguageToggle /></div>
+      <div className="absolute top-4 right-4">
+        <LanguageToggle />
+      </div>
       <Card className="w-full max-w-md p-8 text-center space-y-4">
         {busy && <Loader2 className="mx-auto size-12 animate-spin text-primary" />}
         {!busy && ok && <CheckCircle2 className="mx-auto size-14 text-success" />}
@@ -138,14 +144,18 @@ function AuthCallbackPage() {
           {status === "expired" && t.expired}
           {status === "invalid" && t.invalid}
         </h1>
-        {status === "confirmed" && <p className="text-muted-foreground text-sm">{t.confirmedSub}</p>}
+        {status === "confirmed" && (
+          <p className="text-muted-foreground text-sm">{t.confirmedSub}</p>
+        )}
         {status === "expired" && <p className="text-muted-foreground text-sm">{t.expiredSub}</p>}
         {status === "invalid" && <p className="text-muted-foreground text-sm">{t.invalidSub}</p>}
 
         {(status === "expired" || status === "invalid") && <ResendConfirmation />}
         {!busy && (
           <Button asChild size="lg" className="w-full">
-            <Link to="/login" replace>{t.login}</Link>
+            <Link to="/login" replace>
+              {t.login}
+            </Link>
           </Button>
         )}
       </Card>

@@ -2,7 +2,16 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
-  ArrowLeft, X, Flag, Users, BookOpen, Mic2, Music, Sparkles, Heart, ArrowRight,
+  ArrowLeft,
+  X,
+  Flag,
+  Users,
+  BookOpen,
+  Mic2,
+  Music,
+  Sparkles,
+  Heart,
+  ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +52,10 @@ interface Topic {
 const copy = {
   back: { pt: "Voltar", en: "Back" },
   pageTitle: { pt: "Cultura e História", en: "Culture & History" },
-  heroTitle: { pt: "Descobre a Rica História de Moçambique", en: "Discover Mozambique's Rich History" },
+  heroTitle: {
+    pt: "Descobre a Rica História de Moçambique",
+    en: "Discover Mozambique's Rich History",
+  },
   heroDescription: {
     pt: "Heróis, ritmos e palavras que moldaram a identidade de um povo que olha o futuro sem esquecer o passado.",
     en: "Heroes, rhythms and words that shaped the identity of a people who look to the future without forgetting the past.",
@@ -52,7 +64,10 @@ const copy = {
   culturalHeritage: { pt: "Património Cultural", en: "Cultural Heritage" },
   learnMore: { pt: "Saber Mais", en: "Learn More" },
   didYouKnow: { pt: "Sabia que...", en: "Did you know..." },
-  heritageFooter: { pt: "Património Cultural de Moçambique", en: "Cultural Heritage of Mozambique" },
+  heritageFooter: {
+    pt: "Património Cultural de Moçambique",
+    en: "Cultural Heritage of Mozambique",
+  },
   close: { pt: "Fechar", en: "Close" },
   mozambique: { pt: "Moçambique", en: "Mozambique" },
 } satisfies Record<string, LocalizedText>;
@@ -413,7 +428,13 @@ function CultureHistoryPage() {
               className="text-left rounded-3xl overflow-hidden bg-card border shadow-lg transition-all"
             >
               <div className="relative h-56 overflow-hidden">
-                <img src={topic.image} alt={topic.title[lang]} className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
+                <img
+                  src={topic.image}
+                  alt={topic.title[lang]}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className={`absolute inset-0 bg-gradient-to-t ${topic.gradient} opacity-80`} />
                 <div className="absolute top-4 right-4 size-11 rounded-2xl bg-white shadow-lg flex items-center justify-center">
                   <topic.icon className="size-5 text-foreground" />
@@ -459,8 +480,16 @@ function CultureHistoryPage() {
               aria-labelledby={`topic-${selected.id}`}
             >
               <div className="relative h-52 sm:h-64 lg:h-72 shrink-0">
-                <img src={selected.image} alt={selected.title[lang]} className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
-                <div className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`} />
+                <img
+                  src={selected.image}
+                  alt={selected.title[lang]}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`}
+                />
                 <motion.button
                   whileHover={{ rotate: 90 }}
                   onClick={() => setSelected(null)}
@@ -475,7 +504,12 @@ function CultureHistoryPage() {
                       <selected.icon className="size-6" />
                     </div>
                     <div>
-                      <h2 id={`topic-${selected.id}`} className="text-2xl sm:text-3xl font-bold leading-tight">{selected.title[lang]}</h2>
+                      <h2
+                        id={`topic-${selected.id}`}
+                        className="text-2xl sm:text-3xl font-bold leading-tight"
+                      >
+                        {selected.title[lang]}
+                      </h2>
                       <p className="text-sm text-white/90">{selected.date[lang]}</p>
                     </div>
                   </div>
@@ -483,25 +517,35 @@ function CultureHistoryPage() {
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8 lg:px-10 lg:py-9">
-                <p className="mb-7 max-w-3xl text-base leading-relaxed text-foreground/80">{selected.short[lang]}</p>
+                <p className="mb-7 max-w-3xl text-base leading-relaxed text-foreground/80">
+                  {selected.short[lang]}
+                </p>
                 <div className="grid gap-6 md:grid-cols-2 md:gap-x-10 md:gap-y-8">
                   {selected.sections.map((section) => (
                     <div key={section.heading.pt} className="flex gap-4">
-                      <div className={`w-1 rounded-full bg-gradient-to-b ${selected.gradient} shrink-0`} />
+                      <div
+                        className={`w-1 rounded-full bg-gradient-to-b ${selected.gradient} shrink-0`}
+                      />
                       <div>
                         <h4 className="font-bold mb-2">{section.heading[lang]}</h4>
-                        <p className="text-base text-muted-foreground leading-7">{section.body[lang]}</p>
+                        <p className="text-base text-muted-foreground leading-7">
+                          {section.body[lang]}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className={`mt-8 rounded-2xl p-5 sm:p-6 bg-gradient-to-br ${selected.gradient} text-white`}>
+                <div
+                  className={`mt-8 rounded-2xl p-5 sm:p-6 bg-gradient-to-br ${selected.gradient} text-white`}
+                >
                   <div className="flex items-start gap-3">
                     <Heart className="size-5 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold text-sm mb-1">{copy.didYouKnow[lang]}</p>
-                      <p className="text-base leading-relaxed text-white/95">{selected.fact[lang]}</p>
+                      <p className="text-base leading-relaxed text-white/95">
+                        {selected.fact[lang]}
+                      </p>
                     </div>
                   </div>
                 </div>
