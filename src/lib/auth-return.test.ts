@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { authReturnFor, validateAuthReturnSearch } from "./auth";
+import { authReturnFor, postConfirmTarget, validateAuthReturnSearch } from "./auth";
 
 describe("FAV-1 return to the page after signing in", () => {
   it("returns guests to the allow-listed page they came from", () => {
@@ -17,5 +17,17 @@ describe("FAV-1 return to the page after signing in", () => {
     expect(authReturnFor("//evil.example")).toBeUndefined();
     expect(validateAuthReturnSearch({ redirect: "https://evil.example" })).toEqual({});
     expect(validateAuthReturnSearch({ redirect: "/map" })).toEqual({ redirect: "/map" });
+  });
+});
+
+describe("FINAL-1 after confirming the email, back to where sign-up started", () => {
+  it("uses the allow-listed page saved at sign-up", () => {
+    expect(postConfirmTarget({ return_to: "/business-register" })).toBe("/business-register");
+  });
+  it("ignores anything else and falls back to the role landing page", () => {
+    expect(postConfirmTarget({ return_to: "https://evil.example" })).toBeUndefined();
+    expect(postConfirmTarget({ return_to: "/admin" })).toBeUndefined();
+    expect(postConfirmTarget({})).toBeUndefined();
+    expect(postConfirmTarget(null)).toBeUndefined();
   });
 });

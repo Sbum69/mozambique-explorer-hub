@@ -51,7 +51,7 @@ src/
 ├── assets/            # Imagens das províncias/destinos
 ├── router.tsx, start.ts, styles.css
 supabase/migrations/   # Migrações originais (Lovable) — PROIBIDO alterar
-drizzle/               # schema.ts + migrations/ (0000–0033) — migrações posteriores; não alterar RLS
+drizzle/               # schema.ts + migrations/ (0000–…) — todas as migrações novas vão aqui (ver §3)
 docs/                  # Relatórios de auditoria e de blocos
 .lovable/plan/         # Planos de blocos anteriores
 EKAYA_FIXES.md, roadmap.md  # Histórico de correções e estado dos blocos
@@ -137,19 +137,59 @@ Se um pedido disser "só AUDIT", não alterar código.
   sistemas paralelos.
 - **Preservar o design** (Tailwind/shadcn, cores, layout, responsivo, tema claro/escuro) e o
   **suporte PT/EN** em todas as alterações.
-- **Não publicar a aplicação** (deploy, publish no Lovable, alterar visibilidade) nem fazer push
-  sem pedido explícito.
+- **Não publicar a aplicação** (deploy, publish no Lovable, alterar visibilidade).
 - Tratar erros e estados de loading em todas as chamadas ao Supabase.
 - Formatar com Prettier (`bunx prettier --write <ficheiros>`) apenas os ficheiros alterados —
-  `bun run format` reformata o repositório inteiro.
+  `bun run format` reformata o repositório inteiro. Se um ficheiro tocado não estava formatado na
+  `main`, fazer primeiro um commit só de formatação, para o diff real se ler bem.
+- **Tema e acessibilidade**: só tokens (`bg-card`, `text-foreground`, `text-muted-foreground`,
+  `border-border`, `primary`…), nunca `bg-white`/cinzentos fixos; contraste AA (texto 4,5:1, ícones
+  e contornos 3:1) nos dois temas; estados nunca só pela cor. Confirmações com `useConfirm`
+  (`src/components/ConfirmDialog.tsx`), nunca `confirm()`/`prompt()`/`alert()`.
+- **Textos PT/EN**: textos novos em dicionários (`LanguageContext`, `src/lib/admin-texts.ts`,
+  `src/lib/page-texts.ts`) cobertos pelos testes de paridade.
+
+### Git e pull requests
+
+- Um branch por bloco, a partir da `main` atualizada; commits separados por parte.
+- Fazer push e dar o link do PR (`/compare/main...<branch>`). **Nunca fazer merge.**
+- Nunca commitar `.env.test.local` nem credenciais (está coberto por `*.local` no `.gitignore`).
 
 ---
 
-## 3. Proibições
+## 3. Base de dados, migrações e escritas
+
+- Base de dados do EKAYA: projeto Lovable `0109a201-22dc-464d-bb9c-58c103bd551a` (conector Lovable,
+  `query_database`). O conector Supabase não tem acesso a este projeto.
+- **Leituras** são livres. **Qualquer escrita** (migração, dados, contas) exige mostrar o SQL e
+  esperar aprovação explícita; aprovar um bloco não aprova o seguinte.
+- Migrações novas: `drizzle/migrations/NNNN_nome.sql` + entrada em `meta/_journal.json` +
+  `meta/NNNN_snapshot.json` (encadeado por `prevId`). Aplicar numa transação e registar em
+  `drizzle.__drizzle_migrations` (hash SHA-256 do ficheiro com LF, `created_at` = `when` do journal).
+- Em PL/pgSQL, não usar `IF … CASE … THEN` (o parser corta no primeiro `THEN`): calcular primeiro
+  numa variável. Extensões disponíveis na Lovable Cloud: `pg_cron`, `pg_net` (não `http`).
+- **Testes de BD auto-revertíveis**: blocos `DO $$ … RAISE EXCEPTION 'TEST_…_ROLLBACK %', r; END $$`,
+  com `set_config('request.jwt.claims', …)` e `SET LOCAL ROLE authenticated/anon` para a RLS; no fim,
+  confirmar por leitura que não ficaram dados de teste.
+- `src/integrations/supabase/types.ts` é gerado, mas sem acesso ao gerador é atualizado à mão, e só
+  com as tabelas/funções de uma migração aprovada.
+
+## 4. Contas de teste e capturas
+
+- Três contas de teste (turista, negócio com o negócio "EKAYA Teste — não reservar", admin).
+  Credenciais só em `.env.test.local` (`TEST_TOURIST_EMAIL`/`_PASSWORD`, `TEST_BUSINESS_…`,
+  `TEST_ADMIN_…`); nunca em logs, relatórios ou commits. **Apagar ou desativar antes do lançamento.**
+- Com sessão, os testes só leem e navegam: sessão obtida pela API de autenticação, sem submeter
+  formulários da app.
+- Capturas e verificações no browser com Playwright e o Edge do sistema, instalados numa pasta
+  temporária — nunca acrescentar dependências ao `package.json` para isso.
+
+---
+
+## 5. Proibições
 
 - **Proibido alterar `supabase/migrations/`** (criar, editar ou apagar ficheiros).
-- **Proibido alterar políticas RLS**, em qualquer local (migrações SQL em `supabase/` ou
-  `drizzle/`, SQL executado diretamente, dashboard). Se uma tarefa exigir mudança de schema ou
-  RLS, parar e listar a necessidade no relatório para o responsável tratar.
-- Não editar ficheiros gerados: `src/integrations/supabase/*`, `src/routeTree.gen.ts`.
+- **Proibido alterar políticas RLS sem aprovação explícita** do SQL (em `drizzle/`, SQL direto ou
+  dashboard). Sem aprovação, parar e listar a necessidade no relatório.
+- Não editar `src/routeTree.gen.ts` (o build e o Vitest podem regenerá-lo: repor a cópia).
 - Não executar escritas diretas em `points_ledger` nem eliminar dados reais para "limpar" testes.

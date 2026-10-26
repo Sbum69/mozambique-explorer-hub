@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { User } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
-import type { AppRole } from "@/lib/auth";
+import { parseAuthReturn, type AppRole, type AuthReturnPath } from "@/lib/auth";
 import { getAuthCallbackUrl } from "@/lib/app-url";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,8 @@ interface AuthContextValue {
     password: string;
     displayName: string;
     email: string;
+    /** Allow-listed page to open after the email is confirmed (kept in the account metadata). */
+    returnTo?: AuthReturnPath;
   }) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
 
   isGuest: boolean;
@@ -308,6 +310,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password,
     displayName,
     email,
+    returnTo,
   }) => {
     const key = username.trim().toLowerCase();
     if (!key)
@@ -325,7 +328,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         emailRedirectTo: getAuthCallbackUrl(),
-        data: { display_name: displayName.trim(), username: key },
+        data: {
+          display_name: displayName.trim(),
+          username: key,
+          ...(parseAuthReturn(returnTo) ? { return_to: returnTo } : {}),
+        },
       },
     });
     if (error) return { ok: false, error: authErrorMessage(error.message, lang) };

@@ -19,6 +19,13 @@ export function parseAuthReturn(value: unknown): AuthReturnPath | undefined {
   return AUTH_RETURN_PATHS.find((path) => path === value);
 }
 
+/** Page saved at sign-up (user_metadata.return_to), only if it is still on the allowlist. */
+export function postConfirmTarget(
+  metadata: Record<string, unknown> | null | undefined,
+): AuthReturnPath | undefined {
+  return parseAuthReturn(metadata?.return_to);
+}
+
 /** Allowed return target for the current page; a route detail returns to its list. */
 export function authReturnFor(pathname: string): AuthReturnPath | undefined {
   if (pathname.startsWith("/itinerary/")) return "/itineraries";

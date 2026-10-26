@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
+  businessInsertError,
   businessRegistrationSchema,
   type BusinessRegistrationResult,
 } from "@/lib/business-registration";
@@ -80,7 +81,7 @@ export const registerMyBusiness = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (businessError || !business) return { ok: false, error: "BUSINESS_FAILED" };
+    if (businessError || !business) return { ok: false, error: businessInsertError(businessError) };
 
     // 4. Business role, only after the business exists. 23505 = role already present.
     const role = data.businessType === "large" ? "business_large" : "business_small";

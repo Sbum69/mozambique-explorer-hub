@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/contexts/LanguageContext";
-import { roleLandingTarget } from "@/lib/auth";
+import { postConfirmTarget, roleLandingTarget } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/callback")({
   ssr: false,
@@ -116,7 +116,11 @@ function AuthCallbackPage() {
       const user = userData.user;
       if (user && user.email_confirmed_at) {
         setStatus("redirecting");
-        navigate({ to: await roleLandingTarget(user.id), replace: true });
+        // Back to where sign-up started (allow-listed), else the role-based landing page.
+        navigate({
+          to: postConfirmTarget(user.user_metadata) ?? (await roleLandingTarget(user.id)),
+          replace: true,
+        });
         return;
       }
       setStatus(confirmedNow ? "confirmed" : "invalid");
