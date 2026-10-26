@@ -21,6 +21,7 @@ describe("ADM-2 admin texts exist in PT and EN", () => {
   it("covers every admin dictionary", () => {
     expect(dictionaries.map(([name]) => name).sort()).toEqual(
       [
+        "BROADCASTS_TXT",
         "BUSINESS_STATUS_LABEL",
         "COMMUNITY_EXP_TXT",
         "MODERATION_TXT",

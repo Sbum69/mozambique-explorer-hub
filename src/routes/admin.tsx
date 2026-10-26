@@ -12,6 +12,7 @@ import { AdminBusinessesModal } from "@/components/AdminBusinesses";
 import { AdminRewardsModal } from "@/components/AdminRewards";
 import { AdminBookingsModal } from "@/components/AdminBookings";
 import { AdminExperiencesModal } from "@/components/AdminExperiences";
+import { AdminBroadcastsModal } from "@/components/AdminBroadcasts";
 import { adminErrorText, setUserRole, type ManagedRole } from "@/lib/admin";
 import {
   BUSINESS_STATUS_LABEL,
@@ -52,6 +53,7 @@ import {
   Compass,
   Loader2,
   Flag,
+  Megaphone,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -138,7 +140,8 @@ type ModalKey =
   | "businesses"
   | "rewards"
   | "bookings"
-  | "experiences";
+  | "experiences"
+  | "broadcasts";
 
 const localeOf = (lang: Lang) => (lang === "pt" ? "pt-PT" : "en-GB");
 
@@ -222,7 +225,7 @@ function AdminPage() {
     { key: "communityReports" as const, label: "Denúncias", icon: Flag },
     { key: "communityExperiences" as const, label: "Experiências Comunitárias", icon: Users },
     { key: "provinces" as const, label: "Gerir Províncias", icon: MapPin },
-
+    { key: "broadcasts" as const, label: "Avisos", icon: Megaphone },
     { key: "reports" as const, label: "Relatórios", icon: FileText },
   ];
 
@@ -354,6 +357,7 @@ function AdminPage() {
                         reports: "Summary",
                         bookings: "Bookings",
                         experiences: "Commercial activities",
+                        broadcasts: "Notices",
                       }[a.key]}
                 </Button>
               ))}
@@ -386,6 +390,9 @@ function AdminPage() {
       )}
       {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
       {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} />}
+      {activeModal === "broadcasts" && (
+        <AdminBroadcastsModal onClose={() => setActiveModal(null)} />
+      )}
     </div>
   );
 }

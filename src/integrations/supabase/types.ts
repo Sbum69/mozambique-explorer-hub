@@ -1200,6 +1200,7 @@ export type Database = {
       notifications: {
         Row: {
           body_en: string | null
+          broadcast_id: string | null
           body_pt: string
           created_at: string
           id: string
@@ -1212,6 +1213,7 @@ export type Database = {
         }
         Insert: {
           body_en?: string | null
+          broadcast_id?: string | null
           body_pt: string
           created_at?: string
           id?: string
@@ -1224,6 +1226,7 @@ export type Database = {
         }
         Update: {
           body_en?: string | null
+          broadcast_id?: string | null
           body_pt?: string
           created_at?: string
           id?: string
@@ -2000,6 +2003,34 @@ export type Database = {
           _business_id: string
           _reason?: string
           _status: Database["public"]["Enums"]["business_status"]
+        }
+        Returns: Json
+      }
+      admin_list_broadcasts: {
+        Args: { _limit?: number }
+        Returns: {
+          audience: string
+          body_en: string
+          body_pt: string
+          created_at: string
+          id: string
+          link: string | null
+          recipients: number
+          sender: string | null
+          target: string | null
+          title_en: string
+          title_pt: string
+        }[]
+      }
+      admin_send_notification: {
+        Args: {
+          _audience: string
+          _body_en: string
+          _body_pt: string
+          _link?: string
+          _title_en: string
+          _title_pt: string
+          _user_id: string | null
         }
         Returns: Json
       }

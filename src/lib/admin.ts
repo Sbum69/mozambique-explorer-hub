@@ -170,6 +170,84 @@ export async function setExperienceActive(id: string, active: boolean): Promise<
   if (!data?.length) throw new Error("NOT_FOUND");
 }
 
+// ---------- Notices (admin_send_notification / admin_list_broadcasts, migration 0042) ----------
+export type BroadcastAudience = "user" | "business_owners" | "all";
+
+export interface BroadcastInput {
+  audience: BroadcastAudience;
+  userId: string | null;
+  titlePt: string;
+  titleEn: string;
+  bodyPt: string;
+  bodyEn: string;
+  link: string;
+}
+
+export const BROADCAST_LIMITS = { title: 160, body: 2000, min: 2 } as const;
+
+export type BroadcastProblem = "user" | "titlePt" | "titleEn" | "bodyPt" | "bodyEn" | "link";
+
+/** Same rules as the admin_broadcasts CHECKs, so the admin sees the problem before sending. */
+export function broadcastProblems(input: BroadcastInput): BroadcastProblem[] {
+  const len = (s: string) => s.trim().length;
+  const out: BroadcastProblem[] = [];
+  if (input.audience === "user" && !input.userId) out.push("user");
+  const { title, body, min } = BROADCAST_LIMITS;
+  if (len(input.titlePt) < min || len(input.titlePt) > title) out.push("titlePt");
+  if (len(input.titleEn) < min || len(input.titleEn) > title) out.push("titleEn");
+  if (len(input.bodyPt) < min || len(input.bodyPt) > body) out.push("bodyPt");
+  if (len(input.bodyEn) < min || len(input.bodyEn) > body) out.push("bodyEn");
+  const link = input.link.trim();
+  if (link && (!link.startsWith("/") || link.startsWith("//"))) out.push("link");
+  return out;
+}
+
+export async function sendBroadcast(input: BroadcastInput): Promise<number> {
+  const { data, error } = await supabase.rpc("admin_send_notification", {
+    _audience: input.audience,
+    _user_id: input.audience === "user" ? input.userId : null,
+    _title_pt: input.titlePt.trim(),
+    _title_en: input.titleEn.trim(),
+    _body_pt: input.bodyPt.trim(),
+    _body_en: input.bodyEn.trim(),
+    _link: input.link.trim() || undefined,
+  });
+  if (error) throw new Error(error.message);
+  return Number((data as { recipients?: number } | null)?.recipients ?? 0);
+}
+
+export interface BroadcastRecord {
+  id: string;
+  createdAt: string;
+  sender: string | null;
+  audience: BroadcastAudience;
+  target: string | null;
+  titlePt: string;
+  titleEn: string;
+  bodyPt: string;
+  bodyEn: string;
+  link: string | null;
+  recipients: number;
+}
+
+export async function fetchBroadcasts(): Promise<BroadcastRecord[]> {
+  const { data, error } = await supabase.rpc("admin_list_broadcasts", { _limit: 50 });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((b) => ({
+    id: b.id,
+    createdAt: b.created_at,
+    sender: b.sender,
+    audience: b.audience as BroadcastAudience,
+    target: b.target,
+    titlePt: b.title_pt,
+    titleEn: b.title_en,
+    bodyPt: b.body_pt,
+    bodyEn: b.body_en,
+    link: b.link,
+    recipients: b.recipients,
+  }));
+}
+
 // ---------- Errors ----------
 const ERRORS: Record<string, [string, string]> = {
   forbidden: ["Só administradores podem fazer isto.", "Only administrators can do this."],
@@ -206,6 +284,15 @@ const ERRORS: Record<string, [string, string]> = {
     "This account owns a business: its business role can't be removed.",
   ],
   "final state": ["Esta reserva já está encerrada.", "This booking is already closed."],
+  rate_limited: [
+    "Limite atingido: no máximo 10 avisos por hora.",
+    "Limit reached: at most 10 notices per hour.",
+  ],
+  invalid_audience: ["Público inválido.", "Invalid audience."],
+  "check constraint": [
+    "Texto ou ligação inválidos (títulos 2–160, textos 2–2000, ligação interna a começar por /).",
+    "Invalid text or link (titles 2–160, texts 2–2000, internal link starting with /).",
+  ],
   not_found: ["Registo não encontrado ou sem permissão.", "Record not found or not allowed."],
 };
 
