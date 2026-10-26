@@ -19,13 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { LazyChoiceSelect } from "@/components/LazyChoiceSelect";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -316,21 +310,15 @@ function HomePage() {
                   <MapPin className="size-3.5" />
                   {lang === "pt" ? "Destino" : "Destination"}
                 </label>
-                <Select value={destId} onValueChange={setDestId}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">
-                      {lang === "pt" ? "Qualquer destino" : "Any destination"}
-                    </SelectItem>
-                    {destinations.map((d) => (
-                      <SelectItem key={d.id} value={d.slug}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <LazyChoiceSelect
+                  value={destId}
+                  onValueChange={setDestId}
+                  className="h-11"
+                  options={[
+                    { value: "any", label: lang === "pt" ? "Qualquer destino" : "Any destination" },
+                    ...destinations.map((d) => ({ value: d.slug, label: d.name })),
+                  ]}
+                />
                 {loadingDestinations && (
                   <p className="mt-1.5 text-[11px] text-muted-foreground">
                     {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
@@ -351,18 +339,12 @@ function HomePage() {
                   <Calendar className="size-3.5" />
                   {lang === "pt" ? "Quantos dias?" : "How many days?"}
                 </label>
-                <Select value={days} onValueChange={(v) => setDays(v as DayBucket)}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DAY_OPTIONS.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.label[lang as Lang]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <LazyChoiceSelect
+                  value={days}
+                  onValueChange={(v) => setDays(v as DayBucket)}
+                  className="h-11"
+                  options={DAY_OPTIONS.map((d) => ({ value: d.id, label: d.label[lang as Lang] }))}
+                />
               </div>
 
               <Button
