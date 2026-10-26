@@ -1,7 +1,7 @@
-import maputo from "@/assets/dest-maputo.jpg";
-import ilha from "@/assets/dest-ilha.jpg";
-import inhambane from "@/assets/dest-inhambane.jpg";
-import vilankulo from "@/assets/dest-vilankulo.jpg";
+import maputo from "@/assets/dest-maputo.webp";
+import ilha from "@/assets/dest-ilha.webp";
+import inhambane from "@/assets/dest-inhambane.webp";
+import vilankulo from "@/assets/dest-vilankulo.webp";
 
 export type StopType = "business" | "waypoint" | "story";
 export type Difficulty = "Fácil" | "Moderado" | "Difícil";
@@ -100,8 +100,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         location: "Baía de Inhambane",
         story:
           "Conta-se que os antigos pescadores da baía recebiam visitas de espíritos do mar que lhes indicavam onde lançar as redes. Em troca, deixavam oferendas de coco e milho na areia. Ainda hoje, os mais velhos respeitam este ritual antes de sair para o mar.",
-        culturalContext:
-          "Tradição oral da comunidade Tonga, transmitida há gerações.",
+        culturalContext: "Tradição oral da comunidade Tonga, transmitida há gerações.",
         x: 40,
         y: 25,
       },
@@ -329,8 +328,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         location: "Two Mile Reef",
         story:
           "Os dugongos do arquipélago são considerados sagrados — caçá-los traz infortúnio à comunidade pesqueira por sete gerações.",
-        culturalContext:
-          "Tabu ecológico que ajudou a preservar a espécie ameaçada.",
+        culturalContext: "Tabu ecológico que ajudou a preservar a espécie ameaçada.",
         x: 70,
         y: 85,
       },
