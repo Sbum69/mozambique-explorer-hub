@@ -49,7 +49,6 @@ import {
 } from "@/lib/community";
 
 export const Route = createFileRoute("/community")({
-  ssr: false,
   head: () => ({
     meta: [
       { title: "Comunidade — Ekaya Explore" },

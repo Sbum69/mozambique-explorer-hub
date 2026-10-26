@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, ClientOnly } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import {
@@ -43,7 +43,6 @@ const InteractiveMap = lazy(() =>
 );
 
 export const Route = createFileRoute("/map")({
-  ssr: false,
   head: () => ({
     meta: [
       { title: "Mapa Interativo — Ekaya Explore" },
@@ -278,6 +277,14 @@ function MapPage() {
     }
   };
 
+  const MAP_PLACEHOLDER = (
+    <div className="h-full w-full flex items-center justify-center bg-muted">
+      <div className="animate-pulse text-muted-foreground">
+        {lang === "pt" ? "A carregar mapa..." : "Loading map..."}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
@@ -400,35 +407,30 @@ function MapPage() {
                     ? "A minha localização"
                     : "My location"}
             </Button>
-            <Suspense
-              fallback={
-                <div className="h-full w-full flex items-center justify-center bg-muted">
-                  <div className="animate-pulse text-muted-foreground">
-                    {lang === "pt" ? "A carregar mapa..." : "Loading map..."}
-                  </div>
-                </div>
-              }
-            >
-              <InteractiveMap
-                destinations={showDestinations ? mappable : []}
-                community={showCommunity ? filteredCommunity : []}
-                highlightCommunityId={selectedCommunityId}
-                onSelectCommunity={(c) => setSelectedCommunityId(c.id)}
-                onOpenCommunity={(c) =>
-                  navigate({ to: "/community-experiences", search: { open: c.id } })
-                }
-                selectedId={selected?.id ?? null}
-                onPick={(d) => {
-                  setSelected(d);
-                  setDirectionsOpen(false);
-                }}
-                onSelect={showDetails}
-                onDirections={openDirections}
-                origin={origin}
-                visitedIds={visited}
-                focus={focus}
-              />
-            </Suspense>
+            {/* Leaflet needs the browser: the server sends the placeholder, the map loads after hydration. */}
+            <ClientOnly fallback={MAP_PLACEHOLDER}>
+              <Suspense fallback={MAP_PLACEHOLDER}>
+                <InteractiveMap
+                  destinations={showDestinations ? mappable : []}
+                  community={showCommunity ? filteredCommunity : []}
+                  highlightCommunityId={selectedCommunityId}
+                  onSelectCommunity={(c) => setSelectedCommunityId(c.id)}
+                  onOpenCommunity={(c) =>
+                    navigate({ to: "/community-experiences", search: { open: c.id } })
+                  }
+                  selectedId={selected?.id ?? null}
+                  onPick={(d) => {
+                    setSelected(d);
+                    setDirectionsOpen(false);
+                  }}
+                  onSelect={showDetails}
+                  onDirections={openDirections}
+                  origin={origin}
+                  visitedIds={visited}
+                  focus={focus}
+                />
+              </Suspense>
+            </ClientOnly>
           </Card>
 
           {/* Sidebar list */}

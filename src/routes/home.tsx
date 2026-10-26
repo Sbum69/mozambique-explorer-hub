@@ -84,7 +84,6 @@ export const Route = createFileRoute("/home")({
       },
     ],
   }),
-  ssr: false,
   component: HomePage,
 });
 
