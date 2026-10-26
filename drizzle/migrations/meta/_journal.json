@@ -288,6 +288,13 @@
       "when": 1793000000000,
       "tag": "0040_exchange_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793100000000,
+      "tag": "0041_favorites_and_preferences",
+      "breakpoints": true
     }
   ]
 }

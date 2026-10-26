@@ -267,32 +267,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setPreferences: AuthContextValue["setPreferences"] = async (prefs) => {
     if (!user) return;
     const next = { ...user, preferences: { ...user.preferences, ...prefs } };
-    persistLocalState(next);
     if (authUser) {
-      await supabase
-        .from("profiles")
-        .update({
-          province: next.preferences?.province,
-          duration_days: next.preferences?.durationDays,
-          interests: next.preferences?.interests,
-        })
-        .eq("id", authUser.id);
-
-      // Several provinces per tourist live in profile_provinces (RLS: own rows only).
-      if (prefs.provinces) {
-        const codes = [...new Set(prefs.provinces)];
-        const { data: rows } = await supabase
-          .from("provinces")
-          .select("id, code")
-          .in("code", codes.length ? codes : [""]);
-        await supabase.from("profile_provinces").delete().eq("profile_id", authUser.id);
-        if (rows && rows.length) {
-          await supabase
-            .from("profile_provinces")
-            .insert(rows.map((row) => ({ profile_id: authUser.id, province_id: row.id })));
-        }
-      }
+      // One transaction on the server: profile and provinces are saved together or not at all.
+      const p = next.preferences ?? {};
+      const { error } = await supabase.rpc("save_my_preferences", {
+        _province: p.province ?? "",
+        _duration_days: p.durationDays ?? 0,
+        _interests: p.interests ?? [],
+        _provinces: prefs.provinces ? [...new Set(prefs.provinces)] : undefined,
+      });
+      if (error) throw new Error(error.message);
     }
+    persistLocalState(next);
   };
 
   const registerUser: AuthContextValue["registerUser"] = async ({

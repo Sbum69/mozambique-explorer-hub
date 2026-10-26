@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { LogIn, UserPlus, Compass, Lock } from "lucide-react";
 
 import {
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { authReturnFor } from "@/lib/auth";
 
 interface AuthGateContextValue {
   /**
@@ -43,6 +44,10 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
   );
 
   const pt = lang === "pt";
+  // After signing in, come back to this page (only allow-listed paths).
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const back = authReturnFor(pathname);
+  const returnSearch = back ? { redirect: back } : {};
 
   return (
     <AuthGateContext.Provider value={{ requireAccount, needsAccount: !isAuthenticated }}>
@@ -65,13 +70,13 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
           </DialogHeader>
           <div className="mt-2 grid gap-2">
             <Button asChild className="gap-2">
-              <Link to="/login" onClick={() => setOpen(false)}>
+              <Link to="/login" search={returnSearch} onClick={() => setOpen(false)}>
                 <LogIn className="size-4" />
                 {pt ? "Entrar" : "Sign in"}
               </Link>
             </Button>
             <Button asChild variant="secondary" className="gap-2">
-              <Link to="/signup" onClick={() => setOpen(false)}>
+              <Link to="/signup" search={returnSearch} onClick={() => setOpen(false)}>
                 <UserPlus className="size-4" />
                 {pt ? "Criar conta" : "Create account"}
               </Link>

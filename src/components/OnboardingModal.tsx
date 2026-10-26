@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { toast } from "sonner";
 import { INTERESTS } from "@/data/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useProvinces } from "@/hooks/useProvinces";
@@ -88,6 +89,14 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
     setSaving(true);
     try {
       await setPreferences({ ...prefs, province: slug, provinces: [provinceCode_] });
+    } catch {
+      // Nothing was saved (all-or-nothing on the server): keep the dialog open so the user can retry.
+      toast.error(
+        lang === "pt"
+          ? "Não foi possível guardar as preferências. Tenta novamente."
+          : "Couldn't save your preferences. Please try again.",
+      );
+      return;
     } finally {
       setSaving(false);
     }

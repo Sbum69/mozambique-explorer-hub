@@ -552,18 +552,7 @@ function MapPage() {
                     className="w-full h-64 md:h-full object-cover"
                   />
                   <div className="absolute top-3 right-3">
-                    <FavoriteButton
-                      itemId={selected.slug}
-                      itemType="place"
-                      itemData={{
-                        name: selected.name,
-                        description: selected.description,
-                        image: selected.image,
-                        location: selected.region[lang],
-                        region: selected.region,
-                      }}
-                      size="md"
-                    />
+                    <FavoriteButton itemId={selected.slug} itemType="place" size="md" />
                   </div>
                 </div>
                 <div className="p-6">

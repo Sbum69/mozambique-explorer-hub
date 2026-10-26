@@ -354,22 +354,7 @@ function ItinerariesPage() {
               <div className="bg-black/60 text-white px-2 py-1 rounded-md text-xs font-mono">
                 {route.code}
               </div>
-              <FavoriteButton
-                itemId={route.id}
-                itemType="itinerary"
-                itemData={{
-                  name: route.title,
-                  description: route.description ?? "",
-                  image: cover,
-                  duration: `${route.durationDays} ${lang === "pt" ? "dias" : "days"}`,
-                  location: route.province
-                    ? lang === "pt"
-                      ? route.province.name.pt
-                      : route.province.name.en
-                    : route.code,
-                }}
-                size="sm"
-              />
+              <FavoriteButton itemId={route.id} itemType="itinerary" size="sm" />
             </div>
             <div className="absolute bottom-3 left-3 right-3 text-white">
               <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>

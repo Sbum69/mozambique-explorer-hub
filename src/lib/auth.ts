@@ -5,11 +5,25 @@ import { supabase } from "@/integrations/supabase/client";
 export type AppRole = "tourist" | "business_small" | "business_large" | "admin";
 
 /** Internal pages login/signup may return to. A whitelist, so `?redirect=` can never point elsewhere. */
-export const AUTH_RETURN_PATHS = ["/business-register"] as const;
+// Fixed allowlist (no open redirects): pages a guest can return to after signing in.
+export const AUTH_RETURN_PATHS = [
+  "/business-register",
+  "/map",
+  "/experiences",
+  "/itineraries",
+  "/favorites",
+] as const;
 export type AuthReturnPath = (typeof AUTH_RETURN_PATHS)[number];
 
 export function parseAuthReturn(value: unknown): AuthReturnPath | undefined {
   return AUTH_RETURN_PATHS.find((path) => path === value);
+}
+
+/** Allowed return target for the current page; a route detail returns to its list. */
+export function authReturnFor(pathname: string): AuthReturnPath | undefined {
+  if (pathname.startsWith("/itinerary/")) return "/itineraries";
+  if (pathname.startsWith("/experience/")) return "/experiences";
+  return parseAuthReturn(pathname);
 }
 
 /** Search schema shared by /login and /signup. */

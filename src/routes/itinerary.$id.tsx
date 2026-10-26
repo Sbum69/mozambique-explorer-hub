@@ -402,18 +402,7 @@ function ItineraryDetailPage() {
           <div className="rounded-md bg-background/80 backdrop-blur">
             <LanguageToggle />
           </div>
-          <FavoriteButton
-            itemId={route.id}
-            itemType="itinerary"
-            itemData={{
-              name: route.title,
-              description: route.description ?? "",
-              image: cover,
-              duration: `${route.durationDays} ${lang === "pt" ? "dias" : "days"}`,
-              location: route.code,
-            }}
-            size="md"
-          />
+          <FavoriteButton itemId={route.id} itemType="itinerary" size="md" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
           <div className="container mx-auto">

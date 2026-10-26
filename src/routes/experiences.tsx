@@ -392,21 +392,7 @@ function ExperiencesPage() {
                           ? CATEGORIES.find((c) => c.id === exp.category)?.labelPt
                           : CATEGORIES.find((c) => c.id === exp.category)?.labelEn}
                       </Badge>
-                      <FavoriteButton
-                        itemId={exp.id}
-                        itemType="experience"
-                        itemData={{
-                          title: exp.title,
-                          description: exp.description,
-                          image: exp.image,
-                          location: exp.location,
-                          rating: exp.rating,
-                          priceMzn: exp.priceMzn,
-                          durationHours: exp.durationHours,
-                          host: exp.host,
-                        }}
-                        size="sm"
-                      />
+                      <FavoriteButton itemId={exp.id} itemType="experience" size="sm" />
                     </div>
                   </div>
 
