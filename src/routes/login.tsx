@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 
 import { HeroImage } from "@/components/HeroImage";
+import { FORGOT_TXT } from "@/lib/page-texts";
 import { getAuthenticatedUser, roleLandingTarget, validateAuthReturnSearch } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
@@ -144,7 +145,15 @@ function LoginPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t("password")}</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="password">{t("password")}</Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-medium text-primary hover:underline rounded"
+                >
+                  {FORGOT_TXT[lang].forgotLink}
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
