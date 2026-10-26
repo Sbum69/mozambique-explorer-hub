@@ -158,7 +158,7 @@ export function AppSidebar() {
                 {isAdmin ? <Shield className="size-5" /> : <Map className="size-5" />}
               </div>
               <div>
-                <p className="text-xs opacity-80 uppercase tracking-wider">Ekaya Explore</p>
+                <p className="text-xs uppercase tracking-wider">Ekaya Explore</p>
                 <h2 className="font-bold leading-tight">
                   {lang === "pt" ? "Moçambique — Hub" : "Mozambique — Hub"}
                 </h2>
@@ -180,7 +180,7 @@ export function AppSidebar() {
               </div>
               <div className="min-w-0">
                 <p className="font-semibold truncate">{user.displayName}</p>
-                <p className="text-xs opacity-80 capitalize">{user.role.replace("-", " ")}</p>
+                <p className="text-xs capitalize">{user.role.replace("-", " ")}</p>
               </div>
             </div>
           )}
@@ -200,12 +200,12 @@ export function AppSidebar() {
               navigate({ to: "/experiences" });
               close();
             }}
-            className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group"
+            className="w-full bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 text-white rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group"
           >
             <motion.div
               animate={{ x: ["-100%", "100%"], opacity: [0, 0.5, 0] }}
               transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white dark:via-background to-transparent pointer-events-none"
             />
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -275,7 +275,7 @@ export function AppSidebar() {
 
           {/* Premium card */}
           {user && user.role !== "guest" && (
-            <div className="rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-pink-500 text-white p-4 shadow-lg">
+            <div className="rounded-2xl bg-gradient-to-br from-amber-700 via-orange-700 to-pink-600 text-white p-4 shadow-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Crown className="size-5" />
                 <p className="font-bold text-sm">{lang === "pt" ? "Plano Básico" : "Free Plan"}</p>
@@ -288,7 +288,7 @@ export function AppSidebar() {
               <Button
                 size="sm"
                 variant="secondary"
-                className="w-full bg-white text-orange-600 hover:bg-white/90"
+                className="w-full bg-card text-orange-700 dark:text-orange-300 hover:bg-white/90"
               >
                 {lang === "pt" ? "Ver Planos" : "View Plans"}
               </Button>

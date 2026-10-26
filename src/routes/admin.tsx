@@ -4,6 +4,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { getAdminSummary } from "@/lib/dashboard.functions";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import { useConfirm } from "@/components/ConfirmDialog";
@@ -246,6 +247,7 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <LanguageToggle />
             <Button variant="outline" size="sm" onClick={() => navigate({ to: "/impact" })}>
               <Activity className="size-4" /> {pt ? "Impacto" : "Impact"}

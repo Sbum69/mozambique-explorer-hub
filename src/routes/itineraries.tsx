@@ -55,6 +55,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { useProvinces } from "@/hooks/useProvinces";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useExperiences } from "@/hooks/useExperiences";
@@ -80,6 +81,7 @@ import {
   type RouteStopKind,
 } from "@/lib/routes";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
@@ -115,6 +117,7 @@ export const Route = createFileRoute("/itineraries")({
 function ItinerariesPage() {
   const { user, authUser } = useAuth();
   const { lang } = useLang();
+  const [askConfirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
   const userId = authUser?.id ?? null;
@@ -268,7 +271,14 @@ function ItinerariesPage() {
   };
 
   const handleDelete = async (route: ItineraryRoute) => {
-    if (!confirm(lang === "pt" ? `Apagar "${route.title}"?` : `Delete "${route.title}"?`)) return;
+    if (
+      !(await askConfirm({
+        title: lang === "pt" ? `Apagar "${route.title}"?` : `Delete "${route.title}"?`,
+        confirmLabel: lang === "pt" ? "Apagar" : "Delete",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await deleteRoute(route.id);
       toast.success(lang === "pt" ? "Roteiro apagado" : "Itinerary deleted");
@@ -335,12 +345,12 @@ function ItinerariesPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
               {route.isCurated && (
-                <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0 gap-1">
+                <Badge className="bg-gradient-to-r from-primary to-orange-700 text-white border-0 gap-1">
                   <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
                 </Badge>
               )}
               {isMine(route) && (
-                <Badge className="bg-emerald-500 text-white border-0">
+                <Badge className="bg-emerald-700 text-white border-0">
                   {lang === "pt" ? "Meu" : "Mine"}
                 </Badge>
               )}
@@ -369,7 +379,7 @@ function ItinerariesPage() {
           <div className="p-5 flex-1 flex flex-col">
             {isMine(route) && route.isPublic && route.reviewStatus !== "approved" && (
               <div
-                className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 text-amber-900" : "bg-destructive/10 text-destructive"}`}
+                className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200" : "bg-destructive/10 text-destructive"}`}
               >
                 {route.reviewStatus === "pending"
                   ? lang === "pt"
@@ -381,7 +391,7 @@ function ItinerariesPage() {
             {route.requiresValidation && (
               <Badge
                 variant="secondary"
-                className="mb-3 w-fit bg-amber-100 text-amber-900 border-0"
+                className="mb-3 w-fit bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border-0"
               >
                 {lang === "pt"
                   ? "Catálogo-base — requer validação"
@@ -420,11 +430,11 @@ function ItinerariesPage() {
                 .map((s) => (
                   <div key={s.id} className="flex items-center gap-2 text-sm">
                     {s.kind === "community" ? (
-                      <Users className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <Users className="h-4 w-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
                     ) : s.kind === "experience" ? (
-                      <Store className="h-4 w-4 text-blue-500 shrink-0" />
+                      <Store className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
                     ) : (
-                      <MapPin className="h-4 w-4 text-purple-500 shrink-0" />
+                      <MapPin className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
                     )}
                     <span className="truncate flex-1">{s.title}</span>
                   </div>
@@ -486,6 +496,7 @@ function ItinerariesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+      {confirmDialog}
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -500,6 +511,7 @@ function ItinerariesPage() {
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -536,7 +548,7 @@ function ItinerariesPage() {
                   return;
                 setShowCreateModal(true);
               }}
-              className="gap-2 bg-gradient-to-r from-primary to-orange-600"
+              className="gap-2 bg-gradient-to-r from-primary to-orange-700"
             >
               <Plus className="h-4 w-4" />
               {lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
@@ -1330,11 +1342,11 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                         #{stopIndex + 1}
                       </span>
                       {stop.kind === "community" ? (
-                        <Users className="size-4 text-emerald-600" />
+                        <Users className="size-4 text-emerald-700 dark:text-emerald-300" />
                       ) : stop.kind === "experience" ? (
-                        <Store className="size-4 text-blue-500" />
+                        <Store className="size-4 text-blue-600 dark:text-blue-400" />
                       ) : (
-                        <MapPin className="size-4 text-purple-500" />
+                        <MapPin className="size-4 text-purple-600 dark:text-purple-400" />
                       )}
                       <span className="flex-1 text-sm truncate">{stop.title}</span>
                       <Button
@@ -1377,7 +1389,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           <Button
             onClick={() => void submit()}
             disabled={saving}
-            className="bg-gradient-to-r from-primary to-orange-600"
+            className="bg-gradient-to-r from-primary to-orange-700"
           >
             {saving && <Loader2 className="size-4 animate-spin mr-2" />}
             {isEdit

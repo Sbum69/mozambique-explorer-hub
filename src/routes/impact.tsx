@@ -20,6 +20,7 @@ import {
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -76,6 +77,7 @@ function ImpactPage() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>

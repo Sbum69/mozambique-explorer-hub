@@ -20,12 +20,14 @@ import { toast } from "sonner";
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLang } from "@/contexts/LanguageContext";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { fetchProvinces, type Province } from "@/lib/provinces";
@@ -85,16 +87,17 @@ const REPORT_REASONS: {
 ];
 
 const AVATAR_GRADIENTS = [
-  "from-blue-500 to-purple-600",
-  "from-green-500 to-teal-600",
-  "from-orange-500 to-red-600",
-  "from-pink-500 to-rose-600",
-  "from-indigo-500 to-blue-600",
-  "from-amber-500 to-orange-600",
+  "from-blue-600 to-purple-600",
+  "from-green-700 to-teal-700",
+  "from-orange-700 to-red-600",
+  "from-pink-600 to-rose-600",
+  "from-indigo-600 to-blue-600",
+  "from-amber-700 to-orange-700",
 ];
 
 function CommunityPage() {
   const { t, lang } = useLang();
+  const [askConfirm, confirmDialog] = useConfirm();
   const { user, authUser, isAdmin } = useAuth();
   const { requireAccount } = useAuthGate();
   const pt = lang === "pt";
@@ -197,7 +200,14 @@ function CommunityPage() {
   };
 
   const handleDelete = async (post: CommunityPost) => {
-    if (!window.confirm(t("communityDeleteConfirm"))) return;
+    if (
+      !(await askConfirm({
+        title: t("communityDeleteConfirm"),
+        confirmLabel: t("communityDelete"),
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await deleteCommunityPost(post.id);
       setPosts((arr) => arr.filter((p) => p.id !== post.id));
@@ -229,11 +239,12 @@ function CommunityPage() {
   const totalLikes = useMemo(() => posts.reduce((s, p) => s + p.likes, 0), [posts]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 dark:from-blue-950/30 via-white dark:via-background to-purple-50 dark:to-purple-950/30">
+      {confirmDialog}
       <motion.header
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b"
+        className="sticky top-0 z-40 bg-background/85 backdrop-blur-md shadow-sm border-b"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -245,6 +256,7 @@ function CommunityPage() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
             {user && (
               <div className="hidden sm:flex size-9 rounded-full bg-gradient-to-br from-primary to-primary-glow text-white items-center justify-center font-bold text-sm">
@@ -273,8 +285,8 @@ function CommunityPage() {
 
         {/* Privacy + CTA */}
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm flex-1">
-            <Shield className="size-4 text-blue-600 shrink-0" />
+          <div className="flex items-center gap-3 text-sm text-muted-foreground bg-card border border-border rounded-xl px-4 py-3 shadow-sm flex-1">
+            <Shield className="size-4 text-blue-600 dark:text-blue-400 shrink-0" />
             <span>{t("privacyNote")}</span>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -291,12 +303,12 @@ function CommunityPage() {
         {/* Search + filters */}
         <div className="space-y-3">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("communitySearch")}
-              className="pl-9 bg-white"
+              className="pl-9 bg-card"
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
@@ -311,7 +323,7 @@ function CommunityPage() {
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition ${
                     categoryId === c.id
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow"
-                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                      : "bg-card border border-border text-foreground hover:bg-muted"
                   }`}
                 >
                   {c.label}
@@ -322,7 +334,7 @@ function CommunityPage() {
               <select
                 value={provinceId ?? ""}
                 onChange={(e) => setProvinceId(e.target.value || null)}
-                className="h-9 rounded-full border border-gray-200 bg-white px-3 text-sm"
+                className="h-9 rounded-full border border-border bg-card px-3 text-sm"
               >
                 <option value="">{t("communityAllProvinces")}</option>
                 {provinces.map((p) => (
@@ -331,7 +343,7 @@ function CommunityPage() {
                   </option>
                 ))}
               </select>
-              <div className="flex gap-1 bg-white border border-gray-200 rounded-full p-1">
+              <div className="flex gap-1 bg-card border border-border rounded-full p-1">
                 {(
                   [
                     { k: "recent", l: t("mostRecent") },
@@ -342,7 +354,9 @@ function CommunityPage() {
                     key={s.k}
                     onClick={() => setSort(s.k)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                      sort === s.k ? "bg-gray-900 text-white" : "text-gray-600 hover:text-gray-900"
+                      sort === s.k
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {s.l}
@@ -355,17 +369,17 @@ function CommunityPage() {
 
         {/* Feed */}
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-gray-500">
+          <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
             <Loader2 className="size-5 animate-spin" /> {t("communityLoading")}
           </div>
         ) : error ? (
-          <Card className="p-8 text-center text-sm text-red-600 rounded-2xl">
+          <Card className="p-8 text-center text-sm text-red-600 dark:text-red-400 rounded-2xl">
             {t("communityLoadError")}
           </Card>
         ) : posts.length === 0 ? (
           <Card className="p-10 text-center rounded-2xl border-dashed">
-            <MessageSquare className="mx-auto size-10 text-gray-300" />
-            <p className="mt-3 text-gray-600">{t("communityFeedEmpty")}</p>
+            <MessageSquare className="mx-auto size-10 text-muted-foreground" />
+            <p className="mt-3 text-muted-foreground">{t("communityFeedEmpty")}</p>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -381,7 +395,7 @@ function CommunityPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96 }}
                   >
-                    <Card className="p-5 rounded-2xl shadow-lg border border-gray-100 bg-white h-full flex flex-col">
+                    <Card className="p-5 rounded-2xl shadow-lg border border-border bg-card h-full flex flex-col">
                       <div className="flex items-start gap-3">
                         <div
                           className={`size-12 rounded-full bg-gradient-to-br ${grad} text-white flex items-center justify-center font-bold shrink-0`}
@@ -389,19 +403,21 @@ function CommunityPage() {
                           {initials(p.authorName)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate">{p.authorName}</h3>
+                          <h3 className="font-semibold text-foreground truncate">{p.authorName}</h3>
                           <div className="mt-1 flex items-center gap-2 flex-wrap">
                             {p.categoryName && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400">
                                 {p.categoryName[lang]}
                               </span>
                             )}
                             {p.provinceName && (
-                              <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                                 <MapPin className="size-3" /> {p.provinceName[lang]}
                               </span>
                             )}
-                            <span className="text-xs text-gray-500">{fmtDate(p.createdAt)}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {fmtDate(p.createdAt)}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -411,7 +427,7 @@ function CommunityPage() {
                         params={{ postId: p.id }}
                         className="mt-3 block"
                       >
-                        <h4 className="font-bold text-gray-900 hover:text-blue-600 transition">
+                        <h4 className="font-bold text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition">
                           {p.title}
                         </h4>
                       </Link>
@@ -424,19 +440,19 @@ function CommunityPage() {
                           className="mt-3 rounded-xl max-h-52 w-full object-cover"
                         />
                       )}
-                      <p className="mt-2 text-sm text-gray-700 leading-relaxed flex-1 line-clamp-4 whitespace-pre-line">
+                      <p className="mt-2 text-sm text-foreground leading-relaxed flex-1 line-clamp-4 whitespace-pre-line">
                         {p.content}
                       </p>
 
-                      <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 flex-wrap">
+                      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => void handleReaction(p, "like")}
                             aria-label={t("communityLike")}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
                               p.myReaction === "like"
-                                ? "bg-green-50 text-green-700"
-                                : "bg-gray-100 text-gray-700 hover:bg-green-50"
+                                ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300"
+                                : "bg-muted text-foreground hover:bg-green-50 dark:hover:bg-green-900/60"
                             }`}
                           >
                             <ThumbsUp className="size-4" /> {p.likes}
@@ -446,8 +462,8 @@ function CommunityPage() {
                             aria-label={t("communityDislike")}
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${
                               p.myReaction === "dislike"
-                                ? "bg-red-50 text-red-700"
-                                : "bg-gray-100 text-gray-700 hover:bg-red-50"
+                                ? "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"
+                                : "bg-muted text-foreground hover:bg-red-50 dark:hover:bg-red-900/60"
                             }`}
                           >
                             <ThumbsDown className="size-4" /> {p.dislikes}
@@ -458,14 +474,14 @@ function CommunityPage() {
                             <>
                               <button
                                 onClick={() => openEdit(p)}
-                                className="size-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center"
+                                className="size-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 flex items-center justify-center"
                                 aria-label={t("communityEditPost")}
                               >
                                 <Pencil className="size-4" />
                               </button>
                               <button
                                 onClick={() => void handleDelete(p)}
-                                className="size-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center"
+                                className="size-8 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 flex items-center justify-center"
                                 aria-label={t("communityDelete")}
                               >
                                 <Trash2 className="size-4" />
@@ -475,7 +491,7 @@ function CommunityPage() {
                           {isAdmin && !mine && (
                             <button
                               onClick={() => void handleDelete(p)}
-                              className="size-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center"
+                              className="size-8 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 flex items-center justify-center"
                               aria-label={t("communityDelete")}
                             >
                               <Trash2 className="size-4" />
@@ -484,7 +500,7 @@ function CommunityPage() {
                           {!mine && (
                             <button
                               onClick={() => openReport(p)}
-                              className="size-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                              className="size-8 rounded-lg bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center"
                               aria-label={t("communityReport")}
                             >
                               <Flag className="size-4" />
@@ -527,7 +543,7 @@ function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
       <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs uppercase tracking-wide opacity-80">{label}</p>
+      <p className="text-xs uppercase tracking-wide">{label}</p>
     </div>
   );
 }
@@ -607,7 +623,7 @@ function PostEditor({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8"
+        className="bg-card rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8"
       >
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 flex items-center justify-between">
           <h3 className="font-bold">{post ? t("communityEditPost") : t("communityNewPost")}</h3>
@@ -674,7 +690,7 @@ function PostEditor({
               ))}
             </Select>
           </Field>
-          <p className="text-xs text-gray-500">{t("communityImageSoon")}</p>
+          <p className="text-xs text-muted-foreground">{t("communityImageSoon")}</p>
         </div>
         <div className="p-5 border-t flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
@@ -701,7 +717,7 @@ function PostEditor({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <label className="text-sm font-medium text-foreground">{label}</label>
       <div className="mt-1">{children}</div>
     </div>
   );
@@ -772,9 +788,9 @@ export function ReportDialog({
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+        className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
       >
-        <div className="bg-gray-900 text-white p-5 flex items-center justify-between">
+        <div className="bg-foreground text-background p-5 flex items-center justify-between">
           <h3 className="font-bold inline-flex items-center gap-2">
             <Flag className="size-4" /> {t("communityReport")}
           </h3>
@@ -786,7 +802,7 @@ export function ReportDialog({
           </button>
         </div>
         <div className="p-5 space-y-4">
-          <p className="text-sm text-gray-600 line-clamp-2">{post.title}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">{post.title}</p>
           <Field label={t("communityReportReason")}>
             <select
               value={reason}
@@ -815,7 +831,7 @@ export function ReportDialog({
           <Button
             onClick={() => void submit()}
             disabled={sending}
-            className="bg-gray-900 text-white hover:bg-gray-800"
+            className="bg-foreground text-background hover:bg-foreground/90"
           >
             {sending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />

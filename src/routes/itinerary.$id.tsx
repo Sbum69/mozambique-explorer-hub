@@ -31,6 +31,7 @@ const ItineraryMap = lazy(() =>
   import("@/components/ItineraryMap").then((m) => ({ default: m.ItineraryMap })),
 );
 import { useLang } from "@/contexts/LanguageContext";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useRoute } from "@/hooks/useRoutes";
@@ -57,6 +58,7 @@ import {
 } from "@/lib/routes";
 import { ShareButton } from "@/components/ShareButton";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { Camera, Users, Image as ImageIcon } from "lucide-react";
 import { LOCATION_PROMPT_TEXT, PROOF_STATUS_LABEL, requestPreciseLocation } from "@/lib/geo";
@@ -90,6 +92,7 @@ export const Route = createFileRoute("/itinerary/$id")({
 function ItineraryDetailPage() {
   const { id } = Route.useParams();
   const { lang } = useLang();
+  const [askConfirm, confirmDialog] = useConfirm();
   const { authUser, user } = useAuth();
   const navigate = useNavigate();
   const userId = authUser?.id ?? null;
@@ -218,11 +221,14 @@ function ItineraryDetailPage() {
       return;
     }
     if (
-      !confirm(
-        lang === "pt"
-          ? "Desmarcar esta paragem? A prova fotográfica deixa de contar."
-          : "Unmark this stop? The photo proof will no longer count.",
-      )
+      !(await askConfirm({
+        title:
+          lang === "pt"
+            ? "Desmarcar esta paragem? A prova fotográfica deixa de contar."
+            : "Unmark this stop? The photo proof will no longer count.",
+        confirmLabel: lang === "pt" ? "Desmarcar" : "Unmark",
+        destructive: true,
+      }))
     )
       return;
     try {
@@ -270,11 +276,14 @@ function ItineraryDetailPage() {
     if (
       !progress ||
       busy ||
-      !confirm(
-        lang === "pt"
-          ? "Reiniciar as visitas? Os pontos já ganhos não serão atribuídos novamente."
-          : "Restart visits? Previously earned points will not be awarded again.",
-      )
+      !(await askConfirm({
+        title:
+          lang === "pt"
+            ? "Reiniciar as visitas? Os pontos já ganhos não serão atribuídos novamente."
+            : "Restart visits? Previously earned points will not be awarded again.",
+        confirmLabel: lang === "pt" ? "Reiniciar" : "Restart",
+        destructive: true,
+      }))
     )
       return;
     setBusy(true);
@@ -382,6 +391,7 @@ function ItineraryDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {confirmDialog}
       {/* Hero */}
       <div className="relative h-96 overflow-hidden bg-muted">
         {cover ? (
@@ -400,6 +410,7 @@ function ItineraryDetailPage() {
         </Link>
         <div className="absolute top-6 right-6 flex items-center gap-2">
           <div className="rounded-md bg-background/80 backdrop-blur">
+            <ThemeToggle />
             <LanguageToggle />
           </div>
           <FavoriteButton itemId={route.id} itemType="itinerary" size="md" />
@@ -467,7 +478,7 @@ function ItineraryDetailPage() {
       <div className="container mx-auto px-4 py-8">
         {isMine && route.isPublic && route.reviewStatus !== "approved" && (
           <Card
-            className={`p-4 mb-6 text-sm ${route.reviewStatus === "pending" ? "bg-amber-50 border-amber-200" : "bg-destructive/10 border-destructive/30"}`}
+            className={`p-4 mb-6 text-sm ${route.reviewStatus === "pending" ? "bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200" : "bg-destructive/10 border-destructive/30"}`}
           >
             {route.reviewStatus === "pending"
               ? lang === "pt"
@@ -750,7 +761,7 @@ function ItineraryDetailPage() {
                             }
                           >
                             {done ? (
-                              <CheckCircle2 className="h-7 w-7 text-green-600" />
+                              <CheckCircle2 className="h-7 w-7 text-green-700 dark:text-green-300" />
                             ) : progress ? (
                               <Camera className="h-7 w-7 text-muted-foreground hover:text-foreground" />
                             ) : (
@@ -790,7 +801,7 @@ function ItineraryDetailPage() {
                 )}
 
                 {progress?.status === "completed" && (
-                  <Badge className="mb-3 bg-green-600 text-white">
+                  <Badge className="mb-3 bg-green-700 text-white">
                     {lang === "pt" ? "Rota concluída" : "Route completed"}
                   </Badge>
                 )}
@@ -799,7 +810,7 @@ function ItineraryDetailPage() {
                   <Button
                     onClick={() => void start()}
                     disabled={busy || progressLoading || progressError || stops.length === 0}
-                    className="w-full mb-2 bg-gradient-to-r from-primary to-orange-600 gap-2"
+                    className="w-full mb-2 bg-gradient-to-r from-primary to-orange-700 gap-2"
                   >
                     {busy ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

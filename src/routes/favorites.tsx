@@ -22,6 +22,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLang } from "@/contexts/LanguageContext";
@@ -142,7 +143,7 @@ function FavoritesPage() {
             </button>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
-                <Bookmark className="size-5 sm:size-6 text-rose-600" />
+                <Bookmark className="size-5 sm:size-6 text-rose-600 dark:text-rose-400" />
                 {lang === "pt" ? "Meus Favoritos" : "My Favorites"}
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
@@ -159,6 +160,7 @@ function FavoritesPage() {
               </span>
             </div>
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -179,7 +181,7 @@ function FavoritesPage() {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
                     active
-                      ? "bg-gradient-to-r from-rose-500 to-rose-700 text-white shadow-md"
+                      ? "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-md"
                       : "bg-muted text-muted-foreground hover:bg-muted/70",
                   )}
                 >
@@ -213,7 +215,7 @@ function FavoritesPage() {
                 className={cn(
                   "p-1.5 rounded-md transition-colors",
                   view === "grid"
-                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600"
+                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
                     : "text-muted-foreground hover:bg-muted",
                 )}
                 aria-label={lang === "pt" ? "Vista em grelha" : "Grid view"}
@@ -226,7 +228,7 @@ function FavoritesPage() {
                 className={cn(
                   "p-1.5 rounded-md transition-colors",
                   view === "list"
-                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600"
+                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
                     : "text-muted-foreground hover:bg-muted",
                 )}
                 aria-label={lang === "pt" ? "Vista em lista" : "List view"}
@@ -304,7 +306,7 @@ function EmptyState({ lang, onAction }: { lang: "pt" | "en"; onAction: () => voi
       </p>
       <Button
         onClick={onAction}
-        className="bg-gradient-to-r from-rose-500 to-rose-700 text-white hover:opacity-90"
+        className="bg-gradient-to-r from-rose-600 to-rose-700 text-white hover:opacity-90"
       >
         {lang === "pt" ? "Explorar agora" : "Explore now"}
       </Button>
@@ -423,7 +425,7 @@ function FavoriteCard({
           </div>
           <div className="absolute top-3 right-3">
             <div className="size-8 bg-background/90 rounded-full flex items-center justify-center">
-              <Bookmark className="size-4 text-rose-600 fill-rose-600" />
+              <Bookmark className="size-4 text-rose-600 dark:text-rose-400 fill-rose-600" />
             </div>
           </div>
         </div>
@@ -439,7 +441,7 @@ function FavoriteCard({
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
           {typeof d.rating === "number" && (
             <span className="flex items-center gap-1">
-              <Star className="size-3 fill-yellow-500 text-yellow-500" />
+              <Star className="size-3 fill-yellow-500 text-yellow-700 dark:text-yellow-300" />
               {d.rating.toFixed(1)}
             </span>
           )}

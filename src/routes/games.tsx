@@ -6,6 +6,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast as sonner } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
+import { GAMES_TXT } from "@/lib/page-texts";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import {
   fetchAchievements,
   isUnlocked,
@@ -99,26 +102,26 @@ interface Game {
 
 const CATEGORIES = [
   { id: "all", label: "Todos", icon: Trophy },
-  { id: "tesouro", label: "Caça ao Tesouro", icon: MapPin, color: "from-amber-500 to-orange-600" },
-  { id: "foto", label: "Fotografia", icon: Camera, color: "from-pink-500 to-rose-600" },
-  { id: "experiencia", label: "Experiências", icon: Heart, color: "from-green-500 to-emerald-600" },
+  { id: "tesouro", label: "Caça ao Tesouro", icon: MapPin, color: "from-amber-700 to-orange-700" },
+  { id: "foto", label: "Fotografia", icon: Camera, color: "from-pink-600 to-rose-600" },
+  { id: "experiencia", label: "Experiências", icon: Heart, color: "from-green-700 to-emerald-700" },
   {
     id: "conhecimento",
     label: "Conhecimento",
     icon: Brain,
-    color: "from-purple-500 to-violet-600",
+    color: "from-purple-600 to-violet-600",
   },
-  { id: "tempo", label: "Tempo", icon: Clock, color: "from-blue-500 to-cyan-600" },
-  { id: "social", label: "Sociais", icon: Users, color: "from-teal-500 to-green-600" },
+  { id: "tempo", label: "Tempo", icon: Clock, color: "from-blue-600 to-cyan-700" },
+  { id: "social", label: "Sociais", icon: Users, color: "from-teal-700 to-green-700" },
 ];
 
 const COLOR_MAP: Record<string, string> = {
-  tesouro: "from-amber-500 to-orange-600",
-  foto: "from-pink-500 to-rose-600",
-  experiencia: "from-green-500 to-emerald-600",
-  conhecimento: "from-purple-500 to-violet-600",
-  tempo: "from-blue-500 to-cyan-600",
-  social: "from-teal-500 to-green-600",
+  tesouro: "from-amber-700 to-orange-700",
+  foto: "from-pink-600 to-rose-600",
+  experiencia: "from-green-700 to-emerald-700",
+  conhecimento: "from-purple-600 to-violet-600",
+  tempo: "from-blue-600 to-cyan-700",
+  social: "from-teal-700 to-green-700",
 };
 
 /** Game texts (title, description, badge, detail) live in the PT/EN dictionary: gameTitle_<id> etc. */
@@ -390,9 +393,18 @@ const INITIAL_GAMES: GameBase[] = [
 ];
 
 const DIFF_BADGE: Record<Difficulty, { label: string; cls: string }> = {
-  easy: { label: "Fácil", cls: "bg-green-100 text-green-700 border-green-200" },
-  medium: { label: "Médio", cls: "bg-amber-100 text-amber-700 border-amber-200" },
-  hard: { label: "Difícil", cls: "bg-red-100 text-red-700 border-red-200" },
+  easy: {
+    label: "Fácil",
+    cls: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800",
+  },
+  medium: {
+    label: "Médio",
+    cls: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  },
+  hard: {
+    label: "Difícil",
+    cls: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800",
+  },
 };
 
 function localizeGame(g: GameBase, t: (key: DictKey) => string): Game {
@@ -489,12 +501,16 @@ function GamesPage() {
           <h1 className="font-bold text-sm sm:text-base">
             🎮 {pt ? "Jogos & Desafios" : "Games & Challenges"}
           </h1>
-          <Button asChild size="sm" variant="outline" className="gap-1">
-            <Link to="/gamification">
-              <Trophy className="size-4" />
-              {pt ? "Conquistas" : "Achievements"}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <LanguageToggle />
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/gamification">
+                <Trophy className="size-4" />
+                {pt ? "Conquistas" : "Achievements"}
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -540,10 +556,10 @@ function GamesPage() {
                 icon: "🏅",
               },
             ].map((s) => (
-              <div key={s.label} className="rounded-2xl bg-background/15 backdrop-blur p-4">
+              <div key={s.label} className="rounded-2xl border border-current/25 p-4">
                 <div className="text-2xl">{s.icon}</div>
                 <p className="text-3xl font-bold mt-1">{s.value}</p>
-                <p className="text-xs opacity-80">{s.label}</p>
+                <p className="text-xs font-medium">{s.label}</p>
               </div>
             ))}
           </div>
@@ -590,7 +606,9 @@ function GamesPage() {
                     }`}
                   >
                     <cat.icon className="size-4" />
-                    {cat.label}
+                    {GAMES_TXT[lang].category[
+                      cat.id as keyof (typeof GAMES_TXT)["pt"]["category"]
+                    ] ?? cat.label}
                   </button>
                 );
               })}
@@ -685,6 +703,7 @@ function GamesPage() {
 }
 
 function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: () => void }) {
+  const { lang } = useLang();
   const locked = game.status === "locked";
   const completed = game.status === "completed";
   const pct = (game.progress / game.total) * 100;
@@ -696,7 +715,7 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={!locked ? { y: -4 } : {}}
-      className={`bg-card rounded-2xl border overflow-hidden shadow-sm ${locked ? "opacity-60" : ""}`}
+      className={`bg-card rounded-2xl border overflow-hidden shadow-sm ${locked ? "border-dashed" : ""}`}
     >
       <div className={`h-2 bg-gradient-to-r ${game.categoryColor}`} />
       <div className="p-5">
@@ -708,9 +727,11 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
           </div>
           <div className="flex flex-col items-end gap-1">
             <Badge variant="outline" className={`text-[10px] ${diff.cls}`}>
-              {diff.label}
+              {GAMES_TXT[lang].difficulty[
+                game.difficulty as keyof (typeof GAMES_TXT)["pt"]["difficulty"]
+              ] ?? diff.label}
             </Badge>
-            <div className="flex items-center gap-1 text-xs font-bold text-amber-600">
+            <div className="flex items-center gap-1 text-xs font-bold text-amber-700 dark:text-amber-300">
               <Zap className="size-3" /> {game.points}
             </div>
           </div>
@@ -742,7 +763,7 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
           disabled={locked}
           className={`w-full mt-4 ${
             completed
-              ? "bg-green-600 hover:bg-green-700"
+              ? "bg-green-700 text-white hover:bg-green-800"
               : locked
                 ? "bg-muted text-muted-foreground"
                 : `bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90`
@@ -750,14 +771,15 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
         >
           {locked ? (
             <>
-              <Lock className="size-4" /> Bloqueado
+              <Lock className="size-4" /> {GAMES_TXT[lang].locked}
             </>
           ) : completed ? (
             <>
-              <CheckCircle className="size-4" /> Concluído
+              <CheckCircle className="size-4" /> {GAMES_TXT[lang].completed}
             </>
           ) : (
-            game.action
+            (GAMES_TXT[lang].action[game.action as keyof (typeof GAMES_TXT)["pt"]["action"]] ??
+            game.action)
           )}
         </Button>
       </div>
@@ -885,7 +907,7 @@ function GameDetailModal({
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
           {success ? (
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="py-8 text-center">
-              <CheckCircle className="size-20 text-green-500 mx-auto mb-3" />
+              <CheckCircle className="size-20 text-green-700 dark:text-green-300 mx-auto mb-3" />
               <p className="font-bold text-lg">
                 {success.completed
                   ? pt
@@ -919,8 +941,8 @@ function GameDetailModal({
                 <Progress value={pct} className="h-2" />
               </div>
 
-              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                <Award className="size-5 text-amber-600" />
+              <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                <Award className="size-5 text-amber-700 dark:text-amber-300" />
                 <p className="text-sm">
                   <span className="text-muted-foreground">Selo:</span> <strong>{game.badge}</strong>
                 </p>
@@ -1163,7 +1185,7 @@ function QuizModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-foreground/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div

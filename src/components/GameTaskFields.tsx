@@ -13,6 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { useExperiences } from "@/hooks/useExperiences";
 import { SAMPLE_ITINERARIES, type Itinerary } from "@/data/itineraries";
+import { useLang } from "@/contexts/LanguageContext";
+import { GAME_TASK_TXT } from "@/lib/page-texts";
+
+const FIELD =
+  "w-full px-3 py-2 rounded-lg border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const useT = () => GAME_TASK_TXT[useLang().lang];
 
 function Wrap({
   title,
@@ -45,26 +51,16 @@ export function ExperienceTask({
   onChange: (id: string | null, label?: string) => void;
 }) {
   const { experiences, loading, error } = useExperiences();
+  const t = useT();
+  const { lang } = useLang();
 
   return (
-    <Wrap
-      title="Escolhe a experiência"
-      hint="Seleciona a experiência comunitária em que participaste."
-      icon={Heart}
-    >
+    <Wrap title={t.expTitle} hint={t.expHint} icon={Heart}>
       <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-        {loading && (
-          <p className="text-xs text-muted-foreground animate-pulse">A carregar experiências...</p>
-        )}
-        {error && (
-          <p className="text-xs text-muted-foreground">
-            Não foi possível carregar as experiências.
-          </p>
-        )}
+        {loading && <p className="text-xs text-muted-foreground animate-pulse">{t.expLoading}</p>}
+        {error && <p className="text-xs text-muted-foreground">{t.expError}</p>}
         {!loading && !error && experiences.length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            Ainda não existem experiências disponíveis.
-          </p>
+          <p className="text-xs text-muted-foreground">{t.expEmpty}</p>
         )}
         {experiences.map((e) => {
           const active = value === e.id;
@@ -79,7 +75,7 @@ export function ExperienceTask({
                   : "bg-background hover:bg-muted/60"
               }`}
             >
-              <p className="text-sm font-semibold truncate">{e.title.pt}</p>
+              <p className="text-sm font-semibold truncate">{e.title[lang]}</p>
               <p className="text-xs text-muted-foreground truncate">
                 {e.location} · {e.durationHours}h · {e.priceMzn} MZN · {e.host}
               </p>
@@ -102,13 +98,10 @@ export function ItineraryTask({
   const list = useMemo<Itinerary[]>(() => SAMPLE_ITINERARIES, []);
   const [openId, setOpenId] = useState<string | null>(value?.itineraryId ?? null);
   const current = list.find((i) => i.id === openId);
+  const t = useT();
 
   return (
-    <Wrap
-      title="Roteiro concluído"
-      hint="Escolhe o roteiro e a paragem que finalizaste."
-      icon={RouteIcon}
-    >
+    <Wrap title={t.routeTitle} hint={t.routeHint} icon={RouteIcon}>
       <div className="space-y-2">
         <select
           value={openId ?? ""}
@@ -116,9 +109,10 @@ export function ItineraryTask({
             setOpenId(e.target.value || null);
             onChange(null);
           }}
-          className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+          className={FIELD}
+          aria-label={t.routeTitle}
         >
-          <option value="">Seleciona um roteiro…</option>
+          <option value="">{t.routePick}</option>
           {list.map((i) => (
             <option key={i.id} value={i.id}>
               {i.name} ({i.duration})
@@ -130,7 +124,7 @@ export function ItineraryTask({
           <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
             {current.route.map((s) => {
               const active = value?.itineraryId === current.id && value?.stopId === s.id;
-              const name = s.name ?? s.title ?? `Paragem ${s.id}`;
+              const name = s.name ?? s.title ?? t.stop(s.id);
               return (
                 <button
                   key={s.id}
@@ -173,6 +167,7 @@ export function TimeOfDayTask({
 }) {
   const [moment, setMoment] = useState<"sunrise" | "sunset">(value?.moment ?? "sunrise");
   const [time, setTime] = useState(value?.time ?? "");
+  const t = useT();
 
   const valid = (m: "sunrise" | "sunset", t: string) => {
     const h = Number(t.split(":")[0]);
@@ -191,22 +186,19 @@ export function TimeOfDayTask({
   const invalid = time !== "" && !valid(moment, time);
 
   return (
-    <Wrap
-      title="Momento do dia"
-      hint="Regista a hora real da captura (amanhecer 04:00–09:59, pôr-do-sol 16:00–21:59)."
-      icon={moment === "sunrise" ? Sunrise : Sunset}
-    >
+    <Wrap title={t.timeTitle} hint={t.timeHint} icon={moment === "sunrise" ? Sunrise : Sunset}>
       <div className="flex gap-2 mb-2">
         {(["sunrise", "sunset"] as const).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => update(m, time)}
+            aria-pressed={moment === m}
             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
               moment === m ? "border-primary bg-primary/5" : "bg-background hover:bg-muted/60"
-            }`}
+            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
           >
-            {m === "sunrise" ? "🌅 Amanhecer" : "🌇 Pôr-do-sol"}
+            {m === "sunrise" ? `🌅 ${t.sunrise}` : `🌇 ${t.sunset}`}
           </button>
         ))}
       </div>
@@ -214,11 +206,11 @@ export function TimeOfDayTask({
         type="time"
         value={time}
         onChange={(e) => update(moment, e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+        className={FIELD}
+        aria-label={t.timeLabel}
+        aria-invalid={invalid}
       />
-      {invalid && (
-        <p className="text-xs text-destructive mt-1">Hora fora da janela deste momento.</p>
-      )}
+      {invalid && <p className="text-xs text-destructive mt-1">{t.timeInvalid}</p>}
     </Wrap>
   );
 }
@@ -233,6 +225,7 @@ export function EventTask({
 }) {
   const [name, setName] = useState(value?.name ?? "");
   const [date, setDate] = useState(value?.date ?? "");
+  const t = useT();
 
   const withinWeek = (d: string) => {
     if (!d) return false;
@@ -249,27 +242,23 @@ export function EventTask({
   };
 
   return (
-    <Wrap
-      title="Evento cultural"
-      hint="Nome do evento e data (deve ser nos últimos 7 dias)."
-      icon={CalendarDays}
-    >
+    <Wrap title={t.eventTitle} hint={t.eventHint} icon={CalendarDays}>
       <input
         value={name}
         onChange={(e) => update(e.target.value, date)}
-        placeholder="ex: Festival de Marrabenta"
-        className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+        placeholder={t.eventPh}
+        aria-label={t.eventName}
+        className={FIELD}
       />
       <input
         type="date"
         value={date}
         onChange={(e) => update(name, e.target.value)}
-        className="w-full mt-2 px-3 py-2 rounded-lg border bg-background text-sm"
+        aria-label={t.eventDate}
+        className={`${FIELD} mt-2`}
       />
       {date !== "" && !withinWeek(date) && (
-        <p className="text-xs text-destructive mt-1">
-          A data tem de estar dentro dos últimos 7 dias.
-        </p>
+        <p className="text-xs text-destructive mt-1">{t.eventInvalid}</p>
       )}
     </Wrap>
   );
@@ -288,6 +277,7 @@ export function ShareTask({
   onDone: () => void;
 }) {
   const url = typeof window !== "undefined" ? window.location.origin : "https://ekaya.app";
+  const t = useT();
 
   const share = async () => {
     try {
@@ -300,11 +290,7 @@ export function ShareTask({
   };
 
   return (
-    <Wrap
-      title="Prova de partilha"
-      hint="Partilha com alguém para validar este desafio."
-      icon={Share2}
-    >
+    <Wrap title={t.shareTitle} hint={t.shareHint} icon={Share2}>
       <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
@@ -313,14 +299,14 @@ export function ShareTask({
           className="col-span-2"
         >
           {done ? <Check className="size-4" /> : <Share2 className="size-4" />}{" "}
-          {done ? "Partilha registada" : "Partilhar agora"}
+          {done ? t.shared : t.shareNow}
         </Button>
         <a
           href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
           target="_blank"
           rel="noreferrer"
           onClick={onDone}
-          className="inline-flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-muted/60"
+          className="inline-flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ExternalLink className="size-3.5" /> WhatsApp
         </a>
@@ -330,9 +316,9 @@ export function ShareTask({
             await navigator.clipboard.writeText(`${text} ${url}`);
             onDone();
           }}
-          className="inline-flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-muted/60"
+          className="inline-flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Check className="size-3.5" /> Copiar link
+          <Check className="size-3.5" /> {t.copyLink}
         </button>
       </div>
     </Wrap>
@@ -349,6 +335,7 @@ export function WordTask({
 }) {
   const [word, setWord] = useState(value?.word ?? "");
   const [meaning, setMeaning] = useState(value?.meaning ?? "");
+  const t = useT();
 
   const update = (w: string, m: string) => {
     setWord(w);
@@ -359,22 +346,20 @@ export function WordTask({
   };
 
   return (
-    <Wrap
-      title="Palavra aprendida"
-      hint="Escreve a palavra em língua local e o seu significado."
-      icon={Languages}
-    >
+    <Wrap title={t.wordTitle} hint={t.wordHint} icon={Languages}>
       <input
         value={word}
         onChange={(e) => update(e.target.value, meaning)}
-        placeholder="ex: Kanimambo"
-        className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+        placeholder={t.wordPh}
+        aria-label={t.word}
+        className={FIELD}
       />
       <input
         value={meaning}
         onChange={(e) => update(word, e.target.value)}
-        placeholder="ex: Obrigado"
-        className="w-full mt-2 px-3 py-2 rounded-lg border bg-background text-sm"
+        placeholder={t.meaningPh}
+        aria-label={t.meaning}
+        className={`${FIELD} mt-2`}
       />
     </Wrap>
   );

@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PointsCard } from "@/components/PointsCard";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
@@ -75,28 +76,28 @@ const MODULES: ModuleDef[] = [
     icon: Map,
     titleKey: "modMap",
     descKey: "modMapDesc",
-    gradient: "from-secondary to-blue-400",
+    gradient: "from-secondary to-blue-600",
   },
   {
     to: "/culture-history",
     icon: BookOpen,
     titleKey: "modCulture",
     descKey: "modCultureDesc",
-    gradient: "from-orange-500 to-red-500",
+    gradient: "from-orange-700 to-red-600",
   },
   {
     to: "/favorites",
     icon: Bookmark,
     titleKey: "modFavorites",
     descKey: "modFavoritesDesc",
-    gradient: "from-pink-500 to-rose-500",
+    gradient: "from-pink-600 to-rose-600",
   },
   {
     to: "/news-alerts",
     icon: Bell,
     titleKey: "modNews",
     descKey: "modNewsDesc",
-    gradient: "from-red-500 to-orange-500",
+    gradient: "from-red-600 to-orange-700",
   },
   {
     to: "/itineraries",
@@ -110,35 +111,35 @@ const MODULES: ModuleDef[] = [
     icon: UsersIcon,
     titleKey: "modCommunityExp",
     descKey: "modCommunityExpDesc",
-    gradient: "from-emerald-500 to-teal-500",
+    gradient: "from-emerald-700 to-teal-700",
   },
   {
     to: "/businesses",
     icon: Store,
     titleKey: "modBusinesses",
     descKey: "modBusinessesDesc",
-    gradient: "from-amber-500 to-orange-500",
+    gradient: "from-amber-700 to-orange-700",
   },
   {
     to: "/experiences",
     icon: Heart,
     titleKey: "modExperiences",
     descKey: "modExperiencesDesc",
-    gradient: "from-success to-emerald-400",
+    gradient: "from-success to-emerald-700",
   },
   {
     to: "/useful-info",
     icon: Info,
     titleKey: "modInfo",
     descKey: "modInfoDesc",
-    gradient: "from-purple-500 to-violet-500",
+    gradient: "from-purple-600 to-violet-600",
   },
   {
     to: "/gamification",
     icon: Trophy,
     titleKey: "modAchievements",
     descKey: "modAchievementsDesc",
-    gradient: "from-warning to-yellow-500",
+    gradient: "from-warning to-yellow-700",
   },
   {
     to: "/games",
@@ -152,7 +153,7 @@ const MODULES: ModuleDef[] = [
     icon: Activity,
     titleKey: "modImpact",
     descKey: "modImpactDesc",
-    gradient: "from-pink-500 to-fuchsia-500",
+    gradient: "from-pink-600 to-fuchsia-600",
   },
 ];
 
@@ -214,6 +215,7 @@ function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
               <span className="size-7 rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground flex items-center justify-center text-xs font-bold">
@@ -366,7 +368,7 @@ function DashboardPage() {
                       {d.stops.map((stop) => (
                         <div key={stop.id} className="flex items-start gap-2 text-sm">
                           {stop.kind === "experience" ? (
-                            <Sun className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                            <Sun className="size-4 text-amber-700 dark:text-amber-300 mt-0.5 shrink-0" />
                           ) : (
                             <MapPin className="size-4 text-primary mt-0.5 shrink-0" />
                           )}
@@ -424,7 +426,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="rounded-xl bg-white/15 backdrop-blur px-3 py-2 min-w-[70px]">
       <p className="text-2xl font-bold">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide opacity-80">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide font-medium">{label}</p>
     </div>
   );
 }

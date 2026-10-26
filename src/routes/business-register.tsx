@@ -20,6 +20,8 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { registerMyBusiness } from "@/lib/business-registration.functions";
 import type { BusinessRegistrationError } from "@/lib/business-registration";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
@@ -166,9 +168,11 @@ function BusinessRegisterPage() {
   const [contact, setContact] = useState("");
 
   const gradient =
-    businessType === "large" ? "from-blue-500 to-blue-700" : "from-orange-500 to-orange-600";
+    businessType === "large" ? "from-blue-600 to-blue-700" : "from-orange-700 to-orange-700";
   const badgeColor =
-    businessType === "large" ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700";
+    businessType === "large"
+      ? "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400"
+      : "bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300";
 
   const handleBack = () => {
     if (step === 2) {
@@ -205,34 +209,34 @@ function BusinessRegisterPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-teal-50 via-white to-blue-50">
+      <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-teal-50 dark:from-teal-950/30 via-white dark:via-background to-blue-50 dark:to-blue-950/30">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-lg w-full bg-white rounded-3xl shadow-2xl p-10 text-center"
+          className="max-w-lg w-full bg-card rounded-3xl shadow-2xl p-10 text-center"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
-            className="mx-auto size-24 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg"
+            className="mx-auto size-24 rounded-full bg-green-700 text-white flex items-center justify-center shadow-lg"
           >
             <Check className="size-12" />
           </motion.div>
           <h1 className="mt-6 text-3xl font-bold">{t.successTitle}</h1>
-          <p className="mt-2 text-gray-600">{t.successBody}</p>
+          <p className="mt-2 text-muted-foreground">{t.successBody}</p>
 
-          <div className="mt-6 flex items-start gap-3 text-left rounded-2xl border border-blue-100 bg-blue-50 p-4">
-            <Shield className="size-5 text-blue-600 shrink-0 mt-0.5" />
+          <div className="mt-6 flex items-start gap-3 text-left rounded-2xl border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 p-4">
+            <Shield className="size-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-blue-900">{t.pendingTitle}</p>
-              <p className="text-sm text-blue-800 mt-1">{t.pendingBody}</p>
+              <p className="font-semibold text-blue-900 dark:text-blue-200">{t.pendingTitle}</p>
+              <p className="text-sm text-blue-800 dark:text-blue-400 mt-1">{t.pendingBody}</p>
             </div>
           </div>
 
           <button
             onClick={() => navigate({ to: "/business-dashboard", search: { status: "all" } })}
-            className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold shadow-lg hover:opacity-95 transition"
+            className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-teal-700 to-blue-600 text-white font-semibold shadow-lg hover:opacity-95 transition"
           >
             {t.goDashboard}
           </button>
@@ -242,23 +246,23 @@ function BusinessRegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 dark:from-teal-950/30 via-white dark:via-background to-blue-50 dark:to-blue-950/30">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <div className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium"
+            className="flex items-center gap-2 text-foreground hover:text-foreground font-medium"
           >
             <ArrowLeft className="size-4" /> {t.back}
           </button>
           {isAuthenticated && (
             <div className="flex items-center gap-2">
               <div
-                className={`h-2 w-12 rounded-full transition ${step >= 1 ? "bg-teal-500" : "bg-gray-200"}`}
+                className={`h-2 w-12 rounded-full transition ${step >= 1 ? "bg-teal-600" : "bg-muted"}`}
               />
               <div
-                className={`h-2 w-12 rounded-full transition ${step >= 2 ? "bg-teal-500" : "bg-gray-200"}`}
+                className={`h-2 w-12 rounded-full transition ${step >= 2 ? "bg-teal-600" : "bg-muted"}`}
               />
             </div>
           )}
@@ -266,13 +270,17 @@ function BusinessRegisterPage() {
             <Link
               to="/login"
               search={RETURN_SEARCH}
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-muted-foreground hover:text-foreground"
             >
               {t.signIn}
             </Link>
           ) : (
             <span />
           )}
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
         </div>
       </div>
 
@@ -282,37 +290,37 @@ function BusinessRegisterPage() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring" }}
-          className="mx-auto size-20 rounded-2xl bg-gradient-to-br from-teal-500 to-blue-500 text-white flex items-center justify-center shadow-xl"
+          className="mx-auto size-20 rounded-2xl bg-gradient-to-br from-teal-700 to-blue-600 text-white flex items-center justify-center shadow-xl"
         >
           <Store className="size-10" />
         </motion.div>
         <h1 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight">{t.heroTitle}</h1>
-        <p className="mt-2 text-gray-600">{t.heroSub}</p>
+        <p className="mt-2 text-muted-foreground">{t.heroSub}</p>
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-10">
         {isLoading ? (
-          <p className="text-center text-sm text-gray-500">{t.loading}</p>
+          <p className="text-center text-sm text-muted-foreground">{t.loading}</p>
         ) : !isAuthenticated ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-lg mx-auto bg-white shadow-xl rounded-3xl p-8 text-center"
+            className="max-w-lg mx-auto bg-card shadow-xl rounded-3xl p-8 text-center"
           >
             <h2 className="text-xl font-bold">{t.gateTitle}</h2>
-            <p className="mt-2 text-sm text-gray-600">{t.gateBody}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t.gateBody}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Link
                 to="/signup"
                 search={RETURN_SEARCH}
-                className="inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold shadow-lg hover:opacity-95 transition"
+                className="inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-teal-700 to-blue-600 text-white font-semibold shadow-lg hover:opacity-95 transition"
               >
                 <UserPlus className="size-4" /> {t.createAccount}
               </Link>
               <Link
                 to="/login"
                 search={RETURN_SEARCH}
-                className="inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 font-semibold hover:bg-gray-50 transition"
+                className="inline-flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition"
               >
                 <LogIn className="size-4" /> {t.signIn}
               </Link>
@@ -334,14 +342,14 @@ function BusinessRegisterPage() {
                     setBusinessType("large");
                     setStep(2);
                   }}
-                  className="text-left bg-white shadow-xl rounded-2xl p-8 border-2 border-transparent hover:border-teal-500 transition"
+                  className="text-left bg-card shadow-xl rounded-2xl p-8 border-2 border-transparent hover:border-teal-500 transition"
                 >
-                  <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center">
+                  <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white flex items-center justify-center">
                     <Building2 className="size-8" />
                   </div>
                   <h3 className="mt-4 text-xl font-bold">{t.large}</h3>
-                  <p className="mt-1 text-gray-600 text-sm">{t.largeDesc}</p>
-                  <div className="mt-4 flex items-center gap-2 text-teal-600 font-semibold">
+                  <p className="mt-1 text-muted-foreground text-sm">{t.largeDesc}</p>
+                  <div className="mt-4 flex items-center gap-2 text-teal-700 dark:text-teal-300 font-semibold">
                     <Sparkles className="size-4" /> {t.select}
                   </div>
                 </motion.button>
@@ -352,14 +360,14 @@ function BusinessRegisterPage() {
                     setBusinessType("small");
                     setStep(2);
                   }}
-                  className="text-left bg-white shadow-xl rounded-2xl p-8 border-2 border-transparent hover:border-orange-500 transition"
+                  className="text-left bg-card shadow-xl rounded-2xl p-8 border-2 border-transparent hover:border-orange-500 transition"
                 >
-                  <div className="size-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center">
+                  <div className="size-16 rounded-2xl bg-gradient-to-br from-orange-700 to-orange-700 text-white flex items-center justify-center">
                     <ShoppingBag className="size-8" />
                   </div>
                   <h3 className="mt-4 text-xl font-bold">{t.small}</h3>
-                  <p className="mt-1 text-gray-600 text-sm">{t.smallDesc}</p>
-                  <div className="mt-4 flex items-center gap-2 text-orange-600 font-semibold">
+                  <p className="mt-1 text-muted-foreground text-sm">{t.smallDesc}</p>
+                  <div className="mt-4 flex items-center gap-2 text-orange-700 dark:text-orange-300 font-semibold">
                     <Sparkles className="size-4" /> {t.select}
                   </div>
                 </motion.button>
@@ -373,7 +381,7 @@ function BusinessRegisterPage() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -100, opacity: 0 }}
                 onSubmit={handleSubmit}
-                className="bg-white shadow-xl rounded-3xl p-8"
+                className="bg-card shadow-xl rounded-3xl p-8"
               >
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${badgeColor}`}
@@ -469,7 +477,7 @@ function BusinessRegisterPage() {
 }
 
 const inputClass =
-  "w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition";
+  "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition";
 
 function Field({
   icon,
@@ -482,8 +490,8 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1">
-        <span className="text-teal-600">{icon}</span> {label}
+      <span className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1">
+        <span className="text-teal-700 dark:text-teal-300">{icon}</span> {label}
       </span>
       {children}
     </label>

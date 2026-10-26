@@ -5,6 +5,7 @@ import { CheckCircle2, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/contexts/LanguageContext";
@@ -130,6 +131,7 @@ function AuthCallbackPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-background via-card to-accent/30">
       <div className="absolute top-4 right-4">
+        <ThemeToggle />
         <LanguageToggle />
       </div>
       <Card className="w-full max-w-md p-8 text-center space-y-4">

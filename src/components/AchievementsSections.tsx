@@ -92,7 +92,7 @@ export function ChallengesAndBadges() {
                   return (
                     <li
                       key={b.id}
-                      className={`rounded-xl border p-3 text-center ${st.earned ? "bg-accent/40" : "opacity-70"}`}
+                      className={`rounded-xl border p-3 text-center ${st.earned ? "bg-accent/40" : "border-dashed bg-muted/30"}`}
                     >
                       <div className="text-2xl" aria-hidden="true">
                         {st.earned ? (

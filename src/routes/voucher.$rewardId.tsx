@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLang } from "@/contexts/LanguageContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,12 +68,18 @@ function VoucherPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-lg mx-auto px-4 py-8 space-y-4">
-        <Button asChild variant="ghost" size="sm" className="gap-1">
-          <Link to="/gamification">
-            <ArrowLeft className="size-4" />
-            {pt ? "Conquistas" : "Achievements"}
-          </Link>
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button asChild variant="ghost" size="sm" className="gap-1">
+            <Link to="/gamification">
+              <ArrowLeft className="size-4" />
+              {pt ? "Conquistas" : "Achievements"}
+            </Link>
+          </Button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
+        </div>
         {q.isLoading ? (
           <Skeleton className="h-48 w-full" />
         ) : !q.data ? (

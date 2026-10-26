@@ -4,7 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/lib/auth";
 import { getAuthCallbackUrl } from "@/lib/app-url";
-import { useLang } from "@/contexts/LanguageContext";
+import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 
 export type UserRole = "guest" | "user" | "admin" | "business-small" | "business-large";
@@ -100,14 +100,41 @@ function toLegacyRole(roles: AppRole[]): UserRole {
   return role;
 }
 
-function authErrorMessage(message: string) {
+const AUTH_ERRORS = {
+  credentials: ["Email ou palavra-passe incorretos.", "Incorrect email or password."],
+  unconfirmed: [
+    "Confirma primeiro o teu email para entrar.",
+    "Confirm your email before signing in.",
+  ],
+  registered: ["Este email já está registado.", "This email is already registered."],
+  email: ["Introduz um email válido.", "Enter a valid email."],
+  shortAndPwned: [
+    "Usa pelo menos 6 caracteres e escolhe uma palavra-passe diferente: esta aparece em fugas de dados conhecidas.",
+    "Use at least 6 characters and choose a different password: this one appears in known data leaks.",
+  ],
+  pwned: [
+    "Esta palavra-passe aparece em fugas de dados conhecidas. Escolhe outra (podes juntar palavras ou números que só tu saibas).",
+    "This password appears in known data leaks. Choose another (you can combine words or numbers only you know).",
+  ],
+  short: [
+    "A palavra-passe precisa de pelo menos 6 caracteres.",
+    "The password needs at least 6 characters.",
+  ],
+  network: [
+    "Sem ligação. Verifica a internet e tenta novamente.",
+    "No connection. Check the internet and try again.",
+  ],
+  generic: ["Não foi possível concluir. Tenta novamente.", "Could not complete. Please try again."],
+} as const;
+
+function authErrorMessage(message: string, lang: Lang = "pt") {
+  const pick = (k: keyof typeof AUTH_ERRORS) => AUTH_ERRORS[k][lang === "pt" ? 0 : 1];
   const normalized = message.toLowerCase();
-  if (normalized.includes("invalid login credentials")) return "Email ou palavra-passe incorretos.";
-  if (normalized.includes("email not confirmed"))
-    return "Confirma primeiro o teu email para entrar.";
+  if (normalized.includes("invalid login credentials")) return pick("credentials");
+  if (normalized.includes("email not confirmed")) return pick("unconfirmed");
   if (normalized.includes("already registered") || normalized.includes("already been registered"))
-    return "Este email já está registado.";
-  if (normalized.includes("valid email")) return "Introduz um email válido.";
+    return pick("registered");
+  if (normalized.includes("valid email")) return pick("email");
   const tooShort =
     normalized.includes("at least 6 characters") ||
     (normalized.includes("password") && normalized.includes("characters"));
@@ -115,16 +142,11 @@ function authErrorMessage(message: string) {
     normalized.includes("known to be weak") ||
     normalized.includes("easy to guess") ||
     normalized.includes("pwned");
-  if (tooShort && pwned) {
-    return "Usa pelo menos 6 caracteres e escolhe uma palavra-passe diferente: esta aparece em fugas de dados conhecidas.";
-  }
-  if (pwned) {
-    return "Esta palavra-passe aparece em fugas de dados conhecidas. Escolhe outra (podes juntar palavras ou números que só tu saibas).";
-  }
-  if (tooShort) return "A palavra-passe precisa de pelo menos 6 caracteres.";
-  if (normalized.includes("network") || normalized.includes("fetch"))
-    return "Sem ligação. Verifica a internet e tenta novamente.";
-  return "Não foi possível concluir. Tenta novamente.";
+  if (tooShort && pwned) return pick("shortAndPwned");
+  if (pwned) return pick("pwned");
+  if (tooShort) return pick("short");
+  if (normalized.includes("network") || normalized.includes("fetch")) return pick("network");
+  return pick("generic");
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -132,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const { t } = useLang();
+  const { t, lang } = useLang();
 
   /** Resolves to the user's role, or null when there is no session or the account could not be read. */
   const loadAuthenticatedUser = useCallback(async (currentAuthUser: User | null) => {
@@ -236,7 +258,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error || !data.user) {
       const unconfirmed =
         /email not confirmed/i.test(error?.message ?? "") || error?.code === "email_not_confirmed";
-      return { ok: false, error: authErrorMessage(error?.message ?? ""), unconfirmed };
+      return { ok: false, error: authErrorMessage(error?.message ?? "", lang), unconfirmed };
     }
     const role = await loadAuthenticatedUser(data.user);
     if (!role) return { ok: false, error: t("accountLoadError") };
@@ -288,8 +310,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email,
   }) => {
     const key = username.trim().toLowerCase();
-    if (!key) return { ok: false, error: "Escolhe um nome de utilizador" };
-    if (/\s/.test(key)) return { ok: false, error: "Sem espaços no nome de utilizador" };
+    if (!key)
+      return {
+        ok: false,
+        error: lang === "pt" ? "Escolhe um nome de utilizador" : "Choose a username",
+      };
+    if (/\s/.test(key))
+      return {
+        ok: false,
+        error: lang === "pt" ? "Sem espaços no nome de utilizador" : "No spaces in the username",
+      };
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
@@ -298,7 +328,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: { display_name: displayName.trim(), username: key },
       },
     });
-    if (error) return { ok: false, error: authErrorMessage(error.message) };
+    if (error) return { ok: false, error: authErrorMessage(error.message, lang) };
     if (data.session && data.user) await loadAuthenticatedUser(data.user);
     return { ok: true, needsConfirmation: data.session === null };
   };

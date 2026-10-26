@@ -95,7 +95,7 @@ export function FavoriteButton({
         className={cn(
           iconSizeClass[size],
           "transition-colors",
-          favorited ? "text-rose-600 fill-rose-600" : "text-muted-foreground",
+          favorited ? "text-rose-600 dark:text-rose-400 fill-rose-600" : "text-muted-foreground",
         )}
       />
     </motion.button>

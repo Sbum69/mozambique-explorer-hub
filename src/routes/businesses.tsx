@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
@@ -95,6 +96,7 @@ function BusinessesPage() {
             <Store className="size-5 text-primary" />
             {pt ? "Negócios Locais" : "Local Businesses"}
           </h1>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </header>

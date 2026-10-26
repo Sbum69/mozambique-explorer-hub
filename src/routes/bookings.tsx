@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { useLang } from "@/contexts/LanguageContext";
 import {
@@ -71,12 +72,32 @@ export const Route = createFileRoute("/bookings")({
 });
 
 const STATUS_STYLE: Record<BookingStatus, { pt: string; en: string; className: string }> = {
-  pending: { pt: "Pendente", en: "Pending", className: "bg-amber-100 text-amber-700" },
-  confirmed: { pt: "Confirmada", en: "Confirmed", className: "bg-emerald-100 text-emerald-700" },
-  rejected: { pt: "Rejeitada", en: "Rejected", className: "bg-rose-100 text-rose-700" },
+  pending: {
+    pt: "Pendente",
+    en: "Pending",
+    className: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
+  },
+  confirmed: {
+    pt: "Confirmada",
+    en: "Confirmed",
+    className: "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300",
+  },
+  rejected: {
+    pt: "Rejeitada",
+    en: "Rejected",
+    className: "bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400",
+  },
   cancelled: { pt: "Cancelada", en: "Cancelled", className: "bg-muted text-muted-foreground" },
-  completed: { pt: "Concluída", en: "Completed", className: "bg-blue-100 text-blue-700" },
-  no_show: { pt: "Não compareceu", en: "No-show", className: "bg-orange-100 text-orange-700" },
+  completed: {
+    pt: "Concluída",
+    en: "Completed",
+    className: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400",
+  },
+  no_show: {
+    pt: "Não compareceu",
+    en: "No-show",
+    className: "bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300",
+  },
 };
 
 type TabId = "all" | "pending" | "confirmed" | "closed";
@@ -167,6 +188,7 @@ function BookingsPage() {
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -237,7 +259,7 @@ function BookingsPage() {
             </p>
             {bookings.length === 0 && (
               <Button
-                className="bg-gradient-to-r from-warning to-primary text-white border-0"
+                className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0"
                 onClick={() => navigate({ to: "/experiences" })}
               >
                 {pt ? "Ver experiências" : "Browse experiences"}

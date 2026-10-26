@@ -40,6 +40,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { type Experience, type ExperienceCategory } from "@/lib/experiences";
@@ -264,6 +265,7 @@ function ExperiencesPage() {
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -278,7 +280,7 @@ function ExperiencesPage() {
         </motion.div>
 
         {provinceId && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 to-orange-500/10 px-4 py-3 flex-wrap">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 to-orange-700/10 px-4 py-3 flex-wrap">
             <p className="text-sm">
               <Sparkles className="inline size-4 text-primary mr-1" />
               {showAllDestinations
@@ -309,7 +311,7 @@ function ExperiencesPage() {
               onClick={() => setFilter(c.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 filter === c.id
-                  ? "bg-gradient-to-r from-warning to-primary text-white shadow-[var(--shadow-elegant)]"
+                  ? "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)]"
                   : "bg-background border border-border hover:border-primary/40"
               }`}
             >
@@ -386,7 +388,7 @@ function ExperiencesPage() {
                       </Badge>
                     </div>
                     <div className="absolute top-3 right-3 flex items-center gap-2">
-                      <Badge className="bg-gradient-to-r from-warning to-primary text-white border-0">
+                      <Badge className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0">
                         {CATEGORIES.find((c) => c.id === exp.category)?.emoji}{" "}
                         {lang === "pt"
                           ? CATEGORIES.find((c) => c.id === exp.category)?.labelPt
@@ -429,7 +431,7 @@ function ExperiencesPage() {
                         className={
                           isBooked
                             ? ""
-                            : "bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
+                            : "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0 hover:opacity-90"
                         }
                         variant={isBooked ? "outline" : "default"}
                       >
@@ -552,7 +554,7 @@ function ExperiencesPage() {
                       ))}
                     </div>
                     {selectedSlot && !selectedSlot.available && (
-                      <p className="mt-2 text-xs text-rose-600">
+                      <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">
                         {lang === "pt"
                           ? "Sem lugares disponíveis para este horário."
                           : "No seats available for this time."}
@@ -644,7 +646,7 @@ function ExperiencesPage() {
                   {t("back")}
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-warning to-primary text-white border-0"
+                  className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0"
                   onClick={() => void submitBooking()}
                   disabled={submitting || !form.date || !form.time || !selectedSlot?.available}
                 >
@@ -668,7 +670,7 @@ function ExperiencesPage() {
           {confirmedBooking && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-emerald-600">
+                <DialogTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
                   <CheckCircle2 className="size-6" />
                   {lang === "pt" ? "Pedido enviado!" : "Request sent!"}
                 </DialogTitle>
@@ -690,7 +692,7 @@ function ExperiencesPage() {
                   <span className="text-xs uppercase tracking-wide text-muted-foreground">
                     {lang === "pt" ? "Estado" : "Status"}
                   </span>
-                  <Badge className="bg-amber-100 text-amber-700 border-0">
+                  <Badge className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-0">
                     {lang === "pt" ? "Aguarda confirmação" : "Awaiting confirmation"}
                   </Badge>
                 </div>
@@ -765,7 +767,7 @@ function ExperiencesPage() {
                   {lang === "pt" ? "Continuar a explorar" : "Keep exploring"}
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-warning to-primary text-white border-0"
+                  className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0"
                   onClick={() => {
                     setConfirmedBooking(null);
                     navigate({ to: "/bookings" });

@@ -23,6 +23,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { type Destination } from "@/lib/destinations";
@@ -292,6 +293,7 @@ function MapPage() {
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -589,7 +591,7 @@ function MapPage() {
                       className={
                         isVisited(selected.id)
                           ? ""
-                          : "bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
+                          : "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0 hover:opacity-90"
                       }
                     >
                       {savingVisit ? (

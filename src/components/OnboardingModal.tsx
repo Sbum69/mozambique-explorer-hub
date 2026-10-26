@@ -352,17 +352,33 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                   className="mb-4"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground font-medium px-1">
-                  <button onClick={() => setDays(2)} className="hover:text-primary">
+                  <button
+                    type="button"
+                    onClick={() => setDays(2)}
+                    className="hover:text-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     2 {t("days")}
                   </button>
-                  <button onClick={() => setDays(7)} className="hover:text-primary">
-                    1 sem
+                  <button
+                    type="button"
+                    onClick={() => setDays(7)}
+                    className="hover:text-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {lang === "pt" ? "1 sem" : "1 wk"}
                   </button>
-                  <button onClick={() => setDays(14)} className="hover:text-primary">
-                    2 sem
+                  <button
+                    type="button"
+                    onClick={() => setDays(14)}
+                    className="hover:text-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {lang === "pt" ? "2 sem" : "2 wks"}
                   </button>
-                  <button onClick={() => setDays(30)} className="hover:text-primary">
-                    1 mês
+                  <button
+                    type="button"
+                    onClick={() => setDays(30)}
+                    className="hover:text-primary rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {lang === "pt" ? "1 mês" : "1 month"}
                   </button>
                 </div>
               </motion.div>

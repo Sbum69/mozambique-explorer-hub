@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchPublicBusiness, type PublicBusiness } from "@/lib/local-businesses";
 import { supabase } from "@/integrations/supabase/client";
 import { mapExperience, type Experience } from "@/lib/experiences";
@@ -113,6 +114,7 @@ function BusinessDetailPage() {
           <span className="font-bold flex-1 truncate">
             {pt ? "Negócios Locais" : "Local Businesses"}
           </span>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </header>

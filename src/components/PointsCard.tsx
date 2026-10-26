@@ -186,7 +186,7 @@ export function PointsCard({
               return (
                 <li
                   key={l.level}
-                  className={`rounded-xl border p-3 text-center ${reached ? "bg-accent/40" : "opacity-60"}`}
+                  className={`rounded-xl border p-3 text-center ${reached ? "bg-accent/40" : "border-dashed bg-muted/30"}`}
                 >
                   {(() => {
                     const I = iconFor(l.level);

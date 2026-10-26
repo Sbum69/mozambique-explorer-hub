@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLang } from "@/contexts/LanguageContext";
@@ -99,13 +100,14 @@ function CommunityPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 dark:from-blue-950/30 via-white dark:via-background to-purple-50 dark:to-purple-950/30">
+      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
             <h1 className="font-bold text-base sm:text-lg truncate">{t("communityTitle")}</h1>
           </div>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </header>
@@ -118,28 +120,28 @@ function CommunityPostPage() {
         </Button>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-gray-500">
+          <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
             <Loader2 className="size-5 animate-spin" /> {t("communityLoading")}
           </div>
         ) : !post ? (
           <Card className="p-10 text-center rounded-2xl border-dashed">
-            <p className="text-gray-600">{t("communityFeedEmpty")}</p>
+            <p className="text-muted-foreground">{t("communityFeedEmpty")}</p>
           </Card>
         ) : (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="p-6 rounded-2xl shadow-lg border border-gray-100 bg-white">
+            <Card className="p-6 rounded-2xl shadow-lg border border-border bg-card">
               <div className="flex flex-wrap items-center gap-2">
                 {post.categoryName && (
-                  <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700">
+                  <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400">
                     {post.categoryName[lang]}
                   </span>
                 )}
                 {post.provinceName && (
-                  <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <MapPin className="size-3" /> {post.provinceName[lang]}
                   </span>
                 )}
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {new Date(post.createdAt).toLocaleDateString(pt ? "pt-PT" : "en-US", {
                     day: "2-digit",
                     month: "short",
@@ -148,36 +150,38 @@ function CommunityPostPage() {
                 </span>
               </div>
 
-              <h2 className="mt-3 text-2xl font-bold text-gray-900">{post.title}</h2>
-              <p className="mt-1 text-sm text-gray-500">{post.authorName}</p>
+              <h2 className="mt-3 text-2xl font-bold text-foreground">{post.title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{post.authorName}</p>
 
               {post.imageUrl && (
                 <img src={post.imageUrl} alt="" className="mt-4 rounded-xl w-full object-cover" />
               )}
 
-              <p className="mt-4 text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="mt-4 text-foreground leading-relaxed whitespace-pre-line">
                 {post.content}
               </p>
 
               {(post.destinationName || post.experienceTitle || post.routeTitle) && (
-                <div className="mt-6 border-t border-gray-100 pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <div className="mt-6 border-t border-border pt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {t("communityRelated")}
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                  <ul className="mt-2 space-y-1 text-sm text-foreground">
                     {post.destinationName && (
                       <li className="inline-flex items-center gap-2">
-                        <Compass className="size-4 text-blue-600" /> {post.destinationName}
+                        <Compass className="size-4 text-blue-600 dark:text-blue-400" />{" "}
+                        {post.destinationName}
                       </li>
                     )}
                     {post.experienceTitle && (
                       <li className="inline-flex items-center gap-2">
-                        <Sparkles className="size-4 text-purple-600" /> {post.experienceTitle}
+                        <Sparkles className="size-4 text-purple-600 dark:text-purple-400" />{" "}
+                        {post.experienceTitle}
                       </li>
                     )}
                     {post.routeTitle && (
                       <li className="inline-flex items-center gap-2">
-                        <RouteIcon className="size-4 text-indigo-600" />
+                        <RouteIcon className="size-4 text-indigo-600 dark:text-indigo-400" />
                         <Link
                           to="/itinerary/$id"
                           params={{ id: post.routeId! }}
@@ -191,14 +195,14 @@ function CommunityPostPage() {
                 </div>
               )}
 
-              <div className="mt-6 border-t border-gray-100 pt-4 flex items-center justify-between gap-3 flex-wrap">
+              <div className="mt-6 border-t border-border pt-4 flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => void react("like")}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
                       post.myReaction === "like"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-gray-100 text-gray-700 hover:bg-green-50"
+                        ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300"
+                        : "bg-muted text-foreground hover:bg-green-50 dark:hover:bg-green-900/60"
                     }`}
                   >
                     <ThumbsUp className="size-4" /> {post.likes}
@@ -207,8 +211,8 @@ function CommunityPostPage() {
                     onClick={() => void react("dislike")}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition ${
                       post.myReaction === "dislike"
-                        ? "bg-red-50 text-red-700"
-                        : "bg-gray-100 text-gray-700 hover:bg-red-50"
+                        ? "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"
+                        : "bg-muted text-foreground hover:bg-red-50 dark:hover:bg-red-900/60"
                     }`}
                   >
                     <ThumbsDown className="size-4" /> {post.dislikes}

@@ -29,6 +29,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { OnboardingModal } from "@/components/OnboardingModal";
@@ -193,7 +194,8 @@ function HomePage() {
             loading="lazy"
             decoding="async"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-foreground/75 via-foreground/55 to-background" />
+          {/* Fixed dark overlay (not a theme token) so the white hero text always reads, in both themes. */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-background" />
         </div>
 
         {/* Nav */}
@@ -211,13 +213,14 @@ function HomePage() {
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell variant="onDark" />
+            <ThemeToggle />
             <LanguageToggle />
             {isGuest ? (
               <>
                 <Button
                   asChild
                   size="sm"
-                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
+                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-lg gap-1.5"
                 >
                   <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
                 </Button>
@@ -235,7 +238,7 @@ function HomePage() {
                 <Button
                   asChild
                   size="sm"
-                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg gap-1.5"
+                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-lg gap-1.5"
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard className="size-4" />

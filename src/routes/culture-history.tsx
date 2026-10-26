@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useBackTarget } from "@/lib/nav";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 
@@ -78,7 +79,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Independência", en: "Independence" },
     subtitle: { pt: "Nascimento de uma nação", en: "Birth of a nation" },
     date: { pt: "25 de Junho de 1975", en: "25 June 1975" },
-    gradient: "from-green-500 to-green-700",
+    gradient: "from-green-700 to-green-700",
     icon: Flag,
     image: "https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=1200&h=600&fit=crop",
     short: {
@@ -125,7 +126,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Samora Machel", en: "Samora Machel" },
     subtitle: { pt: "O primeiro Presidente", en: "The first President" },
     date: { pt: "1933 – 1986", en: "1933–1986" },
-    gradient: "from-red-500 to-red-700",
+    gradient: "from-red-600 to-red-700",
     icon: Users,
     image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=1200&h=600&fit=crop",
     short: {
@@ -172,7 +173,7 @@ const TOPICS: Topic[] = [
     title: { pt: "FRELIMO", en: "FRELIMO" },
     subtitle: { pt: "Frente de Libertação", en: "Liberation Front" },
     date: { pt: "Fundada a 25 de Junho de 1962", en: "Founded on 25 June 1962" },
-    gradient: "from-yellow-600 to-orange-600",
+    gradient: "from-yellow-700 to-orange-700",
     icon: BookOpen,
     image: "https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=1200&h=600&fit=crop",
     short: {
@@ -219,7 +220,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Azagaia", en: "Azagaia" },
     subtitle: { pt: "A voz da juventude", en: "The voice of youth" },
     date: { pt: "1977 – 2023", en: "1977–2023" },
-    gradient: "from-purple-500 to-purple-700",
+    gradient: "from-purple-600 to-purple-700",
     icon: Mic2,
     image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=600&fit=crop",
     short: {
@@ -266,7 +267,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Marrabenta", en: "Marrabenta" },
     subtitle: { pt: "O ritmo do país", en: "The rhythm of the country" },
     date: { pt: "Desde os anos 1950", en: "Since the 1950s" },
-    gradient: "from-blue-500 to-blue-700",
+    gradient: "from-blue-600 to-blue-700",
     icon: Music,
     image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&h=600&fit=crop",
     short: {
@@ -313,7 +314,7 @@ const TOPICS: Topic[] = [
     title: { pt: "José Craveirinha", en: "José Craveirinha" },
     subtitle: { pt: "Poeta Nacional", en: "National Poet" },
     date: { pt: "1922 – 2003", en: "1922–2003" },
-    gradient: "from-teal-500 to-teal-700",
+    gradient: "from-teal-700 to-teal-700",
     icon: Sparkles,
     image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1200&h=600&fit=crop",
     short: {
@@ -374,6 +375,7 @@ function CultureHistoryPage() {
             <ArrowLeft className="size-4" /> {copy.back[lang]}
           </button>
           <h1 className="font-bold text-sm sm:text-base truncate">🇲🇿 {copy.pageTitle[lang]}</h1>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </header>
@@ -436,7 +438,7 @@ function CultureHistoryPage() {
                   decoding="async"
                 />
                 <div className={`absolute inset-0 bg-gradient-to-t ${topic.gradient} opacity-80`} />
-                <div className="absolute top-4 right-4 size-11 rounded-2xl bg-white shadow-lg flex items-center justify-center">
+                <div className="absolute top-4 right-4 size-11 rounded-2xl bg-card shadow-lg flex items-center justify-center">
                   <topic.icon className="size-5 text-foreground" />
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 text-white">
@@ -493,7 +495,7 @@ function CultureHistoryPage() {
                 <motion.button
                   whileHover={{ rotate: 90 }}
                   onClick={() => setSelected(null)}
-                  className="absolute top-4 right-4 size-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
+                  className="absolute top-4 right-4 size-10 rounded-full bg-background/90 text-foreground flex items-center justify-center shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   aria-label={copy.close[lang]}
                 >
                   <X className="size-5" />

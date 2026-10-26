@@ -39,6 +39,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ShareButton } from "@/components/ShareButton";
@@ -77,22 +78,22 @@ export const Route = createFileRoute("/news-alerts")({
 type Tab = "news" | "weather" | "roads" | "tips";
 
 const TABS: { id: Tab; pt: string; en: string; icon: typeof Newspaper; grad: string }[] = [
-  { id: "news", pt: "Notícias", en: "News", icon: Newspaper, grad: "from-red-500 to-red-700" },
+  { id: "news", pt: "Notícias", en: "News", icon: Newspaper, grad: "from-red-600 to-red-700" },
   {
     id: "weather",
     pt: "Temperatura",
     en: "Weather",
     icon: Thermometer,
-    grad: "from-cyan-500 to-blue-500",
+    grad: "from-cyan-700 to-blue-600",
   },
   {
     id: "roads",
     pt: "Estradas",
     en: "Roads",
     icon: AlertTriangle,
-    grad: "from-orange-500 to-orange-700",
+    grad: "from-orange-700 to-orange-700",
   },
-  { id: "tips", pt: "Dicas", en: "Tips", icon: Info, grad: "from-purple-500 to-pink-500" },
+  { id: "tips", pt: "Dicas", en: "Tips", icon: Info, grad: "from-purple-600 to-pink-600" },
 ];
 
 function NewsAlertsPage() {
@@ -117,7 +118,7 @@ function NewsAlertsPage() {
             </button>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
-                <Newspaper className="size-5 sm:size-6 text-red-600" />
+                <Newspaper className="size-5 sm:size-6 text-red-600 dark:text-red-400" />
                 {lang === "pt" ? "Notícias & Avisos" : "News & Alerts"}
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
@@ -145,6 +146,7 @@ function NewsAlertsPage() {
               </span>
             </motion.div>
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -342,12 +344,12 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                     onError={(e) => (e.currentTarget.style.display = "none")}
                   />
                 ) : (
-                  <div className="size-20 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
+                  <div className="size-20 rounded-lg bg-gradient-to-br from-red-600 to-orange-700 flex items-center justify-center shrink-0">
                     <Newspaper className="size-8 text-white/90" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-600 mb-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-600 dark:text-red-400 mb-1">
                     <span className="uppercase truncate">{it.source}</span>
                     <span className="text-muted-foreground font-normal">
                       · {fmtLive(it.pubDate)}
@@ -422,7 +424,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                   <Button
                     size="sm"
                     onClick={() => setSelected(n)}
-                    className="bg-gradient-to-r from-red-500 to-red-700 text-white hover:opacity-90"
+                    className="bg-gradient-to-r from-red-600 to-red-700 text-white hover:opacity-90"
                   >
                     {lang === "pt" ? "Ler mais" : "Read more"}
                     <ChevronRight className="size-4" />
@@ -492,7 +494,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
 
 /* ---------- Weather tab (Open-Meteo, real destination coordinates) ---------- */
 const WEATHER_ICON: Record<WeatherKind, { icon: typeof Sun; color: string }> = {
-  clear: { icon: Sun, color: "text-amber-500" },
+  clear: { icon: Sun, color: "text-amber-700 dark:text-amber-300" },
   cloud: { icon: Cloud, color: "text-muted-foreground" },
   fog: { icon: CloudFog, color: "text-muted-foreground" },
   rain: { icon: CloudRain, color: "text-blue-600 dark:text-blue-400" },
@@ -643,11 +645,11 @@ const TIP_ICON = {
   utensils: Utensils,
 } as const;
 const TIP_GRAD = {
-  camera: "from-purple-500 to-pink-500",
-  wallet: "from-emerald-500 to-teal-500",
-  shield: "from-blue-500 to-indigo-500",
-  compass: "from-orange-500 to-red-500",
-  utensils: "from-amber-500 to-orange-500",
+  camera: "from-purple-600 to-pink-600",
+  wallet: "from-emerald-700 to-teal-700",
+  shield: "from-blue-600 to-indigo-600",
+  compass: "from-orange-700 to-red-600",
+  utensils: "from-amber-700 to-orange-700",
 } as const;
 
 function TipsTab({ lang }: { lang: "pt" | "en" }) {

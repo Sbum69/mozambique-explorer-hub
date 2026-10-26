@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchExperienceById, type Experience } from "@/lib/experiences";
 
 export const Route = createFileRoute("/experience/$id")({
@@ -76,6 +77,7 @@ function ExperienceDetailPage() {
             <ArrowLeft className="size-5" />
           </Button>
           <span className="font-bold flex-1 truncate">{pt ? "Experiência" : "Experience"}</span>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </header>

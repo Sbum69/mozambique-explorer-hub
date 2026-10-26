@@ -126,7 +126,7 @@ export function PersonalSections({ routes, loading, error, lang, renderCard, onS
         )}
         {res.exact.length > 0 && <Grid routes={res.exact} renderCard={renderCard} />}
         {days && res.exact.length === 0 && res.otherDuration.length > 0 && (
-          <Card className="p-4 border-amber-300 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 text-sm">
+          <Card className="p-4 border-amber-300 dark:border-amber-800 bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 text-sm">
             {pt
               ? `Não há roteiros de exatamente ${days} dias. Vê abaixo alternativas com outra duração.`
               : `No itineraries of exactly ${days} days. See alternatives with a different length below.`}

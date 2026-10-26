@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, ShieldCheck, RefreshCw, CheckCircle, AlertCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLang } from "@/contexts/LanguageContext";
 
 type Stage = "consent" | "requesting" | "live" | "captured" | "denied";
 
@@ -13,8 +14,9 @@ interface Props {
 
 export function PhotoChallengeCapture({
   onPhoto,
-  accentClass = "from-pink-500 to-rose-600",
+  accentClass = "from-pink-600 to-rose-600",
 }: Props) {
+  const { lang } = useLang();
   const [stage, setStage] = useState<Stage>("consent");
   const [error, setError] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export function PhotoChallengeCapture({
       {stage === "consent" && (
         <div className="space-y-3">
           <div className="flex gap-2 text-sm">
-            <ShieldCheck className="size-5 shrink-0 text-green-600" />
+            <ShieldCheck className="size-5 shrink-0 text-green-700 dark:text-green-300" />
             <p className="text-muted-foreground">
               Para confirmar este desafio precisas de tirar uma fotografia no local. A app vai pedir
               permissão para usar a câmara — a foto fica no teu dispositivo e serve apenas como
@@ -145,10 +147,10 @@ export function PhotoChallengeCapture({
           <div className="relative rounded-xl overflow-hidden border">
             <img
               src={photo}
-              alt="Prova fotográfica do desafio"
+              alt={lang === "pt" ? "Prova fotográfica do desafio" : "Photo proof for the challenge"}
               className="w-full max-h-64 object-cover"
             />
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-green-600 text-white text-xs px-2 py-1">
+            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-green-700 text-white text-xs px-2 py-1">
               <CheckCircle className="size-3" /> Foto validada
             </span>
           </div>

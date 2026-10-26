@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PointsCard } from "@/components/PointsCard";
 import {
@@ -91,6 +92,7 @@ function GamificationPage() {
               </Link>
             </Button>
           </div>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </nav>

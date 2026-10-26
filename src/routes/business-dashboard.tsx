@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { BusinessManagement } from "@/components/BusinessManagement";
 import { bookingReasonText, decideBooking, type Booking, type BookingStatus } from "@/lib/bookings";
@@ -194,6 +195,7 @@ function BusinessDashboardPage() {
           >
             <ArrowLeft className="size-4" />
           </Button>
+          <ThemeToggle />
           <LanguageToggle />
           <NotificationsBell />
           <Button
