@@ -34,12 +34,20 @@ interface AuthContextValue {
   /** Set when the signed-in user's profile/roles could not be read; the app is blocked until a retry succeeds. */
   loadError: string | null;
   retryLoad: () => void;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: UserRole; unconfirmed?: boolean }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string; role?: UserRole; unconfirmed?: boolean }>;
   loginAsGuest: () => void;
   logout: () => Promise<void>;
   setPreferences: (prefs: UserPreferences) => Promise<void>;
   needsOnboarding: boolean;
-  registerUser: (data: { username: string; password: string; displayName: string; email: string }) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
+  registerUser: (data: {
+    username: string;
+    password: string;
+    displayName: string;
+    email: string;
+  }) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
 
   isGuest: boolean;
   isUser: boolean;
@@ -95,11 +103,18 @@ function toLegacyRole(roles: AppRole[]): UserRole {
 function authErrorMessage(message: string) {
   const normalized = message.toLowerCase();
   if (normalized.includes("invalid login credentials")) return "Email ou palavra-passe incorretos.";
-  if (normalized.includes("email not confirmed")) return "Confirma primeiro o teu email para entrar.";
-  if (normalized.includes("already registered") || normalized.includes("already been registered")) return "Este email já está registado.";
+  if (normalized.includes("email not confirmed"))
+    return "Confirma primeiro o teu email para entrar.";
+  if (normalized.includes("already registered") || normalized.includes("already been registered"))
+    return "Este email já está registado.";
   if (normalized.includes("valid email")) return "Introduz um email válido.";
-  const tooShort = normalized.includes("at least 6 characters") || (normalized.includes("password") && normalized.includes("characters"));
-  const pwned = normalized.includes("known to be weak") || normalized.includes("easy to guess") || normalized.includes("pwned");
+  const tooShort =
+    normalized.includes("at least 6 characters") ||
+    (normalized.includes("password") && normalized.includes("characters"));
+  const pwned =
+    normalized.includes("known to be weak") ||
+    normalized.includes("easy to guess") ||
+    normalized.includes("pwned");
   if (tooShort && pwned) {
     return "Usa pelo menos 6 caracteres e escolhe uma palavra-passe diferente: esta aparece em fugas de dados conhecidas.";
   }
@@ -107,10 +122,10 @@ function authErrorMessage(message: string) {
     return "Esta palavra-passe aparece em fugas de dados conhecidas. Escolhe outra (podes juntar palavras ou números que só tu saibas).";
   }
   if (tooShort) return "A palavra-passe precisa de pelo menos 6 caracteres.";
-  if (normalized.includes("network") || normalized.includes("fetch")) return "Sem ligação. Verifica a internet e tenta novamente.";
+  if (normalized.includes("network") || normalized.includes("fetch"))
+    return "Sem ligação. Verifica a internet e tenta novamente.";
   return "Não foi possível concluir. Tenta novamente.";
 }
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -173,9 +188,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const email = currentAuthUser.email ?? "";
     const appUser: AppUser = {
-      username: String(currentAuthUser.user_metadata?.username ?? email.split("@")[0] ?? "explorador"),
+      username: String(
+        currentAuthUser.user_metadata?.username ?? email.split("@")[0] ?? "explorador",
+      ),
       role: toLegacyRole(roles),
-      displayName: profile?.display_name ?? String(currentAuthUser.user_metadata?.display_name ?? email.split("@")[0] ?? "Explorador"),
+      displayName:
+        profile?.display_name ??
+        String(currentAuthUser.user_metadata?.display_name ?? email.split("@")[0] ?? "Explorador"),
       email,
       preferences: {
         province: profile?.province ?? undefined,
@@ -191,7 +210,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     clearLegacyLocalState();
-    void supabase.auth.getSession().then(({ data }) => loadAuthenticatedUser(data.session?.user ?? null));
+    void supabase.auth
+      .getSession()
+      .then(({ data }) => loadAuthenticatedUser(data.session?.user ?? null));
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "TOKEN_REFRESHED") return;
       queueMicrotask(() => void loadAuthenticatedUser(session?.user ?? null));
@@ -208,16 +229,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const persistLocalState = (u: AppUser | null) => setUser(u);
 
   const login: AuthContextValue["login"] = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     if (error || !data.user) {
-      const unconfirmed = /email not confirmed/i.test(error?.message ?? "") || error?.code === "email_not_confirmed";
+      const unconfirmed =
+        /email not confirmed/i.test(error?.message ?? "") || error?.code === "email_not_confirmed";
       return { ok: false, error: authErrorMessage(error?.message ?? ""), unconfirmed };
     }
     const role = await loadAuthenticatedUser(data.user);
     if (!role) return { ok: false, error: t("accountLoadError") };
     return { ok: true, role };
   };
-
 
   const loginAsGuest = () => {
     try {
@@ -245,16 +269,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const next = { ...user, preferences: { ...user.preferences, ...prefs } };
     persistLocalState(next);
     if (authUser) {
-      await supabase.from("profiles").update({
-        province: next.preferences?.province,
-        duration_days: next.preferences?.durationDays,
-        interests: next.preferences?.interests,
-      }).eq("id", authUser.id);
+      await supabase
+        .from("profiles")
+        .update({
+          province: next.preferences?.province,
+          duration_days: next.preferences?.durationDays,
+          interests: next.preferences?.interests,
+        })
+        .eq("id", authUser.id);
 
       // Several provinces per tourist live in profile_provinces (RLS: own rows only).
       if (prefs.provinces) {
         const codes = [...new Set(prefs.provinces)];
-        const { data: rows } = await supabase.from("provinces").select("id, code").in("code", codes.length ? codes : [""]);
+        const { data: rows } = await supabase
+          .from("provinces")
+          .select("id, code")
+          .in("code", codes.length ? codes : [""]);
         await supabase.from("profile_provinces").delete().eq("profile_id", authUser.id);
         if (rows && rows.length) {
           await supabase
@@ -265,7 +295,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const registerUser: AuthContextValue["registerUser"] = async ({ username, password, displayName, email }) => {
+  const registerUser: AuthContextValue["registerUser"] = async ({
+    username,
+    password,
+    displayName,
+    email,
+  }) => {
     const key = username.trim().toLowerCase();
     if (!key) return { ok: false, error: "Escolhe um nome de utilizador" };
     if (/\s/.test(key)) return { ok: false, error: "Sem espaços no nome de utilizador" };
@@ -282,9 +317,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true, needsConfirmation: data.session === null };
   };
 
-
   // Guests never see onboarding: they have no profile and save nothing.
-  const needsOnboarding = !!authUser && !!user && user.role === "user" && !user.preferences?.province;
+  const needsOnboarding =
+    !!authUser && !!user && user.role === "user" && !user.preferences?.province;
 
   const isGuest = user?.role === "guest";
   const isUser = user?.role === "user";

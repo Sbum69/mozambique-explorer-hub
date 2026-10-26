@@ -40,7 +40,10 @@ export const Route = createFileRoute("/favorites")({
         content: "Tudo o que guardaste para explorar depois em Moçambique.",
       },
       { property: "og:title", content: "Meus Favoritos — Ekaya Explore" },
-      { property: "og:description", content: "Tudo o que guardaste para explorar depois em Moçambique." },
+      {
+        property: "og:description",
+        content: "Tudo o que guardaste para explorar depois em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -247,9 +250,7 @@ function FavoritesPage() {
         ) : (
           <div
             className={
-              view === "grid"
-                ? "grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
-                : "flex flex-col gap-3"
+              view === "grid" ? "grid sm:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-3"
             }
           >
             <AnimatePresence mode="popLayout">
@@ -280,13 +281,7 @@ function FavoritesPage() {
   );
 }
 
-function EmptyState({
-  lang,
-  onAction,
-}: {
-  lang: "pt" | "en";
-  onAction: () => void;
-}) {
+function EmptyState({ lang, onAction }: { lang: "pt" | "en"; onAction: () => void }) {
   return (
     <div className="text-center py-20">
       <div className="inline-flex p-5 rounded-full bg-rose-50 dark:bg-rose-950/30 mb-5">
@@ -326,14 +321,11 @@ function FavoriteCard({
   formatDate: (s: string) => string;
 }) {
   const d = item.data;
-  const title =
-    (d.title && typeof d.title === "object" ? d.title[lang] : d.title) ??
-    d.name ??
-    "—";
+  const title = (d.title && typeof d.title === "object" ? d.title[lang] : d.title) ?? d.name ?? "—";
   const description =
-    (d.description && typeof d.description === "object"
-      ? d.description[lang]
-      : d.description) ?? d.summary?.[lang] ?? "";
+    (d.description && typeof d.description === "object" ? d.description[lang] : d.description) ??
+    d.summary?.[lang] ??
+    "";
   const image = d.image ?? d.cover ?? "";
   const location = d.location ?? d.region?.[lang] ?? "";
 
@@ -370,7 +362,9 @@ function FavoriteCard({
     return (
       <Card className="p-3 sm:p-4 flex gap-4 hover:shadow-md transition-shadow">
         {image && (
-          <img loading="lazy" decoding="async"
+          <img
+            loading="lazy"
+            decoding="async"
             src={image}
             alt={title}
             className="size-20 sm:size-24 rounded-lg object-cover shrink-0"
@@ -378,12 +372,8 @@ function FavoriteCard({
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Badge className={cn(typeColor[item.type], "border-0 text-[10px]")}>
-              {typeLabel}
-            </Badge>
-            <span className="text-[11px] text-muted-foreground">
-              {formatDate(item.savedDate)}
-            </span>
+            <Badge className={cn(typeColor[item.type], "border-0 text-[10px]")}>{typeLabel}</Badge>
+            <span className="text-[11px] text-muted-foreground">{formatDate(item.savedDate)}</span>
           </div>
           <h3 className="font-bold truncate">{title}</h3>
           {location && (
@@ -393,9 +383,7 @@ function FavoriteCard({
             </p>
           )}
           {description && (
-            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-              {description}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">{description}</p>
           )}
         </div>
         <div className="flex flex-col gap-1 shrink-0">
@@ -419,15 +407,15 @@ function FavoriteCard({
     <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full flex flex-col">
       {image && (
         <div className="relative h-44 overflow-hidden">
-          <img loading="lazy" decoding="async"
+          <img
+            loading="lazy"
+            decoding="async"
             src={image}
             alt={title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3">
-            <Badge className={cn(typeColor[item.type], "border-0")}>
-              {typeLabel}
-            </Badge>
+            <Badge className={cn(typeColor[item.type], "border-0")}>{typeLabel}</Badge>
           </div>
           <div className="absolute top-3 right-3">
             <div className="size-8 bg-background/90 rounded-full flex items-center justify-center">
@@ -465,9 +453,7 @@ function FavoriteCard({
           )}
         </div>
         {description && (
-          <p className="text-sm text-muted-foreground line-clamp-3 mt-3 flex-1">
-            {description}
-          </p>
+          <p className="text-sm text-muted-foreground line-clamp-3 mt-3 flex-1">{description}</p>
         )}
         <p className="text-[11px] text-muted-foreground mt-3">
           {lang === "pt" ? "Guardado em" : "Saved on"} {formatDate(item.savedDate)}

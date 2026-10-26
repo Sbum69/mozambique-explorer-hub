@@ -16,13 +16,24 @@ interface OnboardingModalProps {
   open: boolean;
   onComplete: () => void;
   /** Current preferences, so editing starts from what the user already chose. */
-  initial?: { province?: string; provinces?: string[]; durationDays?: number; interests?: string[] };
+  initial?: {
+    province?: string;
+    provinces?: string[];
+    durationDays?: number;
+    interests?: string[];
+  };
 }
 
 export function OnboardingModal({ open, onComplete, initial }: OnboardingModalProps) {
   const { setPreferences } = useAuth();
   const { t, lang } = useLang();
-  const { destinations, loading: loadingDestinations, error: destinationsError, isEmpty, reload } = useDestinations();
+  const {
+    destinations,
+    loading: loadingDestinations,
+    error: destinationsError,
+    isEmpty,
+    reload,
+  } = useDestinations();
   const { provinces, loading: loadingProvinces } = useProvinces();
   const [step, setStep] = useState(0);
   /** Featured destination slug (optional, kept for the existing profiles.province field). */
@@ -62,12 +73,16 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
 
   const [saving, setSaving] = useState(false);
 
-  const savePrefs = async (prefs: { durationDays: number; interests: string[] }, code = provinceCode) => {
+  const savePrefs = async (
+    prefs: { durationDays: number; interests: string[] },
+    code = provinceCode,
+  ) => {
     if (!code) return;
     const provinceCode_ = code;
     // profiles.province keeps a destination slug when the chosen province has one; otherwise the province code.
     const slug =
-      (province && destinations.find((d) => d.slug === province && d.province === provinceCode_)?.slug) ??
+      (province &&
+        destinations.find((d) => d.slug === province && d.province === provinceCode_)?.slug) ??
       destinations.find((d) => d.province === provinceCode_)?.slug ??
       provinceCode_;
     setSaving(true);
@@ -82,7 +97,9 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
   /** Single choice: picking a province replaces the previous one. */
   const pickProvince = (code: string) => {
     setProvinceCode(code);
-    setProvince((cur) => (cur && destinations.find((d) => d.slug === cur)?.province === code ? cur : null));
+    setProvince((cur) =>
+      cur && destinations.find((d) => d.slug === cur)?.province === code ? cur : null,
+    );
   };
   const pickDestination = (slug: string, code?: string | null) => {
     setProvince(slug);
@@ -105,23 +122,24 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
   };
 
   const toggleInterest = (id: string) => {
-    setInterests((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+    setInterests((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent
-        className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 gap-0 border-0 bg-card [&>button]:hidden"
-      >
+      <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 gap-0 border-0 bg-card [&>button]:hidden">
         {/* Header */}
         <div className="px-6 sm:px-10 pt-8 pb-4 bg-gradient-to-br from-primary/10 via-card to-secondary/10">
           <div className="flex items-center justify-between gap-3 mb-3">
             <Badge variant="outline" className="bg-card font-medium">
               {t("step")} {step + 1} {t("of")} {totalSteps}
             </Badge>
-            <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSkip}
+              className="text-muted-foreground"
+            >
               {t("skip")}
             </Button>
           </div>
@@ -173,12 +191,15 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                 )}
                 {isEmpty && (
                   <p className="text-sm text-muted-foreground">
-                    {lang === "pt" ? "Ainda não existem destinos disponíveis." : "No destinations available yet."}
+                    {lang === "pt"
+                      ? "Ainda não existem destinos disponíveis."
+                      : "No destinations available yet."}
                   </p>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {destinations.map((d, i) => {
-                    const selected = !!provinceCode && province === d.slug && provinceCode === d.province;
+                    const selected =
+                      !!provinceCode && province === d.slug && provinceCode === d.province;
                     return (
                       <motion.button
                         key={d.id}
@@ -231,7 +252,9 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                           </div>
                         </div>
                         <div className="p-3">
-                          <p className="text-sm text-muted-foreground line-clamp-2">{d.description[lang]}</p>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {d.description[lang]}
+                          </p>
                           <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Users className="size-3" />
                             <span className="font-semibold text-foreground">{d.visitorsK}k</span>
@@ -247,14 +270,20 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                 <div className="mt-8">
                   <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
                     <MapPin className="size-4 text-primary" />
-                    {lang === "pt" ? "Ou escolhe diretamente a província de destino" : "Or pick your destination province directly"}
+                    {lang === "pt"
+                      ? "Ou escolhe diretamente a província de destino"
+                      : "Or pick your destination province directly"}
                   </h3>
                   {loadingProvinces ? (
                     <p className="text-sm text-muted-foreground animate-pulse">
                       {lang === "pt" ? "A carregar províncias..." : "Loading provinces..."}
                     </p>
                   ) : (
-                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={lang === "pt" ? "Província de destino" : "Destination province"}>
+                    <div
+                      className="flex flex-wrap gap-2"
+                      role="radiogroup"
+                      aria-label={lang === "pt" ? "Província de destino" : "Destination province"}
+                    >
                       {provinces.map((p) => {
                         const selected = provinceCode === p.code;
                         return (
@@ -314,10 +343,18 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                   className="mb-4"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground font-medium px-1">
-                  <button onClick={() => setDays(2)} className="hover:text-primary">2 {t("days")}</button>
-                  <button onClick={() => setDays(7)} className="hover:text-primary">1 sem</button>
-                  <button onClick={() => setDays(14)} className="hover:text-primary">2 sem</button>
-                  <button onClick={() => setDays(30)} className="hover:text-primary">1 mês</button>
+                  <button onClick={() => setDays(2)} className="hover:text-primary">
+                    2 {t("days")}
+                  </button>
+                  <button onClick={() => setDays(7)} className="hover:text-primary">
+                    1 sem
+                  </button>
+                  <button onClick={() => setDays(14)} className="hover:text-primary">
+                    2 sem
+                  </button>
+                  <button onClick={() => setDays(30)} className="hover:text-primary">
+                    1 mês
+                  </button>
                 </div>
               </motion.div>
             )}

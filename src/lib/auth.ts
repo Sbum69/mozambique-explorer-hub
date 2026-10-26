@@ -32,10 +32,7 @@ export async function requireAuthenticatedUser() {
 }
 
 export async function getAuthenticatedRoles(userId: string): Promise<AppRole[]> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
+  const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
 
   if (error) return [];
   return data.map(({ role }) => role);
@@ -73,6 +70,7 @@ export async function roleLandingTarget(
 ): Promise<"/admin" | "/business-dashboard" | "/onboarding" | "/home"> {
   const roles = await getAuthenticatedRoles(userId);
   if (roles.includes("admin")) return "/admin";
-  if (roles.includes("business_small") || roles.includes("business_large")) return "/business-dashboard";
+  if (roles.includes("business_small") || roles.includes("business_large"))
+    return "/business-dashboard";
   return postAuthTarget(userId);
 }

@@ -1,13 +1,38 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Compass, Clock, Star, MapPin, Users, Check, Sparkles, Calendar, Phone, Mail, User as UserIcon, Store, FileText, CheckCircle2, Minus, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  Compass,
+  Clock,
+  Star,
+  MapPin,
+  Users,
+  Check,
+  Sparkles,
+  Calendar,
+  Phone,
+  Mail,
+  User as UserIcon,
+  Store,
+  FileText,
+  CheckCircle2,
+  Minus,
+  Plus,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,9 +67,15 @@ export const Route = createFileRoute("/experiences")({
   head: () => ({
     meta: [
       { title: "Experiências — Ekaya Explore" },
-      { name: "description", content: "Reserva experiências comunitárias autênticas em Moçambique." },
+      {
+        name: "description",
+        content: "Reserva experiências comunitárias autênticas em Moçambique.",
+      },
       { property: "og:title", content: "Experiências — Ekaya Explore" },
-      { property: "og:description", content: "Reserva experiências comunitárias autênticas em Moçambique." },
+      {
+        property: "og:description",
+        content: "Reserva experiências comunitárias autênticas em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -55,7 +86,12 @@ export const Route = createFileRoute("/experiences")({
   component: ExperiencesPage,
 });
 
-const CATEGORIES: { id: ExperienceCategory | "all"; emoji: string; labelPt: string; labelEn: string }[] = [
+const CATEGORIES: {
+  id: ExperienceCategory | "all";
+  emoji: string;
+  labelPt: string;
+  labelEn: string;
+}[] = [
   { id: "all", emoji: "✨", labelPt: "Todas", labelEn: "All" },
   { id: "beach", emoji: "🏖️", labelPt: "Praia", labelEn: "Beach" },
   { id: "culture", emoji: "🎨", labelPt: "Cultura", labelEn: "Culture" },
@@ -98,15 +134,17 @@ function ExperiencesPage() {
 
   const filtered = useMemo(() => {
     let list = experiences;
-    if (provinceId && !showAllDestinations) list = list.filter((e) => e.destinationId === provinceId);
+    if (provinceId && !showAllDestinations)
+      list = list.filter((e) => e.destinationId === provinceId);
     if (filter !== "all") list = list.filter((e) => e.category === filter);
     return list;
   }, [experiences, filter, provinceId, showAllDestinations]);
 
-  const { slots, loading: loadingSlots, error: slotsError } = useAvailability(
-    openExp?.id ?? null,
-    form.date || null,
-  );
+  const {
+    slots,
+    loading: loadingSlots,
+    error: slotsError,
+  } = useAvailability(openExp?.id ?? null, form.date || null);
 
   const selectedSlot = slots.find((s) => s.startTime === form.time) ?? null;
   const maxPeople = selectedSlot
@@ -217,7 +255,10 @@ function ExperiencesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button onClick={() => navigate({ to: backTarget })} className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2">
+            <button
+              onClick={() => navigate({ to: backTarget })}
+              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
+            >
               <ArrowLeft className="size-4" /> {t("backToDashboard")}
             </button>
           </div>
@@ -241,13 +282,21 @@ function ExperiencesPage() {
             <p className="text-sm">
               <Sparkles className="inline size-4 text-primary mr-1" />
               {showAllDestinations
-                ? (lang === "pt" ? "A mostrar experiências de todos os destinos" : "Showing experiences from all destinations")
-                : (lang === "pt" ? `A mostrar apenas experiências em ${provinceId}` : `Showing only experiences in ${provinceId}`)}
+                ? lang === "pt"
+                  ? "A mostrar experiências de todos os destinos"
+                  : "Showing experiences from all destinations"
+                : lang === "pt"
+                  ? `A mostrar apenas experiências em ${provinceId}`
+                  : `Showing only experiences in ${provinceId}`}
             </p>
             <Button size="sm" variant="outline" onClick={() => setShowAllDestinations((s) => !s)}>
               {showAllDestinations
-                ? (lang === "pt" ? "Filtrar pelo meu destino" : "Filter by my destination")
-                : (lang === "pt" ? "Ver todos os destinos" : "Show all destinations")}
+                ? lang === "pt"
+                  ? "Filtrar pelo meu destino"
+                  : "Filter by my destination"
+                : lang === "pt"
+                  ? "Ver todos os destinos"
+                  : "Show all destinations"}
             </Button>
           </div>
         )}
@@ -273,7 +322,10 @@ function ExperiencesPage() {
         {loading && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {[0, 1, 2].map((i) => (
-              <Card key={i} className="h-72 animate-pulse border-0 shadow-[var(--shadow-soft)] bg-muted/40" />
+              <Card
+                key={i}
+                className="h-72 animate-pulse border-0 shadow-[var(--shadow-soft)] bg-muted/40"
+              />
             ))}
           </div>
         )}
@@ -293,7 +345,9 @@ function ExperiencesPage() {
 
         {isEmpty && (
           <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
-            {lang === "pt" ? "Ainda não existem experiências disponíveis." : "No experiences available yet."}
+            {lang === "pt"
+              ? "Ainda não existem experiências disponíveis."
+              : "No experiences available yet."}
           </Card>
         )}
 
@@ -318,7 +372,13 @@ function ExperiencesPage() {
               >
                 <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full flex flex-col">
                   <div className="relative h-48 overflow-hidden">
-                    <img src={exp.image} alt={exp.title[lang]} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
+                    <img
+                      src={exp.image}
+                      alt={exp.title[lang]}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <div className="absolute top-3 left-3">
                       <Badge className="bg-background/95 text-foreground backdrop-blur">
                         <Star className="size-3 mr-1 fill-warning text-warning" />
@@ -355,11 +415,14 @@ function ExperiencesPage() {
                       <MapPin className="size-3" /> {exp.location}
                     </div>
                     <h3 className="font-bold text-lg leading-tight">{exp.title[lang]}</h3>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3 flex-1">{exp.description[lang]}</p>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3 flex-1">
+                      {exp.description[lang]}
+                    </p>
 
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4">
                       <span className="flex items-center gap-1">
-                        <Clock className="size-3" /> {exp.durationHours} {exp.durationHours === 1 ? t("hour") : t("hours")}
+                        <Clock className="size-3" /> {exp.durationHours}{" "}
+                        {exp.durationHours === 1 ? t("hour") : t("hours")}
                       </span>
                       <span className="flex items-center gap-1">
                         <Users className="size-3" /> {exp.host}
@@ -369,18 +432,25 @@ function ExperiencesPage() {
                     <div className="flex items-end justify-between mt-5 pt-4 border-t">
                       <div>
                         <div className="text-2xl font-bold text-primary">
-                          {exp.priceMzn.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">MZN</span>
+                          {exp.priceMzn.toLocaleString()}{" "}
+                          <span className="text-xs font-normal text-muted-foreground">MZN</span>
                         </div>
                         <p className="text-[11px] text-muted-foreground">{t("perPerson")}</p>
                       </div>
                       <Button
                         onClick={() => openBookingModal(exp)}
                         disabled={isBooked}
-                        className={isBooked ? "" : "bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"}
+                        className={
+                          isBooked
+                            ? ""
+                            : "bg-gradient-to-r from-warning to-primary text-white border-0 hover:opacity-90"
+                        }
                         variant={isBooked ? "outline" : "default"}
                       >
                         {isBooked ? (
-                          <><Check className="size-4" /> {t("booked")}</>
+                          <>
+                            <Check className="size-4" /> {t("booked")}
+                          </>
                         ) : (
                           t("bookNow")
                         )}
@@ -404,15 +474,31 @@ function ExperiencesPage() {
                   <Calendar className="size-5 text-primary" />
                   {lang === "pt" ? "Detalhes da reserva" : "Booking details"}
                 </DialogTitle>
-                <DialogDescription>{openExp.title[lang]} — {openExp.host}</DialogDescription>
+                <DialogDescription>
+                  {openExp.title[lang]} — {openExp.host}
+                </DialogDescription>
               </DialogHeader>
 
               <div className="rounded-lg overflow-hidden border mb-2">
-                <img src={openExp.image} alt="" className="w-full h-32 object-cover" loading="lazy" decoding="async" />
+                <img
+                  src={openExp.image}
+                  alt=""
+                  className="w-full h-32 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="p-3 bg-muted/30 text-sm flex items-center justify-between">
-                  <span className="flex items-center gap-1 text-muted-foreground"><MapPin className="size-3" />{openExp.location}</span>
-                  <span className="flex items-center gap-1 text-muted-foreground"><Clock className="size-3" />{openExp.durationHours}h</span>
-                  <span className="font-semibold text-primary">{openExp.priceMzn.toLocaleString()} MZN</span>
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="size-3" />
+                    {openExp.location}
+                  </span>
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <Clock className="size-3" />
+                    {openExp.durationHours}h
+                  </span>
+                  <span className="font-semibold text-primary">
+                    {openExp.priceMzn.toLocaleString()} MZN
+                  </span>
                 </div>
               </div>
 
@@ -440,7 +526,9 @@ function ExperiencesPage() {
                     </p>
                     {loadingSlots && (
                       <p className="text-xs text-muted-foreground animate-pulse">
-                        {lang === "pt" ? "A verificar disponibilidade..." : "Checking availability..."}
+                        {lang === "pt"
+                          ? "A verificar disponibilidade..."
+                          : "Checking availability..."}
                       </p>
                     )}
                     {slotsError && (
@@ -471,7 +559,9 @@ function ExperiencesPage() {
                           {slot.startTime}–{slot.endTime} ·{" "}
                           {slot.available
                             ? `${slot.remainingCapacity} ${lang === "pt" ? "lugares" : "seats"}`
-                            : lang === "pt" ? "sem lugares" : "no seats"}
+                            : lang === "pt"
+                              ? "sem lugares"
+                              : "no seats"}
                         </button>
                       ))}
                     </div>
@@ -503,7 +593,9 @@ function ExperiencesPage() {
                       type="button"
                       size="icon"
                       variant="outline"
-                      onClick={() => setForm((f) => ({ ...f, people: Math.min(maxPeople, f.people + 1) }))}
+                      onClick={() =>
+                        setForm((f) => ({ ...f, people: Math.min(maxPeople, f.people + 1) }))
+                      }
                       disabled={form.people >= maxPeople}
                       aria-label={lang === "pt" ? "Mais pessoas" : "More people"}
                     >
@@ -521,37 +613,62 @@ function ExperiencesPage() {
 
                 <div>
                   <Label>{lang === "pt" ? "Nome" : "Name"} *</Label>
-                  <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                  <Input
+                    value={form.name}
+                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  />
                 </div>
                 <div>
                   <Label>{lang === "pt" ? "Telefone" : "Phone"} *</Label>
-                  <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+258..." />
+                  <Input
+                    value={form.phone}
+                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                    placeholder="+258..."
+                  />
                 </div>
                 <div className="col-span-2">
                   <Label>Email</Label>
-                  <Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  />
                 </div>
                 <div className="col-span-2">
                   <Label>{lang === "pt" ? "Notas (opcional)" : "Notes (optional)"}</Label>
-                  <Textarea rows={2} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                  <Textarea
+                    rows={2}
+                    value={form.notes}
+                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                  />
                 </div>
               </div>
 
               <div className="mt-2 flex items-center justify-between rounded-lg bg-gradient-to-r from-warning/10 to-primary/10 p-3">
-                <span className="text-sm text-muted-foreground">{lang === "pt" ? "Total estimado" : "Estimated total"}</span>
-                <span className="text-xl font-bold text-primary">{(openExp.priceMzn * form.people).toLocaleString()} MZN</span>
+                <span className="text-sm text-muted-foreground">
+                  {lang === "pt" ? "Total estimado" : "Estimated total"}
+                </span>
+                <span className="text-xl font-bold text-primary">
+                  {(openExp.priceMzn * form.people).toLocaleString()} MZN
+                </span>
               </div>
 
               <DialogFooter>
-                <Button variant="outline" onClick={() => setOpenExp(null)}>{t("back")}</Button>
+                <Button variant="outline" onClick={() => setOpenExp(null)}>
+                  {t("back")}
+                </Button>
                 <Button
                   className="bg-gradient-to-r from-warning to-primary text-white border-0"
                   onClick={() => void submitBooking()}
                   disabled={submitting || !form.date || !form.time || !selectedSlot?.available}
                 >
                   {submitting
-                    ? (lang === "pt" ? "A reservar..." : "Booking...")
-                    : (lang === "pt" ? "Enviar pedido de reserva" : "Send booking request")}
+                    ? lang === "pt"
+                      ? "A reservar..."
+                      : "Booking..."
+                    : lang === "pt"
+                      ? "Enviar pedido de reserva"
+                      : "Send booking request"}
                 </Button>
               </DialogFooter>
             </>
@@ -578,28 +695,82 @@ function ExperiencesPage() {
 
               <div className="rounded-xl border bg-gradient-to-br from-warning/5 to-primary/5 p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">{lang === "pt" ? "Código" : "Code"}</span>
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {lang === "pt" ? "Código" : "Code"}
+                  </span>
                   <span className="font-mono font-bold text-primary">{confirmedBooking.code}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-wide text-muted-foreground">{lang === "pt" ? "Estado" : "Status"}</span>
-                  <Badge className="bg-amber-100 text-amber-700 border-0">{lang === "pt" ? "Aguarda confirmação" : "Awaiting confirmation"}</Badge>
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {lang === "pt" ? "Estado" : "Status"}
+                  </span>
+                  <Badge className="bg-amber-100 text-amber-700 border-0">
+                    {lang === "pt" ? "Aguarda confirmação" : "Awaiting confirmation"}
+                  </Badge>
                 </div>
                 <div className="border-t pt-3 space-y-2 text-sm">
-                  <DetailRow icon={<Compass className="size-4" />} label={lang === "pt" ? "Experiência" : "Experience"} value={confirmedBooking.experienceTitle[lang]} />
-                  <DetailRow icon={<Store className="size-4" />} label={lang === "pt" ? "Anfitrião" : "Host"} value={confirmedBooking.host} />
-                  <DetailRow icon={<MapPin className="size-4" />} label={lang === "pt" ? "Local" : "Location"} value={confirmedBooking.location} />
-                  <DetailRow icon={<Calendar className="size-4" />} label={lang === "pt" ? "Data e hora" : "Date & time"} value={`${confirmedBooking.date} · ${confirmedBooking.time}`} />
-                  <DetailRow icon={<Users className="size-4" />} label={lang === "pt" ? "Pessoas" : "People"} value={String(confirmedBooking.people)} />
-                  <DetailRow icon={<Clock className="size-4" />} label={lang === "pt" ? "Duração" : "Duration"} value={`${confirmedBooking.durationHours}h`} />
-                  <DetailRow icon={<UserIcon className="size-4" />} label={lang === "pt" ? "Reservado por" : "Booked by"} value={confirmedBooking.customerName} />
-                  <DetailRow icon={<Phone className="size-4" />} label={lang === "pt" ? "Contacto" : "Phone"} value={confirmedBooking.customerPhone ?? "—"} />
-                  {confirmedBooking.customerEmail && <DetailRow icon={<Mail className="size-4" />} label="Email" value={confirmedBooking.customerEmail} />}
-                  {confirmedBooking.notes && <DetailRow icon={<FileText className="size-4" />} label={lang === "pt" ? "Notas" : "Notes"} value={confirmedBooking.notes} />}
+                  <DetailRow
+                    icon={<Compass className="size-4" />}
+                    label={lang === "pt" ? "Experiência" : "Experience"}
+                    value={confirmedBooking.experienceTitle[lang]}
+                  />
+                  <DetailRow
+                    icon={<Store className="size-4" />}
+                    label={lang === "pt" ? "Anfitrião" : "Host"}
+                    value={confirmedBooking.host}
+                  />
+                  <DetailRow
+                    icon={<MapPin className="size-4" />}
+                    label={lang === "pt" ? "Local" : "Location"}
+                    value={confirmedBooking.location}
+                  />
+                  <DetailRow
+                    icon={<Calendar className="size-4" />}
+                    label={lang === "pt" ? "Data e hora" : "Date & time"}
+                    value={`${confirmedBooking.date} · ${confirmedBooking.time}`}
+                  />
+                  <DetailRow
+                    icon={<Users className="size-4" />}
+                    label={lang === "pt" ? "Pessoas" : "People"}
+                    value={String(confirmedBooking.people)}
+                  />
+                  <DetailRow
+                    icon={<Clock className="size-4" />}
+                    label={lang === "pt" ? "Duração" : "Duration"}
+                    value={`${confirmedBooking.durationHours}h`}
+                  />
+                  <DetailRow
+                    icon={<UserIcon className="size-4" />}
+                    label={lang === "pt" ? "Reservado por" : "Booked by"}
+                    value={confirmedBooking.customerName}
+                  />
+                  <DetailRow
+                    icon={<Phone className="size-4" />}
+                    label={lang === "pt" ? "Contacto" : "Phone"}
+                    value={confirmedBooking.customerPhone ?? "—"}
+                  />
+                  {confirmedBooking.customerEmail && (
+                    <DetailRow
+                      icon={<Mail className="size-4" />}
+                      label="Email"
+                      value={confirmedBooking.customerEmail}
+                    />
+                  )}
+                  {confirmedBooking.notes && (
+                    <DetailRow
+                      icon={<FileText className="size-4" />}
+                      label={lang === "pt" ? "Notas" : "Notes"}
+                      value={confirmedBooking.notes}
+                    />
+                  )}
                 </div>
                 <div className="border-t pt-3 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{lang === "pt" ? "Total" : "Total"}</span>
-                  <span className="text-2xl font-bold text-primary">{confirmedBooking.totalMzn.toLocaleString()} MZN</span>
+                  <span className="text-sm text-muted-foreground">
+                    {lang === "pt" ? "Total" : "Total"}
+                  </span>
+                  <span className="text-2xl font-bold text-primary">
+                    {confirmedBooking.totalMzn.toLocaleString()} MZN
+                  </span>
                 </div>
               </div>
 
@@ -614,7 +785,8 @@ function ExperiencesPage() {
                     navigate({ to: "/bookings" });
                   }}
                 >
-                  <Calendar className="size-4" /> {lang === "pt" ? "Ver as minhas reservas" : "See my bookings"}
+                  <Calendar className="size-4" />{" "}
+                  {lang === "pt" ? "Ver as minhas reservas" : "See my bookings"}
                 </Button>
               </DialogFooter>
             </>
@@ -625,7 +797,15 @@ function ExperiencesPage() {
   );
 }
 
-function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function DetailRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex items-start gap-2">
       <span className="text-muted-foreground mt-0.5">{icon}</span>
