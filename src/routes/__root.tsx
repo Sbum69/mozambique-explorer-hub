@@ -4,26 +4,32 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthGateProvider } from "@/contexts/AuthGateContext";
-import { LanguageProvider } from "@/contexts/LanguageContext";
+import { LanguageProvider, useLang } from "@/contexts/LanguageContext";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
+  const { lang } = useLang();
+  const pt = lang === "pt";
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">
+          {pt ? "Página não encontrada" : "Page not found"}
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Esta página não existe ou foi movida.
+          {pt ? "Esta página não existe ou foi movida." : "This page doesn't exist or has moved."}
         </p>
         <div className="mt-6">
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Voltar ao início
+            {pt ? "Voltar ao início" : "Back to home"}
           </a>
         </div>
       </div>
@@ -51,6 +57,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    // Applies the saved (or system) theme before the first paint: no white flash in dark mode.
+    scripts: [{ children: THEME_INIT_SCRIPT }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -59,7 +67,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt">
+    // The theme script sets class/style on <html> before React hydrates.
+    <html lang="pt" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -75,18 +84,25 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <AuthGateProvider>
-          <NotificationsProvider>
-            <FavoritesProvider>
-              <Outlet />
-              <Toaster />
-            </FavoritesProvider>
-          </NotificationsProvider>
-        </AuthGateProvider>
-      </AuthProvider>
-    </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AuthGateProvider>
+              <NotificationsProvider>
+                <FavoritesProvider>
+                  <Outlet />
+                  <ThemedToaster />
+                </FavoritesProvider>
+              </NotificationsProvider>
+            </AuthGateProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+function ThemedToaster() {
+  const { resolved } = useTheme();
+  return <Toaster theme={resolved} />;
 }

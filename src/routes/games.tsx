@@ -6,13 +6,39 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast as sonner } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
+import { GAMES_TXT } from "@/lib/page-texts";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import {
-  fetchAchievements, isUnlocked, submitGameStep, uploadGameProof, startQuiz, answerQuiz, finishQuiz,
-  gameErrorText, BADGES, badgeStatus, type GameState, type QuizQuestion, type StepResult,
+  fetchAchievements,
+  isUnlocked,
+  submitGameStep,
+  uploadGameProof,
+  startQuiz,
+  answerQuiz,
+  finishQuiz,
+  gameErrorText,
+  BADGES,
+  badgeStatus,
+  type GameState,
+  type QuizQuestion,
+  type StepResult,
 } from "@/lib/games";
 import {
-  ArrowLeft, Zap, Lock, CheckCircle, X, Trophy, Award,
-  MapPin, Camera, Users, Brain, Clock, Heart, AlertCircle,
+  ArrowLeft,
+  Zap,
+  Lock,
+  CheckCircle,
+  X,
+  Trophy,
+  Award,
+  MapPin,
+  Camera,
+  Users,
+  Brain,
+  Clock,
+  Heart,
+  AlertCircle,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,18 +49,27 @@ import { TreasureStopPicker } from "@/components/TreasureStopPicker";
 import { getGameTask } from "@/data/game-tasks";
 import { LOCATION_PROMPT_TEXT, requestPreciseLocation } from "@/lib/geo";
 import {
-  ExperienceTask, ItineraryTask, TimeOfDayTask, EventTask, ShareTask, WordTask,
+  ExperienceTask,
+  ItineraryTask,
+  TimeOfDayTask,
+  EventTask,
+  ShareTask,
+  WordTask,
 } from "@/components/GameTaskFields";
-
-
 
 export const Route = createFileRoute("/games")({
   head: () => ({
     meta: [
       { title: "Jogos & Desafios — Ekaya Explore" },
-      { name: "description", content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique." },
+      {
+        name: "description",
+        content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique.",
+      },
       { property: "og:title", content: "Jogos & Desafios — Ekaya Explore" },
-      { property: "og:description", content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique." },
+      {
+        property: "og:description",
+        content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -67,21 +102,26 @@ interface Game {
 
 const CATEGORIES = [
   { id: "all", label: "Todos", icon: Trophy },
-  { id: "tesouro", label: "Caça ao Tesouro", icon: MapPin, color: "from-amber-500 to-orange-600" },
-  { id: "foto", label: "Fotografia", icon: Camera, color: "from-pink-500 to-rose-600" },
-  { id: "experiencia", label: "Experiências", icon: Heart, color: "from-green-500 to-emerald-600" },
-  { id: "conhecimento", label: "Conhecimento", icon: Brain, color: "from-purple-500 to-violet-600" },
-  { id: "tempo", label: "Tempo", icon: Clock, color: "from-blue-500 to-cyan-600" },
-  { id: "social", label: "Sociais", icon: Users, color: "from-teal-500 to-green-600" },
+  { id: "tesouro", label: "Caça ao Tesouro", icon: MapPin, color: "from-amber-700 to-orange-700" },
+  { id: "foto", label: "Fotografia", icon: Camera, color: "from-pink-600 to-rose-600" },
+  { id: "experiencia", label: "Experiências", icon: Heart, color: "from-green-700 to-emerald-700" },
+  {
+    id: "conhecimento",
+    label: "Conhecimento",
+    icon: Brain,
+    color: "from-purple-600 to-violet-600",
+  },
+  { id: "tempo", label: "Tempo", icon: Clock, color: "from-blue-600 to-cyan-700" },
+  { id: "social", label: "Sociais", icon: Users, color: "from-teal-700 to-green-700" },
 ];
 
 const COLOR_MAP: Record<string, string> = {
-  tesouro: "from-amber-500 to-orange-600",
-  foto: "from-pink-500 to-rose-600",
-  experiencia: "from-green-500 to-emerald-600",
-  conhecimento: "from-purple-500 to-violet-600",
-  tempo: "from-blue-500 to-cyan-600",
-  social: "from-teal-500 to-green-600",
+  tesouro: "from-amber-700 to-orange-700",
+  foto: "from-pink-600 to-rose-600",
+  experiencia: "from-green-700 to-emerald-700",
+  conhecimento: "from-purple-600 to-violet-600",
+  tempo: "from-blue-600 to-cyan-700",
+  social: "from-teal-700 to-green-700",
 };
 
 /** Game texts (title, description, badge, detail) live in the PT/EN dictionary: gameTitle_<id> etc. */
@@ -89,43 +129,293 @@ type GameBase = Omit<Game, "title" | "description" | "badge" | "detail">;
 
 const INITIAL_GAMES: GameBase[] = [
   // Tesouro
-  { id: "g1", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 150, difficulty: "medium", status: "in_progress", progress: 2, total: 5, action: "Continuar" },
-  { id: "g2", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 200, difficulty: "hard", status: "available", progress: 0, total: 8, action: "Começar" },
-  { id: "g3", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 180, difficulty: "medium", status: "available", progress: 0, total: 3, action: "Começar" },
-  { id: "g4", category: "tesouro", categoryColor: COLOR_MAP.tesouro, icon: MapPin, points: 250, difficulty: "hard", status: "locked", progress: 0, total: 4, action: "Bloqueado" },
+  {
+    id: "g1",
+    category: "tesouro",
+    categoryColor: COLOR_MAP.tesouro,
+    icon: MapPin,
+    points: 150,
+    difficulty: "medium",
+    status: "in_progress",
+    progress: 2,
+    total: 5,
+    action: "Continuar",
+  },
+  {
+    id: "g2",
+    category: "tesouro",
+    categoryColor: COLOR_MAP.tesouro,
+    icon: MapPin,
+    points: 200,
+    difficulty: "hard",
+    status: "available",
+    progress: 0,
+    total: 8,
+    action: "Começar",
+  },
+  {
+    id: "g3",
+    category: "tesouro",
+    categoryColor: COLOR_MAP.tesouro,
+    icon: MapPin,
+    points: 180,
+    difficulty: "medium",
+    status: "available",
+    progress: 0,
+    total: 3,
+    action: "Começar",
+  },
+  {
+    id: "g4",
+    category: "tesouro",
+    categoryColor: COLOR_MAP.tesouro,
+    icon: MapPin,
+    points: 250,
+    difficulty: "hard",
+    status: "locked",
+    progress: 0,
+    total: 4,
+    action: "Bloqueado",
+  },
   // Foto
-  { id: "g5", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 100, difficulty: "easy", status: "in_progress", progress: 1, total: 3, action: "Continuar" },
-  { id: "g6", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 120, difficulty: "easy", status: "available", progress: 0, total: 3, action: "Começar" },
-  { id: "g7", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 140, difficulty: "medium", status: "available", progress: 0, total: 4, action: "Começar" },
-  { id: "g8", category: "foto", categoryColor: COLOR_MAP.foto, icon: Camera, points: 90, difficulty: "easy", status: "available", progress: 0, total: 1, action: "Começar" },
+  {
+    id: "g5",
+    category: "foto",
+    categoryColor: COLOR_MAP.foto,
+    icon: Camera,
+    points: 100,
+    difficulty: "easy",
+    status: "in_progress",
+    progress: 1,
+    total: 3,
+    action: "Continuar",
+  },
+  {
+    id: "g6",
+    category: "foto",
+    categoryColor: COLOR_MAP.foto,
+    icon: Camera,
+    points: 120,
+    difficulty: "easy",
+    status: "available",
+    progress: 0,
+    total: 3,
+    action: "Começar",
+  },
+  {
+    id: "g7",
+    category: "foto",
+    categoryColor: COLOR_MAP.foto,
+    icon: Camera,
+    points: 140,
+    difficulty: "medium",
+    status: "available",
+    progress: 0,
+    total: 4,
+    action: "Começar",
+  },
+  {
+    id: "g8",
+    category: "foto",
+    categoryColor: COLOR_MAP.foto,
+    icon: Camera,
+    points: 90,
+    difficulty: "easy",
+    status: "available",
+    progress: 0,
+    total: 1,
+    action: "Começar",
+  },
   // Experiência
-  { id: "g9", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 200, difficulty: "medium", status: "available", progress: 0, total: 1, action: "Começar" },
-  { id: "g10", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 130, difficulty: "easy", status: "in_progress", progress: 0, total: 1, action: "Continuar" },
-  { id: "g11", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 80, difficulty: "easy", status: "available", progress: 0, total: 3, action: "Começar", special: "aprende-palavra" },
-  { id: "g12", category: "experiencia", categoryColor: COLOR_MAP.experiencia, icon: Heart, points: 220, difficulty: "hard", status: "locked", progress: 0, total: 1, action: "Bloqueado" },
+  {
+    id: "g9",
+    category: "experiencia",
+    categoryColor: COLOR_MAP.experiencia,
+    icon: Heart,
+    points: 200,
+    difficulty: "medium",
+    status: "available",
+    progress: 0,
+    total: 1,
+    action: "Começar",
+  },
+  {
+    id: "g10",
+    category: "experiencia",
+    categoryColor: COLOR_MAP.experiencia,
+    icon: Heart,
+    points: 130,
+    difficulty: "easy",
+    status: "in_progress",
+    progress: 0,
+    total: 1,
+    action: "Continuar",
+  },
+  {
+    id: "g11",
+    category: "experiencia",
+    categoryColor: COLOR_MAP.experiencia,
+    icon: Heart,
+    points: 80,
+    difficulty: "easy",
+    status: "available",
+    progress: 0,
+    total: 3,
+    action: "Começar",
+    special: "aprende-palavra",
+  },
+  {
+    id: "g12",
+    category: "experiencia",
+    categoryColor: COLOR_MAP.experiencia,
+    icon: Heart,
+    points: 220,
+    difficulty: "hard",
+    status: "locked",
+    progress: 0,
+    total: 1,
+    action: "Bloqueado",
+  },
   // Conhecimento
-  { id: "g13", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 50, difficulty: "medium", status: "available", progress: 0, total: 5, action: "Jogar Quiz", special: "quiz" },
-  { id: "g14", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 60, difficulty: "easy", status: "available", progress: 0, total: 5, action: "Jogar Quiz", special: "quiz" },
-  { id: "g15", category: "conhecimento", categoryColor: COLOR_MAP.conhecimento, icon: Brain, points: 70, difficulty: "hard", status: "locked", progress: 0, total: 5, action: "Bloqueado" },
+  {
+    id: "g13",
+    category: "conhecimento",
+    categoryColor: COLOR_MAP.conhecimento,
+    icon: Brain,
+    points: 50,
+    difficulty: "medium",
+    status: "available",
+    progress: 0,
+    total: 5,
+    action: "Jogar Quiz",
+    special: "quiz",
+  },
+  {
+    id: "g14",
+    category: "conhecimento",
+    categoryColor: COLOR_MAP.conhecimento,
+    icon: Brain,
+    points: 60,
+    difficulty: "easy",
+    status: "available",
+    progress: 0,
+    total: 5,
+    action: "Jogar Quiz",
+    special: "quiz",
+  },
+  {
+    id: "g15",
+    category: "conhecimento",
+    categoryColor: COLOR_MAP.conhecimento,
+    icon: Brain,
+    points: 70,
+    difficulty: "hard",
+    status: "locked",
+    progress: 0,
+    total: 5,
+    action: "Bloqueado",
+  },
   // Tempo
-  { id: "g16", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 300, difficulty: "hard", status: "available", progress: 0, total: 6, action: "Começar" },
-  { id: "g17", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 160, difficulty: "medium", status: "available", progress: 0, total: 2, action: "Começar" },
-  { id: "g18", category: "tempo", categoryColor: COLOR_MAP.tempo, icon: Clock, points: 240, difficulty: "hard", status: "locked", progress: 0, total: 3, action: "Bloqueado" },
+  {
+    id: "g16",
+    category: "tempo",
+    categoryColor: COLOR_MAP.tempo,
+    icon: Clock,
+    points: 300,
+    difficulty: "hard",
+    status: "available",
+    progress: 0,
+    total: 6,
+    action: "Começar",
+  },
+  {
+    id: "g17",
+    category: "tempo",
+    categoryColor: COLOR_MAP.tempo,
+    icon: Clock,
+    points: 160,
+    difficulty: "medium",
+    status: "available",
+    progress: 0,
+    total: 2,
+    action: "Começar",
+  },
+  {
+    id: "g18",
+    category: "tempo",
+    categoryColor: COLOR_MAP.tempo,
+    icon: Clock,
+    points: 240,
+    difficulty: "hard",
+    status: "locked",
+    progress: 0,
+    total: 3,
+    action: "Bloqueado",
+  },
   // Social
-  { id: "g19", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 100, difficulty: "easy", status: "available", progress: 0, total: 1, action: "Começar" },
-  { id: "g20", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 90, difficulty: "easy", status: "in_progress", progress: 1, total: 3, action: "Continuar", special: "conta-historia" },
-  { id: "g21", category: "social", categoryColor: COLOR_MAP.social, icon: Users, points: 250, difficulty: "medium", status: "available", progress: 0, total: 2, action: "Começar" },
+  {
+    id: "g19",
+    category: "social",
+    categoryColor: COLOR_MAP.social,
+    icon: Users,
+    points: 100,
+    difficulty: "easy",
+    status: "available",
+    progress: 0,
+    total: 1,
+    action: "Começar",
+  },
+  {
+    id: "g20",
+    category: "social",
+    categoryColor: COLOR_MAP.social,
+    icon: Users,
+    points: 90,
+    difficulty: "easy",
+    status: "in_progress",
+    progress: 1,
+    total: 3,
+    action: "Continuar",
+    special: "conta-historia",
+  },
+  {
+    id: "g21",
+    category: "social",
+    categoryColor: COLOR_MAP.social,
+    icon: Users,
+    points: 250,
+    difficulty: "medium",
+    status: "available",
+    progress: 0,
+    total: 2,
+    action: "Começar",
+  },
 ];
 
 const DIFF_BADGE: Record<Difficulty, { label: string; cls: string }> = {
-  easy: { label: "Fácil", cls: "bg-green-100 text-green-700 border-green-200" },
-  medium: { label: "Médio", cls: "bg-amber-100 text-amber-700 border-amber-200" },
-  hard: { label: "Difícil", cls: "bg-red-100 text-red-700 border-red-200" },
+  easy: {
+    label: "Fácil",
+    cls: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800",
+  },
+  medium: {
+    label: "Médio",
+    cls: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  },
+  hard: {
+    label: "Difícil",
+    cls: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800",
+  },
 };
 
 function localizeGame(g: GameBase, t: (key: DictKey) => string): Game {
   const text = (kind: "Title" | "Desc" | "Badge" | "Detail") => t(`game${kind}_${g.id}` as DictKey);
-  return { ...g, title: text("Title"), description: text("Desc"), badge: text("Badge"), detail: text("Detail") };
+  return {
+    ...g,
+    title: text("Title"),
+    description: text("Desc"),
+    badge: text("Badge"),
+    detail: text("Detail"),
+  };
 }
 
 function applyState(base: GameBase[], state: GameState | undefined): GameBase[] {
@@ -136,8 +426,24 @@ function applyState(base: GameBase[], state: GameState | undefined): GameBase[] 
     if (!c) return [];
     const done = !!state.completed[g.id];
     const progress = done ? c.total : Math.min(c.total, state.progress[g.id] ?? 0);
-    const status: GameStatus = done ? "completed" : !isUnlocked(c, state.completed) ? "locked" : progress > 0 ? "in_progress" : "available";
-    return [{ ...g, points: c.xp, total: c.total, progress, status, action: status === "in_progress" ? "Continuar" : g.special === "quiz" ? "Jogar Quiz" : "Começar" }];
+    const status: GameStatus = done
+      ? "completed"
+      : !isUnlocked(c, state.completed)
+        ? "locked"
+        : progress > 0
+          ? "in_progress"
+          : "available";
+    return [
+      {
+        ...g,
+        points: c.xp,
+        total: c.total,
+        progress,
+        status,
+        action:
+          status === "in_progress" ? "Continuar" : g.special === "quiz" ? "Jogar Quiz" : "Começar",
+      },
+    ];
   });
 }
 
@@ -148,22 +454,33 @@ function GamesPage() {
   const { lang, t } = useLang();
   const pt = lang === "pt";
   const uid = authUser?.id;
-  const q = useQuery({ queryKey: ["achievements", uid], queryFn: fetchAchievements, enabled: !!uid });
+  const q = useQuery({
+    queryKey: ["achievements", uid],
+    queryFn: fetchAchievements,
+    enabled: !!uid,
+  });
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"jogos" | "selos">("jogos");
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [quizGame, setQuizGame] = useState<Game | null>(null);
 
-  const games = useMemo(() => applyState(INITIAL_GAMES, q.data?.state).map((g) => localizeGame(g, t)), [q.data, t]);
+  const games = useMemo(
+    () => applyState(INITIAL_GAMES, q.data?.state).map((g) => localizeGame(g, t)),
+    [q.data, t],
+  );
   const filteredGames = useMemo(
     () => (activeCategory === "all" ? games : games.filter((g) => g.category === activeCategory)),
-    [games, activeCategory]
+    [games, activeCategory],
   );
   const completed = games.filter((g) => g.status === "completed").length;
   const inProgress = games.filter((g) => g.status === "in_progress").length;
   const badges = q.data ? BADGES.map((b) => ({ b, st: badgeStatus(b, q.data.badgeInput) })) : [];
   const earnedSelos = badges.filter((x) => x.st.earned).length;
-  const xpEarned = q.data ? q.data.state.catalog.filter((c) => q.data.state.completed[c.key]).reduce((n, c) => n + c.xp, 0) : 0;
+  const xpEarned = q.data
+    ? q.data.state.catalog
+        .filter((c) => q.data.state.completed[c.key])
+        .reduce((n, c) => n + c.xp, 0)
+    : 0;
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["achievements", uid] });
@@ -181,10 +498,19 @@ function GamesPage() {
           >
             <ArrowLeft className="size-4" /> {pt ? "Voltar" : "Back"}
           </button>
-          <h1 className="font-bold text-sm sm:text-base">🎮 {pt ? "Jogos & Desafios" : "Games & Challenges"}</h1>
-          <Button asChild size="sm" variant="outline" className="gap-1">
-            <Link to="/gamification"><Trophy className="size-4" />{pt ? "Conquistas" : "Achievements"}</Link>
-          </Button>
+          <h1 className="font-bold text-sm sm:text-base">
+            🎮 {pt ? "Jogos & Desafios" : "Games & Challenges"}
+          </h1>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <LanguageToggle />
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/gamification">
+                <Trophy className="size-4" />
+                {pt ? "Conquistas" : "Achievements"}
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -192,8 +518,14 @@ function GamesPage() {
         {q.isError && (
           <div className="mb-4 rounded-xl border p-4 flex items-center gap-3 text-sm">
             <AlertCircle className="size-5 text-destructive" />
-            <span className="flex-1">{pt ? "Não foi possível carregar o teu progresso." : "We couldn't load your progress."}</span>
-            <Button size="sm" variant="outline" onClick={() => q.refetch()}>{pt ? "Tentar novamente" : "Try again"}</Button>
+            <span className="flex-1">
+              {pt
+                ? "Não foi possível carregar o teu progresso."
+                : "We couldn't load your progress."}
+            </span>
+            <Button size="sm" variant="outline" onClick={() => q.refetch()}>
+              {pt ? "Tentar novamente" : "Try again"}
+            </Button>
           </div>
         )}
         <motion.div
@@ -203,15 +535,31 @@ function GamesPage() {
         >
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: pt ? "XP de jogos" : "Game XP", value: q.isLoading ? "…" : xpEarned, icon: "⚡" },
-              { label: pt ? "Concluídos" : "Completed", value: q.isLoading ? "…" : completed, icon: "✅" },
-              { label: pt ? "Em progresso" : "In progress", value: q.isLoading ? "…" : inProgress, icon: "⏳" },
-              { label: pt ? "Selos" : "Badges", value: q.isLoading ? "…" : `${earnedSelos}/${BADGES.length}`, icon: "🏅" },
+              {
+                label: pt ? "XP de jogos" : "Game XP",
+                value: q.isLoading ? "…" : xpEarned,
+                icon: "⚡",
+              },
+              {
+                label: pt ? "Concluídos" : "Completed",
+                value: q.isLoading ? "…" : completed,
+                icon: "✅",
+              },
+              {
+                label: pt ? "Em progresso" : "In progress",
+                value: q.isLoading ? "…" : inProgress,
+                icon: "⏳",
+              },
+              {
+                label: pt ? "Selos" : "Badges",
+                value: q.isLoading ? "…" : `${earnedSelos}/${BADGES.length}`,
+                icon: "🏅",
+              },
             ].map((s) => (
-              <div key={s.label} className="rounded-2xl bg-background/15 backdrop-blur p-4">
+              <div key={s.label} className="rounded-2xl border border-current/25 p-4">
                 <div className="text-2xl">{s.icon}</div>
                 <p className="text-3xl font-bold mt-1">{s.value}</p>
-                <p className="text-xs opacity-80">{s.label}</p>
+                <p className="text-xs font-medium">{s.label}</p>
               </div>
             ))}
           </div>
@@ -231,8 +579,13 @@ function GamesPage() {
                 activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tab === "jogos" ? (pt ? "🎮 Jogos" : "🎮 Games") : (pt ? "🏅 Selos" : "🏅 Badges")}
-              {activeTab === tab && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+              {tab === "jogos" ? (pt ? "🎮 Jogos" : "🎮 Games") : pt ? "🏅 Selos" : "🏅 Badges"}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="tab-indicator"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                />
+              )}
             </button>
           ))}
         </div>
@@ -247,22 +600,31 @@ function GamesPage() {
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
                     className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                      active ? "bg-primary text-primary-foreground border-primary shadow" : "bg-card hover:bg-muted border-border text-foreground"
+                      active
+                        ? "bg-primary text-primary-foreground border-primary shadow"
+                        : "bg-card hover:bg-muted border-border text-foreground"
                     }`}
                   >
                     <cat.icon className="size-4" />
-                    {cat.label}
+                    {GAMES_TXT[lang].category[
+                      cat.id as keyof (typeof GAMES_TXT)["pt"]["category"]
+                    ] ?? cat.label}
                   </button>
                 );
               })}
             </div>
             <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredGames.map((game, i) => (
-                <GameCard key={game.id} game={game} index={i} onOpen={() => {
-                  if (game.status === "locked" || game.status === "completed" || !q.data) return;
-                  if (game.special === "quiz") setQuizGame(game);
-                  else setSelectedGame(game);
-                }} />
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  index={i}
+                  onOpen={() => {
+                    if (game.status === "locked" || game.status === "completed" || !q.data) return;
+                    if (game.special === "quiz") setQuizGame(game);
+                    else setSelectedGame(game);
+                  }}
+                />
               ))}
             </div>
           </>
@@ -271,13 +633,20 @@ function GamesPage() {
         {activeTab === "selos" && (
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {badges.map(({ b, st }) => (
-              <div key={b.id} className={`rounded-2xl p-5 text-center border-2 ${st.earned ? "bg-accent/40 border-primary" : "bg-muted/30 border-muted"}`}>
-                <div className={`mx-auto size-20 rounded-full flex items-center justify-center text-4xl ${st.earned ? "bg-primary/20" : "bg-muted"}`}>
+              <div
+                key={b.id}
+                className={`rounded-2xl p-5 text-center border-2 ${st.earned ? "bg-accent/40 border-primary" : "bg-muted/30 border-muted"}`}
+              >
+                <div
+                  className={`mx-auto size-20 rounded-full flex items-center justify-center text-4xl ${st.earned ? "bg-primary/20" : "bg-muted"}`}
+                >
                   {st.earned ? b.emoji : <Lock className="size-7 text-muted-foreground" />}
                 </div>
                 <h3 className="mt-3 font-bold text-sm">{b.name[lang]}</h3>
                 <p className="text-xs text-muted-foreground mt-1">{b.requirement[lang]}</p>
-                <Badge variant="outline" className="mt-2 text-[10px]">{st.have}/{st.need}</Badge>
+                <Badge variant="outline" className="mt-2 text-[10px]">
+                  {st.have}/{st.need}
+                </Badge>
               </div>
             ))}
           </div>
@@ -289,14 +658,28 @@ function GamesPage() {
           <GameDetailModal
             game={selectedGame}
             userId={uid}
-            doneRefs={q.data.state.steps.filter((s) => s.gameKey === selectedGame.id).map((s) => s.stepRef)}
-            history={q.data.state.steps.filter((s) => s.gameKey === selectedGame.id).map((s) => s.createdAt)}
+            doneRefs={q.data.state.steps
+              .filter((s) => s.gameKey === selectedGame.id)
+              .map((s) => s.stepRef)}
+            history={q.data.state.steps
+              .filter((s) => s.gameKey === selectedGame.id)
+              .map((s) => s.createdAt)}
             onClose={() => setSelectedGame(null)}
             onSaved={(r) => {
               refresh();
-              sonner.success(r.completed
-                ? (r.xp_awarded > 0 ? (pt ? `Jogo concluído! +${r.xp_awarded} XP` : `Game completed! +${r.xp_awarded} XP`) : (pt ? "Jogo concluído (sem XP)" : "Game completed (no XP)"))
-                : (pt ? `Progresso guardado: ${r.progress}/${r.total}` : `Progress saved: ${r.progress}/${r.total}`));
+              sonner.success(
+                r.completed
+                  ? r.xp_awarded > 0
+                    ? pt
+                      ? `Jogo concluído! +${r.xp_awarded} XP`
+                      : `Game completed! +${r.xp_awarded} XP`
+                    : pt
+                      ? "Jogo concluído (sem XP)"
+                      : "Game completed (no XP)"
+                  : pt
+                    ? `Progresso guardado: ${r.progress}/${r.total}`
+                    : `Progress saved: ${r.progress}/${r.total}`,
+              );
             }}
           />
         )}
@@ -306,7 +689,10 @@ function GamesPage() {
         {quizGame && (
           <QuizModal
             game={quizGame}
-            attempts={q.data?.state.quizAttempts.filter((a) => a.gameKey === quizGame.id && a.finishedAt).length ?? 0}
+            attempts={
+              q.data?.state.quizAttempts.filter((a) => a.gameKey === quizGame.id && a.finishedAt)
+                .length ?? 0
+            }
             onClose={() => setQuizGame(null)}
             onFinished={refresh}
           />
@@ -317,6 +703,7 @@ function GamesPage() {
 }
 
 function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: () => void }) {
+  const { lang } = useLang();
   const locked = game.status === "locked";
   const completed = game.status === "completed";
   const pct = (game.progress / game.total) * 100;
@@ -328,27 +715,37 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       whileHover={!locked ? { y: -4 } : {}}
-      className={`bg-card rounded-2xl border overflow-hidden shadow-sm ${locked ? "opacity-60" : ""}`}
+      className={`bg-card rounded-2xl border overflow-hidden shadow-sm ${locked ? "border-dashed" : ""}`}
     >
       <div className={`h-2 bg-gradient-to-r ${game.categoryColor}`} />
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
-          <div className={`size-12 rounded-xl bg-gradient-to-br ${game.categoryColor} text-white flex items-center justify-center shadow`}>
+          <div
+            className={`size-12 rounded-xl bg-gradient-to-br ${game.categoryColor} text-white flex items-center justify-center shadow`}
+          >
             <game.icon className="size-5" />
           </div>
           <div className="flex flex-col items-end gap-1">
-            <Badge variant="outline" className={`text-[10px] ${diff.cls}`}>{diff.label}</Badge>
-            <div className="flex items-center gap-1 text-xs font-bold text-amber-600">
+            <Badge variant="outline" className={`text-[10px] ${diff.cls}`}>
+              {GAMES_TXT[lang].difficulty[
+                game.difficulty as keyof (typeof GAMES_TXT)["pt"]["difficulty"]
+              ] ?? diff.label}
+            </Badge>
+            <div className="flex items-center gap-1 text-xs font-bold text-amber-700 dark:text-amber-300">
               <Zap className="size-3" /> {game.points}
             </div>
           </div>
         </div>
         <h3 className="font-bold text-base">{game.title}</h3>
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">{game.description}</p>
+        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 min-h-[2rem]">
+          {game.description}
+        </p>
 
         <div className="mt-4">
           <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
-            <span>{game.progress}/{game.total}</span>
+            <span>
+              {game.progress}/{game.total}
+            </span>
             <span>{Math.round(pct)}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -366,23 +763,44 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
           disabled={locked}
           className={`w-full mt-4 ${
             completed
-              ? "bg-green-600 hover:bg-green-700"
+              ? "bg-green-700 text-white hover:bg-green-800"
               : locked
-              ? "bg-muted text-muted-foreground"
-              : `bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90`
+                ? "bg-muted text-muted-foreground"
+                : `bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90`
           }`}
         >
-          {locked ? (<><Lock className="size-4" /> Bloqueado</>) :
-           completed ? (<><CheckCircle className="size-4" /> Concluído</>) :
-           game.action}
+          {locked ? (
+            <>
+              <Lock className="size-4" /> {GAMES_TXT[lang].locked}
+            </>
+          ) : completed ? (
+            <>
+              <CheckCircle className="size-4" /> {GAMES_TXT[lang].completed}
+            </>
+          ) : (
+            (GAMES_TXT[lang].action[game.action as keyof (typeof GAMES_TXT)["pt"]["action"]] ??
+            game.action)
+          )}
         </Button>
       </div>
     </motion.div>
   );
 }
 
-function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: {
-  game: Game; userId: string; doneRefs: string[]; history: string[]; onClose: () => void; onSaved: (r: StepResult) => void;
+function GameDetailModal({
+  game,
+  userId,
+  doneRefs,
+  history,
+  onClose,
+  onSaved,
+}: {
+  game: Game;
+  userId: string;
+  doneRefs: string[];
+  history: string[];
+  onClose: () => void;
+  onSaved: (r: StepResult) => void;
 }) {
   const { lang } = useLang();
   const pt = lang === "pt";
@@ -396,8 +814,12 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
   const doneStops = doneRefs;
   const [selectedStop, setSelectedStop] = useState<string | null>(null);
   const [experienceId, setExperienceId] = useState<string | null>(null);
-  const [itinerarySel, setItinerarySel] = useState<{ itineraryId: string; stopId: number } | null>(null);
-  const [timeOfDay, setTimeOfDay] = useState<{ moment: "sunrise" | "sunset"; time: string } | null>(null);
+  const [itinerarySel, setItinerarySel] = useState<{ itineraryId: string; stopId: number } | null>(
+    null,
+  );
+  const [timeOfDay, setTimeOfDay] = useState<{ moment: "sunrise" | "sunset"; time: string } | null>(
+    null,
+  );
   const [eventInfo, setEventInfo] = useState<{ name: string; date: string } | null>(null);
   const [shared, setShared] = useState(false);
   const [word, setWord] = useState<{ word: string; meaning: string } | null>(null);
@@ -414,7 +836,8 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
     if (task.timeOfDay && !timeOfDay) return "Regista o momento do dia";
     if (task.event && !eventInfo) return "Preenche o evento e a data";
     if (task.word && !word) return "Escreve a palavra e o significado";
-    if (task.note && note.trim().length < task.note) return `Escreve pelo menos ${task.note} caracteres`;
+    if (task.note && note.trim().length < task.note)
+      return `Escreve pelo menos ${task.note} caracteres`;
     if (task.share && !shared) return "Partilha para validar";
     if (requiresPhoto && !photo) return "Tira a foto para confirmar";
     return null;
@@ -422,11 +845,16 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
 
   const handleConfirm = async () => {
     if (missing || saving) return;
-    setSaving(true); setSaveErr(null);
+    setSaving(true);
+    setSaveErr(null);
     try {
       const proofPath = requiresPhoto && photo ? await uploadGameProof(userId, photo) : null;
       const location = proofPath ? await requestPreciseLocation() : null;
-      const stepRef = isTreasure ? selectedStop : task.timeOfDay && timeOfDay ? timeOfDay.moment : null;
+      const stepRef = isTreasure
+        ? selectedStop
+        : task.timeOfDay && timeOfDay
+          ? timeOfDay.moment
+          : null;
       const details: Record<string, string> = {};
       for (const [k, v] of Object.entries(labels)) if (v) details[k] = v.slice(0, 200);
       if (note.trim()) details.note = note.trim().slice(0, 1000);
@@ -443,7 +871,9 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
 
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
@@ -455,7 +885,10 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
         className="bg-card rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
       >
         <div className={`bg-gradient-to-br ${game.categoryColor} text-white p-6 relative`}>
-          <button onClick={onClose} className="absolute top-4 right-4 size-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 size-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30"
+          >
             <X className="size-4" />
           </button>
           <div className="flex items-center gap-3 mb-3">
@@ -474,42 +907,64 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
           {success ? (
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="py-8 text-center">
-              <CheckCircle className="size-20 text-green-500 mx-auto mb-3" />
-              <p className="font-bold text-lg">{success.completed ? (pt ? "Jogo concluído!" : "Game completed!") : (pt ? "Progresso guardado" : "Progress saved")}</p>
-              <p className="text-sm text-muted-foreground">{success.progress}/{success.total}{success.xp_awarded > 0 ? ` · +${success.xp_awarded} XP` : ""}</p>
+              <CheckCircle className="size-20 text-green-700 dark:text-green-300 mx-auto mb-3" />
+              <p className="font-bold text-lg">
+                {success.completed
+                  ? pt
+                    ? "Jogo concluído!"
+                    : "Game completed!"
+                  : pt
+                    ? "Progresso guardado"
+                    : "Progress saved"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {success.progress}/{success.total}
+                {success.xp_awarded > 0 ? ` · +${success.xp_awarded} XP` : ""}
+              </p>
             </motion.div>
           ) : (
             <>
               <div className="bg-muted/40 rounded-xl p-4">
-                <p className="text-xs font-bold uppercase mb-1 text-muted-foreground">Como funciona</p>
+                <p className="text-xs font-bold uppercase mb-1 text-muted-foreground">
+                  Como funciona
+                </p>
                 <p className="text-sm">{game.detail}</p>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
                   <span>Progresso</span>
-                  <span>{game.progress}/{game.total}</span>
+                  <span>
+                    {game.progress}/{game.total}
+                  </span>
                 </div>
                 <Progress value={pct} className="h-2" />
               </div>
 
-              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                <Award className="size-5 text-amber-600" />
-                <p className="text-sm"><span className="text-muted-foreground">Selo:</span> <strong>{game.badge}</strong></p>
+              <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                <Award className="size-5 text-amber-700 dark:text-amber-300" />
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Selo:</span> <strong>{game.badge}</strong>
+                </p>
               </div>
 
               {game.points === 0 && (
                 <p className="text-xs rounded-xl border p-3 text-muted-foreground">
-                  {pt ? "Este desafio não pode ser verificado pelo sistema: o progresso fica guardado, mas não dá XP." : "This challenge can't be verified by the system: progress is saved but gives no XP."}
+                  {pt
+                    ? "Este desafio não pode ser verificado pelo sistema: o progresso fica guardado, mas não dá XP."
+                    : "This challenge can't be verified by the system: progress is saved but gives no XP."}
                 </p>
               )}
               {history.length > 0 && (
                 <div className="rounded-xl border p-3">
-                  <p className="text-xs font-bold uppercase text-muted-foreground mb-1">Registos anteriores</p>
+                  <p className="text-xs font-bold uppercase text-muted-foreground mb-1">
+                    Registos anteriores
+                  </p>
                   <ul className="space-y-1">
                     {history.slice(0, 4).map((at, i) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-center gap-1">
-                        <CheckCircle className="size-3 text-primary shrink-0" /> {new Date(at).toLocaleString(pt ? "pt-PT" : "en-GB")}
+                        <CheckCircle className="size-3 text-primary shrink-0" />{" "}
+                        {new Date(at).toLocaleString(pt ? "pt-PT" : "en-GB")}
                       </li>
                     ))}
                   </ul>
@@ -517,29 +972,53 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
               )}
 
               {task.word && (
-                <WordTask value={word} onChange={(v, label) => { setWord(v); setLabel("word", label); }} />
+                <WordTask
+                  value={word}
+                  onChange={(v, label) => {
+                    setWord(v);
+                    setLabel("word", label);
+                  }}
+                />
               )}
 
               {task.experience && (
                 <ExperienceTask
                   value={experienceId}
-                  onChange={(id, label) => { setExperienceId(id); setLabel("experience", label); }}
+                  onChange={(id, label) => {
+                    setExperienceId(id);
+                    setLabel("experience", label);
+                  }}
                 />
               )}
 
               {task.itinerary && (
                 <ItineraryTask
                   value={itinerarySel}
-                  onChange={(v, label) => { setItinerarySel(v); setLabel("itinerary", label); }}
+                  onChange={(v, label) => {
+                    setItinerarySel(v);
+                    setLabel("itinerary", label);
+                  }}
                 />
               )}
 
               {task.timeOfDay && (
-                <TimeOfDayTask value={timeOfDay} onChange={(v, label) => { setTimeOfDay(v); setLabel("timeOfDay", label); }} />
+                <TimeOfDayTask
+                  value={timeOfDay}
+                  onChange={(v, label) => {
+                    setTimeOfDay(v);
+                    setLabel("timeOfDay", label);
+                  }}
+                />
               )}
 
               {task.event && (
-                <EventTask value={eventInfo} onChange={(v, label) => { setEventInfo(v); setLabel("event", label); }} />
+                <EventTask
+                  value={eventInfo}
+                  onChange={(v, label) => {
+                    setEventInfo(v);
+                    setLabel("event", label);
+                  }}
+                />
               )}
 
               {task.share && (
@@ -563,7 +1042,9 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
                     rows={4}
                     className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">{note.trim().length}/{task.note} caracteres</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {note.trim().length}/{task.note} caracteres
+                  </p>
                 </div>
               )}
 
@@ -595,11 +1076,15 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
                 disabled={!!missing || saving}
                 className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
               >
-                {missing ?? (saving ? (pt ? "A guardar…" : "Saving…") : (pt ? "Guardar progresso" : "Save progress"))}
+                {missing ??
+                  (saving
+                    ? pt
+                      ? "A guardar…"
+                      : "Saving…"
+                    : pt
+                      ? "Guardar progresso"
+                      : "Save progress")}
               </Button>
-
-
-
             </>
           )}
         </div>
@@ -608,26 +1093,53 @@ function GameDetailModal({ game, userId, doneRefs, history, onClose, onSaved }: 
   );
 }
 
-function QuizModal({ game, attempts, onClose, onFinished }: { game: Game; attempts: number; onClose: () => void; onFinished: () => void }) {
+function QuizModal({
+  game,
+  attempts,
+  onClose,
+  onFinished,
+}: {
+  game: Game;
+  attempts: number;
+  onClose: () => void;
+  onFinished: () => void;
+}) {
   const { lang } = useLang();
   const pt = lang === "pt";
   const [session, setSession] = useState<{ id: string; questions: QuizQuestion[] } | null>(null);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState<{ correct: boolean; correct_index: number; explanation: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    correct: boolean;
+    correct_index: number;
+    explanation: string;
+  } | null>(null);
   const [score, setScore] = useState(0);
-  const [result, setResult] = useState<{ correct: number; total: number; passed: boolean; xp_awarded: number } | null>(null);
+  const [result, setResult] = useState<{
+    correct: number;
+    total: number;
+    passed: boolean;
+    xp_awarded: number;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const begin = async () => {
-    setBusy(true); setErr(null);
+    setBusy(true);
+    setErr(null);
     try {
       const s = await startQuiz(game.id);
       setSession({ id: s.attempt_id, questions: s.questions });
-      setCurrent(0); setSelected(null); setFeedback(null); setScore(0); setResult(null);
-    } catch (e) { setErr(gameErrorText((e as Error).message, pt)); }
-    finally { setBusy(false); }
+      setCurrent(0);
+      setSelected(null);
+      setFeedback(null);
+      setScore(0);
+      setResult(null);
+    } catch (e) {
+      setErr(gameErrorText((e as Error).message, pt));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const q = session?.questions[current];
@@ -635,79 +1147,160 @@ function QuizModal({ game, attempts, onClose, onFinished }: { game: Game; attemp
 
   const choose = async (idx: number) => {
     if (!session || !q || selected !== null || busy) return;
-    setSelected(idx); setBusy(true);
+    setSelected(idx);
+    setBusy(true);
     try {
       const f = await answerQuiz(session.id, q.id, idx);
       setFeedback(f);
       if (f.correct) setScore((s) => s + 1);
-    } catch (e) { setErr(gameErrorText((e as Error).message, pt)); setSelected(null); }
-    finally { setBusy(false); }
+    } catch (e) {
+      setErr(gameErrorText((e as Error).message, pt));
+      setSelected(null);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const next = async () => {
     if (!session) return;
-    if (!isLast) { setCurrent((c) => c + 1); setSelected(null); setFeedback(null); return; }
+    if (!isLast) {
+      setCurrent((c) => c + 1);
+      setSelected(null);
+      setFeedback(null);
+      return;
+    }
     setBusy(true);
-    try { setResult(await finishQuiz(session.id)); onFinished(); }
-    catch (e) { setErr(gameErrorText((e as Error).message, pt)); }
-    finally { setBusy(false); }
+    try {
+      setResult(await finishQuiz(session.id));
+      onFinished();
+    } catch (e) {
+      setErr(gameErrorText((e as Error).message, pt));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-foreground/70 backdrop-blur-sm flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
         className="bg-card rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden"
-        role="dialog" aria-label={game.title}
+        role="dialog"
+        aria-label={game.title}
       >
         <div className="bg-gradient-to-br from-primary to-secondary text-primary-foreground p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><Brain className="size-5" /><p className="font-bold">{game.title}</p></div>
-            <button onClick={onClose} aria-label={pt ? "Fechar" : "Close"} className="size-8 rounded-full bg-background/20 flex items-center justify-center"><X className="size-4" /></button>
+            <div className="flex items-center gap-2">
+              <Brain className="size-5" />
+              <p className="font-bold">{game.title}</p>
+            </div>
+            <button
+              onClick={onClose}
+              aria-label={pt ? "Fechar" : "Close"}
+              className="size-8 rounded-full bg-background/20 flex items-center justify-center"
+            >
+              <X className="size-4" />
+            </button>
           </div>
           {session && !result && (
             <>
               <div className="flex justify-between text-xs opacity-90 mb-1">
-                <span>{pt ? "Pergunta" : "Question"} {current + 1} / {session.questions.length}</span>
-                <span>{pt ? "Certas" : "Correct"}: {score}</span>
+                <span>
+                  {pt ? "Pergunta" : "Question"} {current + 1} / {session.questions.length}
+                </span>
+                <span>
+                  {pt ? "Certas" : "Correct"}: {score}
+                </span>
               </div>
               <div className="h-2 bg-background/20 rounded-full overflow-hidden">
-                <motion.div animate={{ width: `${((current + 1) / session.questions.length) * 100}%` }} className="h-full bg-background" />
+                <motion.div
+                  animate={{ width: `${((current + 1) / session.questions.length) * 100}%` }}
+                  className="h-full bg-background"
+                />
               </div>
             </>
           )}
         </div>
 
         <div className="p-6">
-          {err && <p className="mb-3 text-sm text-destructive flex gap-2"><AlertCircle className="size-4 shrink-0" />{err}</p>}
+          {err && (
+            <p className="mb-3 text-sm text-destructive flex gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              {err}
+            </p>
+          )}
           {!session ? (
             <div className="space-y-3 text-sm">
               <p className="font-semibold">{pt ? "Regras" : "Rules"}</p>
               <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                <li>{pt ? "7 perguntas sorteadas pelo servidor." : "7 questions drawn by the server."}</li>
-                <li>{pt ? "Cada resposta é final e corrigida no servidor." : "Each answer is final and scored on the server."}</li>
-                <li>{pt ? "Aprovas com 70% (5 de 7). Podes repetir até aprovar." : "Pass with 70% (5 of 7). You can retry until you pass."}</li>
-                <li>{pt ? `Ao aprovar: +${game.points} XP, uma única vez.` : `On passing: +${game.points} XP, once.`}</li>
+                <li>
+                  {pt ? "7 perguntas sorteadas pelo servidor." : "7 questions drawn by the server."}
+                </li>
+                <li>
+                  {pt
+                    ? "Cada resposta é final e corrigida no servidor."
+                    : "Each answer is final and scored on the server."}
+                </li>
+                <li>
+                  {pt
+                    ? "Aprovas com 70% (5 de 7). Podes repetir até aprovar."
+                    : "Pass with 70% (5 of 7). You can retry until you pass."}
+                </li>
+                <li>
+                  {pt
+                    ? `Ao aprovar: +${game.points} XP, uma única vez.`
+                    : `On passing: +${game.points} XP, once.`}
+                </li>
               </ul>
-              <p className="text-xs text-muted-foreground">{pt ? `Tentativas anteriores: ${attempts}` : `Previous attempts: ${attempts}`}</p>
-              <Button className="w-full" disabled={busy} onClick={begin}>{pt ? "Começar quiz" : "Start quiz"}</Button>
+              <p className="text-xs text-muted-foreground">
+                {pt ? `Tentativas anteriores: ${attempts}` : `Previous attempts: ${attempts}`}
+              </p>
+              <Button className="w-full" disabled={busy} onClick={begin}>
+                {pt ? "Começar quiz" : "Start quiz"}
+              </Button>
             </div>
           ) : result ? (
             <div className="text-center py-6">
-              <Trophy className={`size-20 mx-auto ${result.passed ? "text-primary" : "text-muted-foreground"}`} />
-              <h3 className="text-2xl font-bold mt-3">{result.passed ? (pt ? "Aprovado!" : "Passed!") : (pt ? "Ainda não" : "Not yet")}</h3>
-              <p className="text-muted-foreground">{pt ? `Acertaste ${result.correct} de ${result.total}` : `You got ${result.correct} of ${result.total}`}</p>
+              <Trophy
+                className={`size-20 mx-auto ${result.passed ? "text-primary" : "text-muted-foreground"}`}
+              />
+              <h3 className="text-2xl font-bold mt-3">
+                {result.passed ? (pt ? "Aprovado!" : "Passed!") : pt ? "Ainda não" : "Not yet"}
+              </h3>
+              <p className="text-muted-foreground">
+                {pt
+                  ? `Acertaste ${result.correct} de ${result.total}`
+                  : `You got ${result.correct} of ${result.total}`}
+              </p>
               <p className="text-sm font-semibold mt-1 text-primary">
-                {result.xp_awarded > 0 ? `+${result.xp_awarded} XP` : result.passed ? (pt ? "Já concluído antes" : "Already completed") : (pt ? "Precisas de 70% para aprovar" : "You need 70% to pass")}
+                {result.xp_awarded > 0
+                  ? `+${result.xp_awarded} XP`
+                  : result.passed
+                    ? pt
+                      ? "Já concluído antes"
+                      : "Already completed"
+                    : pt
+                      ? "Precisas de 70% para aprovar"
+                      : "You need 70% to pass"}
               </p>
               <div className="flex gap-2 mt-6">
-                <Button variant="outline" className="flex-1" onClick={onClose}>{pt ? "Fechar" : "Close"}</Button>
-                {!result.passed && <Button className="flex-1" disabled={busy} onClick={begin}>{pt ? "Tentar novamente" : "Try again"}</Button>}
+                <Button variant="outline" className="flex-1" onClick={onClose}>
+                  {pt ? "Fechar" : "Close"}
+                </Button>
+                {!result.passed && (
+                  <Button className="flex-1" disabled={busy} onClick={begin}>
+                    {pt ? "Tentar novamente" : "Try again"}
+                  </Button>
+                )}
               </div>
             </div>
           ) : q ? (
@@ -722,21 +1315,38 @@ function QuizModal({ game, attempts, onClose, onFinished }: { game: Game; attemp
                     else cls = "border-border bg-muted/30 text-muted-foreground";
                   }
                   return (
-                    <button key={idx} onClick={() => choose(idx)} disabled={selected !== null}
-                      className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${cls}`}>
-                      <span className="font-bold mr-2">{String.fromCharCode(65 + idx)}.</span>{opt}
+                    <button
+                      key={idx}
+                      onClick={() => choose(idx)}
+                      disabled={selected !== null}
+                      className={`w-full text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${cls}`}
+                    >
+                      <span className="font-bold mr-2">{String.fromCharCode(65 + idx)}.</span>
+                      {opt}
                     </button>
                   );
                 })}
               </div>
               {feedback && (
-                <div className={`mt-4 p-3 rounded-xl flex items-start gap-2 text-sm ${feedback.correct ? "bg-primary/10" : "bg-destructive/10"}`}>
-                  {feedback.correct ? <CheckCircle className="size-5 shrink-0 text-primary" /> : <AlertCircle className="size-5 shrink-0 text-destructive" />}
+                <div
+                  className={`mt-4 p-3 rounded-xl flex items-start gap-2 text-sm ${feedback.correct ? "bg-primary/10" : "bg-destructive/10"}`}
+                >
+                  {feedback.correct ? (
+                    <CheckCircle className="size-5 shrink-0 text-primary" />
+                  ) : (
+                    <AlertCircle className="size-5 shrink-0 text-destructive" />
+                  )}
                   <p>{feedback.explanation}</p>
                 </div>
               )}
               <Button disabled={!feedback || busy} onClick={next} className="w-full mt-4">
-                {isLast ? (pt ? "Ver resultado" : "See result") : (pt ? "Próxima pergunta" : "Next question")}
+                {isLast
+                  ? pt
+                    ? "Ver resultado"
+                    : "See result"
+                  : pt
+                    ? "Próxima pergunta"
+                    : "Next question"}
               </Button>
             </>
           ) : null}

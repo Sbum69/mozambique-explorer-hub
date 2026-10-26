@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
-import { adminErrorText, isValidEmail, isValidReason } from "./admin";
+import { adminErrorText, broadcastProblems, isValidEmail, isValidReason } from "./admin";
 
 describe("ADM-1 admin form rules", () => {
   it("a suspension or cancellation reason needs at least 3 characters", () => {
@@ -32,5 +32,42 @@ describe("ADM-1 server errors shown in PT and EN", () => {
     expect(adminErrorText("duplicate key value violates", "pt")).toBe(
       "Não foi possível concluir. Tenta novamente.",
     );
+  });
+});
+
+describe("ADM-2C notice form rules (same as the admin_broadcasts CHECKs)", () => {
+  const ok = {
+    audience: "all" as const,
+    userId: null,
+    titlePt: "Manutenção",
+    titleEn: "Maintenance",
+    bodyPt: "A app estará em manutenção.",
+    bodyEn: "The app will be under maintenance.",
+    link: "",
+  };
+  it("accepts a valid notice, with or without an internal link", () => {
+    expect(broadcastProblems(ok)).toEqual([]);
+    expect(broadcastProblems({ ...ok, link: "/news-alerts" })).toEqual([]);
+  });
+  it("needs a user when the audience is one user", () => {
+    expect(broadcastProblems({ ...ok, audience: "user" })).toEqual(["user"]);
+  });
+  it("refuses texts that are too short or too long, in either language", () => {
+    expect(broadcastProblems({ ...ok, titlePt: " A " })).toEqual(["titlePt"]);
+    expect(broadcastProblems({ ...ok, titleEn: "x".repeat(161) })).toEqual(["titleEn"]);
+    expect(broadcastProblems({ ...ok, bodyEn: "x".repeat(2001), bodyPt: "" })).toEqual([
+      "bodyPt",
+      "bodyEn",
+    ]);
+  });
+  it("refuses external and protocol-relative links", () => {
+    expect(broadcastProblems({ ...ok, link: "https://evil.example" })).toEqual(["link"]);
+    expect(broadcastProblems({ ...ok, link: "//evil.example" })).toEqual(["link"]);
+  });
+  it("maps the new server errors to PT and EN", () => {
+    expect(adminErrorText("RATE_LIMITED", "pt")).toMatch(/10 avisos por hora/);
+    expect(
+      adminErrorText('new row violates check constraint "admin_broadcasts_link_check"', "en"),
+    ).toMatch(/Invalid text or link/);
   });
 });

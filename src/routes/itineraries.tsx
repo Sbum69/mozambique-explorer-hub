@@ -55,6 +55,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { useProvinces } from "@/hooks/useProvinces";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useExperiences } from "@/hooks/useExperiences";
@@ -80,6 +81,7 @@ import {
   type RouteStopKind,
 } from "@/lib/routes";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
@@ -92,21 +94,30 @@ export const Route = createFileRoute("/itineraries")({
   head: () => ({
     meta: [
       { title: "Roteiros — Ekaya Explore" },
-      { name: "description", content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique." },
+      {
+        name: "description",
+        content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique.",
+      },
       { property: "og:title", content: "Roteiros — Ekaya Explore" },
-      { property: "og:description", content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique." },
+      {
+        property: "og:description",
+        content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   validateSearch: (s: Record<string, unknown>): { personal?: boolean } =>
-    s.personal === true || s.personal === "true" || s.personal === 1 || s.personal === "1" ? { personal: true } : {},
+    s.personal === true || s.personal === "true" || s.personal === 1 || s.personal === "1"
+      ? { personal: true }
+      : {},
   component: ItinerariesPage,
 });
 
 function ItinerariesPage() {
   const { user, authUser } = useAuth();
   const { lang } = useLang();
+  const [askConfirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
   const userId = authUser?.id ?? null;
@@ -140,7 +151,8 @@ function ItinerariesPage() {
     return all.filter((route) => {
       if (provinceFilter !== "all" && route.provinceId !== provinceFilter) return false;
       if (durationFilter === "short" && route.durationDays > 2) return false;
-      if (durationFilter === "mid" && (route.durationDays < 3 || route.durationDays > 4)) return false;
+      if (durationFilter === "mid" && (route.durationDays < 3 || route.durationDays > 4))
+        return false;
       if (durationFilter === "long" && route.durationDays < 5) return false;
       if (interestFilter && !route.interests.includes(interestFilter)) return false;
       if (!term) return true;
@@ -154,8 +166,18 @@ function ItinerariesPage() {
   }, [all, provinceFilter, search, durationFilter, interestFilter]);
 
   const recommended = useMemo(
-    () => recommendRoutes(all, { provinces: user?.preferences?.provinces, durationDays: user?.preferences?.durationDays, interests: user?.preferences?.interests }),
-    [all, user?.preferences?.provinces, user?.preferences?.durationDays, user?.preferences?.interests],
+    () =>
+      recommendRoutes(all, {
+        provinces: user?.preferences?.provinces,
+        durationDays: user?.preferences?.durationDays,
+        interests: user?.preferences?.interests,
+      }),
+    [
+      all,
+      user?.preferences?.provinces,
+      user?.preferences?.durationDays,
+      user?.preferences?.interests,
+    ],
   );
 
   const isMine = (route: ItineraryRoute) => !!userId && route.ownerId === userId;
@@ -194,7 +216,10 @@ function ItinerariesPage() {
     setImportBusy(true);
     try {
       const found = await fetchRouteByCode(importCode);
-      if (!found || (found.ownerId !== userId && (!found.isPublic || found.reviewStatus !== "approved"))) {
+      if (
+        !found ||
+        (found.ownerId !== userId && (!found.isPublic || found.reviewStatus !== "approved"))
+      ) {
         setPreview(null);
         toast.error(lang === "pt" ? "Roteiro não encontrado." : "Itinerary not found.");
         return;
@@ -208,7 +233,8 @@ function ItinerariesPage() {
   };
 
   const handleImport = async () => {
-    if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId) return;
+    if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId)
+      return;
     setImportBusy(true);
     try {
       const copy = await importRouteByCode(importCode, userId);
@@ -229,7 +255,11 @@ function ItinerariesPage() {
               : "The code does not exist or the itinerary is not public.",
         });
       } else if (message === "ALREADY_IMPORTED") {
-        toast.info(lang === "pt" ? "Este roteiro já está nos teus roteiros." : "This itinerary is already in your itineraries.");
+        toast.info(
+          lang === "pt"
+            ? "Este roteiro já está nos teus roteiros."
+            : "This itinerary is already in your itineraries.",
+        );
       } else if (message === "ALREADY_OWN") {
         toast.info(lang === "pt" ? "Este roteiro já é teu" : "This itinerary is already yours");
       } else {
@@ -241,7 +271,14 @@ function ItinerariesPage() {
   };
 
   const handleDelete = async (route: ItineraryRoute) => {
-    if (!confirm(lang === "pt" ? `Apagar "${route.title}"?` : `Delete "${route.title}"?`)) return;
+    if (
+      !(await askConfirm({
+        title: lang === "pt" ? `Apagar "${route.title}"?` : `Delete "${route.title}"?`,
+        confirmLabel: lang === "pt" ? "Apagar" : "Delete",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await deleteRoute(route.id);
       toast.success(lang === "pt" ? "Roteiro apagado" : "Itinerary deleted");
@@ -270,174 +307,196 @@ function ItinerariesPage() {
       }
     } else {
       toast.info(
-        lang === "pt" ? "Partilha nativa não disponível neste dispositivo" : "Native share not available on this device",
+        lang === "pt"
+          ? "Partilha nativa não disponível neste dispositivo"
+          : "Native share not available on this device",
       );
     }
   };
 
   const renderCard = (route: ItineraryRoute, idx: number) => {
-            const cover = routeCover(route);
-            const stops = routeStopCount(route);
-            const price = routePriceMzn(route);
-            return (
-              <motion.div
-                key={route.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(idx * 0.06, 0.4), duration: 0.4 }}
-                whileHover={{ y: -10 }}
-                className="transition-shadow hover:shadow-2xl rounded-xl"
+    const cover = routeCover(route);
+    const stops = routeStopCount(route);
+    const price = routePriceMzn(route);
+    return (
+      <motion.div
+        key={route.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: Math.min(idx * 0.06, 0.4), duration: 0.4 }}
+        whileHover={{ y: -10 }}
+        className="transition-shadow hover:shadow-2xl rounded-xl"
+      >
+        <Card className="overflow-hidden h-full flex flex-col">
+          <div className="relative h-48 overflow-hidden bg-muted">
+            {cover ? (
+              <img
+                src={cover}
+                alt={route.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <Compass className="size-8" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
+              {route.isCurated && (
+                <Badge className="bg-gradient-to-r from-primary to-orange-700 text-white border-0 gap-1">
+                  <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
+                </Badge>
+              )}
+              {isMine(route) && (
+                <Badge className="bg-emerald-700 text-white border-0">
+                  {lang === "pt" ? "Meu" : "Mine"}
+                </Badge>
+              )}
+              {!route.isPublic && (
+                <Badge variant="secondary" className="gap-1">
+                  <Lock className="size-3" /> {lang === "pt" ? "Privado" : "Private"}
+                </Badge>
+              )}
+            </div>
+            <div className="absolute top-3 right-3 flex items-center gap-2">
+              <div className="bg-black/60 text-white px-2 py-1 rounded-md text-xs font-mono">
+                {route.code}
+              </div>
+              <FavoriteButton itemId={route.id} itemType="itinerary" size="sm" />
+            </div>
+            <div className="absolute bottom-3 left-3 right-3 text-white">
+              <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>
+              {route.province && (
+                <p className="text-xs text-white/80">
+                  {lang === "pt" ? route.province.name.pt : route.province.name.en}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="p-5 flex-1 flex flex-col">
+            {isMine(route) && route.isPublic && route.reviewStatus !== "approved" && (
+              <div
+                className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200" : "bg-destructive/10 text-destructive"}`}
               >
-                <Card className="overflow-hidden h-full flex flex-col">
-                  <div className="relative h-48 overflow-hidden bg-muted">
-                    {cover ? (
-                      <img src={cover} alt={route.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                {route.reviewStatus === "pending"
+                  ? lang === "pt"
+                    ? "Pendente — à espera de aprovação do Admin."
+                    : "Pending — awaiting admin approval."
+                  : `${lang === "pt" ? "Rejeitado" : "Rejected"}${route.rejectionReason ? ` — ${route.rejectionReason}` : ""}`}
+              </div>
+            )}
+            {route.requiresValidation && (
+              <Badge
+                variant="secondary"
+                className="mb-3 w-fit bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border-0"
+              >
+                {lang === "pt"
+                  ? "Catálogo-base — requer validação"
+                  : "Base catalogue — needs validation"}
+              </Badge>
+            )}
+            {routeDescription(route, lang) && (
+              <p className="text-sm text-muted-foreground mb-4">{routeDescription(route, lang)}</p>
+            )}
+
+            <div className="grid grid-cols-3 gap-2 mb-4 text-sm">
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {route.durationDays} {lang === "pt" ? "dias" : "days"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {stops} {lang === "pt" ? "paragens" : "stops"}
+                </span>
+              </div>
+              {price > 0 && (
+                <div className="flex items-center gap-1">
+                  <Coins className="h-4 w-4 text-muted-foreground" />
+                  <span>{price.toLocaleString("pt-PT")} MZN</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5 mb-4">
+              {route.days
+                .flatMap((d) => d.stops)
+                .slice(0, 3)
+                .map((s) => (
+                  <div key={s.id} className="flex items-center gap-2 text-sm">
+                    {s.kind === "community" ? (
+                      <Users className="h-4 w-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
+                    ) : s.kind === "experience" ? (
+                      <Store className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <Compass className="size-8" />
-                      </div>
+                      <MapPin className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
-                      {route.isCurated && (
-                        <Badge className="bg-gradient-to-r from-primary to-orange-600 text-white border-0 gap-1">
-                          <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
-                        </Badge>
-                      )}
-                      {isMine(route) && (
-                        <Badge className="bg-emerald-500 text-white border-0">{lang === "pt" ? "Meu" : "Mine"}</Badge>
-                      )}
-                      {!route.isPublic && (
-                        <Badge variant="secondary" className="gap-1">
-                          <Lock className="size-3" /> {lang === "pt" ? "Privado" : "Private"}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="absolute top-3 right-3 flex items-center gap-2">
-                      <div className="bg-black/60 text-white px-2 py-1 rounded-md text-xs font-mono">{route.code}</div>
-                      <FavoriteButton
-                        itemId={route.id}
-                        itemType="itinerary"
-                        itemData={{
-                          name: route.title,
-                          description: route.description ?? "",
-                          image: cover,
-                          duration: `${route.durationDays} ${lang === "pt" ? "dias" : "days"}`,
-                          location: route.province ? (lang === "pt" ? route.province.name.pt : route.province.name.en) : route.code,
-                        }}
-                        size="sm"
-                      />
-                    </div>
-                    <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>
-                      {route.province && (
-                        <p className="text-xs text-white/80">
-                          {lang === "pt" ? route.province.name.pt : route.province.name.en}
-                        </p>
-                      )}
-                    </div>
+                    <span className="truncate flex-1">{s.title}</span>
                   </div>
+                ))}
+              {stops > 3 && (
+                <p className="text-xs text-muted-foreground">
+                  + {stops - 3} {lang === "pt" ? "mais paragens" : "more stops"}
+                </p>
+              )}
+              {stops === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {lang === "pt" ? "Ainda sem paragens." : "No stops yet."}
+                </p>
+              )}
+            </div>
 
-                  <div className="p-5 flex-1 flex flex-col">
-                    {isMine(route) && route.isPublic && route.reviewStatus !== "approved" && (
-                      <div className={`mb-3 rounded-md px-3 py-2 text-xs ${route.reviewStatus === "pending" ? "bg-amber-100 text-amber-900" : "bg-destructive/10 text-destructive"}`}>
-                        {route.reviewStatus === "pending"
-                          ? (lang === "pt" ? "Pendente — à espera de aprovação do Admin." : "Pending — awaiting admin approval.")
-                          : `${lang === "pt" ? "Rejeitado" : "Rejected"}${route.rejectionReason ? ` — ${route.rejectionReason}` : ""}`}
-                      </div>
-                    )}
-                    {route.requiresValidation && (
-                      <Badge variant="secondary" className="mb-3 w-fit bg-amber-100 text-amber-900 border-0">
-                        {lang === "pt" ? "Catálogo-base — requer validação" : "Base catalogue — needs validation"}
-                      </Badge>
-                    )}
-                    {routeDescription(route, lang) && <p className="text-sm text-muted-foreground mb-4">{routeDescription(route, lang)}</p>}
-
-                    <div className="grid grid-cols-3 gap-2 mb-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {route.durationDays} {lang === "pt" ? "dias" : "days"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {stops} {lang === "pt" ? "paragens" : "stops"}
-                        </span>
-                      </div>
-                      {price > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Coins className="h-4 w-4 text-muted-foreground" />
-                          <span>{price.toLocaleString("pt-PT")} MZN</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5 mb-4">
-                      {route.days.flatMap((d) => d.stops).slice(0, 3).map((s) => (
-                        <div key={s.id} className="flex items-center gap-2 text-sm">
-                          {s.kind === "community" ? (
-                            <Users className="h-4 w-4 text-emerald-600 shrink-0" />
-                          ) : s.kind === "experience" ? (
-                            <Store className="h-4 w-4 text-blue-500 shrink-0" />
-                          ) : (
-                            <MapPin className="h-4 w-4 text-purple-500 shrink-0" />
-                          )}
-                          <span className="truncate flex-1">{s.title}</span>
-                        </div>
-                      ))}
-                      {stops > 3 && (
-                        <p className="text-xs text-muted-foreground">
-                          + {stops - 3} {lang === "pt" ? "mais paragens" : "more stops"}
-                        </p>
-                      )}
-                      {stops === 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          {lang === "pt" ? "Ainda sem paragens." : "No stops yet."}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 mt-auto flex-wrap">
-                      <Button asChild className="flex-1 min-w-[140px]">
-                        <Link to="/itinerary/$id" params={{ id: route.id }}>
-                          {lang === "pt" ? "Ver Roteiro" : "View Itinerary"}
-                        </Link>
-                      </Button>
-                      {route.isPublic && route.reviewStatus === "approved" && (
-                        <ShareButton payload={{ title: `${routeTitle(route, lang)} · ${route.code}`, description: routeDescription(route, lang) ?? undefined, url: `${typeof window !== "undefined" ? window.location.origin : ""}/itinerary/${route.id}` }} />
-                      )}
-                      {isMine(route) && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setEditing(route)}
-                            title={lang === "pt" ? "Editar" : "Edit"}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => void handleDelete(route)}
-                            title={lang === "pt" ? "Apagar" : "Delete"}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            );
+            <div className="flex gap-2 mt-auto flex-wrap">
+              <Button asChild className="flex-1 min-w-[140px]">
+                <Link to="/itinerary/$id" params={{ id: route.id }}>
+                  {lang === "pt" ? "Ver Roteiro" : "View Itinerary"}
+                </Link>
+              </Button>
+              {route.isPublic && route.reviewStatus === "approved" && (
+                <ShareButton
+                  payload={{
+                    title: `${routeTitle(route, lang)} · ${route.code}`,
+                    description: routeDescription(route, lang) ?? undefined,
+                    url: `${typeof window !== "undefined" ? window.location.origin : ""}/itinerary/${route.id}`,
+                  }}
+                />
+              )}
+              {isMine(route) && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditing(route)}
+                    title={lang === "pt" ? "Editar" : "Edit"}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => void handleDelete(route)}
+                    title={lang === "pt" ? "Apagar" : "Delete"}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    );
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+      {confirmDialog}
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -446,11 +505,13 @@ function ItinerariesPage() {
               onClick={() => navigate({ to: backTarget })}
               className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
             >
-              <ArrowLeft className="size-4" /> {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}
+              <ArrowLeft className="size-4" />{" "}
+              {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}
             </button>
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -459,7 +520,9 @@ function ItinerariesPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold">{lang === "pt" ? "Roteiros" : "Itineraries"}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">
+              {lang === "pt" ? "Roteiros" : "Itineraries"}
+            </h1>
             <p className="text-muted-foreground mt-2">
               {lang === "pt"
                 ? "Descobre, cria, edita e partilha roteiros únicos por Moçambique."
@@ -470,7 +533,8 @@ function ItinerariesPage() {
             <Button
               variant="outline"
               onClick={() => {
-                if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries")) return;
+                if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries"))
+                  return;
                 setShowImportModal(true);
               }}
               className="gap-2"
@@ -480,10 +544,11 @@ function ItinerariesPage() {
             </Button>
             <Button
               onClick={() => {
-                if (!requireAccount(lang === "pt" ? "Criar roteiros" : "Create itineraries")) return;
+                if (!requireAccount(lang === "pt" ? "Criar roteiros" : "Create itineraries"))
+                  return;
                 setShowCreateModal(true);
               }}
-              className="gap-2 bg-gradient-to-r from-primary to-orange-600"
+              className="gap-2 bg-gradient-to-r from-primary to-orange-700"
             >
               <Plus className="h-4 w-4" />
               {lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
@@ -491,126 +556,172 @@ function ItinerariesPage() {
           </div>
         </div>
 
-        {personalMode && <PersonalSections user={user} routes={all} loading={loading} error={error} renderCard={renderCard} lang={lang} onShowAll={() => navigate({ to: "/itineraries", search: {} })} />}
-        {!personalMode && (<>
-        {/* Quick code search */}
-        <Card className="p-4 mb-4 border-dashed border-primary/30 bg-primary/5">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="size-4 text-primary" />
-            <p className="text-sm font-semibold">
-              {lang === "pt" ? "Tens um código de roteiro?" : "Got an itinerary code?"}
-            </p>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Input
-              placeholder={lang === "pt" ? "Cola aqui o código (ex: EK-INH001)" : "Paste code here (e.g. EK-INH001)"}
-              value={quickCode}
-              onChange={(e) => setQuickCode(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === "Enter" && void openByCode(quickCode)}
-              className="font-mono flex-1 min-w-[200px]"
-            />
-            <Button onClick={() => void openByCode(quickCode)} disabled={!quickCode.trim() || codeBusy}>
-              {codeBusy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {lang === "pt" ? "Abrir Roteiro" : "Open Itinerary"}
-            </Button>
-          </div>
-        </Card>
-
-        {/* Filters */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder={lang === "pt" ? "Pesquisar por nome ou código" : "Search by name or code"}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Select value={provinceFilter} onValueChange={setProvinceFilter}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder={lang === "pt" ? "Província" : "Province"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "pt" ? "Todas as províncias" : "All provinces"}</SelectItem>
-              {provinces.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {lang === "pt" ? p.name.pt : p.name.en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={durationFilter} onValueChange={(v) => setDurationFilter(v as typeof durationFilter)}>
-            <SelectTrigger className="w-[180px]" aria-label={lang === "pt" ? "Duração" : "Duration"}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{lang === "pt" ? "Qualquer duração" : "Any duration"}</SelectItem>
-              <SelectItem value="short">1–2 {lang === "pt" ? "dias" : "days"}</SelectItem>
-              <SelectItem value="mid">3–4 {lang === "pt" ? "dias" : "days"}</SelectItem>
-              <SelectItem value="long">5+ {lang === "pt" ? "dias" : "days"}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex gap-2 flex-wrap mb-6" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
-          {ROUTE_INTERESTS.map((i) => {
-            const m = routeInterestMeta(i);
-            return (
-              <Button key={i} size="sm" variant={interestFilter === i ? "default" : "outline"} aria-pressed={interestFilter === i}
-                onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}>
-                <span aria-hidden>{m.emoji}</span> {m.label[lang]}
-              </Button>
-            );
-          })}
-        </div>
-
-        {recommended.length > 0 && (
-          <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
-            <p className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="size-4 text-primary" />{lang === "pt" ? "Recomendados para ti" : "Recommended for you"}</p>
-            <div className="flex flex-wrap gap-2">
-              {recommended.map((r) => (
-                <Button key={r.id} asChild size="sm" variant="secondary">
-                  <Link to="/itinerary/$id" params={{ id: r.id }}>{routeTitle(r, lang)} · {r.durationDays} {lang === "pt" ? "dias" : "days"}</Link>
+        {personalMode && (
+          <PersonalSections
+            user={user}
+            routes={all}
+            loading={loading}
+            error={error}
+            renderCard={renderCard}
+            lang={lang}
+            onShowAll={() => navigate({ to: "/itineraries", search: {} })}
+          />
+        )}
+        {!personalMode && (
+          <>
+            {/* Quick code search */}
+            <Card className="p-4 mb-4 border-dashed border-primary/30 bg-primary/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="size-4 text-primary" />
+                <p className="text-sm font-semibold">
+                  {lang === "pt" ? "Tens um código de roteiro?" : "Got an itinerary code?"}
+                </p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <Input
+                  placeholder={
+                    lang === "pt"
+                      ? "Cola aqui o código (ex: EK-INH001)"
+                      : "Paste code here (e.g. EK-INH001)"
+                  }
+                  value={quickCode}
+                  onChange={(e) => setQuickCode(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => e.key === "Enter" && void openByCode(quickCode)}
+                  className="font-mono flex-1 min-w-[200px]"
+                />
+                <Button
+                  onClick={() => void openByCode(quickCode)}
+                  disabled={!quickCode.trim() || codeBusy}
+                >
+                  {codeBusy && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {lang === "pt" ? "Abrir Roteiro" : "Open Itinerary"}
                 </Button>
-              ))}
+              </div>
+            </Card>
+
+            {/* Filters */}
+            <div className="flex gap-2 flex-wrap mb-6">
+              <div className="relative flex-1 min-w-[220px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder={
+                    lang === "pt" ? "Pesquisar por nome ou código" : "Search by name or code"
+                  }
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <Select value={provinceFilter} onValueChange={setProvinceFilter}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder={lang === "pt" ? "Província" : "Province"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {lang === "pt" ? "Todas as províncias" : "All provinces"}
+                  </SelectItem>
+                  {provinces.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {lang === "pt" ? p.name.pt : p.name.en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={durationFilter}
+                onValueChange={(v) => setDurationFilter(v as typeof durationFilter)}
+              >
+                <SelectTrigger
+                  className="w-[180px]"
+                  aria-label={lang === "pt" ? "Duração" : "Duration"}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {lang === "pt" ? "Qualquer duração" : "Any duration"}
+                  </SelectItem>
+                  <SelectItem value="short">1–2 {lang === "pt" ? "dias" : "days"}</SelectItem>
+                  <SelectItem value="mid">3–4 {lang === "pt" ? "dias" : "days"}</SelectItem>
+                  <SelectItem value="long">5+ {lang === "pt" ? "dias" : "days"}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </Card>
-        )}
+            <div
+              className="flex gap-2 flex-wrap mb-6"
+              aria-label={lang === "pt" ? "Interesses" : "Interests"}
+            >
+              {ROUTE_INTERESTS.map((i) => {
+                const m = routeInterestMeta(i);
+                return (
+                  <Button
+                    key={i}
+                    size="sm"
+                    variant={interestFilter === i ? "default" : "outline"}
+                    aria-pressed={interestFilter === i}
+                    onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}
+                  >
+                    <span aria-hidden>{m.emoji}</span> {m.label[lang]}
+                  </Button>
+                );
+              })}
+            </div>
 
-        {loading && (
-          <div className="flex items-center gap-2 text-muted-foreground py-16 justify-center">
-            <Loader2 className="size-5 animate-spin" />
-            {lang === "pt" ? "A carregar roteiros..." : "Loading itineraries..."}
-          </div>
-        )}
+            {recommended.length > 0 && (
+              <Card className="p-4 mb-6 bg-primary/5 border-primary/20">
+                <p className="font-semibold mb-2 flex items-center gap-2">
+                  <Sparkles className="size-4 text-primary" />
+                  {lang === "pt" ? "Recomendados para ti" : "Recommended for you"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {recommended.map((r) => (
+                    <Button key={r.id} asChild size="sm" variant="secondary">
+                      <Link to="/itinerary/$id" params={{ id: r.id }}>
+                        {routeTitle(r, lang)} · {r.durationDays} {lang === "pt" ? "dias" : "days"}
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              </Card>
+            )}
 
-        {error && !loading && (
-          <Card className="p-6 text-center">
-            <p className="text-sm text-muted-foreground mb-3">
-              {lang === "pt" ? "Não foi possível carregar os roteiros." : "Could not load itineraries."}
-            </p>
-            <Button variant="outline" onClick={() => void reload()}>
-              {lang === "pt" ? "Tentar novamente" : "Try again"}
-            </Button>
-          </Card>
-        )}
+            {loading && (
+              <div className="flex items-center gap-2 text-muted-foreground py-16 justify-center">
+                <Loader2 className="size-5 animate-spin" />
+                {lang === "pt" ? "A carregar roteiros..." : "Loading itineraries..."}
+              </div>
+            )}
 
-        {!loading && !error && filtered.length === 0 && (
-          <Card className="p-10 text-center">
-            <Compass className="size-8 mx-auto text-muted-foreground mb-3" />
-            <p className="font-semibold mb-1">{lang === "pt" ? "Sem roteiros para mostrar" : "No itineraries to show"}</p>
-            <p className="text-sm text-muted-foreground">
-              {lang === "pt"
-                ? "Ajusta a pesquisa ou cria o teu primeiro roteiro com destinos e experiências reais."
-                : "Adjust the search or create your first itinerary from real destinations and experiences."}
-            </p>
-          </Card>
-        )}
+            {error && !loading && (
+              <Card className="p-6 text-center">
+                <p className="text-sm text-muted-foreground mb-3">
+                  {lang === "pt"
+                    ? "Não foi possível carregar os roteiros."
+                    : "Could not load itineraries."}
+                </p>
+                <Button variant="outline" onClick={() => void reload()}>
+                  {lang === "pt" ? "Tentar novamente" : "Try again"}
+                </Button>
+              </Card>
+            )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filtered.map(renderCard)}
-        </div>
-        </>)}
+            {!loading && !error && filtered.length === 0 && (
+              <Card className="p-10 text-center">
+                <Compass className="size-8 mx-auto text-muted-foreground mb-3" />
+                <p className="font-semibold mb-1">
+                  {lang === "pt" ? "Sem roteiros para mostrar" : "No itineraries to show"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {lang === "pt"
+                    ? "Ajusta a pesquisa ou cria o teu primeiro roteiro com destinos e experiências reais."
+                    : "Adjust the search or create your first itinerary from real destinations and experiences."}
+                </p>
+              </Card>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">{filtered.map(renderCard)}</div>
+          </>
+        )}
       </div>
 
       {/* Import */}
@@ -626,7 +737,9 @@ function ItinerariesPage() {
           </DialogHeader>
           {isGuest ? (
             <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md">
-              {lang === "pt" ? "Entra na conta para importar roteiros." : "Sign in to import itineraries."}
+              {lang === "pt"
+                ? "Entra na conta para importar roteiros."
+                : "Sign in to import itineraries."}
             </p>
           ) : (
             <div className="space-y-3">
@@ -634,12 +747,19 @@ function ItinerariesPage() {
                 <Input
                   placeholder="EK-INH001"
                   value={importCode}
-                  onChange={(e) => { setImportCode(e.target.value.toUpperCase()); setPreview(null); }}
+                  onChange={(e) => {
+                    setImportCode(e.target.value.toUpperCase());
+                    setPreview(null);
+                  }}
                   onKeyDown={(e) => e.key === "Enter" && void lookupImport()}
                   className="font-mono"
                   aria-label={lang === "pt" ? "Código do roteiro" : "Itinerary code"}
                 />
-                <Button variant="outline" onClick={() => void lookupImport()} disabled={!importCode.trim() || importBusy}>
+                <Button
+                  variant="outline"
+                  onClick={() => void lookupImport()}
+                  disabled={!importCode.trim() || importBusy}
+                >
                   <Search className="size-4" /> {lang === "pt" ? "Pesquisar" : "Search"}
                 </Button>
               </div>
@@ -647,10 +767,19 @@ function ItinerariesPage() {
                 <Card className="p-3 text-sm space-y-1">
                   <p className="font-semibold">{routeTitle(preview, lang)}</p>
                   <p className="text-muted-foreground">
-                    {preview.province ? preview.province.name[lang] : "—"} · {preview.durationDays} {lang === "pt" ? "dias" : "days"} · {preview.days.length} {lang === "pt" ? "dias planeados" : "planned days"}
+                    {preview.province ? preview.province.name[lang] : "—"} · {preview.durationDays}{" "}
+                    {lang === "pt" ? "dias" : "days"} · {preview.days.length}{" "}
+                    {lang === "pt" ? "dias planeados" : "planned days"}
                   </p>
                   {preview.interests.length > 0 && (
-                    <p className="text-xs">{preview.interests.map((i) => `${routeInterestMeta(i).emoji} ${routeInterestMeta(i).label[lang]}`).join(" · ")}</p>
+                    <p className="text-xs">
+                      {preview.interests
+                        .map(
+                          (i) =>
+                            `${routeInterestMeta(i).emoji} ${routeInterestMeta(i).label[lang]}`,
+                        )
+                        .join(" · ")}
+                    </p>
                   )}
                 </Card>
               )}
@@ -681,10 +810,16 @@ function ItinerariesPage() {
         onSaved={async (route, isEdit) => {
           toast.success(
             route.isPublic && route.reviewStatus === "pending"
-              ? lang === "pt" ? "Roteiro submetido! Fica pendente até aprovação do Admin." : "Itinerary submitted! Pending admin approval."
+              ? lang === "pt"
+                ? "Roteiro submetido! Fica pendente até aprovação do Admin."
+                : "Itinerary submitted! Pending admin approval."
               : isEdit
-                ? lang === "pt" ? "Roteiro atualizado!" : "Itinerary updated!"
-                : lang === "pt" ? "Roteiro criado!" : "Itinerary created!",
+                ? lang === "pt"
+                  ? "Roteiro atualizado!"
+                  : "Itinerary updated!"
+                : lang === "pt"
+                  ? "Roteiro criado!"
+                  : "Itinerary created!",
             { description: `${lang === "pt" ? "Código" : "Code"}: ${route.code}` },
           );
           await reload();
@@ -766,7 +901,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
 
   useEffect(() => {
     if (!open) return;
-    fetchCommunityExperiences().then(setCommunity).catch(() => setCommunity([]));
+    fetchCommunityExperiences()
+      .then(setCommunity)
+      .catch(() => setCommunity([]));
   }, [open]);
 
   useEffect(() => {
@@ -785,7 +922,10 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
       setDays(
         editing.days.length > 0
           ? editing.days.map((d) => ({
-              title: d.title ?? "", titleEn: d.titleEn, description: d.description, isUnassigned: d.isUnassigned,
+              title: d.title ?? "",
+              titleEn: d.titleEn,
+              description: d.description,
+              isUnassigned: d.isUnassigned,
               stops: d.stops.map((s) => ({ ...stopToInput(s), title: s.title })),
             }))
           : [{ title: "", stops: [] }],
@@ -813,7 +953,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
     if (!label) return;
     setDays((prev) =>
       prev.map((day, index) =>
-        index === pickerDay ? { ...day, stops: [...day.stops, { kind, refId, title: label }] } : day,
+        index === pickerDay
+          ? { ...day, stops: [...day.stops, { kind, refId, title: label }] }
+          : day,
       ),
     );
     setPickerValue("");
@@ -856,17 +998,29 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
       return;
     }
     const payloadDays: RouteDayInput[] = days.map((day) => ({
-      title: day.title.trim() || null, titleEn: day.titleEn, description: day.description, isUnassigned: day.isUnassigned,
+      title: day.title.trim() || null,
+      titleEn: day.titleEn,
+      description: day.description,
+      isUnassigned: day.isUnassigned,
       stops: day.stops.map((s) => ({ ...s })),
     }));
     if (payloadDays.every((d) => d.stops.length === 0)) {
-      toast.error(lang === "pt" ? "Adiciona pelo menos uma paragem real" : "Add at least one real stop");
+      toast.error(
+        lang === "pt" ? "Adiciona pelo menos uma paragem real" : "Add at least one real stop",
+      );
       return;
     }
     setSaving(true);
     try {
-      if (isPublic && (!titleEn.trim() || !description.trim() || !descriptionEn.trim() || provinceId === "none")) {
-        toast.error(lang === "pt" ? "Para submeter, preenche título e descrição em PT e EN e a província." : "To submit, fill PT and EN title and description and the province.");
+      if (
+        isPublic &&
+        (!titleEn.trim() || !description.trim() || !descriptionEn.trim() || provinceId === "none")
+      ) {
+        toast.error(
+          lang === "pt"
+            ? "Para submeter, preenche título e descrição em PT e EN e a província."
+            : "To submit, fill PT and EN title and description and the province.",
+        );
         setSaving(false);
         return;
       }
@@ -883,17 +1037,25 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
         isPublic,
         days: payloadDays,
       };
-      const saved = editing ? await updateRoute(editing.id, input) : await createRoute(input, ownerId);
+      const saved = editing
+        ? await updateRoute(editing.id, input)
+        : await createRoute(input, ownerId);
       await onSaved(saved, isEdit);
       onClose();
     } catch (e) {
       const message = e instanceof Error ? e.message : "";
       toast.error(
         message.includes("ROUTE_HAS_PROOFS")
-          ? lang === "pt" ? "Este roteiro tem provas de visitas. Mantém as paragens para preservar o histórico." : "This itinerary has visit proofs. Keep its stops to preserve history."
+          ? lang === "pt"
+            ? "Este roteiro tem provas de visitas. Mantém as paragens para preservar o histórico."
+            : "This itinerary has visit proofs. Keep its stops to preserve history."
           : message === "DUPLICATE_CODE"
-          ? lang === "pt" ? "Esse código já existe" : "That code already exists"
-          : lang === "pt" ? "Não foi possível guardar" : "Could not save",
+            ? lang === "pt"
+              ? "Esse código já existe"
+              : "That code already exists"
+            : lang === "pt"
+              ? "Não foi possível guardar"
+              : "Could not save",
       );
     } finally {
       setSaving(false);
@@ -907,8 +1069,12 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
             {isEdit
-              ? lang === "pt" ? "Editar Roteiro" : "Edit Itinerary"
-              : lang === "pt" ? "Criar Novo Roteiro" : "Create New Itinerary"}
+              ? lang === "pt"
+                ? "Editar Roteiro"
+                : "Edit Itinerary"
+              : lang === "pt"
+                ? "Criar Novo Roteiro"
+                : "Create New Itinerary"}
           </DialogTitle>
           <DialogDescription>
             {lang === "pt"
@@ -918,31 +1084,86 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
         </DialogHeader>
 
         <div className="space-y-3">
-          <h4 className="font-semibold text-sm">1. {lang === "pt" ? "Informações básicas" : "Basic info"}</h4>
+          <h4 className="font-semibold text-sm">
+            1. {lang === "pt" ? "Informações básicas" : "Basic info"}
+          </h4>
           <div className="grid gap-2 sm:grid-cols-2">
-            <Input aria-label="Título PT" placeholder={lang === "pt" ? "Título (PT)" : "Title (PT)"} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} />
-            <Input aria-label="Title EN" placeholder={lang === "pt" ? "Título (EN)" : "Title (EN)"} value={titleEn} onChange={(e) => setTitleEn(e.target.value)} maxLength={140} />
-            <Input aria-label="Subtítulo PT" placeholder={lang === "pt" ? "Subtítulo (PT, opcional)" : "Subtitle (PT, optional)"} value={subtitlePt} onChange={(e) => setSubtitlePt(e.target.value)} maxLength={160} />
-            <Input aria-label="Subtitle EN" placeholder={lang === "pt" ? "Subtítulo (EN, opcional)" : "Subtitle (EN, optional)"} value={subtitleEn} onChange={(e) => setSubtitleEn(e.target.value)} maxLength={160} />
-            <Textarea aria-label="Descrição PT" placeholder={lang === "pt" ? "Descrição (PT)" : "Description (PT)"} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={2000} />
-            <Textarea aria-label="Description EN" placeholder={lang === "pt" ? "Descrição (EN)" : "Description (EN)"} value={descriptionEn} onChange={(e) => setDescriptionEn(e.target.value)} rows={3} maxLength={2000} />
+            <Input
+              aria-label="Título PT"
+              placeholder={lang === "pt" ? "Título (PT)" : "Title (PT)"}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={140}
+            />
+            <Input
+              aria-label="Title EN"
+              placeholder={lang === "pt" ? "Título (EN)" : "Title (EN)"}
+              value={titleEn}
+              onChange={(e) => setTitleEn(e.target.value)}
+              maxLength={140}
+            />
+            <Input
+              aria-label="Subtítulo PT"
+              placeholder={lang === "pt" ? "Subtítulo (PT, opcional)" : "Subtitle (PT, optional)"}
+              value={subtitlePt}
+              onChange={(e) => setSubtitlePt(e.target.value)}
+              maxLength={160}
+            />
+            <Input
+              aria-label="Subtitle EN"
+              placeholder={lang === "pt" ? "Subtítulo (EN, opcional)" : "Subtitle (EN, optional)"}
+              value={subtitleEn}
+              onChange={(e) => setSubtitleEn(e.target.value)}
+              maxLength={160}
+            />
+            <Textarea
+              aria-label="Descrição PT"
+              placeholder={lang === "pt" ? "Descrição (PT)" : "Description (PT)"}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              maxLength={2000}
+            />
+            <Textarea
+              aria-label="Description EN"
+              placeholder={lang === "pt" ? "Descrição (EN)" : "Description (EN)"}
+              value={descriptionEn}
+              onChange={(e) => setDescriptionEn(e.target.value)}
+              rows={3}
+              maxLength={2000}
+            />
           </div>
-          <div className="flex flex-wrap gap-2" aria-label={lang === "pt" ? "Interesses" : "Interests"}>
+          <div
+            className="flex flex-wrap gap-2"
+            aria-label={lang === "pt" ? "Interesses" : "Interests"}
+          >
             {ROUTE_INTERESTS.map((i) => {
               const m = routeInterestMeta(i);
               const on = interests.includes(i);
               return (
-                <Button key={i} type="button" size="sm" variant={on ? "default" : "outline"} aria-pressed={on}
-                  onClick={() => setInterests((cur) => (on ? cur.filter((x) => x !== i) : [...cur, i]))}>
+                <Button
+                  key={i}
+                  type="button"
+                  size="sm"
+                  variant={on ? "default" : "outline"}
+                  aria-pressed={on}
+                  onClick={() =>
+                    setInterests((cur) => (on ? cur.filter((x) => x !== i) : [...cur, i]))
+                  }
+                >
                   {m.emoji} {m.label[lang]}
                 </Button>
               );
             })}
           </div>
           <Select value={intensity} onValueChange={(v) => setIntensity(v as typeof intensity)}>
-            <SelectTrigger aria-label={lang === "pt" ? "Intensidade" : "Intensity"}><SelectValue /></SelectTrigger>
+            <SelectTrigger aria-label={lang === "pt" ? "Intensidade" : "Intensity"}>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">{lang === "pt" ? "Intensidade (opcional)" : "Intensity (optional)"}</SelectItem>
+              <SelectItem value="none">
+                {lang === "pt" ? "Intensidade (opcional)" : "Intensity (optional)"}
+              </SelectItem>
               <SelectItem value="low">{lang === "pt" ? "Leve" : "Low"}</SelectItem>
               <SelectItem value="medium">{lang === "pt" ? "Moderada" : "Medium"}</SelectItem>
               <SelectItem value="high">{lang === "pt" ? "Exigente" : "High"}</SelectItem>
@@ -953,7 +1174,9 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
               <SelectValue placeholder={lang === "pt" ? "Província principal" : "Main province"} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">{lang === "pt" ? "Sem província definida" : "No province"}</SelectItem>
+              <SelectItem value="none">
+                {lang === "pt" ? "Sem província definida" : "No province"}
+              </SelectItem>
               {provinces.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
                   {lang === "pt" ? p.name.pt : p.name.en}
@@ -964,17 +1187,27 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           <div className="flex items-center gap-3 rounded-lg border p-3">
             <Switch id="route-public" checked={isPublic} onCheckedChange={setIsPublic} />
             <Label htmlFor="route-public" className="flex items-center gap-2 text-sm">
-              {isPublic ? <Globe2 className="size-4 text-primary" /> : <Lock className="size-4 text-muted-foreground" />}
+              {isPublic ? (
+                <Globe2 className="size-4 text-primary" />
+              ) : (
+                <Lock className="size-4 text-muted-foreground" />
+              )}
               {isPublic
-                ? lang === "pt" ? "Propor como público — fica pendente até o Admin aprovar" : "Propose as public — stays pending until an admin approves"
-                : lang === "pt" ? "Privado — só tu vês este roteiro" : "Private — only you can see it"}
+                ? lang === "pt"
+                  ? "Propor como público — fica pendente até o Admin aprovar"
+                  : "Propose as public — stays pending until an admin approves"
+                : lang === "pt"
+                  ? "Privado — só tu vês este roteiro"
+                  : "Private — only you can see it"}
             </Label>
           </div>
         </div>
 
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm">2. {lang === "pt" ? "Dias e paragens" : "Days and stops"}</h4>
+            <h4 className="font-semibold text-sm">
+              2. {lang === "pt" ? "Dias e paragens" : "Days and stops"}
+            </h4>
             <Button
               type="button"
               variant="outline"
@@ -1000,19 +1233,29 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
             </Select>
             <Select value={pickerValue} onValueChange={setPickerValue}>
               <SelectTrigger className="flex-1 min-w-[200px]">
-                <SelectValue placeholder={lang === "pt" ? "Escolher destino, atividade ou experiência comunitária" : "Pick destination, activity or community experience"} />
+                <SelectValue
+                  placeholder={
+                    lang === "pt"
+                      ? "Escolher destino, atividade ou experiência comunitária"
+                      : "Pick destination, activity or community experience"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                {destinations.filter((d) => !provinceCode || d.province === provinceCode).map((d) => (
-                  <SelectItem key={d.id} value={`destination::${d.id}`}>
-                    📍 {d.name}
-                  </SelectItem>
-                ))}
-                {experiences.filter((e) => !provinceCode || e.province === provinceCode).map((e) => (
-                  <SelectItem key={e.id} value={`experience::${e.id}`}>
-                    🏪 {lang === "pt" ? e.title.pt : e.title.en}
-                  </SelectItem>
-                ))}
+                {destinations
+                  .filter((d) => !provinceCode || d.province === provinceCode)
+                  .map((d) => (
+                    <SelectItem key={d.id} value={`destination::${d.id}`}>
+                      📍 {d.name}
+                    </SelectItem>
+                  ))}
+                {experiences
+                  .filter((e) => !provinceCode || e.province === provinceCode)
+                  .map((e) => (
+                    <SelectItem key={e.id} value={`experience::${e.id}`}>
+                      🏪 {lang === "pt" ? e.title.pt : e.title.en}
+                    </SelectItem>
+                  ))}
                 {community
                   .filter((c) => provinceId === "none" || c.provinceId === provinceId)
                   .map((c) => (
@@ -1036,16 +1279,38 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                   </span>
                   <Input
                     className="h-8 flex-1"
-                    placeholder={lang === "pt" ? "Título do dia (opcional)" : "Day title (optional)"}
+                    placeholder={
+                      lang === "pt" ? "Título do dia (opcional)" : "Day title (optional)"
+                    }
                     value={day.title}
                     onChange={(e) =>
-                      setDays((prev) => prev.map((d, i) => (i === dayIndex ? { ...d, title: e.target.value } : d)))
+                      setDays((prev) =>
+                        prev.map((d, i) => (i === dayIndex ? { ...d, title: e.target.value } : d)),
+                      )
                     }
                   />
                   {days.length > 1 && (
                     <>
-                      <Button type="button" variant="ghost" size="sm" aria-label={lang === "pt" ? "Subir dia" : "Move day up"} disabled={dayIndex === 0} onClick={() => moveDay(dayIndex, -1)}>↑</Button>
-                      <Button type="button" variant="ghost" size="sm" aria-label={lang === "pt" ? "Descer dia" : "Move day down"} disabled={dayIndex === days.length - 1} onClick={() => moveDay(dayIndex, 1)}>↓</Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={lang === "pt" ? "Subir dia" : "Move day up"}
+                        disabled={dayIndex === 0}
+                        onClick={() => moveDay(dayIndex, -1)}
+                      >
+                        ↑
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={lang === "pt" ? "Descer dia" : "Move day down"}
+                        disabled={dayIndex === days.length - 1}
+                        onClick={() => moveDay(dayIndex, 1)}
+                      >
+                        ↓
+                      </Button>
                     </>
                   )}
                   {days.length > 1 && (
@@ -1069,20 +1334,35 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                   </p>
                 ) : (
                   day.stops.map((stop, stopIndex) => (
-                    <div key={`${stop.refId}-${stopIndex}`} className="flex items-center gap-2 rounded-md border bg-card p-2">
-                      <span className="text-xs font-mono text-muted-foreground">#{stopIndex + 1}</span>
+                    <div
+                      key={`${stop.refId}-${stopIndex}`}
+                      className="flex items-center gap-2 rounded-md border bg-card p-2"
+                    >
+                      <span className="text-xs font-mono text-muted-foreground">
+                        #{stopIndex + 1}
+                      </span>
                       {stop.kind === "community" ? (
-                        <Users className="size-4 text-emerald-600" />
+                        <Users className="size-4 text-emerald-700 dark:text-emerald-300" />
                       ) : stop.kind === "experience" ? (
-                        <Store className="size-4 text-blue-500" />
+                        <Store className="size-4 text-blue-600 dark:text-blue-400" />
                       ) : (
-                        <MapPin className="size-4 text-purple-500" />
+                        <MapPin className="size-4 text-purple-600 dark:text-purple-400" />
                       )}
                       <span className="flex-1 text-sm truncate">{stop.title}</span>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => moveStop(dayIndex, stopIndex, -1)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => moveStop(dayIndex, stopIndex, -1)}
+                      >
                         ↑
                       </Button>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => moveStop(dayIndex, stopIndex, 1)}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => moveStop(dayIndex, stopIndex, 1)}
+                      >
                         ↓
                       </Button>
                       <Button
@@ -1106,13 +1386,23 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           <Button variant="outline" onClick={onClose}>
             {lang === "pt" ? "Cancelar" : "Cancel"}
           </Button>
-          <Button onClick={() => void submit()} disabled={saving} className="bg-gradient-to-r from-primary to-orange-600">
+          <Button
+            onClick={() => void submit()}
+            disabled={saving}
+            className="bg-gradient-to-r from-primary to-orange-700"
+          >
             {saving && <Loader2 className="size-4 animate-spin mr-2" />}
             {isEdit
-              ? lang === "pt" ? "Guardar Alterações" : "Save Changes"
+              ? lang === "pt"
+                ? "Guardar Alterações"
+                : "Save Changes"
               : isPublic
-                ? lang === "pt" ? "Submeter para aprovação" : "Submit for approval"
-                : lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
+                ? lang === "pt"
+                  ? "Submeter para aprovação"
+                  : "Submit for approval"
+                : lang === "pt"
+                  ? "Criar Roteiro"
+                  : "Create Itinerary"}
           </Button>
         </DialogFooter>
       </DialogContent>

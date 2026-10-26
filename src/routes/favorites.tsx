@@ -8,8 +8,6 @@ import {
   MapPin,
   Heart,
   Compass,
-  MessageSquare,
-  Newspaper,
   Search,
   Grid,
   List,
@@ -24,10 +22,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLang } from "@/contexts/LanguageContext";
-import { useFavorites, type FavoriteType } from "@/contexts/FavoritesContext";
+import { useFavorites, type FavoriteItem, type FavoriteType } from "@/contexts/FavoritesContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -40,7 +39,10 @@ export const Route = createFileRoute("/favorites")({
         content: "Tudo o que guardaste para explorar depois em Moçambique.",
       },
       { property: "og:title", content: "Meus Favoritos — Ekaya Explore" },
-      { property: "og:description", content: "Tudo o que guardaste para explorar depois em Moçambique." },
+      {
+        property: "og:description",
+        content: "Tudo o que guardaste para explorar depois em Moçambique.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -57,14 +59,12 @@ const TABS: { id: TabFilter; pt: string; en: string; icon: typeof Bookmark }[] =
   { id: "place", pt: "Locais", en: "Places", icon: MapPin },
   { id: "experience", pt: "Experiências", en: "Experiences", icon: Heart },
   { id: "itinerary", pt: "Roteiros", en: "Itineraries", icon: Compass },
-  { id: "news", pt: "Notícias", en: "News", icon: Newspaper },
-  { id: "post", pt: "Posts", en: "Posts", icon: MessageSquare },
 ];
 
 function FavoritesPage() {
   const { lang } = useLang();
   const navigate = useNavigate();
-  const { favorites, removeFavorite } = useFavorites();
+  const { favorites, removeFavorite, loading, error } = useFavorites();
   const [tab, setTab] = useState<TabFilter>("all");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [query, setQuery] = useState("");
@@ -75,8 +75,6 @@ function FavoritesPage() {
       place: 0,
       experience: 0,
       itinerary: 0,
-      news: 0,
-      post: 0,
     };
     favorites.forEach((f) => {
       c[f.type] = (c[f.type] ?? 0) + 1;
@@ -106,9 +104,13 @@ function FavoritesPage() {
       year: "numeric",
     });
 
-  const handleRemove = (id: string, type: FavoriteType) => {
-    removeFavorite(id, type);
-    toast.success(lang === "pt" ? "Removido dos favoritos" : "Removed from favorites");
+  const handleRemove = async (id: string, type: FavoriteType) => {
+    try {
+      await removeFavorite(type, id);
+      toast.success(lang === "pt" ? "Removido dos favoritos" : "Removed from favorites");
+    } catch {
+      // The context reverted the change and showed the error.
+    }
   };
 
   const handleOpen = (item: (typeof favorites)[number]) => {
@@ -117,15 +119,10 @@ function FavoritesPage() {
         navigate({ to: "/map" });
         break;
       case "experience":
-        navigate({ to: "/experiences" });
+        navigate({ to: "/experience/$id", params: { id: item.id } });
         break;
       case "itinerary":
         navigate({ to: "/itinerary/$id", params: { id: item.id } });
-        break;
-      case "news":
-        navigate({ to: "/news-alerts" });
-        break;
-      default:
         break;
     }
   };
@@ -146,7 +143,7 @@ function FavoritesPage() {
             </button>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
-                <Bookmark className="size-5 sm:size-6 text-rose-600" />
+                <Bookmark className="size-5 sm:size-6 text-rose-600 dark:text-rose-400" />
                 {lang === "pt" ? "Meus Favoritos" : "My Favorites"}
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
@@ -163,6 +160,7 @@ function FavoritesPage() {
               </span>
             </div>
             <NotificationsBell />
+            <ThemeToggle />
             <LanguageToggle />
           </div>
         </div>
@@ -183,7 +181,7 @@ function FavoritesPage() {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
                     active
-                      ? "bg-gradient-to-r from-rose-500 to-rose-700 text-white shadow-md"
+                      ? "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-md"
                       : "bg-muted text-muted-foreground hover:bg-muted/70",
                   )}
                 >
@@ -217,10 +215,11 @@ function FavoritesPage() {
                 className={cn(
                   "p-1.5 rounded-md transition-colors",
                   view === "grid"
-                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600"
+                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
                     : "text-muted-foreground hover:bg-muted",
                 )}
-                aria-label="Grid view"
+                aria-label={lang === "pt" ? "Vista em grelha" : "Grid view"}
+                aria-pressed={view === "grid"}
               >
                 <Grid className="size-4" />
               </button>
@@ -229,10 +228,11 @@ function FavoritesPage() {
                 className={cn(
                   "p-1.5 rounded-md transition-colors",
                   view === "list"
-                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600"
+                    ? "bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
                     : "text-muted-foreground hover:bg-muted",
                 )}
-                aria-label="List view"
+                aria-label={lang === "pt" ? "Vista em lista" : "List view"}
+                aria-pressed={view === "list"}
               >
                 <List className="size-4" />
               </button>
@@ -242,14 +242,24 @@ function FavoritesPage() {
       </div>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
+            {[0, 1, 2].map((k) => (
+              <div key={k} className="h-72 rounded-xl border bg-card animate-pulse" />
+            ))}
+          </div>
+        ) : error ? (
+          <p role="alert" className="text-center py-20 text-muted-foreground">
+            {lang === "pt"
+              ? "Não foi possível carregar os teus favoritos. Tenta novamente mais tarde."
+              : "Couldn't load your favourites. Please try again later."}
+          </p>
+        ) : filtered.length === 0 ? (
           <EmptyState lang={lang} onAction={() => navigate({ to: "/dashboard" })} />
         ) : (
           <div
             className={
-              view === "grid"
-                ? "grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
-                : "flex flex-col gap-3"
+              view === "grid" ? "grid sm:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-3"
             }
           >
             <AnimatePresence mode="popLayout">
@@ -280,13 +290,7 @@ function FavoritesPage() {
   );
 }
 
-function EmptyState({
-  lang,
-  onAction,
-}: {
-  lang: "pt" | "en";
-  onAction: () => void;
-}) {
+function EmptyState({ lang, onAction }: { lang: "pt" | "en"; onAction: () => void }) {
   return (
     <div className="text-center py-20">
       <div className="inline-flex p-5 rounded-full bg-rose-50 dark:bg-rose-950/30 mb-5">
@@ -302,7 +306,7 @@ function EmptyState({
       </p>
       <Button
         onClick={onAction}
-        className="bg-gradient-to-r from-rose-500 to-rose-700 text-white hover:opacity-90"
+        className="bg-gradient-to-r from-rose-600 to-rose-700 text-white hover:opacity-90"
       >
         {lang === "pt" ? "Explorar agora" : "Explore now"}
       </Button>
@@ -318,7 +322,7 @@ function FavoriteCard({
   onOpen,
   formatDate,
 }: {
-  item: { id: string; type: FavoriteType; data: Record<string, any>; savedDate: string };
+  item: FavoriteItem;
   view: "grid" | "list";
   lang: "pt" | "en";
   onRemove: () => void;
@@ -326,16 +330,20 @@ function FavoriteCard({
   formatDate: (s: string) => string;
 }) {
   const d = item.data;
-  const title =
-    (d.title && typeof d.title === "object" ? d.title[lang] : d.title) ??
-    d.name ??
-    "—";
-  const description =
-    (d.description && typeof d.description === "object"
-      ? d.description[lang]
-      : d.description) ?? d.summary?.[lang] ?? "";
-  const image = d.image ?? d.cover ?? "";
+  const title = d.unavailable
+    ? lang === "pt"
+      ? "Item já não disponível"
+      : "Item no longer available"
+    : ((d.title && typeof d.title === "object" ? d.title[lang] : d.title) ?? d.name ?? "—");
+  const description = d.unavailable
+    ? lang === "pt"
+      ? "Foi removido ou deixou de ser público. Podes retirá-lo dos favoritos."
+      : "It was removed or is no longer public. You can remove it from your favourites."
+    : ((d.description && typeof d.description === "object" ? d.description[lang] : d.description) ??
+      "");
+  const image = d.image ?? "";
   const location = d.location ?? d.region?.[lang] ?? "";
+  const duration = d.durationDays ? `${d.durationDays} ${lang === "pt" ? "dias" : "days"}` : null;
 
   const typeLabel =
     item.type === "place"
@@ -346,31 +354,23 @@ function FavoriteCard({
         ? lang === "pt"
           ? "Experiência"
           : "Experience"
-        : item.type === "itinerary"
-          ? lang === "pt"
-            ? "Roteiro"
-            : "Itinerary"
-          : item.type === "news"
-            ? lang === "pt"
-              ? "Notícia"
-              : "News"
-            : lang === "pt"
-              ? "Post"
-              : "Post";
+        : lang === "pt"
+          ? "Roteiro"
+          : "Itinerary";
 
   const typeColor: Record<FavoriteType, string> = {
-    place: "bg-blue-100 text-blue-700",
-    experience: "bg-orange-100 text-orange-700",
-    itinerary: "bg-emerald-100 text-emerald-700",
-    news: "bg-red-100 text-red-700",
-    post: "bg-purple-100 text-purple-700",
+    place: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300",
+    experience: "bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300",
+    itinerary: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
   };
 
   if (view === "list") {
     return (
       <Card className="p-3 sm:p-4 flex gap-4 hover:shadow-md transition-shadow">
         {image && (
-          <img loading="lazy" decoding="async"
+          <img
+            loading="lazy"
+            decoding="async"
             src={image}
             alt={title}
             className="size-20 sm:size-24 rounded-lg object-cover shrink-0"
@@ -378,12 +378,8 @@ function FavoriteCard({
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Badge className={cn(typeColor[item.type], "border-0 text-[10px]")}>
-              {typeLabel}
-            </Badge>
-            <span className="text-[11px] text-muted-foreground">
-              {formatDate(item.savedDate)}
-            </span>
+            <Badge className={cn(typeColor[item.type], "border-0 text-[10px]")}>{typeLabel}</Badge>
+            <span className="text-[11px] text-muted-foreground">{formatDate(item.savedDate)}</span>
           </div>
           <h3 className="font-bold truncate">{title}</h3>
           {location && (
@@ -393,20 +389,18 @@ function FavoriteCard({
             </p>
           )}
           {description && (
-            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-              {description}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">{description}</p>
           )}
         </div>
         <div className="flex flex-col gap-1 shrink-0">
-          <Button size="sm" onClick={onOpen}>
+          <Button size="sm" onClick={onOpen} disabled={d.unavailable}>
             {lang === "pt" ? "Abrir" : "Open"}
           </Button>
           <Button
             size="sm"
             variant="ghost"
             onClick={onRemove}
-            className="text-rose-600 hover:bg-rose-50"
+            className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
           >
             <Trash2 className="size-4" />
           </Button>
@@ -419,19 +413,19 @@ function FavoriteCard({
     <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full flex flex-col">
       {image && (
         <div className="relative h-44 overflow-hidden">
-          <img loading="lazy" decoding="async"
+          <img
+            loading="lazy"
+            decoding="async"
             src={image}
             alt={title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3">
-            <Badge className={cn(typeColor[item.type], "border-0")}>
-              {typeLabel}
-            </Badge>
+            <Badge className={cn(typeColor[item.type], "border-0")}>{typeLabel}</Badge>
           </div>
           <div className="absolute top-3 right-3">
             <div className="size-8 bg-background/90 rounded-full flex items-center justify-center">
-              <Bookmark className="size-4 text-rose-600 fill-rose-600" />
+              <Bookmark className="size-4 text-rose-600 dark:text-rose-400 fill-rose-600" />
             </div>
           </div>
         </div>
@@ -447,14 +441,14 @@ function FavoriteCard({
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
           {typeof d.rating === "number" && (
             <span className="flex items-center gap-1">
-              <Star className="size-3 fill-yellow-500 text-yellow-500" />
+              <Star className="size-3 fill-yellow-500 text-yellow-700 dark:text-yellow-300" />
               {d.rating.toFixed(1)}
             </span>
           )}
-          {d.duration && (
+          {duration && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />
-              {d.duration}
+              {duration}
             </span>
           )}
           {typeof d.priceMzn === "number" && (
@@ -465,15 +459,13 @@ function FavoriteCard({
           )}
         </div>
         {description && (
-          <p className="text-sm text-muted-foreground line-clamp-3 mt-3 flex-1">
-            {description}
-          </p>
+          <p className="text-sm text-muted-foreground line-clamp-3 mt-3 flex-1">{description}</p>
         )}
         <p className="text-[11px] text-muted-foreground mt-3">
           {lang === "pt" ? "Guardado em" : "Saved on"} {formatDate(item.savedDate)}
         </p>
         <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-          <Button onClick={onOpen} className="flex-1">
+          <Button onClick={onOpen} className="flex-1" disabled={d.unavailable}>
             {lang === "pt" ? "Abrir" : "Open"}
           </Button>
           <Button
@@ -483,7 +475,7 @@ function FavoriteCard({
               navigator.clipboard?.writeText(`${title}`);
               toast.success(lang === "pt" ? "Copiado" : "Copied");
             }}
-            aria-label="Share"
+            aria-label={lang === "pt" ? "Copiar título" : "Copy title"}
           >
             <Share2 className="size-4" />
           </Button>
@@ -491,8 +483,8 @@ function FavoriteCard({
             variant="ghost"
             size="icon"
             onClick={onRemove}
-            className="text-rose-600 hover:bg-rose-50"
-            aria-label="Remove"
+            className="text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
+            aria-label={lang === "pt" ? "Remover dos favoritos" : "Remove from favorites"}
           >
             <Trash2 className="size-4" />
           </Button>

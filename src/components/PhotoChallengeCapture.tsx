@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, ShieldCheck, RefreshCw, CheckCircle, AlertCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLang } from "@/contexts/LanguageContext";
 
 type Stage = "consent" | "requesting" | "live" | "captured" | "denied";
 
@@ -11,7 +12,11 @@ interface Props {
   accentClass?: string;
 }
 
-export function PhotoChallengeCapture({ onPhoto, accentClass = "from-pink-500 to-rose-600" }: Props) {
+export function PhotoChallengeCapture({
+  onPhoto,
+  accentClass = "from-pink-600 to-rose-600",
+}: Props) {
+  const { lang } = useLang();
   const [stage, setStage] = useState<Stage>("consent");
   const [error, setError] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
@@ -97,14 +102,17 @@ export function PhotoChallengeCapture({ onPhoto, accentClass = "from-pink-500 to
       {stage === "consent" && (
         <div className="space-y-3">
           <div className="flex gap-2 text-sm">
-            <ShieldCheck className="size-5 shrink-0 text-green-600" />
+            <ShieldCheck className="size-5 shrink-0 text-green-700 dark:text-green-300" />
             <p className="text-muted-foreground">
               Para confirmar este desafio precisas de tirar uma fotografia no local. A app vai pedir
-              permissão para usar a câmara — a foto fica no teu dispositivo e serve apenas como prova
-              do desafio.
+              permissão para usar a câmara — a foto fica no teu dispositivo e serve apenas como
+              prova do desafio.
             </p>
           </div>
-          <Button onClick={requestCamera} className={`w-full bg-gradient-to-r ${accentClass} text-white hover:opacity-90`}>
+          <Button
+            onClick={requestCamera}
+            className={`w-full bg-gradient-to-r ${accentClass} text-white hover:opacity-90`}
+          >
             <Camera className="size-4" /> Permitir câmara e tirar foto
           </Button>
         </div>
@@ -121,17 +129,28 @@ export function PhotoChallengeCapture({ onPhoto, accentClass = "from-pink-500 to
           <div className="relative rounded-xl overflow-hidden bg-black aspect-[3/4] max-h-64 mx-auto">
             <video ref={videoRef} playsInline muted className="w-full h-full object-cover" />
           </div>
-          <Button onClick={shoot} className={`w-full bg-gradient-to-r ${accentClass} text-white hover:opacity-90`}>
+          <Button
+            onClick={shoot}
+            className={`w-full bg-gradient-to-r ${accentClass} text-white hover:opacity-90`}
+          >
             <Camera className="size-4" /> Capturar fotografia
           </Button>
         </div>
       )}
 
       {stage === "captured" && photo && (
-        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="space-y-3">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="space-y-3"
+        >
           <div className="relative rounded-xl overflow-hidden border">
-            <img src={photo} alt="Prova fotográfica do desafio" className="w-full max-h-64 object-cover" />
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-green-600 text-white text-xs px-2 py-1">
+            <img
+              src={photo}
+              alt={lang === "pt" ? "Prova fotográfica do desafio" : "Photo proof for the challenge"}
+              className="w-full max-h-64 object-cover"
+            />
+            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-green-700 text-white text-xs px-2 py-1">
               <CheckCircle className="size-3" /> Foto validada
             </span>
           </div>
@@ -151,7 +170,12 @@ export function PhotoChallengeCapture({ onPhoto, accentClass = "from-pink-500 to
             <Button variant="outline" size="sm" className="flex-1" onClick={requestCamera}>
               <Camera className="size-4" /> Tentar de novo
             </Button>
-            <Button variant="outline" size="sm" className="flex-1" onClick={() => fileRef.current?.click()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => fileRef.current?.click()}
+            >
               <Upload className="size-4" /> Enviar foto
             </Button>
           </div>

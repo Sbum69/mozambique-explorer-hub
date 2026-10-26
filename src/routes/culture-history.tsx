@@ -2,12 +2,22 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
-  ArrowLeft, X, Flag, Users, BookOpen, Mic2, Music, Sparkles, Heart, ArrowRight,
+  ArrowLeft,
+  X,
+  Flag,
+  Users,
+  BookOpen,
+  Mic2,
+  Music,
+  Sparkles,
+  Heart,
+  ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useBackTarget } from "@/lib/nav";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 
@@ -43,7 +53,10 @@ interface Topic {
 const copy = {
   back: { pt: "Voltar", en: "Back" },
   pageTitle: { pt: "Cultura e História", en: "Culture & History" },
-  heroTitle: { pt: "Descobre a Rica História de Moçambique", en: "Discover Mozambique's Rich History" },
+  heroTitle: {
+    pt: "Descobre a Rica História de Moçambique",
+    en: "Discover Mozambique's Rich History",
+  },
   heroDescription: {
     pt: "Heróis, ritmos e palavras que moldaram a identidade de um povo que olha o futuro sem esquecer o passado.",
     en: "Heroes, rhythms and words that shaped the identity of a people who look to the future without forgetting the past.",
@@ -52,7 +65,10 @@ const copy = {
   culturalHeritage: { pt: "Património Cultural", en: "Cultural Heritage" },
   learnMore: { pt: "Saber Mais", en: "Learn More" },
   didYouKnow: { pt: "Sabia que...", en: "Did you know..." },
-  heritageFooter: { pt: "Património Cultural de Moçambique", en: "Cultural Heritage of Mozambique" },
+  heritageFooter: {
+    pt: "Património Cultural de Moçambique",
+    en: "Cultural Heritage of Mozambique",
+  },
   close: { pt: "Fechar", en: "Close" },
   mozambique: { pt: "Moçambique", en: "Mozambique" },
 } satisfies Record<string, LocalizedText>;
@@ -63,7 +79,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Independência", en: "Independence" },
     subtitle: { pt: "Nascimento de uma nação", en: "Birth of a nation" },
     date: { pt: "25 de Junho de 1975", en: "25 June 1975" },
-    gradient: "from-green-500 to-green-700",
+    gradient: "from-green-700 to-green-700",
     icon: Flag,
     image: "https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=1200&h=600&fit=crop",
     short: {
@@ -110,7 +126,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Samora Machel", en: "Samora Machel" },
     subtitle: { pt: "O primeiro Presidente", en: "The first President" },
     date: { pt: "1933 – 1986", en: "1933–1986" },
-    gradient: "from-red-500 to-red-700",
+    gradient: "from-red-600 to-red-700",
     icon: Users,
     image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=1200&h=600&fit=crop",
     short: {
@@ -157,7 +173,7 @@ const TOPICS: Topic[] = [
     title: { pt: "FRELIMO", en: "FRELIMO" },
     subtitle: { pt: "Frente de Libertação", en: "Liberation Front" },
     date: { pt: "Fundada a 25 de Junho de 1962", en: "Founded on 25 June 1962" },
-    gradient: "from-yellow-600 to-orange-600",
+    gradient: "from-yellow-700 to-orange-700",
     icon: BookOpen,
     image: "https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=1200&h=600&fit=crop",
     short: {
@@ -204,7 +220,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Azagaia", en: "Azagaia" },
     subtitle: { pt: "A voz da juventude", en: "The voice of youth" },
     date: { pt: "1977 – 2023", en: "1977–2023" },
-    gradient: "from-purple-500 to-purple-700",
+    gradient: "from-purple-600 to-purple-700",
     icon: Mic2,
     image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=600&fit=crop",
     short: {
@@ -251,7 +267,7 @@ const TOPICS: Topic[] = [
     title: { pt: "Marrabenta", en: "Marrabenta" },
     subtitle: { pt: "O ritmo do país", en: "The rhythm of the country" },
     date: { pt: "Desde os anos 1950", en: "Since the 1950s" },
-    gradient: "from-blue-500 to-blue-700",
+    gradient: "from-blue-600 to-blue-700",
     icon: Music,
     image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&h=600&fit=crop",
     short: {
@@ -298,7 +314,7 @@ const TOPICS: Topic[] = [
     title: { pt: "José Craveirinha", en: "José Craveirinha" },
     subtitle: { pt: "Poeta Nacional", en: "National Poet" },
     date: { pt: "1922 – 2003", en: "1922–2003" },
-    gradient: "from-teal-500 to-teal-700",
+    gradient: "from-teal-700 to-teal-700",
     icon: Sparkles,
     image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1200&h=600&fit=crop",
     short: {
@@ -359,6 +375,7 @@ function CultureHistoryPage() {
             <ArrowLeft className="size-4" /> {copy.back[lang]}
           </button>
           <h1 className="font-bold text-sm sm:text-base truncate">🇲🇿 {copy.pageTitle[lang]}</h1>
+          <ThemeToggle />
           <LanguageToggle />
         </div>
       </header>
@@ -413,9 +430,15 @@ function CultureHistoryPage() {
               className="text-left rounded-3xl overflow-hidden bg-card border shadow-lg transition-all"
             >
               <div className="relative h-56 overflow-hidden">
-                <img src={topic.image} alt={topic.title[lang]} className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
+                <img
+                  src={topic.image}
+                  alt={topic.title[lang]}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className={`absolute inset-0 bg-gradient-to-t ${topic.gradient} opacity-80`} />
-                <div className="absolute top-4 right-4 size-11 rounded-2xl bg-white shadow-lg flex items-center justify-center">
+                <div className="absolute top-4 right-4 size-11 rounded-2xl bg-card shadow-lg flex items-center justify-center">
                   <topic.icon className="size-5 text-foreground" />
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 text-white">
@@ -459,12 +482,20 @@ function CultureHistoryPage() {
               aria-labelledby={`topic-${selected.id}`}
             >
               <div className="relative h-52 sm:h-64 lg:h-72 shrink-0">
-                <img src={selected.image} alt={selected.title[lang]} className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
-                <div className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`} />
+                <img
+                  src={selected.image}
+                  alt={selected.title[lang]}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`}
+                />
                 <motion.button
                   whileHover={{ rotate: 90 }}
                   onClick={() => setSelected(null)}
-                  className="absolute top-4 right-4 size-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
+                  className="absolute top-4 right-4 size-10 rounded-full bg-background/90 text-foreground flex items-center justify-center shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   aria-label={copy.close[lang]}
                 >
                   <X className="size-5" />
@@ -475,7 +506,12 @@ function CultureHistoryPage() {
                       <selected.icon className="size-6" />
                     </div>
                     <div>
-                      <h2 id={`topic-${selected.id}`} className="text-2xl sm:text-3xl font-bold leading-tight">{selected.title[lang]}</h2>
+                      <h2
+                        id={`topic-${selected.id}`}
+                        className="text-2xl sm:text-3xl font-bold leading-tight"
+                      >
+                        {selected.title[lang]}
+                      </h2>
                       <p className="text-sm text-white/90">{selected.date[lang]}</p>
                     </div>
                   </div>
@@ -483,25 +519,35 @@ function CultureHistoryPage() {
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8 lg:px-10 lg:py-9">
-                <p className="mb-7 max-w-3xl text-base leading-relaxed text-foreground/80">{selected.short[lang]}</p>
+                <p className="mb-7 max-w-3xl text-base leading-relaxed text-foreground/80">
+                  {selected.short[lang]}
+                </p>
                 <div className="grid gap-6 md:grid-cols-2 md:gap-x-10 md:gap-y-8">
                   {selected.sections.map((section) => (
                     <div key={section.heading.pt} className="flex gap-4">
-                      <div className={`w-1 rounded-full bg-gradient-to-b ${selected.gradient} shrink-0`} />
+                      <div
+                        className={`w-1 rounded-full bg-gradient-to-b ${selected.gradient} shrink-0`}
+                      />
                       <div>
                         <h4 className="font-bold mb-2">{section.heading[lang]}</h4>
-                        <p className="text-base text-muted-foreground leading-7">{section.body[lang]}</p>
+                        <p className="text-base text-muted-foreground leading-7">
+                          {section.body[lang]}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className={`mt-8 rounded-2xl p-5 sm:p-6 bg-gradient-to-br ${selected.gradient} text-white`}>
+                <div
+                  className={`mt-8 rounded-2xl p-5 sm:p-6 bg-gradient-to-br ${selected.gradient} text-white`}
+                >
                   <div className="flex items-start gap-3">
                     <Heart className="size-5 shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold text-sm mb-1">{copy.didYouKnow[lang]}</p>
-                      <p className="text-base leading-relaxed text-white/95">{selected.fact[lang]}</p>
+                      <p className="text-base leading-relaxed text-white/95">
+                        {selected.fact[lang]}
+                      </p>
                     </div>
                   </div>
                 </div>

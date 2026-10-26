@@ -4,6 +4,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { getAdminSummary } from "@/lib/dashboard.functions";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import { useConfirm } from "@/components/ConfirmDialog";
@@ -12,6 +13,7 @@ import { AdminBusinessesModal } from "@/components/AdminBusinesses";
 import { AdminRewardsModal } from "@/components/AdminRewards";
 import { AdminBookingsModal } from "@/components/AdminBookings";
 import { AdminExperiencesModal } from "@/components/AdminExperiences";
+import { AdminBroadcastsModal } from "@/components/AdminBroadcasts";
 import { adminErrorText, setUserRole, type ManagedRole } from "@/lib/admin";
 import {
   BUSINESS_STATUS_LABEL,
@@ -52,6 +54,7 @@ import {
   Compass,
   Loader2,
   Flag,
+  Megaphone,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -138,7 +141,8 @@ type ModalKey =
   | "businesses"
   | "rewards"
   | "bookings"
-  | "experiences";
+  | "experiences"
+  | "broadcasts";
 
 const localeOf = (lang: Lang) => (lang === "pt" ? "pt-PT" : "en-GB");
 
@@ -222,7 +226,7 @@ function AdminPage() {
     { key: "communityReports" as const, label: "Denúncias", icon: Flag },
     { key: "communityExperiences" as const, label: "Experiências Comunitárias", icon: Users },
     { key: "provinces" as const, label: "Gerir Províncias", icon: MapPin },
-
+    { key: "broadcasts" as const, label: "Avisos", icon: Megaphone },
     { key: "reports" as const, label: "Relatórios", icon: FileText },
   ];
 
@@ -243,6 +247,7 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <LanguageToggle />
             <Button variant="outline" size="sm" onClick={() => navigate({ to: "/impact" })}>
               <Activity className="size-4" /> {pt ? "Impacto" : "Impact"}
@@ -354,6 +359,7 @@ function AdminPage() {
                         reports: "Summary",
                         bookings: "Bookings",
                         experiences: "Commercial activities",
+                        broadcasts: "Notices",
                       }[a.key]}
                 </Button>
               ))}
@@ -386,6 +392,9 @@ function AdminPage() {
       )}
       {activeModal === "provinces" && <ProvincesModal onClose={() => setActiveModal(null)} />}
       {activeModal === "reports" && <ReportsModal onClose={() => setActiveModal(null)} />}
+      {activeModal === "broadcasts" && (
+        <AdminBroadcastsModal onClose={() => setActiveModal(null)} />
+      )}
     </div>
   );
 }

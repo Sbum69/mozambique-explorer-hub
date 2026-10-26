@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { MapPin, CheckCircle, Navigation, BookOpen, Waves, Building2, Palmtree } from "lucide-react";
+import {
+  MapPin,
+  CheckCircle,
+  Navigation,
+  BookOpen,
+  Waves,
+  Building2,
+  Palmtree,
+} from "lucide-react";
 import { getTreasureStops, type TreasureStop } from "@/data/treasure-stops";
 
 const KIND_META: Record<TreasureStop["kind"], { icon: typeof MapPin; label: string }> = {
@@ -42,7 +50,7 @@ export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Pr
               onClick={() => onSelect(active ? null : s.id)}
               className={`w-full text-left rounded-lg border p-3 transition ${
                 done
-                  ? "opacity-60 bg-green-50 border-green-200 cursor-default"
+                  ? "opacity-60 bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800 cursor-default"
                   : active
                     ? "border-primary bg-primary/5 ring-2 ring-primary/30"
                     : "bg-background hover:bg-muted/60"
@@ -55,10 +63,12 @@ export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Pr
                   <p className="text-xs text-muted-foreground truncate">
                     {Meta.label} · {s.place}
                   </p>
-                  {s.hint && <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.hint}</p>}
+                  {s.hint && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.hint}</p>
+                  )}
                 </div>
                 {done ? (
-                  <CheckCircle className="size-4 text-green-600 shrink-0" />
+                  <CheckCircle className="size-4 text-green-700 dark:text-green-300 shrink-0" />
                 ) : s.coords ? (
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${s.coords[0]},${s.coords[1]}`}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bookmark } from "lucide-react";
 import { toast } from "sonner";
@@ -9,7 +10,6 @@ import { cn } from "@/lib/utils";
 interface FavoriteButtonProps {
   itemId: string;
   itemType: FavoriteType;
-  itemData: Record<string, any>;
   size?: "sm" | "md" | "lg";
   showToast?: boolean;
   className?: string;
@@ -29,7 +29,6 @@ const iconSizeClass = {
 export function FavoriteButton({
   itemId,
   itemType,
-  itemData,
   size = "md",
   showToast = true,
   className,
@@ -37,24 +36,35 @@ export function FavoriteButton({
   const { isFavorite, toggleFavorite } = useFavorites();
   const { lang } = useLang();
   const { requireAccount } = useAuthGate();
+  const [busy, setBusy] = useState(false);
   const favorited = isFavorite(itemId, itemType);
+  const pt = lang === "pt";
 
-  const handle = (e: React.MouseEvent) => {
+  const handle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!requireAccount(lang === "pt" ? "Favoritos" : "Favorites")) return;
-    const added = toggleFavorite({ id: itemId, type: itemType, data: itemData });
-    if (!showToast) return;
-    toast.success(
-      added
-        ? lang === "pt"
-          ? "Adicionado aos favoritos!"
-          : "Added to favorites!"
-        : lang === "pt"
-          ? "Removido dos favoritos"
-          : "Removed from favorites",
-      { icon: <Bookmark className="size-4" /> },
-    );
+    // Guests are asked to sign in and come back to this page.
+    if (busy || !requireAccount(pt ? "Favoritos" : "Favorites")) return;
+    setBusy(true);
+    try {
+      const added = await toggleFavorite(itemType, itemId);
+      if (showToast) {
+        toast.success(
+          added
+            ? pt
+              ? "Adicionado aos favoritos!"
+              : "Added to favorites!"
+            : pt
+              ? "Removido dos favoritos"
+              : "Removed from favorites",
+          { icon: <Bookmark className="size-4" /> },
+        );
+      }
+    } catch {
+      // The context already reverted the change and showed the error.
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -63,11 +73,20 @@ export function FavoriteButton({
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={handle}
+      disabled={busy}
       aria-pressed={favorited}
-      aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+      aria-label={
+        favorited
+          ? pt
+            ? "Remover dos favoritos"
+            : "Remove from favorites"
+          : pt
+            ? "Adicionar aos favoritos"
+            : "Add to favorites"
+      }
       className={cn(
         sizeClass[size],
-        "bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all",
+        "bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
         favorited && "bg-rose-100 dark:bg-rose-950/40",
         className,
       )}
@@ -76,7 +95,7 @@ export function FavoriteButton({
         className={cn(
           iconSizeClass[size],
           "transition-colors",
-          favorited ? "text-rose-600 fill-rose-600" : "text-muted-foreground",
+          favorited ? "text-rose-600 dark:text-rose-400 fill-rose-600" : "text-muted-foreground",
         )}
       />
     </motion.button>

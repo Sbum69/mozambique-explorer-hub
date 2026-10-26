@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Info, ChevronDown, CheckCircle, ArrowLeft, Home, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useBackTarget } from "@/lib/nav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,7 +62,7 @@ const CATEGORIES: Category[] = [
     id: "moeda",
     emoji: "💰",
     title: l("Moeda e Pagamentos", "Currency and Payments"),
-    gradient: "from-green-500 to-emerald-600",
+    gradient: "from-green-700 to-emerald-700",
     icon: Info,
     pills: [
       { label: l("Moeda", "Currency"), value: same("Metical (MZN)") },
@@ -102,7 +103,7 @@ const CATEGORIES: Category[] = [
     id: "seguranca",
     emoji: "🛡️",
     title: l("Segurança para Turistas", "Safety for Tourists"),
-    gradient: "from-blue-500 to-blue-600",
+    gradient: "from-blue-600 to-blue-600",
     icon: Info,
     pills: [{ label: l("Nível", "Level"), value: l("Moderado", "Moderate") }],
     subs: [
@@ -142,7 +143,7 @@ const CATEGORIES: Category[] = [
     id: "transporte",
     emoji: "🚗",
     title: l("Transporte", "Transport"),
-    gradient: "from-orange-500 to-red-600",
+    gradient: "from-orange-700 to-red-600",
     icon: Info,
     pills: [
       { label: l("Condução", "Driving"), value: l("Lado direito", "Right-hand side") },
@@ -182,7 +183,7 @@ const CATEGORIES: Category[] = [
     id: "clima",
     emoji: "🌤️",
     title: l("Clima e Melhor Época", "Climate and Best Season"),
-    gradient: "from-yellow-500 to-orange-600",
+    gradient: "from-yellow-700 to-orange-700",
     icon: Info,
     pills: [
       { label: l("Temperatura", "Temperature"), value: same("25–32 °C") },
@@ -222,7 +223,7 @@ const CATEGORIES: Category[] = [
     id: "cultura",
     emoji: "🎭",
     title: l("Cultura e Etiqueta Local", "Culture and Local Etiquette"),
-    gradient: "from-purple-500 to-pink-600",
+    gradient: "from-purple-600 to-pink-600",
     icon: Info,
     pills: [
       { label: l("Língua oficial", "Official language"), value: l("Português", "Portuguese") },
@@ -268,7 +269,7 @@ const CATEGORIES: Category[] = [
     id: "gastronomia",
     emoji: "🍤",
     title: l("Gastronomia Típica", "Typical Cuisine"),
-    gradient: "from-red-500 to-orange-600",
+    gradient: "from-red-600 to-orange-700",
     icon: Info,
     pills: [
       {
@@ -315,7 +316,7 @@ const CATEGORIES: Category[] = [
     id: "saude",
     emoji: "🏥",
     title: l("Saúde e Vacinas", "Health and Vaccines"),
-    gradient: "from-pink-500 to-red-600",
+    gradient: "from-pink-600 to-red-600",
     icon: Info,
     pills: [
       { label: l("Obrigatória", "Required"), value: l("Febre Amarela", "Yellow Fever") },
@@ -375,7 +376,7 @@ const CATEGORIES: Category[] = [
     id: "linguagem",
     emoji: "🗣️",
     title: l("Frases Básicas em Português", "Basic Portuguese Phrases"),
-    gradient: "from-indigo-500 to-purple-600",
+    gradient: "from-indigo-600 to-purple-600",
     icon: Info,
     pills: [
       { label: l("Oficial", "Official"), value: l("Português", "Portuguese") },
@@ -423,7 +424,7 @@ const CATEGORIES: Category[] = [
     id: "internet",
     emoji: "📶",
     title: l("Internet e Comunicação", "Internet and Communication"),
-    gradient: "from-cyan-500 to-blue-600",
+    gradient: "from-cyan-700 to-blue-600",
     icon: Info,
     pills: [
       { label: l("Cobertura", "Coverage"), value: l("Boa nas cidades", "Good in cities") },
@@ -477,7 +478,7 @@ const CATEGORIES: Category[] = [
     id: "sustentavel",
     emoji: "🌍",
     title: l("Turismo Sustentável", "Sustainable Tourism"),
-    gradient: "from-green-500 to-teal-600",
+    gradient: "from-green-700 to-teal-700",
     icon: Info,
     pills: [
       { label: l("Princípio", "Principle"), value: l("Respeito", "Respect") },
@@ -575,6 +576,7 @@ function UsefulInfoPage() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <LanguageToggle />
             {user && (
               <div className="size-9 rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold flex items-center justify-center text-sm">
@@ -586,7 +588,7 @@ function UsefulInfoPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 text-white">
+      <section className="bg-gradient-to-br from-purple-600 via-blue-600 to-teal-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 text-center">
           <motion.div
             initial={{ scale: 0 }}
@@ -608,7 +610,7 @@ function UsefulInfoPage() {
 
       {/* Quick tips */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 -mt-6">
-        <div className="rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 text-white p-6 shadow-2xl">
+        <div className="rounded-3xl bg-gradient-to-br from-orange-700 to-red-600 text-white p-6 shadow-2xl">
           <h3 className="font-bold mb-4 text-lg">⚡ {pt ? "10 Dicas Rápidas" : "10 Quick Tips"}</h3>
           <div className="grid sm:grid-cols-2 gap-3">
             {QUICK_TIPS.map((tip, i) => (
@@ -683,7 +685,7 @@ function UsefulInfoPage() {
                               key={idx}
                               className={`rounded-xl p-3 bg-gradient-to-br ${cat.gradient} text-white`}
                             >
-                              <p className="text-[10px] uppercase opacity-80">{p.label[lang]}</p>
+                              <p className="text-[10px] uppercase font-medium">{p.label[lang]}</p>
                               <p className="font-bold mt-0.5">{p.value[lang]}</p>
                             </div>
                           ))}

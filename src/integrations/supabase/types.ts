@@ -776,6 +776,30 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       experience_availability: {
         Row: {
           accepts_new_bookings: boolean
@@ -1176,6 +1200,7 @@ export type Database = {
       notifications: {
         Row: {
           body_en: string | null
+          broadcast_id: string | null
           body_pt: string
           created_at: string
           id: string
@@ -1188,6 +1213,7 @@ export type Database = {
         }
         Insert: {
           body_en?: string | null
+          broadcast_id?: string | null
           body_pt: string
           created_at?: string
           id?: string
@@ -1200,6 +1226,7 @@ export type Database = {
         }
         Update: {
           body_en?: string | null
+          broadcast_id?: string | null
           body_pt?: string
           created_at?: string
           id?: string
@@ -1979,6 +2006,34 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_list_broadcasts: {
+        Args: { _limit?: number }
+        Returns: {
+          audience: string
+          body_en: string
+          body_pt: string
+          created_at: string
+          id: string
+          link: string | null
+          recipients: number
+          sender: string | null
+          target: string | null
+          title_en: string
+          title_pt: string
+        }[]
+      }
+      admin_send_notification: {
+        Args: {
+          _audience: string
+          _body_en: string
+          _body_pt: string
+          _link?: string
+          _title_en: string
+          _title_pt: string
+          _user_id: string | null
+        }
+        Returns: Json
+      }
       admin_set_user_role: {
         Args: {
           _grant: boolean
@@ -2083,6 +2138,15 @@ export type Database = {
       redeem_reward: {
         Args: { _request_id: string; _reward_id: string }
         Returns: Json
+      }
+      save_my_preferences: {
+        Args: {
+          _duration_days: number
+          _interests: string[]
+          _province: string
+          _provinces?: string[]
+        }
+        Returns: undefined
       }
       reset_my_route_progress: {
         Args: { _progress_id: string }

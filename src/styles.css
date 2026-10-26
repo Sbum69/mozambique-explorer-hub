@@ -69,41 +69,47 @@
 :root {
   --radius: 0.875rem;
   --background: oklch(0.995 0.005 80);
-  --foreground: oklch(0.20 0.04 250);
+  --foreground: oklch(0.2 0.04 250);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.04 250);
+  --card-foreground: oklch(0.2 0.04 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.04 250);
-  /* Mozambique orange — sun, energy */
-  --primary: oklch(0.68 0.18 45);
+  --popover-foreground: oklch(0.2 0.04 250);
+  /* Mozambique orange — sun, energy. L 0.575 keeps white text and orange text ≥ 4.5:1 (WCAG AA). */
+  --primary: oklch(0.575 0.18 45);
   --primary-foreground: oklch(0.99 0.01 80);
-  --primary-glow: oklch(0.78 0.17 60);
+  --primary-glow: oklch(0.57 0.17 58);
   /* Indian Ocean blue */
-  --secondary: oklch(0.55 0.15 235);
+  --secondary: oklch(0.54 0.15 235);
   --secondary-foreground: oklch(0.99 0.01 80);
   --muted: oklch(0.96 0.01 80);
-  --muted-foreground: oklch(0.50 0.03 250);
+  --muted-foreground: oklch(0.5 0.03 250);
   --accent: oklch(0.92 0.06 50);
   --accent-foreground: oklch(0.25 0.05 45);
   /* Sustainability green */
-  --success: oklch(0.62 0.16 155);
+  --success: oklch(0.53 0.16 155);
   --success-foreground: oklch(0.99 0.01 80);
   /* Achievement yellow */
   --warning: oklch(0.82 0.15 85);
   --warning-foreground: oklch(0.25 0.05 45);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0.01 80);
-  --border: oklch(0.90 0.02 60);
-  --input: oklch(0.93 0.02 60);
-  --ring: oklch(0.68 0.18 45);
-  --gradient-hero: linear-gradient(135deg, oklch(0.68 0.18 45) 0%, oklch(0.78 0.17 60) 50%, oklch(0.55 0.15 235) 100%);
+  --border: oklch(0.9 0.02 60);
+  /* Field borders need 3:1 against the page (WCAG 1.4.11). */
+  --input: oklch(0.655 0.02 60);
+  --ring: oklch(0.575 0.18 45);
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.68 0.18 45) 0%,
+    oklch(0.78 0.17 60) 50%,
+    oklch(0.55 0.15 235) 100%
+  );
   --gradient-sunset: linear-gradient(180deg, oklch(0.78 0.17 60) 0%, oklch(0.68 0.18 45) 100%);
   --gradient-ocean: linear-gradient(135deg, oklch(0.55 0.15 235) 0%, oklch(0.62 0.16 200) 100%);
   --gradient-savanna: linear-gradient(135deg, oklch(0.62 0.16 155) 0%, oklch(0.82 0.15 85) 100%);
   --gradient-card: linear-gradient(180deg, oklch(1 0 0) 0%, oklch(0.98 0.02 60) 100%);
   --shadow-elegant: 0 10px 40px -12px oklch(0.68 0.18 45 / 0.25);
   --shadow-glow: 0 0 60px oklch(0.78 0.17 60 / 0.45);
-  --shadow-soft: 0 4px 20px -4px oklch(0.20 0.04 250 / 0.10);
+  --shadow-soft: 0 4px 20px -4px oklch(0.2 0.04 250 / 0.1);
   --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -120,39 +126,50 @@
   --sidebar-ring: oklch(0.704 0.04 256.788);
 }
 
+/* Dark theme with the brand: orange stays primary (dark text on it), Indian Ocean blue, green and
+   yellow keep their roles. Every text pair is ≥ 4.5:1 and field borders ≥ 3:1. */
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
+  --background: oklch(0.17 0.025 255);
+  --foreground: oklch(0.97 0.005 80);
+  --card: oklch(0.215 0.03 255);
+  --card-foreground: oklch(0.97 0.005 80);
+  --popover: oklch(0.215 0.03 255);
+  --popover-foreground: oklch(0.97 0.005 80);
+  --primary: oklch(0.75 0.16 50);
+  --primary-foreground: oklch(0.2 0.04 250);
+  --primary-glow: oklch(0.8 0.15 62);
+  --secondary: oklch(0.72 0.12 235);
+  --secondary-foreground: oklch(0.2 0.04 250);
+  --muted: oklch(0.27 0.03 255);
+  --muted-foreground: oklch(0.74 0.025 255);
+  --accent: oklch(0.3 0.04 50);
+  --accent-foreground: oklch(0.97 0.005 80);
+  --success: oklch(0.74 0.15 155);
+  --success-foreground: oklch(0.2 0.04 250);
+  --warning: oklch(0.83 0.15 85);
+  --warning-foreground: oklch(0.2 0.04 250);
+  --destructive: oklch(0.7 0.18 25);
+  --destructive-foreground: oklch(0.2 0.04 250);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(0.55 0.02 255);
+  --ring: oklch(0.75 0.16 50);
+  --gradient-card: linear-gradient(180deg, oklch(0.215 0.03 255) 0%, oklch(0.24 0.035 60) 100%);
+  --shadow-elegant: 0 10px 40px -12px oklch(0 0 0 / 0.6);
+  --shadow-glow: 0 0 50px oklch(0.75 0.16 50 / 0.3);
+  --shadow-soft: 0 4px 20px -4px oklch(0 0 0 / 0.5);
+  --chart-1: oklch(0.75 0.16 50);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-4: oklch(0.72 0.12 235);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar: oklch(0.215 0.03 255);
+  --sidebar-foreground: oklch(0.97 0.005 80);
+  --sidebar-primary: oklch(0.75 0.16 50);
+  --sidebar-primary-foreground: oklch(0.2 0.04 250);
+  --sidebar-accent: oklch(0.27 0.03 255);
+  --sidebar-accent-foreground: oklch(0.97 0.005 80);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.75 0.16 50);
 }
 
 @layer base {
@@ -162,6 +179,43 @@
 
   body {
     background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* Visible keyboard focus everywhere; components with their own ring (outline-none + ring) override it. */
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  /* Native controls (select lists, scrollbars, date pickers) follow the theme. */
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Leaflet popups and controls use the theme tokens instead of their fixed white. */
+  .leaflet-popup-content-wrapper,
+  .leaflet-popup-tip {
+    background: var(--color-popover);
+    color: var(--color-popover-foreground);
+  }
+  .leaflet-container a.leaflet-popup-close-button {
+    color: var(--color-muted-foreground);
+  }
+  .leaflet-bar a,
+  .leaflet-control-layers {
+    background: var(--color-card);
+    color: var(--color-card-foreground);
+    border-color: var(--color-border);
+  }
+  .leaflet-control-attribution {
+    background: color-mix(in oklab, var(--color-card) 85%, transparent) !important;
+    color: var(--color-muted-foreground);
+  }
+  .leaflet-control-attribution a {
     color: var(--color-foreground);
   }
 }
