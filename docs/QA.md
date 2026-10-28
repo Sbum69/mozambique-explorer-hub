@@ -1,0 +1,63 @@
+# QA do EKAYA Explore
+
+Como verificar a aplicação antes de um merge ou de um lançamento, por esta ordem.
+
+## 1. Verificações de código (sempre; também correm no CI)
+
+```powershell
+bunx tsc --noEmit        # PASS: sem erros
+bunx vitest run          # PASS: todos os testes passam (testes em src/lib/*.test.ts)
+bun run lint             # PASS: 0 erros (os avisos react-refresh são conhecidos)
+bun run build            # PASS: termina sem erros e não altera src/routeTree.gen.ts
+```
+
+O workflow `.github/workflows/ci.yml` corre os quatro em cada PR e em cada push para a `main`.
+
+## 2. Testes de base de dados (quando mudam migrações, RLS ou triggers)
+
+Ficheiros em `supabase/tests/`, um por área. Cada um:
+
+- explica no topo o que testa, como correr e o resultado esperado;
+- corre como um único bloco `DO $$ … $$` e termina **sempre** com
+  `RAISE EXCEPTION '…_ROLLBACK …'`, por isso tudo o que cria é revertido;
+- escreve o resultado na mensagem do erro: `[… PASS …]` em todos os itens e nenhum `[… FAIL …]`
+  (nos ficheiros mais antigos, as falhas aparecem com `!`).
+
+Como correr: colar o ficheiro no SQL da Lovable Cloud (conector Lovable, `query_database`).
+Depois, confirmar por leitura que não ficaram dados de teste (consulta no topo de cada ficheiro).
+
+| Ficheiro                              | Área                                                    |
+| ------------------------------------- | ------------------------------------------------------- |
+| `seg-1b_one_business_per_owner.sql`   | um negócio por conta                                    |
+| `seg-2_bookings_integrity.sql`        | integridade das reservas                                |
+| `8e5_commercial_flow.sql`             | expiração, não comparência, capacidade                  |
+| `10b_rewards_and_proofs.sql`          | recompensas e provas localizadas                        |
+| `adm-1_admin_management.sql`          | gestão de utilizadores e negócios                       |
+| `adm-2c_admin_broadcasts.sql`         | avisos do admin                                         |
+| `dados-1_exchange_rates.sql`          | câmbio                                                  |
+| `fav-1_favorites_and_preferences.sql` | favoritos e preferências                                |
+| `community.sql`                       | comunidade, denúncias, experiências comunitárias, fotos |
+| `notifications.sql`                   | notificações (RLS, conteúdo imutável, triggers)         |
+
+## 3. Verificações no browser (antes de um merge com mudanças visíveis)
+
+Ver [scripts/qa/README.md](../scripts/qa/README.md). Ordem recomendada, com o build de produção
+a correr na porta 4173:
+
+1. `hydration.ts`
+2. `interactions.ts`
+3. `widths.ts`
+4. `contrast.ts`
+5. `lang.ts`
+6. `shots.ts` (revisão visual)
+7. `lighthouse.ts` (só com nenhum outro servidor ligado)
+
+## 4. Testes à mão (telemóvel real)
+
+Com o build a correr com `--ip 0.0.0.0`, abrir `http://<IPv4 do Wi-Fi do PC>:4173` no telemóvel,
+na mesma rede. A geolocalização só funciona em https (preview do Lovable).
+
+## Estados nos relatórios
+
+**PASS** (executado e certo), **FAIL** (executado e errado), **BLOCKED** (impedido por algo
+externo, dizer o quê), **NOT RUN** (não executado, dizer porquê). Nunca PASS sem executar.
