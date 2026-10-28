@@ -50,8 +50,8 @@ export function ShareButton({
       await navigator.share({ title: payload.title, text: buildText(payload), url: payload.url });
       setOpen(false);
       return true;
-    } catch (e: any) {
-      if (e?.name === "AbortError") return true;
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return true;
       return false;
     }
   };
