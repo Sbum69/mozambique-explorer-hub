@@ -37,7 +37,13 @@ import {
 } from "@/components/CommunityExperienceCard";
 import type { CommunityExperience } from "@/lib/community-experiences";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
-import { routeCover, routePriceMzn, routeStopCount } from "@/lib/routes";
+import {
+  routeCover,
+  routeDescription,
+  routePriceMzn,
+  routeStopCount,
+  routeTitle,
+} from "@/lib/routes";
 import { SAMPLE_ITINERARIES } from "@/data/itineraries";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -127,11 +133,10 @@ const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
     .filter((s) => s.type === "story")
     .map((s) => ({
       id: `${it.id}-${s.id}`,
-      itineraryId: it.id,
-      title: s.title ?? "",
-      location: s.location ?? "",
-      story: s.story ?? "",
-      category: s.culturalContext ?? "",
+      routeId: it.routeId,
+      title: { pt: s.title ?? "", en: s.titleEn ?? s.title ?? "" },
+      location: { pt: s.location ?? "", en: s.locationEn ?? s.location ?? "" },
+      story: { pt: s.story ?? "", en: s.storyEn ?? s.story ?? "" },
     })),
 );
 
@@ -426,7 +431,7 @@ function HomePage() {
                 <div className="relative aspect-[16/10]">
                   <img
                     src={routeCover(it)}
-                    alt={it.title}
+                    alt={routeTitle(it, lang)}
                     className="size-full object-cover"
                     loading="lazy"
                     decoding="async"
@@ -437,9 +442,9 @@ function HomePage() {
                 </div>
                 <CardContent className="p-4">
                   <p className="text-xs font-mono text-muted-foreground mb-1.5">{it.code}</p>
-                  <h3 className="font-semibold leading-tight">{it.title}</h3>
+                  <h3 className="font-semibold leading-tight">{routeTitle(it, lang)}</h3>
                   <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                    {it.description}
+                    {routeDescription(it, lang)}
                   </p>
                   <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
@@ -547,17 +552,20 @@ function HomePage() {
                     <Sparkles className="size-3" />
                     Story Stop
                   </div>
-                  <h3 className="mt-3 font-semibold leading-tight">{s.title}</h3>
+                  <h3 className="mt-3 font-semibold leading-tight">{s.title[lang]}</h3>
                   <p className="mt-1 text-xs text-muted-foreground inline-flex items-center gap-1">
-                    <MapPin className="size-3" /> {s.location}
+                    <MapPin className="size-3" /> {s.location[lang]}
                   </p>
-                  <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{s.story}</p>
-                  <Button asChild size="sm" variant="ghost" className="mt-3 -ml-2">
-                    <Link to="/itinerary/$id" params={{ id: s.itineraryId }}>
-                      {lang === "pt" ? "Explorar roteiro" : "Explore itinerary"}
-                      <ArrowRight className="size-3.5" />
-                    </Link>
-                  </Button>
+                  <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{s.story[lang]}</p>
+                  {/* Only stories whose itinerary exists in the database link to it. */}
+                  {s.routeId && (
+                    <Button asChild size="sm" variant="ghost" className="mt-3 -ml-2">
+                      <Link to="/itinerary/$id" params={{ id: s.routeId }}>
+                        {lang === "pt" ? "Explorar roteiro" : "Explore itinerary"}
+                        <ArrowRight className="size-3.5" />
+                      </Link>
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

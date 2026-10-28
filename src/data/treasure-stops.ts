@@ -8,6 +8,10 @@ export interface TreasureStop {
   kind: "story" | "point" | "beach" | "island";
   coords?: [number, number];
   hint?: string;
+  /** English versions where they differ (place names stay as they are). */
+  nameEn?: string;
+  placeEn?: string;
+  hintEn?: string;
 }
 
 // Story Stops reais retirados dos roteiros de amostra
@@ -17,10 +21,13 @@ const STORY_STOPS: TreasureStop[] = SAMPLE_ITINERARIES.flatMap((it) =>
     .map((s) => ({
       id: `${it.id}:${s.id}`,
       name: s.title ?? "Story Stop",
+      nameEn: s.titleEn,
       place: s.location ?? it.name,
+      placeEn: s.locationEn ?? (s.location ? undefined : it.nameEn),
       kind: "story" as const,
       coords: ITINERARY_STOP_COORDS[`${it.id}:${s.id}`],
       hint: it.name,
+      hintEn: it.nameEn,
     })),
 );
 
@@ -33,6 +40,7 @@ const NEIGHBOURHOOD_STOPS: TreasureStop[] = [
     kind: "point",
     coords: [-25.97, 32.573],
     hint: "Art déco de 1901",
+    hintEn: "Art deco, 1901",
   },
   {
     id: "b2",
