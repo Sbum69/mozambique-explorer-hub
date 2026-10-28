@@ -1,7 +1,8 @@
 -- I18N-2 — English location of community experiences, and hide the leftover test route "Shelbea".
 -- 1) New nullable column location_en (no RLS or grant changes: it follows the table's policies).
--- 2) English text only where the Portuguese has descriptive words; proper names stay as they are
---    and those rows keep location_en NULL (the interface then shows the Portuguese text).
+-- 2) English text only where the Portuguese has descriptive words; proper names stay in Portuguese
+--    except the well-known English names Lake Niassa and Zambezi. Rows that are only Portuguese
+--    proper names keep location_en NULL (the interface then shows the Portuguese text).
 --    Only empty location_en values are filled; the Portuguese column is not touched.
 -- 3) Route EK-B0F618 "Shelbea" (public, no owner, no progress, no favourites) becomes private and
 --    inactive. Nothing is deleted.
@@ -20,16 +21,18 @@ UPDATE public.community_experiences ce
     ('Centro de Tete', 'Tete city centre'),
     ('Centro de Xai-Xai', 'Xai-Xai city centre'),
     ('Cidade de Inhambane', 'Inhambane city'),
+    ('Delta do Zambeze', 'Zambezi Delta'),
     ('Frente à Praia do Tofo', 'In front of Praia do Tofo'),
     ('Ilha e arredores', 'The island and surroundings'),
     ('Maputo (local varia; frequentemente na marginal)', 'Maputo (venue varies; often on the seafront avenue)'),
-    ('Margens do Lago Niassa', 'Shores of Lago Niassa'),
-    ('Margens do Zambeze', 'Banks of the Zambeze'),
+    ('Margens do Lago Niassa', 'Shores of Lake Niassa'),
+    ('Margens do Zambeze', 'Banks of the Zambezi'),
     ('Niassa rural', 'Rural Niassa'),
     ('Nkwichi e arredores', 'Nkwichi and surroundings'),
     ('Norte de Cabo Delgado', 'Northern Cabo Delgado'),
     ('Norte de Niassa', 'Northern Niassa'),
     ('Ponta do Ouro, sul de Maputo', 'Ponta do Ouro, south of Maputo'),
+    ('Rio Zambeze, Tete', 'Zambezi River, Tete'),
     ('Sul da província de Maputo', 'Southern Maputo province'),
     ('Tete cidade', 'Tete city'),
     ('Tete e arredores', 'Tete and surroundings'),
