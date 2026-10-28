@@ -18,3 +18,6 @@ supabase/migrations/
 # Lovable plans (platform history) and the roadmap (updated at the end of each sequence)
 .lovable/
 roadmap.md
+
+# Browser QA outputs
+qa-output/
