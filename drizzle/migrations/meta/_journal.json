@@ -302,6 +302,13 @@
       "when": 1793200000000,
       "tag": "0042_admin_broadcasts",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1793300000000,
+      "tag": "0043_routes_seed_english_texts",
+      "breakpoints": true
     }
   ]
 }
