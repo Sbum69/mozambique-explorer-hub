@@ -81,7 +81,6 @@ export const Route = createFileRoute("/experiences")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  ssr: false,
   validateSearch: (search: Record<string, unknown>): { book?: string } =>
     typeof search.book === "string" ? { book: search.book } : {},
   component: ExperiencesPage,

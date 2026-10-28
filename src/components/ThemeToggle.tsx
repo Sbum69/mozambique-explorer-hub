@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 // The Radix menu (and floating-ui) is a separate chunk fetched after the first render, so it is not
 // part of the JavaScript every page needs before it can paint.
@@ -15,7 +16,7 @@ const TXT = {
 } as const;
 
 /** Light / dark / system, remembered in this browser; sits next to the language toggle. */
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { lang } = useLang();
   const { preference, resolved, setPreference } = useTheme();
   const t = TXT[lang];
@@ -28,7 +29,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="text-foreground"
+      className={cn("text-foreground", className)}
       aria-label={`${t.label}: ${t[preference]}`}
       title={`${t.label}: ${t[preference]}`}
       aria-haspopup="menu"

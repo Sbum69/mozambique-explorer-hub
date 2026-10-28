@@ -19,13 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { LazyChoiceSelect } from "@/components/LazyChoiceSelect";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -50,6 +44,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
 import { HERO_AVIF_SRCSET, HeroImage } from "@/components/HeroImage";
+
+// Same colours as NotificationsBell variant="onDark": the top bar sits on the dark hero photo.
+const ON_HERO = "text-white hover:bg-white/10 hover:text-white";
 
 const OnboardingModal = lazy(() =>
   import("@/components/OnboardingModal").then((m) => ({ default: m.OnboardingModal })),
@@ -84,7 +81,6 @@ export const Route = createFileRoute("/home")({
       },
     ],
   }),
-  ssr: false,
   component: HomePage,
 });
 
@@ -211,22 +207,23 @@ function HomePage() {
         </div>
 
         {/* Nav */}
-        <nav className="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5 text-white">
-          <div className="flex items-center gap-1">
+        <nav className="relative z-10 flex items-center justify-between gap-2 px-4 sm:px-10 py-5 text-white">
+          <div className="flex min-w-0 items-center gap-1">
             <div className="text-white">
               <AppSidebar />
             </div>
-            <div className="flex items-center gap-2 font-bold text-xl ml-1">
-              <span className="size-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+            <div className="flex min-w-0 items-center gap-2 font-bold text-xl ml-1">
+              <span className="size-9 shrink-0 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
                 🌍
               </span>
-              Ekaya
+              <span className="sr-only min-[390px]:not-sr-only truncate">Ekaya</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          {/* Phones: tighter spacing, logo without the wordmark below 390px; the second action stays in the side menu. */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <NotificationsBell variant="onDark" />
-            <ThemeToggle />
-            <LanguageToggle />
+            <ThemeToggle className={ON_HERO} />
+            <LanguageToggle className={ON_HERO} />
             {isGuest ? (
               <>
                 <Button
@@ -240,7 +237,7 @@ function HomePage() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-white hover:bg-white/10 hover:text-white"
+                  className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
                 >
                   <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
                 </Button>
@@ -254,13 +251,13 @@ function HomePage() {
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard className="size-4" />
-                    {t("dashboard")}
+                    <span className="sr-only sm:not-sr-only">{t("dashboard")}</span>
                   </Link>
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-white hover:bg-white/10 hover:text-white"
+                  className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
                   onClick={() => {
                     void logout().then(() => navigate({ to: "/login", replace: true }));
                   }}
@@ -317,21 +314,15 @@ function HomePage() {
                   <MapPin className="size-3.5" />
                   {lang === "pt" ? "Destino" : "Destination"}
                 </label>
-                <Select value={destId} onValueChange={setDestId}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">
-                      {lang === "pt" ? "Qualquer destino" : "Any destination"}
-                    </SelectItem>
-                    {destinations.map((d) => (
-                      <SelectItem key={d.id} value={d.slug}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <LazyChoiceSelect
+                  value={destId}
+                  onValueChange={setDestId}
+                  className="h-11"
+                  options={[
+                    { value: "any", label: lang === "pt" ? "Qualquer destino" : "Any destination" },
+                    ...destinations.map((d) => ({ value: d.slug, label: d.name })),
+                  ]}
+                />
                 {loadingDestinations && (
                   <p className="mt-1.5 text-[11px] text-muted-foreground">
                     {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
@@ -352,18 +343,12 @@ function HomePage() {
                   <Calendar className="size-3.5" />
                   {lang === "pt" ? "Quantos dias?" : "How many days?"}
                 </label>
-                <Select value={days} onValueChange={(v) => setDays(v as DayBucket)}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DAY_OPTIONS.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.label[lang as Lang]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <LazyChoiceSelect
+                  value={days}
+                  onValueChange={(v) => setDays(v as DayBucket)}
+                  className="h-11"
+                  options={DAY_OPTIONS.map((d) => ({ value: d.id, label: d.label[lang as Lang] }))}
+                />
               </div>
 
               <Button

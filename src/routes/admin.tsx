@@ -234,23 +234,25 @@ function AdminPage() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="border-b bg-card text-card-foreground">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="size-12 rounded-xl bg-gradient-to-br from-orange-600 to-blue-700 text-white flex items-center justify-center shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="size-10 sm:size-12 shrink-0 rounded-xl bg-gradient-to-br from-orange-600 to-blue-700 text-white flex items-center justify-center shadow-lg">
               <Shield className="size-6" aria-hidden="true" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold">
+            <div className="min-w-0">
+              <h1 className="truncate text-base sm:text-lg font-bold">
                 {pt ? "Painel de Administração" : "Administration"}
               </h1>
               <p className="text-xs text-muted-foreground">Ekaya Explore</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          {/* Phones: icon-only actions (names kept for screen readers). */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <ThemeToggle />
             <LanguageToggle />
             <Button variant="outline" size="sm" onClick={() => navigate({ to: "/impact" })}>
-              <Activity className="size-4" /> {pt ? "Impacto" : "Impact"}
+              <Activity className="size-4" />{" "}
+              <span className="sr-only sm:not-sr-only">{pt ? "Impacto" : "Impact"}</span>
             </Button>
             <span className="hidden sm:inline text-sm text-muted-foreground">
               {user.displayName ?? user.username}
@@ -262,7 +264,8 @@ function AdminPage() {
                 void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
             >
-              <LogOut className="size-4" /> {pt ? "Sair" : "Sign out"}
+              <LogOut className="size-4" />{" "}
+              <span className="sr-only sm:not-sr-only">{pt ? "Sair" : "Sign out"}</span>
             </Button>
           </div>
         </div>

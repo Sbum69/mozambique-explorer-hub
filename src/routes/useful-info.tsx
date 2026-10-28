@@ -559,8 +559,8 @@ function UsefulInfoPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
             <AppSidebar />
             <Button
               variant="ghost"
@@ -571,15 +571,15 @@ function UsefulInfoPage() {
             >
               <ArrowLeft className="size-5" />
             </Button>
-            <h1 className="font-bold text-base sm:text-lg ml-1">
+            <h1 className="min-w-0 truncate font-bold text-base sm:text-lg ml-1">
               {pt ? "Informações Úteis" : "Useful Information"}
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <ThemeToggle />
             <LanguageToggle />
             {user && (
-              <div className="size-9 rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold flex items-center justify-center text-sm">
+              <div className="size-9 shrink-0 rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold flex items-center justify-center text-sm">
                 {user.displayName.charAt(0).toUpperCase()}
               </div>
             )}

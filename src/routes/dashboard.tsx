@@ -203,17 +203,17 @@ function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
       {/* Nav */}
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-1">
             <AppSidebar />
-            <Link to="/home" className="flex items-center gap-2 font-bold text-lg ml-1">
-              <span className="size-8 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-primary-foreground">
+            <Link to="/home" className="flex min-w-0 items-center gap-2 font-bold text-lg ml-1">
+              <span className="size-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-primary-foreground">
                 🌍
               </span>
-              Ekaya
+              <span className="sr-only min-[375px]:not-sr-only truncate">Ekaya</span>
             </Link>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
