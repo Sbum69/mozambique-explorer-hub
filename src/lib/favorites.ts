@@ -1,7 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { fetchDestinations } from "@/lib/destinations";
-import { fetchExperienceById } from "@/lib/experiences";
-import { fetchRouteById, routeCover } from "@/lib/routes";
 
 /**
  * Favourites live in public.favorites (RLS: own rows only; a trigger refuses items that don't exist
@@ -75,6 +72,13 @@ export async function resolveFavoriteData(
   rows: FavoriteRef[],
 ): Promise<Record<string, FavoriteData>> {
   const out: Record<string, FavoriteData> = {};
+  // Loaded on demand: the provider sits in the root, and these modules are only needed to show details.
+  const [{ fetchDestinations }, { fetchExperienceById }, { fetchRouteById, routeCover }] =
+    await Promise.all([
+      import("@/lib/destinations"),
+      import("@/lib/experiences"),
+      import("@/lib/routes"),
+    ]);
   const places = rows.filter((r) => r.type === "place");
   const destinations = places.length ? await fetchDestinations() : [];
   for (const p of places) {

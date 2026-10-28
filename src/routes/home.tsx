@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -32,7 +32,6 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { OnboardingModal } from "@/components/OnboardingModal";
 
 import { useDestinations } from "@/hooks/useDestinations";
 import { type ExperienceCategory } from "@/lib/experiences";
@@ -50,8 +49,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
-import hero from "@/assets/hero-mozambique.jpg";
+import { HERO_AVIF_SRCSET, HeroImage } from "@/components/HeroImage";
 
+const OnboardingModal = lazy(() =>
+  import("@/components/OnboardingModal").then((m) => ({ default: m.OnboardingModal })),
+);
 export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
@@ -69,6 +71,17 @@ export const Route = createFileRoute("/home")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+    ],
+    // The hero photo is the largest element: start fetching it with the HTML, not after the JS.
+    links: [
+      {
+        rel: "preload",
+        as: "image",
+        type: "image/avif",
+        imageSrcSet: HERO_AVIF_SRCSET,
+        imageSizes: "100vw",
+        fetchPriority: "high",
+      },
     ],
   }),
   ssr: false,
@@ -133,6 +146,11 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  // Loaded only for accounts that still need it; kept mounted once opened so it can animate closed.
+  const [onboardingMounted, setOnboardingMounted] = useState(false);
+  useEffect(() => {
+    if (showOnboarding) setOnboardingMounted(true);
+  }, [showOnboarding]);
   const {
     destinations,
     loading: loadingDestinations,
@@ -187,13 +205,7 @@ function HomePage() {
       {/* ============ HERO ============ */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={hero}
-            alt=""
-            className="size-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
+          <HeroImage alt="" className="size-full object-cover" priority />
           {/* Fixed dark overlay (not a theme token) so the white hero text always reads, in both themes. */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-background" />
         </div>
@@ -262,7 +274,8 @@ function HomePage() {
 
         {/* Hero copy + selector */}
         <section className="relative z-10 px-6 sm:px-10 pt-8 pb-20 max-w-6xl mx-auto text-white">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Largest element of the page: shown at once (no entrance fade) so it paints with the first render. */}
+          <motion.div initial={false} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-4 py-1.5 text-sm">
               <Sparkles className="size-3.5" />
               {lang === "pt"
@@ -677,7 +690,11 @@ function HomePage() {
         </Card>
       </section>
 
-      <OnboardingModal open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
+      {onboardingMounted && (
+        <Suspense fallback={null}>
+          <OnboardingModal open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

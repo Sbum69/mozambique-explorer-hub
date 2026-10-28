@@ -13,7 +13,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 
-import hero from "@/assets/hero-mozambique.jpg";
+import { HeroImage } from "@/components/HeroImage";
+import { FORGOT_TXT } from "@/lib/page-texts";
 import { getAuthenticatedUser, roleLandingTarget, validateAuthReturnSearch } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
@@ -76,10 +77,11 @@ function LoginPage() {
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left visual */}
       <div className="relative hidden lg:block overflow-hidden">
-        <img
-          src={hero}
+        {/* Hidden below lg: lazy, so phones never download it. */}
+        <HeroImage
           alt={lang === "pt" ? "Costa de Moçambique" : "Mozambique coastline"}
           className="absolute inset-0 size-full object-cover"
+          sizes="50vw"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-black/45 via-black/35 to-black/70" />
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
@@ -111,11 +113,8 @@ function LoginPage() {
           <ThemeToggle />
           <LanguageToggle />
         </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
-        >
+        {/* Largest element of the page: shown at once (no entrance fade) so it paints with the first render. */}
+        <motion.div initial={false} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <div className="text-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
@@ -146,7 +145,15 @@ function LoginPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">{t("password")}</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="password">{t("password")}</Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-medium text-primary hover:underline rounded"
+                >
+                  {FORGOT_TXT[lang].forgotLink}
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input

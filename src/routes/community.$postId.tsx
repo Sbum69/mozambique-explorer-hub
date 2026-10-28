@@ -27,7 +27,7 @@ import {
   type CommunityPost,
   type ReactionValue,
 } from "@/lib/community";
-import { ReportDialog } from "@/routes/community";
+import { ReportDialog } from "@/components/ReportDialog";
 
 export const Route = createFileRoute("/community/$postId")({
   ssr: false,

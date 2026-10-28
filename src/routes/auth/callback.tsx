@@ -9,7 +9,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/contexts/LanguageContext";
-import { roleLandingTarget } from "@/lib/auth";
+import { postConfirmTarget, roleLandingTarget } from "@/lib/auth";
+import { RECOVERY_FLAG, isRecoveryReturn } from "@/lib/password-reset";
 
 export const Route = createFileRoute("/auth/callback")({
   ssr: false,
@@ -56,7 +57,14 @@ const TXT = {
   },
 };
 
-const EMAIL_OTP_TYPES = ["signup", "email", "invite", "magiclink", "email_change"] as const;
+const EMAIL_OTP_TYPES = [
+  "signup",
+  "email",
+  "invite",
+  "magiclink",
+  "email_change",
+  "recovery",
+] as const;
 type EmailOtpType = (typeof EMAIL_OTP_TYPES)[number];
 
 function AuthCallbackPage() {
@@ -79,6 +87,16 @@ function AuthCallbackPage() {
       const tokenHash = search.get("token_hash");
       const type = search.get("type") as EmailOtpType | null;
       const hasHashTokens = hash.has("access_token");
+
+      // A password-reset link (any format) continues on /reset-password once the session is open.
+      let flagged = false;
+      try {
+        const at = Number(localStorage.getItem(RECOVERY_FLAG) ?? 0);
+        flagged = Date.now() - at < 60 * 60 * 1000;
+      } catch {
+        // storage blocked
+      }
+      const recovery = isRecoveryReturn(search, hash, flagged);
 
       // Remove tokens/codes from the address bar so a refresh never re-processes them.
       window.history.replaceState(null, "", window.location.pathname);
@@ -114,9 +132,18 @@ function AuthCallbackPage() {
       // Supabase Auth is the only source of truth: re-validate the user server-side.
       const { data: userData } = await supabase.auth.getUser();
       const user = userData.user;
+      if (user && recovery) {
+        setStatus("redirecting");
+        navigate({ to: "/reset-password", replace: true });
+        return;
+      }
       if (user && user.email_confirmed_at) {
         setStatus("redirecting");
-        navigate({ to: await roleLandingTarget(user.id), replace: true });
+        // Back to where sign-up started (allow-listed), else the role-based landing page.
+        navigate({
+          to: postConfirmTarget(user.user_metadata) ?? (await roleLandingTarget(user.id)),
+          replace: true,
+        });
         return;
       }
       setStatus(confirmedNow ? "confirmed" : "invalid");

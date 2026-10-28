@@ -21,6 +21,7 @@ import { Route as CultureHistoryRouteImport } from './routes/culture-history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as GamificationRouteImport } from './routes/gamification'
 import { Route as HomeRouteImport } from './routes/home'
@@ -31,6 +32,7 @@ import { Route as MapRouteImport } from './routes/map'
 import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PreferencesRouteImport } from './routes/preferences'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UsefulInfoRouteImport } from './routes/useful-info'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -100,6 +102,11 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesRoute = GamesRouteImport.update({
   id: '/games',
   path: '/games',
@@ -148,6 +155,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const PreferencesRoute = PreferencesRouteImport.update({
   id: '/preferences',
   path: '/preferences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -204,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/games': typeof GamesRoute
   '/gamification': typeof GamificationRoute
   '/home': typeof HomeRoute
@@ -214,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/preferences': typeof PreferencesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -236,6 +250,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/games': typeof GamesRoute
   '/gamification': typeof GamificationRoute
   '/home': typeof HomeRoute
@@ -246,6 +261,7 @@ export interface FileRoutesByTo {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/preferences': typeof PreferencesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -269,6 +285,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/games': typeof GamesRoute
   '/gamification': typeof GamificationRoute
   '/home': typeof HomeRoute
@@ -279,6 +296,7 @@ export interface FileRoutesById {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/preferences': typeof PreferencesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -303,6 +321,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/experiences'
     | '/favorites'
+    | '/forgot-password'
     | '/games'
     | '/gamification'
     | '/home'
@@ -313,6 +332,7 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/preferences'
+    | '/reset-password'
     | '/signup'
     | '/useful-info'
     | '/auth/callback'
@@ -335,6 +355,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/experiences'
     | '/favorites'
+    | '/forgot-password'
     | '/games'
     | '/gamification'
     | '/home'
@@ -345,6 +366,7 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/preferences'
+    | '/reset-password'
     | '/signup'
     | '/useful-info'
     | '/auth/callback'
@@ -367,6 +389,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/experiences'
     | '/favorites'
+    | '/forgot-password'
     | '/games'
     | '/gamification'
     | '/home'
@@ -377,6 +400,7 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/preferences'
+    | '/reset-password'
     | '/signup'
     | '/useful-info'
     | '/auth/callback'
@@ -400,6 +424,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
   FavoritesRoute: typeof FavoritesRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   GamesRoute: typeof GamesRoute
   GamificationRoute: typeof GamificationRoute
   HomeRoute: typeof HomeRoute
@@ -410,6 +435,7 @@ export interface RootRouteChildren {
   NewsAlertsRoute: typeof NewsAlertsRoute
   OnboardingRoute: typeof OnboardingRoute
   PreferencesRoute: typeof PreferencesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
@@ -505,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games': {
       id: '/games'
       path: '/games'
@@ -573,6 +606,13 @@ declare module '@tanstack/react-router' {
       path: '/preferences'
       fullPath: '/preferences'
       preLoaderRoute: typeof PreferencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -659,6 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,
   FavoritesRoute: FavoritesRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   GamesRoute: GamesRoute,
   GamificationRoute: GamificationRoute,
   HomeRoute: HomeRoute,
@@ -669,6 +710,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsAlertsRoute: NewsAlertsRoute,
   OnboardingRoute: OnboardingRoute,
   PreferencesRoute: PreferencesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   UsefulInfoRoute: UsefulInfoRoute,
   AuthCallbackRoute: AuthCallbackRoute,

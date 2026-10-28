@@ -94,7 +94,7 @@ function SignupPage() {
     setErrors(v);
     if (Object.keys(v).length > 0) return;
     setLoading(true);
-    const res = await registerUser({ username, password, displayName, email });
+    const res = await registerUser({ username, password, displayName, email, returnTo });
     setLoading(false);
     if (!res.ok) {
       const msg = res.error ?? t.errGeneric;

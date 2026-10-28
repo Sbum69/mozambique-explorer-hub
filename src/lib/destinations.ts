@@ -1,11 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 
-import maputo from "@/assets/dest-maputo.jpg";
-import ilha from "@/assets/dest-ilha.jpg";
-import inhambane from "@/assets/dest-inhambane.jpg";
-import vilankulo from "@/assets/dest-vilankulo.jpg";
-import pemba from "@/assets/dest-pemba.jpg";
-import gorongosa from "@/assets/dest-gorongosa.jpg";
+import maputo from "@/assets/dest-maputo.webp";
+import ilha from "@/assets/dest-ilha.webp";
+import inhambane from "@/assets/dest-inhambane.webp";
+import vilankulo from "@/assets/dest-vilankulo.webp";
+import pemba from "@/assets/dest-pemba.webp";
+import gorongosa from "@/assets/dest-gorongosa.webp";
 
 export type DestinationBadge = "most-visited" | "most-recommended";
 

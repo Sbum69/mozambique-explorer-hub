@@ -1,24 +1,18 @@
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Suspense, lazy, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useLang } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import type { ThemePreference } from "@/lib/theme";
+
+// The Radix menu (and floating-ui) is a separate chunk fetched after the first render, so it is not
+// part of the JavaScript every page needs before it can paint.
+const ThemeMenu = lazy(() => import("@/components/ThemeMenu"));
 
 const TXT = {
-  pt: { label: "Tema", light: "Claro", dark: "Escuro", system: "Sistema", current: "Tema atual" },
-  en: { label: "Theme", light: "Light", dark: "Dark", system: "System", current: "Current theme" },
+  pt: { label: "Tema", light: "Claro", dark: "Escuro", system: "Sistema" },
+  en: { label: "Theme", light: "Light", dark: "Dark", system: "System" },
 } as const;
-
-const ICON = { light: Sun, dark: Moon, system: Monitor } as const;
 
 /** Light / dark / system, remembered in this browser; sits next to the language toggle. */
 export function ThemeToggle() {
@@ -26,37 +20,40 @@ export function ThemeToggle() {
   const { preference, resolved, setPreference } = useTheme();
   const t = TXT[lang];
   const Icon = resolved === "dark" ? Moon : Sun;
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [menuReady, setMenuReady] = useState(false);
+
+  const button = (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="text-foreground"
+      aria-label={`${t.label}: ${t[preference]}`}
+      title={`${t.label}: ${t[preference]}`}
+      aria-haspopup="menu"
+      aria-expanded={open}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      // A click while the menu is still loading opens it as soon as it arrives; then Radix takes over.
+      onClick={menuReady ? undefined : () => setOpen(true)}
+    >
+      <Icon className="size-4" />
+    </Button>
+  );
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-foreground"
-          aria-label={`${t.label}: ${t[preference]}`}
-          title={`${t.label}: ${t[preference]}`}
-        >
-          <Icon className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>{t.label}</DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          value={preference}
-          onValueChange={(v) => setPreference(v as ThemePreference)}
-        >
-          {(["light", "dark", "system"] as const).map((p) => {
-            const ItemIcon = ICON[p];
-            return (
-              <DropdownMenuRadioItem key={p} value={p} className="gap-2">
-                <ItemIcon className="size-4" aria-hidden="true" />
-                {t[p]}
-              </DropdownMenuRadioItem>
-            );
-          })}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Suspense fallback={button}>
+      <ThemeMenu
+        trigger={button}
+        open={open}
+        onOpenChange={setOpen}
+        focusTrigger={focused}
+        value={preference}
+        onValueChange={setPreference}
+        labels={t}
+        onReady={() => setMenuReady(true)}
+      />
+    </Suspense>
   );
 }

@@ -33,3 +33,15 @@ export type BusinessRegistrationError =
 export type BusinessRegistrationResult =
   | { ok: true }
   | { ok: false; error: BusinessRegistrationError };
+
+/**
+ * Error of the business insert. Two simultaneous registrations can both pass the eligibility read;
+ * the unique index businesses_owner_id_key (one business per account) then refuses the second.
+ */
+export function businessInsertError(
+  error: { code?: string | null; message?: string | null } | null,
+): BusinessRegistrationError {
+  if (error?.code === "23505" && (error.message ?? "").includes("businesses_owner_id_key"))
+    return "ALREADY_HAS_BUSINESS";
+  return "BUSINESS_FAILED";
+}

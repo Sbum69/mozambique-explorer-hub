@@ -272,7 +272,8 @@ function ExperiencesPage() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        {/* Largest element of the page: shown at once (no entrance fade) so it paints with the first render. */}
+        <motion.div initial={false} animate={{ opacity: 1, y: 0 }} className="mb-6">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight flex items-center gap-3">
             <Compass className="size-8 text-primary" /> {t("expTitle")}
           </h1>

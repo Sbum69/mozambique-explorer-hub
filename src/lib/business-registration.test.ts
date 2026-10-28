@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { businessRegistrationSchema } from "./business-registration";
+import { businessInsertError, businessRegistrationSchema } from "./business-registration";
 
 const valid = {
   businessName: "Banca da Ana",
@@ -67,5 +67,27 @@ describe("SEG-1 business registration schema", () => {
     ]) {
       expect(key in parsed, key).toBe(false);
     }
+  });
+});
+
+describe("FINAL-1 one business per account at insert time", () => {
+  test("a unique-index violation on the owner means the account already has a business", () =>
+    expect(
+      businessInsertError({
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "businesses_owner_id_key"',
+      }),
+    ).toBe("ALREADY_HAS_BUSINESS"));
+  test("other failures stay generic (including a slug collision)", () => {
+    expect(
+      businessInsertError({
+        code: "23505",
+        message: 'duplicate key value violates unique constraint "businesses_slug_key"',
+      }),
+    ).toBe("BUSINESS_FAILED");
+    expect(businessInsertError({ code: "42501", message: "permission denied" })).toBe(
+      "BUSINESS_FAILED",
+    );
+    expect(businessInsertError(null)).toBe("BUSINESS_FAILED");
   });
 });

@@ -56,7 +56,13 @@ function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  // Data is reused for a minute across pages (no repeated Supabase requests when navigating);
+  // mutations still invalidate their own keys, so actions refresh immediately.
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { staleTime: 60_000, refetchOnWindowFocus: false, retry: 1 },
+    },
+  });
   const router = createRouter({
     routeTree,
     context: { queryClient },
