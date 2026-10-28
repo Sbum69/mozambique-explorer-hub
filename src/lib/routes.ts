@@ -815,6 +815,13 @@ export function routeSubtitle(r: ItineraryRoute, lang: "pt" | "en") {
 export function routeDescription(r: ItineraryRoute, lang: "pt" | "en") {
   return lang === "en" && r.descriptionEn ? r.descriptionEn : r.description;
 }
+/** Day heading: the unassigned bucket has a fixed label; other days fall back to Portuguese. */
+export function dayTitle(d: RouteDay, lang: "pt" | "en"): string | null {
+  if (d.isUnassigned) {
+    return lang === "en" ? "Day-by-day split to be validated" : "Distribuição por dias a validar";
+  }
+  return (lang === "en" && d.titleEn ? d.titleEn : d.title) || null;
+}
 export function stopTitle(s: RouteStop, lang: "pt" | "en") {
   return lang === "en" && s.titleEn ? s.titleEn : s.title;
 }

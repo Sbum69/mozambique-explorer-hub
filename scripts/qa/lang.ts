@@ -9,7 +9,12 @@
 import { launch, newContext, reporter, selectedPages, BASE } from "./lib";
 
 // Proper names that keep their accents in English.
-const ALLOWED = [/Zambézia/, /Ilha de Moçambique/];
+const ALLOWED = [
+  /Zambézia|Ilha de Moçambique|Praça da Independência|Závora|São Sebastião|Núcleo de Arte/,
+  /Lourenço Marques|José Craveirinha|Capitão Sálvio/,
+  // Internal test business (to be deleted before launch).
+  /EKAYA Teste|Negócio de teste interno/,
+];
 
 const h1Of = (html: string) =>
   (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "").replace(/<[^>]+>/g, "").trim();
