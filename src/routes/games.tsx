@@ -496,18 +496,20 @@ function GamesPage() {
             onClick={() => navigate({ to: "/dashboard" })}
             className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
           >
-            <ArrowLeft className="size-4" /> {pt ? "Voltar" : "Back"}
+            <ArrowLeft className="size-4" />{" "}
+            <span className="sr-only sm:not-sr-only">{pt ? "Voltar" : "Back"}</span>
           </button>
-          <h1 className="font-bold text-sm sm:text-base">
+          <h1 className="min-w-0 truncate font-bold text-sm sm:text-base">
             🎮 {pt ? "Jogos & Desafios" : "Games & Challenges"}
           </h1>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <ThemeToggle />
             <LanguageToggle />
             <Button asChild size="sm" variant="outline" className="gap-1">
               <Link to="/gamification">
                 <Trophy className="size-4" />
-                {pt ? "Conquistas" : "Achievements"}
+                {/* Phones: icon only (name kept for screen readers). */}
+                <span className="sr-only sm:not-sr-only">{pt ? "Conquistas" : "Achievements"}</span>
               </Link>
             </Button>
           </div>

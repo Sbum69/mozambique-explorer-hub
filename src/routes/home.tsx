@@ -45,6 +45,9 @@ import { getLiveNews } from "@/lib/news.functions";
 
 import { HERO_AVIF_SRCSET, HeroImage } from "@/components/HeroImage";
 
+// Same colours as NotificationsBell variant="onDark": the top bar sits on the dark hero photo.
+const ON_HERO = "text-white hover:bg-white/10 hover:text-white";
+
 const OnboardingModal = lazy(() =>
   import("@/components/OnboardingModal").then((m) => ({ default: m.OnboardingModal })),
 );
@@ -204,22 +207,23 @@ function HomePage() {
         </div>
 
         {/* Nav */}
-        <nav className="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5 text-white">
-          <div className="flex items-center gap-1">
+        <nav className="relative z-10 flex items-center justify-between gap-2 px-4 sm:px-10 py-5 text-white">
+          <div className="flex min-w-0 items-center gap-1">
             <div className="text-white">
               <AppSidebar />
             </div>
-            <div className="flex items-center gap-2 font-bold text-xl ml-1">
-              <span className="size-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+            <div className="flex min-w-0 items-center gap-2 font-bold text-xl ml-1">
+              <span className="size-9 shrink-0 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
                 🌍
               </span>
-              Ekaya
+              <span className="sr-only min-[390px]:not-sr-only truncate">Ekaya</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          {/* Phones: tighter spacing, logo without the wordmark below 390px; the second action stays in the side menu. */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <NotificationsBell variant="onDark" />
-            <ThemeToggle />
-            <LanguageToggle />
+            <ThemeToggle className={ON_HERO} />
+            <LanguageToggle className={ON_HERO} />
             {isGuest ? (
               <>
                 <Button
@@ -233,7 +237,7 @@ function HomePage() {
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="text-white hover:bg-white/10 hover:text-white"
+                  className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
                 >
                   <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
                 </Button>
@@ -247,13 +251,13 @@ function HomePage() {
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard className="size-4" />
-                    {t("dashboard")}
+                    <span className="sr-only sm:not-sr-only">{t("dashboard")}</span>
                   </Link>
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-white hover:bg-white/10 hover:text-white"
+                  className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
                   onClick={() => {
                     void logout().then(() => navigate({ to: "/login", replace: true }));
                   }}
