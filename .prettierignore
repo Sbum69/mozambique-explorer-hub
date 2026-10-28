@@ -2,6 +2,19 @@ node_modules
 dist
 .output
 .vinxi
+.wrangler
 pnpm-lock.yaml
 package-lock.json
-routeTree.gen.ts
+bun.lock
+
+# Generated: never formatted by hand
+src/routeTree.gen.ts
+src/integrations/supabase/
+drizzle/migrations/
+
+# Migrations of the original project: must not be changed
+supabase/migrations/
+
+# Lovable plans (platform history) and the roadmap (updated at the end of each sequence)
+.lovable/
+roadmap.md
