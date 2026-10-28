@@ -306,7 +306,7 @@ export function ShareTask({
         <a
           href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           onClick={onDone}
           className="inline-flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

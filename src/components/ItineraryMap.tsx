@@ -158,7 +158,7 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
   const openInGmaps = () => {
     if (points.length === 0) return;
     const waypoints = points.map(([lat, lng]) => `${lat},${lng}`).join("/");
-    window.open(`https://www.google.com/maps/dir/${waypoints}`, "_blank");
+    window.open(`https://www.google.com/maps/dir/${waypoints}`, "_blank", "noopener,noreferrer");
   };
 
   return (

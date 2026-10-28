@@ -79,7 +79,7 @@ export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Pr
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${s.coords[0]},${s.coords[1]}`}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="shrink-0 text-muted-foreground hover:text-primary"
                     aria-label={t.directions(name)}
