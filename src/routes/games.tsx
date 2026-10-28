@@ -1,7 +1,7 @@
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useMemo } from "react";
+import { Suspense, lazy, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast as sonner } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,18 +44,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { PhotoChallengeCapture } from "@/components/PhotoChallengeCapture";
-import { TreasureStopPicker } from "@/components/TreasureStopPicker";
 import { getGameTask } from "@/data/game-tasks";
 import { LOCATION_PROMPT_TEXT, requestPreciseLocation } from "@/lib/geo";
-import {
-  ExperienceTask,
-  ItineraryTask,
-  TimeOfDayTask,
-  EventTask,
-  ShareTask,
-  WordTask,
-} from "@/components/GameTaskFields";
+
+// Challenge fields only show inside the challenge dialog, after a tap: loaded on demand.
+const loadTaskFields = () => import("@/components/GameTaskFields");
+const WordTask = lazy(() => loadTaskFields().then((m) => ({ default: m.WordTask })));
+const ExperienceTask = lazy(() => loadTaskFields().then((m) => ({ default: m.ExperienceTask })));
+const ItineraryTask = lazy(() => loadTaskFields().then((m) => ({ default: m.ItineraryTask })));
+const TimeOfDayTask = lazy(() => loadTaskFields().then((m) => ({ default: m.TimeOfDayTask })));
+const EventTask = lazy(() => loadTaskFields().then((m) => ({ default: m.EventTask })));
+const ShareTask = lazy(() => loadTaskFields().then((m) => ({ default: m.ShareTask })));
+const TreasureStopPicker = lazy(() =>
+  import("@/components/TreasureStopPicker").then((m) => ({ default: m.TreasureStopPicker })),
+);
+const PhotoChallengeCapture = lazy(() =>
+  import("@/components/PhotoChallengeCapture").then((m) => ({ default: m.PhotoChallengeCapture })),
+);
 
 export const Route = createFileRoute("/games")({
   head: () => ({
@@ -657,33 +662,35 @@ function GamesPage() {
 
       <AnimatePresence>
         {selectedGame && q.data && uid && (
-          <GameDetailModal
-            game={selectedGame}
-            userId={uid}
-            doneRefs={q.data.state.steps
-              .filter((s) => s.gameKey === selectedGame.id)
-              .map((s) => s.stepRef)}
-            history={q.data.state.steps
-              .filter((s) => s.gameKey === selectedGame.id)
-              .map((s) => s.createdAt)}
-            onClose={() => setSelectedGame(null)}
-            onSaved={(r) => {
-              refresh();
-              sonner.success(
-                r.completed
-                  ? r.xp_awarded > 0
-                    ? pt
-                      ? `Jogo concluído! +${r.xp_awarded} XP`
-                      : `Game completed! +${r.xp_awarded} XP`
+          <Suspense fallback={null}>
+            <GameDetailModal
+              game={selectedGame}
+              userId={uid}
+              doneRefs={q.data.state.steps
+                .filter((s) => s.gameKey === selectedGame.id)
+                .map((s) => s.stepRef)}
+              history={q.data.state.steps
+                .filter((s) => s.gameKey === selectedGame.id)
+                .map((s) => s.createdAt)}
+              onClose={() => setSelectedGame(null)}
+              onSaved={(r) => {
+                refresh();
+                sonner.success(
+                  r.completed
+                    ? r.xp_awarded > 0
+                      ? pt
+                        ? `Jogo concluído! +${r.xp_awarded} XP`
+                        : `Game completed! +${r.xp_awarded} XP`
+                      : pt
+                        ? "Jogo concluído (sem XP)"
+                        : "Game completed (no XP)"
                     : pt
-                      ? "Jogo concluído (sem XP)"
-                      : "Game completed (no XP)"
-                  : pt
-                    ? `Progresso guardado: ${r.progress}/${r.total}`
-                    : `Progress saved: ${r.progress}/${r.total}`,
-              );
-            }}
-          />
+                      ? `Progresso guardado: ${r.progress}/${r.total}`
+                      : `Progress saved: ${r.progress}/${r.total}`,
+                );
+              }}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
 
