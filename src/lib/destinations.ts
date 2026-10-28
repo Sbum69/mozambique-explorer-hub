@@ -6,6 +6,12 @@ import inhambane from "@/assets/dest-inhambane.webp";
 import vilankulo from "@/assets/dest-vilankulo.webp";
 import pemba from "@/assets/dest-pemba.webp";
 import gorongosa from "@/assets/dest-gorongosa.webp";
+import maputoThumb from "@/assets/dest-maputo-thumb.webp";
+import ilhaThumb from "@/assets/dest-ilha-thumb.webp";
+import inhambaneThumb from "@/assets/dest-inhambane-thumb.webp";
+import vilankuloThumb from "@/assets/dest-vilankulo-thumb.webp";
+import pembaThumb from "@/assets/dest-pemba-thumb.webp";
+import gorongosaThumb from "@/assets/dest-gorongosa-thumb.webp";
 
 export type DestinationBadge = "most-visited" | "most-recommended";
 
@@ -20,6 +26,8 @@ export interface Destination {
   region: { pt: string; en: string };
   description: { pt: string; en: string };
   image: string;
+  /** Small square version (288 px) for lists; same artwork as image. */
+  thumbnail: string;
   visitorsK: number;
   badges: DestinationBadge[];
   highlights: { pt: string; en: string }[];
@@ -34,6 +42,16 @@ export const IMAGE_BY_SLUG: Record<string, string> = {
   vilankulo,
   pemba,
   gorongosa,
+};
+
+/** 288 px squares of the same artwork, for lists (a few KB instead of ~60 KB). */
+const THUMB_BY_SLUG: Record<string, string> = {
+  maputo: maputoThumb,
+  ilha: ilhaThumb,
+  inhambane: inhambaneThumb,
+  vilankulo: vilankuloThumb,
+  pemba: pembaThumb,
+  gorongosa: gorongosaThumb,
 };
 
 const BADGES: DestinationBadge[] = ["most-visited", "most-recommended"];
@@ -81,6 +99,7 @@ export function mapDestination(row: DestinationRow): Destination {
     region: { pt: regionPt, en: row.region_en ?? regionPt },
     description: { pt: descriptionPt, en: descriptionEn },
     image: IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
+    thumbnail: THUMB_BY_SLUG[row.slug] ?? IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
     visitorsK: row.visitors_k ?? 0,
     badges: (row.badges ?? []).filter((badge): badge is DestinationBadge =>
       (BADGES as string[]).includes(badge),

@@ -100,13 +100,15 @@ function MapPage() {
     setSelectedCommunityId(linkedCommunity ?? null);
   }, [linkedCommunity]);
   const preferredId = user?.preferences?.province;
+  // Destinations already in the server HTML: show them at once (no entrance fade on the LCP card).
+  const serverDestinations = Route.useLoaderData();
   const {
     destinations,
     loading: loadingDestinations,
     error: destinationsError,
     isEmpty,
     reload,
-  } = useDestinations(Route.useLoaderData());
+  } = useDestinations(serverDestinations);
   const [selected, setSelected] = useState<Destination | null>(null);
   const [showAllDestinations, setShowAllDestinations] = useState(!preferredId || !!linkedSlug);
   const visibleDestinations =
@@ -495,7 +497,7 @@ function MapPage() {
             {visibleDestinations.map((d, i) => (
               <motion.div
                 key={d.id}
-                initial={{ opacity: 0, x: 20 }}
+                initial={serverDestinations ? false : { opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
@@ -512,7 +514,7 @@ function MapPage() {
                       loading={i === 0 ? "eager" : "lazy"}
                       fetchPriority={i === 0 ? "high" : "auto"}
                       decoding="async"
-                      src={d.image}
+                      src={d.thumbnail}
                       alt={d.name}
                       className="size-24 object-cover"
                     />
