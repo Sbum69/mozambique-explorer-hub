@@ -11,7 +11,10 @@ import { launch, newContext, reporter, selectedPages, BASE } from "./lib";
 // Proper names that keep their accents in English.
 const ALLOWED = [
   /Zambézia|Ilha de Moçambique|Praça da Independência|Závora|São Sebastião|Núcleo de Arte/,
+  /Península da Macaneta/,
   /Lourenço Marques|José Craveirinha|Capitão Sálvio/,
+  // User-created content is not translated (route EK-A7D872 is a user copy of a catalogue route).
+  /^Mergulha nas praias paradisíacas e na cultura costeira de Inhambane.$/,
   // Internal test business (to be deleted before launch).
   /EKAYA Teste|Negócio de teste interno/,
 ];

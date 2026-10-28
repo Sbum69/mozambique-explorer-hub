@@ -12,7 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useLang } from "@/contexts/LanguageContext";
-import { categoryMeta, type CommunityCategory } from "@/lib/community-experiences";
+import {
+  categoryMeta,
+  communityLocation,
+  type CommunityCategory,
+} from "@/lib/community-experiences";
 import { hasValidCoords } from "@/lib/visits";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import {
@@ -67,7 +71,7 @@ export function CommunityExperienceDialog({
             <p className="text-sm whitespace-pre-line">{item.description[lang]}</p>
             <p className="text-sm flex items-center gap-2">
               <MapPin className="size-4 text-primary" />
-              {item.location}
+              {communityLocation(item, lang)}
             </p>
             {valid && coords ? (
               <>

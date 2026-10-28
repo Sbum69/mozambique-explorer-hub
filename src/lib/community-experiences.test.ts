@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   COMMUNITY_CATEGORIES,
   categoryMeta,
+  communityLocation,
   mapCommunityExperience,
   type CommunityExperienceRow,
 } from "./community-experiences";
@@ -15,7 +16,8 @@ const row = (over: Partial<CommunityExperienceRow> = {}): CommunityExperienceRow
   description_en: "Fresh fish",
   province_id: "pr1",
   category: "food",
-  location: "Maputo",
+  location: "Margens do Lago Niassa",
+  location_en: "Shores of Lake Niassa",
   lat: "-25.95",
   lng: "32.6",
   image_url: "",
@@ -56,6 +58,18 @@ describe("community experience mapping", () => {
       row({ provinces: [{ code: "gaza", name_pt: "Gaza", name_en: "Gaza" }] }),
     );
     expect(ce.provinceCode).toBe("gaza");
+  });
+});
+
+describe("community experience location", () => {
+  it("uses the English location when there is one", () => {
+    expect(communityLocation(mapCommunityExperience(row()), "en")).toBe("Shores of Lake Niassa");
+    expect(communityLocation(mapCommunityExperience(row()), "pt")).toBe("Margens do Lago Niassa");
+  });
+
+  it("shows the Portuguese location when English is missing (proper names)", () => {
+    const ce = mapCommunityExperience(row({ location: "Ilha de Moçambique", location_en: null }));
+    expect(communityLocation(ce, "en")).toBe("Ilha de Moçambique");
   });
 });
 

@@ -14,7 +14,7 @@ import "leaflet/dist/leaflet.css";
 import type { Destination } from "@/lib/destinations";
 import { useLang } from "@/contexts/LanguageContext";
 import type { CommunityExperience } from "@/lib/community-experiences";
-import { categoryMeta } from "@/lib/community-experiences";
+import { categoryMeta, communityLocation } from "@/lib/community-experiences";
 import { communityIcon } from "@/components/CommunityMiniMap";
 import { directionsUrls } from "@/lib/visits";
 
@@ -237,7 +237,7 @@ export function InteractiveMap({
                 </p>
                 <h3 style={{ margin: "4px 0", fontWeight: 700, fontSize: 15 }}>{c.title[lang]}</h3>
                 <p style={{ fontSize: 11, color: "#888", margin: "0 0 4px" }}>
-                  {c.provinceName[lang]} · {c.location}
+                  {c.provinceName[lang]} · {communityLocation(c, lang)}
                 </p>
                 <p style={{ fontSize: 12, color: "#666", margin: "0 0 8px" }}>
                   {c.description[lang]}

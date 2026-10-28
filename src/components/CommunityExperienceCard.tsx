@@ -4,7 +4,11 @@ import { MapPin, Gift } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
-import { categoryMeta, type CommunityExperience } from "@/lib/community-experiences";
+import {
+  categoryMeta,
+  communityLocation,
+  type CommunityExperience,
+} from "@/lib/community-experiences";
 
 // The detail dialog (Radix Dialog, directions, mini-map) only shows after a tap.
 const LazyDialog = lazy(() =>
@@ -74,7 +78,7 @@ export function CommunityExperienceCard({
           <p className="text-xs text-muted-foreground">{item.provinceName[lang]}</p>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <MapPin className="size-3 shrink-0" />
-            {item.location}
+            {communityLocation(item, lang)}
           </p>
           <p className="text-sm text-muted-foreground line-clamp-2 pt-1">
             {item.description[lang]}

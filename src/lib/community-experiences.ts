@@ -17,6 +17,11 @@ export const COMMUNITY_CATEGORIES: {
   { id: "adventure", emoji: "🏃", label: { pt: "Aventura", en: "Adventure" } },
 ];
 
+/** Location in the reader's language (Portuguese when there is no English text). */
+export function communityLocation(item: CommunityExperience, lang: "pt" | "en"): string {
+  return (lang === "en" && item.locationEn) || item.location;
+}
+
 export function categoryMeta(id: string) {
   return COMMUNITY_CATEGORIES.find((c) => c.id === id) ?? COMMUNITY_CATEGORIES[0];
 }
@@ -30,6 +35,8 @@ export interface CommunityExperience {
   provinceName: { pt: string; en: string };
   category: CommunityCategory;
   location: string;
+  /** English location (migration 0044); null when the Portuguese is only a proper name. */
+  locationEn: string | null;
   lat: number | null;
   lng: number | null;
   imageUrl: string | null;
@@ -48,7 +55,7 @@ export type CommunityStatus = "pending" | "approved" | "rejected";
 export const COMMUNITY_PHOTOS_BUCKET = "community-photos";
 
 const SELECT =
-  "id, title_pt, title_en, description_pt, description_en, province_id, category, location, lat, lng, image_url, image_path, active, status, submitted_by, submitted_at, decided_at, rejection_reason, additional_info, provinces(code, name_pt, name_en)";
+  "id, title_pt, title_en, description_pt, description_en, province_id, category, location, location_en, lat, lng, image_url, image_path, active, status, submitted_by, submitted_at, decided_at, rejection_reason, additional_info, provinces(code, name_pt, name_en)";
 
 export interface CommunityExperienceRow {
   id: string;
@@ -59,6 +66,7 @@ export interface CommunityExperienceRow {
   province_id: string;
   category: string;
   location: string;
+  location_en: string | null;
   lat: number | string | null;
   lng: number | string | null;
   image_url: string | null;
@@ -87,6 +95,7 @@ export function mapCommunityExperience(row: CommunityExperienceRow): CommunityEx
     provinceName: { pt: p?.name_pt ?? "", en: p?.name_en ?? "" },
     category: row.category as CommunityCategory,
     location: row.location,
+    locationEn: row.location_en || null,
     lat: row.lat === null ? null : Number(row.lat),
     lng: row.lng === null ? null : Number(row.lng),
     imageUrl: row.image_url || null,
