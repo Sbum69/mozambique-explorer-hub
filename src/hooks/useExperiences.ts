@@ -26,7 +26,9 @@ export function useExperiences() {
     setLoading(true);
     setError(null);
     try {
-      const list = await (inflight ??= fetchExperiences().finally(() => { inflight = null; }));
+      const list = await (inflight ??= fetchExperiences().finally(() => {
+        inflight = null;
+      }));
       cache = list;
       setExperiences(list);
     } catch {

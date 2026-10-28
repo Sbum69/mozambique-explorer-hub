@@ -2,7 +2,12 @@
 export const SUPPORTED_ROUTING_MODES = ["driving"] as const;
 
 export function validMapCoordinate(point: [number, number]): boolean {
-  return Number.isFinite(point[0]) && Number.isFinite(point[1]) && Math.abs(point[0]) <= 90 && Math.abs(point[1]) <= 180;
+  return (
+    Number.isFinite(point[0]) &&
+    Number.isFinite(point[1]) &&
+    Math.abs(point[0]) <= 90 &&
+    Math.abs(point[1]) <= 180
+  );
 }
 
 export function carRouteUrl(points: [number, number][]): string | null {

@@ -13,7 +13,12 @@ export const communityIcon = L.divIcon({
 
 export function CommunityMiniMap({ lat, lng }: { lat: number; lng: number }) {
   return (
-    <MapContainer center={[lat, lng]} zoom={11} style={{ height: "100%", width: "100%", borderRadius: "0.75rem" }} scrollWheelZoom={false}>
+    <MapContainer
+      center={[lat, lng]}
+      zoom={11}
+      style={{ height: "100%", width: "100%", borderRadius: "0.75rem" }}
+      scrollWheelZoom={false}
+    >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

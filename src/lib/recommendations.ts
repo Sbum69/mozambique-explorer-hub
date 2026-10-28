@@ -40,7 +40,10 @@ export function hasPreferences(prefs: TravelPreferences | undefined): boolean {
 }
 
 /** Province codes the tourist cares about (several provinces are allowed). */
-function preferredProvinceCodes(prefs: TravelPreferences, preferred?: Destination | null): string[] {
+function preferredProvinceCodes(
+  prefs: TravelPreferences,
+  preferred?: Destination | null,
+): string[] {
   const codes = [...(prefs.provinces ?? [])];
   if (preferred?.province) codes.push(preferred.province);
   return [...new Set(codes)];
@@ -170,14 +173,23 @@ export function recommendCommunity<T extends { provinceCode: string; category: s
   limit = 4,
 ): Scored<T>[] {
   const chosen = prefs.provinces ?? [];
-  const isAll = chosen.length === 0 || (allProvinceCodes.length > 0 && allProvinceCodes.every((c) => chosen.includes(c)));
+  const isAll =
+    chosen.length === 0 ||
+    (allProvinceCodes.length > 0 && allProvinceCodes.every((c) => chosen.includes(c)));
   const interests = prefs.interests ?? [];
   return items
     .filter((it) => isAll || chosen.includes(it.provinceCode))
     .map((item) => {
-      const reasons = interests.filter((id) => (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(item.category));
+      const reasons = interests.filter((id) =>
+        (INTEREST_TO_CATEGORIES[id] ?? [id]).includes(item.category),
+      );
       const matchesProvince = !isAll;
-      return { item, reasons, matchesProvince, score: (matchesProvince ? 4 : 0) + reasons.length * 3 };
+      return {
+        item,
+        reasons,
+        matchesProvince,
+        score: (matchesProvince ? 4 : 0) + reasons.length * 3,
+      };
     })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);

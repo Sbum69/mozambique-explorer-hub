@@ -16,7 +16,9 @@ export function useDestinations() {
     setLoading(true);
     setError(null);
     try {
-      const list = await (inflight ??= fetchDestinations().finally(() => { inflight = null; }));
+      const list = await (inflight ??= fetchDestinations().finally(() => {
+        inflight = null;
+      }));
       cache = list;
       setDestinations(list);
     } catch {

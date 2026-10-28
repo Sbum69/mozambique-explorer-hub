@@ -24,7 +24,11 @@ let availabilityCache: Record<string, number> | null = null;
  */
 export function useRecommendations(limit = 6) {
   const { user } = useAuth();
-  const { destinations, loading: loadingDestinations, error: destinationsError } = useDestinations();
+  const {
+    destinations,
+    loading: loadingDestinations,
+    error: destinationsError,
+  } = useDestinations();
   const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
   const [availability, setAvailability] = useState<Record<string, number>>(availabilityCache ?? {});
 
@@ -103,7 +107,15 @@ export function useRecommendations(limit = 6) {
   );
 
   const recommendedCommunity = useMemo(
-    () => (personalised ? recommendCommunity(community, preferences, provinces.map((p) => p.code), 4) : []),
+    () =>
+      personalised
+        ? recommendCommunity(
+            community,
+            preferences,
+            provinces.map((p) => p.code),
+            4,
+          )
+        : [],
     [personalised, community, preferences, provinces],
   );
 

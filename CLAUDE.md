@@ -12,18 +12,18 @@ As regras de domínio detalhadas (pontos, roteiros, negócios, reservas, comunid
 
 ### Stack
 
-| Camada        | Tecnologia                                                                          |
-| ------------- | ----------------------------------------------------------------------------------- |
-| Framework     | TanStack Start (SSR) + TanStack Router (rotas por ficheiro) + React 19              |
-| Build / dev   | Vite 7 via `@lovable.dev/vite-tanstack-config` (já inclui plugins — ver `vite.config.ts`) |
-| Deploy target | Cloudflare Workers (`wrangler.jsonc`, `nodejs_compat`)                              |
-| Dados         | Supabase (Postgres + Auth + Storage + RPCs), `@supabase/supabase-js` v2             |
-| Estado remoto | TanStack Query (um `QueryClient` por router, criado em `src/router.tsx`)            |
+| Camada        | Tecnologia                                                                                    |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| Framework     | TanStack Start (SSR) + TanStack Router (rotas por ficheiro) + React 19                        |
+| Build / dev   | Vite 7 via `@lovable.dev/vite-tanstack-config` (já inclui plugins — ver `vite.config.ts`)     |
+| Deploy target | Cloudflare Workers (`wrangler.jsonc`, `nodejs_compat`)                                        |
+| Dados         | Supabase (Postgres + Auth + Storage + RPCs), `@supabase/supabase-js` v2                       |
+| Estado remoto | TanStack Query (um `QueryClient` por router, criado em `src/router.tsx`)                      |
 | UI            | Tailwind CSS 4, shadcn/ui (Radix) em `src/components/ui`, lucide-react, framer-motion, sonner |
-| Mapas         | Leaflet + react-leaflet                                                             |
-| Formulários   | react-hook-form + zod                                                               |
-| Testes        | Vitest (já nas devDependencies; testes em `src/lib/*.test.ts`, sem script `test`)   |
-| Qualidade     | TypeScript strict, ESLint 9 (typescript-eslint, react-hooks, prettier), Prettier    |
+| Mapas         | Leaflet + react-leaflet                                                                       |
+| Formulários   | react-hook-form + zod                                                                         |
+| Testes        | Vitest (já nas devDependencies; testes em `src/lib/*.test.ts`, sem script `test`)             |
+| Qualidade     | TypeScript strict, ESLint 9 (typescript-eslint, react-hooks, prettier), Prettier              |
 
 Comandos (usar sempre **bun**, nunca npm/npx): `bun run dev`, `bun run build`, `bun run lint`,
 `bunx tsc --noEmit`, `bunx vitest run`. O lockfile é `bun.lock`; o `package-lock.json` não versionado
@@ -79,15 +79,15 @@ Tipos em `src/integrations/supabase/types.ts`. Enums: `app_role` (tourist, busin
 business_large, admin), `booking_status` (pending, confirmed, rejected, cancelled, completed),
 `business_status` (pending, approved, rejected, suspended).
 
-| Domínio          | Tabelas / vistas                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------------- |
-| Utilizadores     | `profiles`, `profile_provinces`, `user_roles`                                                 |
-| Catálogo         | `provinces`, `destinations`, `experiences`, `experience_availability`, `business_categories`  |
-| Negócios/reservas| `businesses`, `bookings`                                                                      |
-| Comunidade       | `community_posts`, `community_post_reactions`, `community_reports`, `community_categories`, `community_experiences`, vista `community_post_authors` |
-| Roteiros         | `routes`, `route_days`, `route_stops`, `route_progress`, `route_stop_progress`               |
-| Gamificação      | `points_ledger` (append-only), `rewards`, `reward_redemptions`, `game_catalog`, `game_steps`, `game_completions`, `game_quiz_attempts`, `game_quiz_questions` |
-| Outros           | `notifications`, `destination_visits`, `news_likes`, `event_participations`                   |
+| Domínio           | Tabelas / vistas                                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Utilizadores      | `profiles`, `profile_provinces`, `user_roles`                                                                                                                 |
+| Catálogo          | `provinces`, `destinations`, `experiences`, `experience_availability`, `business_categories`                                                                  |
+| Negócios/reservas | `businesses`, `bookings`                                                                                                                                      |
+| Comunidade        | `community_posts`, `community_post_reactions`, `community_reports`, `community_categories`, `community_experiences`, vista `community_post_authors`           |
+| Roteiros          | `routes`, `route_days`, `route_stops`, `route_progress`, `route_stop_progress`                                                                                |
+| Gamificação       | `points_ledger` (append-only), `rewards`, `reward_redemptions`, `game_catalog`, `game_steps`, `game_completions`, `game_quiz_attempts`, `game_quiz_questions` |
+| Outros            | `notifications`, `destination_visits`, `news_likes`, `event_participations`                                                                                   |
 
 RPCs chamadas pelo cliente: `has_role`, `save_route_plan`, `reset_my_route_progress`,
 `get_experience_availability`, `cancel_my_booking`, `business_decide_booking`,

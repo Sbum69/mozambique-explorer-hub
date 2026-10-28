@@ -44,31 +44,34 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [showingAll, setShowingAll] = useState(false);
 
-  const load = useCallback(async (all = false) => {
-    if (!userId) {
-      setNotifications([]);
-      setUnreadTotal(0);
+  const load = useCallback(
+    async (all = false) => {
+      if (!userId) {
+        setNotifications([]);
+        setUnreadTotal(0);
+        setError(null);
+        setLoading(false);
+        setShowingAll(false);
+        return;
+      }
+      setLoading(true);
       setError(null);
-      setLoading(false);
-      setShowingAll(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const [list, unread] = await Promise.all([
-        fetchMyNotifications(userId, all ? 1000 : 50),
-        countMyUnread(userId),
-      ]);
-      setNotifications(list);
-      setUnreadTotal(unread);
-      setShowingAll(all);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "load-failed");
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+      try {
+        const [list, unread] = await Promise.all([
+          fetchMyNotifications(userId, all ? 1000 : 50),
+          countMyUnread(userId),
+        ]);
+        setNotifications(list);
+        setUnreadTotal(unread);
+        setShowingAll(all);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "load-failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId],
+  );
 
   useEffect(() => {
     void load();

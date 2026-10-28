@@ -3,7 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 /** Free, no-booking leisure activities. Separate from business experiences (public.experiences). */
 export type CommunityCategory = "beach" | "culture" | "food" | "nature" | "community" | "adventure";
 
-export const COMMUNITY_CATEGORIES: { id: CommunityCategory | "all"; emoji: string; label: { pt: string; en: string } }[] = [
+export const COMMUNITY_CATEGORIES: {
+  id: CommunityCategory | "all";
+  emoji: string;
+  label: { pt: string; en: string };
+}[] = [
   { id: "all", emoji: "✨", label: { pt: "Todas", en: "All" } },
   { id: "beach", emoji: "🏖️", label: { pt: "Praia", en: "Beach" } },
   { id: "culture", emoji: "🎨", label: { pt: "Cultura", en: "Culture" } },
@@ -66,7 +70,10 @@ interface Row {
   decided_at: string | null;
   rejection_reason: string | null;
   additional_info: string | null;
-  provinces: { code: string; name_pt: string; name_en: string } | { code: string; name_pt: string; name_en: string }[] | null;
+  provinces:
+    | { code: string; name_pt: string; name_en: string }
+    | { code: string; name_pt: string; name_en: string }[]
+    | null;
 }
 
 function map(row: Row): CommunityExperience {
@@ -109,23 +116,34 @@ export interface CommunityFilters {
 async function withSignedImages(items: CommunityExperience[]): Promise<CommunityExperience[]> {
   const paths = items.map((i) => i.imagePath).filter((p): p is string => !!p);
   if (!paths.length) return items;
-  const { data } = await supabase.storage.from(COMMUNITY_PHOTOS_BUCKET).createSignedUrls(paths, 3600);
-  const byPath = new Map((data ?? []).filter((d) => d.signedUrl && d.path).map((d) => [d.path as string, d.signedUrl]));
-  return items.map((i) => (i.imagePath && byPath.get(i.imagePath) ? { ...i, imageUrl: byPath.get(i.imagePath)! } : i));
+  const { data } = await supabase.storage
+    .from(COMMUNITY_PHOTOS_BUCKET)
+    .createSignedUrls(paths, 3600);
+  const byPath = new Map(
+    (data ?? []).filter((d) => d.signedUrl && d.path).map((d) => [d.path as string, d.signedUrl]),
+  );
+  return items.map((i) =>
+    i.imagePath && byPath.get(i.imagePath) ? { ...i, imageUrl: byPath.get(i.imagePath)! } : i,
+  );
 }
 
 export async function uploadCommunityPhoto(userId: string, file: File): Promise<string> {
   if (!file.type.startsWith("image/")) throw new Error("invalid_type");
   if (file.size > 5 * 1024 * 1024) throw new Error("too_large");
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const ext =
+    (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(COMMUNITY_PHOTOS_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+  const { error } = await supabase.storage
+    .from(COMMUNITY_PHOTOS_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
   if (error) throw new Error(error.message);
   return path;
 }
 
 /** Filters run in the database. Inactive rows are only returned to admins (RLS). */
-export async function fetchCommunityExperiences(f: CommunityFilters = {}): Promise<CommunityExperience[]> {
+export async function fetchCommunityExperiences(
+  f: CommunityFilters = {},
+): Promise<CommunityExperience[]> {
   let q = supabase.from("community_experiences").select(SELECT).order("title_pt");
   if (f.mine) q = q.eq("submitted_by", f.mine);
   else {
@@ -146,9 +164,15 @@ export async function fetchCommunityExperiences(f: CommunityFilters = {}): Promi
     // Admin view: submitter names (profiles RLS decides; falls back to the id when unreadable).
     const ids = [...new Set(items.map((i) => i.submittedBy).filter((x): x is string => !!x))];
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name").in("id", ids);
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, display_name")
+        .in("id", ids);
       const names = new Map((profs ?? []).map((p) => [p.id, p.display_name]));
-      items = items.map((i) => ({ ...i, submitterName: (i.submittedBy && names.get(i.submittedBy)) || null }));
+      items = items.map((i) => ({
+        ...i,
+        submitterName: (i.submittedBy && names.get(i.submittedBy)) || null,
+      }));
     }
   }
   return withSignedImages(items);
@@ -193,10 +217,16 @@ export async function createCommunityExperience(i: CommunityInput) {
 }
 /** Tourist/business proposal: the database forces status=pending and submitted_by=auth.uid(). */
 export async function submitCommunityExperience(userId: string, i: CommunityInput) {
-  const { error } = await supabase.from("community_experiences").insert({ ...toRow(i), image_url: null, status: "pending", submitted_by: userId });
+  const { error } = await supabase
+    .from("community_experiences")
+    .insert({ ...toRow(i), image_url: null, status: "pending", submitted_by: userId });
   if (error) throw new Error(error.message);
 }
-export async function decideCommunityExperience(id: string, status: "approved" | "rejected", reason?: string) {
+export async function decideCommunityExperience(
+  id: string,
+  status: "approved" | "rejected",
+  reason?: string,
+) {
   const { error } = await supabase
     .from("community_experiences")
     .update({ status, rejection_reason: status === "rejected" ? reason?.trim() || null : null })

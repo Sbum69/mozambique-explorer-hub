@@ -13,7 +13,9 @@ let categoriesCache: BusinessCategory[] | null = null;
 
 /** Shared province list (session cache, so pages don't re-query). */
 export function useProvinces(includeInactive = false) {
-  const [provinces, setProvinces] = useState<Province[]>(includeInactive ? [] : (provincesCache ?? []));
+  const [provinces, setProvinces] = useState<Province[]>(
+    includeInactive ? [] : (provincesCache ?? []),
+  );
   const [loading, setLoading] = useState(includeInactive || !provincesCache);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +25,9 @@ export function useProvinces(includeInactive = false) {
     try {
       const rows = includeInactive
         ? await fetchProvinces(true)
-        : await (provincesInflight ??= fetchProvinces(false).finally(() => { provincesInflight = null; }));
+        : await (provincesInflight ??= fetchProvinces(false).finally(() => {
+            provincesInflight = null;
+          }));
       if (!includeInactive) provincesCache = rows;
       setProvinces(rows);
     } catch (e) {
@@ -42,7 +46,13 @@ export function useProvinces(includeInactive = false) {
     void load();
   }, [includeInactive, load]);
 
-  return { provinces, loading, error, reload: load, isEmpty: !loading && !error && provinces.length === 0 };
+  return {
+    provinces,
+    loading,
+    error,
+    reload: load,
+    isEmpty: !loading && !error && provinces.length === 0,
+  };
 }
 
 export function useBusinessCategories() {

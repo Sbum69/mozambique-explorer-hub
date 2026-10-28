@@ -32,18 +32,18 @@ or an offline cache; do not rely on the app being available offline.
 
 ## Technology
 
-| Area | Technology |
-| --- | --- |
-| Framework | React 19, TanStack Start, TanStack Router |
-| Build and development | Vite 7, `@lovable.dev/vite-tanstack-config` |
-| Language | TypeScript, strict mode |
-| Styling and UI | Tailwind CSS 4, Radix UI, shadcn/ui components |
-| Remote data | Supabase (Postgres, Auth, Storage, and RPCs) |
-| Server state | TanStack Query |
-| Maps | Leaflet and React Leaflet |
-| Forms | React Hook Form and Zod |
-| Tests and quality | Vitest, ESLint 9, Prettier |
-| Deployment target | Cloudflare Workers, configured with `nodejs_compat` |
+| Area                  | Technology                                          |
+| --------------------- | --------------------------------------------------- |
+| Framework             | React 19, TanStack Start, TanStack Router           |
+| Build and development | Vite 7, `@lovable.dev/vite-tanstack-config`         |
+| Language              | TypeScript, strict mode                             |
+| Styling and UI        | Tailwind CSS 4, Radix UI, shadcn/ui components      |
+| Remote data           | Supabase (Postgres, Auth, Storage, and RPCs)        |
+| Server state          | TanStack Query                                      |
+| Maps                  | Leaflet and React Leaflet                           |
+| Forms                 | React Hook Form and Zod                             |
+| Tests and quality     | Vitest, ESLint 9, Prettier                          |
+| Deployment target     | Cloudflare Workers, configured with `nodejs_compat` |
 
 ## Getting started
 
@@ -87,15 +87,15 @@ Use the Supabase project URL and its **publishable** key for browser and user-au
 The client reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`; server-side code also reads
 `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
 
-| Variable | Where it is used | Required |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | Browser Supabase client | Yes, for browser data |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser Supabase client; safe to expose as a publishable key | Yes, for browser data |
-| `SUPABASE_URL` | Server-side Supabase clients and authenticated server functions | Yes, for server-side Supabase features |
-| `SUPABASE_PUBLISHABLE_KEY` | Server-side user-authenticated Supabase access | Yes, for authenticated server functions |
-| `SUPABASE_SERVICE_ROLE_KEY` | Privileged server-only admin operations that explicitly use the service-role client | Only where those operations are enabled |
-| `VITE_PUBLIC_APP_URL` | Public HTTPS base URL used to build browser-side Auth callback links | Set for a published site |
-| `SITE_URL` | Server-side allowlisted site URL used when validating Auth callback redirects | Set for a published site |
+| Variable                        | Where it is used                                                                    | Required                                |
+| ------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------- |
+| `VITE_SUPABASE_URL`             | Browser Supabase client                                                             | Yes, for browser data                   |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser Supabase client; safe to expose as a publishable key                        | Yes, for browser data                   |
+| `SUPABASE_URL`                  | Server-side Supabase clients and authenticated server functions                     | Yes, for server-side Supabase features  |
+| `SUPABASE_PUBLISHABLE_KEY`      | Server-side user-authenticated Supabase access                                      | Yes, for authenticated server functions |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Privileged server-only admin operations that explicitly use the service-role client | Only where those operations are enabled |
+| `VITE_PUBLIC_APP_URL`           | Public HTTPS base URL used to build browser-side Auth callback links                | Set for a published site                |
+| `SITE_URL`                      | Server-side allowlisted site URL used when validating Auth callback redirects       | Set for a published site                |
 
 For example, the public values have this shape:
 
@@ -114,16 +114,16 @@ the published HTTPS domain and that URL must also be permitted by the Supabase A
 
 ## Available scripts
 
-| Command | Description |
-| --- | --- |
-| `bun run dev` | Start the Vite development server |
-| `bun run build` | Build the application |
-| `bun run build:dev` | Build using Vite's development mode |
-| `bun run preview` | Preview the production build locally |
-| `bun run lint` | Run ESLint |
-| `bunx tsc --noEmit` | Type-check the project |
-| `bunx vitest run` | Run the unit tests |
-| `bunx prettier --write <file>` | Format a specific file |
+| Command                        | Description                          |
+| ------------------------------ | ------------------------------------ |
+| `bun run dev`                  | Start the Vite development server    |
+| `bun run build`                | Build the application                |
+| `bun run build:dev`            | Build using Vite's development mode  |
+| `bun run preview`              | Preview the production build locally |
+| `bun run lint`                 | Run ESLint                           |
+| `bunx tsc --noEmit`            | Type-check the project               |
+| `bunx vitest run`              | Run the unit tests                   |
+| `bunx prettier --write <file>` | Format a specific file               |
 
 Vitest tests live beside domain modules in `src/lib/*.test.ts`. There is currently no `test` script
 in `package.json`, so run Vitest with `bunx vitest run`.

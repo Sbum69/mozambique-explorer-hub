@@ -114,7 +114,9 @@ interface RawPost {
 }
 
 /** Fetches public author identity (display name/avatar only) for the given ids. */
-async function fetchAuthors(ids: string[]): Promise<Map<string, { name: string; avatar: string | null }>> {
+async function fetchAuthors(
+  ids: string[],
+): Promise<Map<string, { name: string; avatar: string | null }>> {
   const map = new Map<string, { name: string; avatar: string | null }>();
   if (ids.length === 0) return map;
   const { data } = await supabase
@@ -156,7 +158,10 @@ async function decorate(rows: RawPost[]): Promise<CommunityPost[]> {
   const userId = await currentUserId();
   const [authors, reactions] = await Promise.all([
     fetchAuthors([...new Set(rows.map((r) => r.author_id))]),
-    fetchReactionData(rows.map((r) => r.id), userId),
+    fetchReactionData(
+      rows.map((r) => r.id),
+      userId,
+    ),
   ]);
 
   return rows.map((row) => {
@@ -228,7 +233,11 @@ export async function fetchCommunityFeed(filters: FeedFilters = {}): Promise<Com
 }
 
 export async function fetchCommunityPost(id: string): Promise<CommunityPost | null> {
-  const { data, error } = await supabase.from("community_posts").select(POST_SELECT).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("community_posts")
+    .select(POST_SELECT)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   const [post] = await decorate([data as RawPost]);
@@ -290,7 +299,10 @@ export async function setCommunityPostStatus(id: string, status: PostStatus): Pr
 /* ---------------- Reactions ---------------- */
 
 /** Applies like/dislike toggle semantics: same value removes, opposite value switches. */
-export async function toggleReaction(postId: string, value: ReactionValue): Promise<ReactionValue | null> {
+export async function toggleReaction(
+  postId: string,
+  value: ReactionValue,
+): Promise<ReactionValue | null> {
   const userId = await currentUserId();
   if (!userId) throw new Error("NOT_AUTHENTICATED");
 
@@ -303,7 +315,10 @@ export async function toggleReaction(postId: string, value: ReactionValue): Prom
   if (readError) throw new Error(readError.message);
 
   if (existing && existing.reaction === value) {
-    const { error } = await supabase.from("community_post_reactions").delete().eq("id", existing.id);
+    const { error } = await supabase
+      .from("community_post_reactions")
+      .delete()
+      .eq("id", existing.id);
     if (error) throw new Error(error.message);
     return null;
   }
@@ -341,10 +356,14 @@ export async function reportCommunityPost(
   if (error && !error.message.includes("duplicate key")) throw new Error(error.message);
 }
 
-export async function fetchCommunityReports(status?: ReportStatus | "all"): Promise<CommunityReport[]> {
+export async function fetchCommunityReports(
+  status?: ReportStatus | "all",
+): Promise<CommunityReport[]> {
   let query = supabase
     .from("community_reports")
-    .select("id, post_id, reason, description, status, created_at, resolved_at, community_posts ( title )");
+    .select(
+      "id, post_id, reason, description, status, created_at, resolved_at, community_posts ( title )",
+    );
   if (status && status !== "all") query = query.eq("status", status);
   const { data, error } = await query.order("created_at", { ascending: false }).limit(200);
   if (error) throw new Error(error.message);

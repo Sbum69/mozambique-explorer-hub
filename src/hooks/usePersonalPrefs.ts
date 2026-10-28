@@ -26,5 +26,12 @@ export function usePersonalPrefs() {
       interests,
       durationDays,
     };
-  }, [isAuthenticated, prefs?.provinces, prefs?.province, prefs?.interests, prefs?.durationDays, destinations]);
+  }, [
+    isAuthenticated,
+    prefs?.provinces,
+    prefs?.province,
+    prefs?.interests,
+    prefs?.durationDays,
+    destinations,
+  ]);
 }

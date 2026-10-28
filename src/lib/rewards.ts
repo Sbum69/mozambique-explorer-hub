@@ -88,9 +88,7 @@ export function isRewardRedeemable(
   );
 }
 
-export async function fetchOwnerRewards(
-  userId: string,
-): Promise<{
+export async function fetchOwnerRewards(userId: string): Promise<{
   businesses: { id: string; name: string; status: string }[];
   rewards: BusinessReward[];
 }> {

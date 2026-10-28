@@ -15,8 +15,12 @@ export type RouteStopKind = "destination" | "experience" | "community" | "custom
 
 /** One reusable cover per province (bundled real photos); others stay neutral until a province image exists. */
 const PROVINCE_COVER_SLUG: Record<string, string> = {
-  "maputo-cidade": "maputo", maputo: "maputo", inhambane: "inhambane", sofala: "gorongosa",
-  nampula: "ilha", "cabo-delgado": "pemba",
+  "maputo-cidade": "maputo",
+  maputo: "maputo",
+  inhambane: "inhambane",
+  sofala: "gorongosa",
+  nampula: "ilha",
+  "cabo-delgado": "pemba",
 };
 export const ROUTE_PROOFS_BUCKET = "route-proofs";
 
@@ -107,23 +111,37 @@ interface StopRow {
   is_free: boolean | null;
   validation_status?: string | null;
   community_candidate?: boolean | null;
-  community_experiences:
-    | { id: string; title_pt: string; title_en: string; description_pt: string; description_en: string; location: string; lat: number | string | null; lng: number | string | null }
-    | null;
-  destinations:
-    | { id: string; slug: string; name: string; lat: number | string | null; lng: number | string | null }
-    | null;
-  experiences:
-    | {
-        id: string;
-        slug: string | null;
-        title_pt: string;
-        title_en: string | null;
-        price_mzn: number | string | null;
-        duration_hours: number | string | null;
-        destinations: { slug: string; name: string; lat: number | string | null; lng: number | string | null } | null;
-      }
-    | null;
+  community_experiences: {
+    id: string;
+    title_pt: string;
+    title_en: string;
+    description_pt: string;
+    description_en: string;
+    location: string;
+    lat: number | string | null;
+    lng: number | string | null;
+  } | null;
+  destinations: {
+    id: string;
+    slug: string;
+    name: string;
+    lat: number | string | null;
+    lng: number | string | null;
+  } | null;
+  experiences: {
+    id: string;
+    slug: string | null;
+    title_pt: string;
+    title_en: string | null;
+    price_mzn: number | string | null;
+    duration_hours: number | string | null;
+    destinations: {
+      slug: string;
+      name: string;
+      lat: number | string | null;
+      lng: number | string | null;
+    } | null;
+  } | null;
 }
 
 interface RouteRow {
@@ -203,17 +221,39 @@ function mapStop(row: StopRow): RouteStop | null {
     const c = row.community_experiences;
     if (!c) return null; // not approved/readable: never invent a link
     return {
-      ...base, kind: "community", refId: c.id, title: c.title_pt, titleEn: c.title_en, slug: null,
-      description: { pt: row.description_pt ?? c.description_pt, en: row.description_en ?? c.description_en },
-      location: row.location ?? c.location, isFree: true,
-      coords: coordsOf(c.lat, c.lng), image: "", priceMzn: null, durationHours: null, destinationName: null,
+      ...base,
+      kind: "community",
+      refId: c.id,
+      title: c.title_pt,
+      titleEn: c.title_en,
+      slug: null,
+      description: {
+        pt: row.description_pt ?? c.description_pt,
+        en: row.description_en ?? c.description_en,
+      },
+      location: row.location ?? c.location,
+      isFree: true,
+      coords: coordsOf(c.lat, c.lng),
+      image: "",
+      priceMzn: null,
+      durationHours: null,
+      destinationName: null,
     };
   }
   if (row.stop_type === "custom_stop") {
     if (!row.custom_title_pt) return null;
     return {
-      ...base, kind: "custom", refId: row.id, title: row.custom_title_pt, titleEn: row.custom_title_en, slug: null,
-      coords: coordsOf(row.lat, row.lng), image: "", priceMzn: null, durationHours: null, destinationName: null,
+      ...base,
+      kind: "custom",
+      refId: row.id,
+      title: row.custom_title_pt,
+      titleEn: row.custom_title_en,
+      slug: null,
+      coords: coordsOf(row.lat, row.lng),
+      image: "",
+      priceMzn: null,
+      durationHours: null,
+      destinationName: null,
     };
   }
   if (row.destinations) {
@@ -298,7 +338,9 @@ function mapRoute(row: RouteRow): ItineraryRoute {
     requiresValidation: !!row.requires_validation,
     catalogNotes: { pt: row.catalog_notes_pt ?? null, en: row.catalog_notes_en ?? null },
     communityCandidates: Array.isArray(row.community_candidates)
-      ? (row.community_candidates as { item?: unknown }[]).map((c) => (typeof c?.item === "string" ? c.item : "")).filter(Boolean)
+      ? (row.community_candidates as { item?: unknown }[])
+          .map((c) => (typeof c?.item === "string" ? c.item : ""))
+          .filter(Boolean)
       : [],
     status: row.status === "inactive" ? "inactive" : "active",
     createdAt: row.created_at,
@@ -413,11 +455,20 @@ export interface RouteDayInput {
 /** Retain custom stops and metadata when importing or editing an existing plan. */
 export function stopToInput(stop: RouteStop): RouteStopInput {
   return {
-    kind: stop.kind, refId: stop.refId, title: stop.title, titleEn: stop.titleEn,
-    descriptionPt: stop.description.pt, descriptionEn: stop.description.en,
-    location: stop.location, lat: stop.coords?.[0] ?? null, lng: stop.coords?.[1] ?? null,
-    isFree: stop.isFree, notes: stop.notes, estimatedDurationMinutes: stop.estimatedDurationMinutes,
-    pendingValidation: stop.pendingValidation, communityCandidate: stop.communityCandidate,
+    kind: stop.kind,
+    refId: stop.refId,
+    title: stop.title,
+    titleEn: stop.titleEn,
+    descriptionPt: stop.description.pt,
+    descriptionEn: stop.description.en,
+    location: stop.location,
+    lat: stop.coords?.[0] ?? null,
+    lng: stop.coords?.[1] ?? null,
+    isFree: stop.isFree,
+    notes: stop.notes,
+    estimatedDurationMinutes: stop.estimatedDurationMinutes,
+    pendingValidation: stop.pendingValidation,
+    communityCandidate: stop.communityCandidate,
   };
 }
 
@@ -438,9 +489,15 @@ export interface RouteInput {
 }
 
 /** One database transaction; RLS and ownership remain authoritative. */
-async function savePlan(routeId: string | null, input: RouteInput, curated = false): Promise<ItineraryRoute> {
+async function savePlan(
+  routeId: string | null,
+  input: RouteInput,
+  curated = false,
+): Promise<ItineraryRoute> {
   const { data, error } = await supabase.rpc("save_route_plan", {
-    _route_id: routeId as unknown as string, _input: input as unknown as Json, _curated: curated,
+    _route_id: routeId as unknown as string,
+    _input: input as unknown as Json,
+    _curated: curated,
   });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Route not saved");
@@ -449,9 +506,14 @@ async function savePlan(routeId: string | null, input: RouteInput, curated = fal
   return saved;
 }
 
-export async function createRoute(input: RouteInput, ownerId: string, options: { isCurated?: boolean } = {}): Promise<ItineraryRoute> {
+export async function createRoute(
+  input: RouteInput,
+  ownerId: string,
+  options: { isCurated?: boolean } = {},
+): Promise<ItineraryRoute> {
   const { data } = await supabase.auth.getUser();
-  if (!data.user || (!options.isCurated && data.user.id !== ownerId)) throw new Error("AUTH_REQUIRED");
+  if (!data.user || (!options.isCurated && data.user.id !== ownerId))
+    throw new Error("AUTH_REQUIRED");
   return savePlan(null, input, options.isCurated ?? false);
 }
 
@@ -470,10 +532,17 @@ export async function setRouteStatus(routeId: string, status: "active" | "inacti
 }
 
 /** Admin decision; the database stamps decided_at/by and notifies the author. */
-export async function decideRoute(routeId: string, decision: "approved" | "rejected", reason?: string) {
+export async function decideRoute(
+  routeId: string,
+  decision: "approved" | "rejected",
+  reason?: string,
+) {
   const { error } = await supabase
     .from("routes")
-    .update({ review_status: decision, rejection_reason: decision === "rejected" ? reason?.trim() || null : null })
+    .update({
+      review_status: decision,
+      rejection_reason: decision === "rejected" ? reason?.trim() || null : null,
+    })
     .eq("id", routeId);
   if (error) throw new Error(error.message);
 }
@@ -495,7 +564,11 @@ export async function importRouteByCode(code: string, ownerId: string): Promise<
   }
   if (source.ownerId === ownerId) throw new Error("ALREADY_OWN");
   const { data: existing } = await supabase
-    .from("routes").select("id").eq("owner_id", ownerId).eq("source_route_id", source.id).maybeSingle();
+    .from("routes")
+    .select("id")
+    .eq("owner_id", ownerId)
+    .eq("source_route_id", source.id)
+    .maybeSingle();
   if (existing) throw new Error("ALREADY_IMPORTED");
 
   return createRoute(
@@ -546,7 +619,9 @@ function mapProgress(row: {
   status: string;
   started_at: string;
   completed_at: string | null;
-  route_stop_progress: { route_stop_id: string; photo_path: string | null; review_status: string }[] | null;
+  route_stop_progress:
+    | { route_stop_id: string; photo_path: string | null; review_status: string }[]
+    | null;
 }): RouteProgress {
   return {
     id: row.id,
@@ -556,15 +631,27 @@ function mapProgress(row: {
     startedAt: row.started_at,
     completedAt: row.completed_at,
     completedStopIds: (row.route_stop_progress ?? []).map((s) => s.route_stop_id),
-    proofPaths: Object.fromEntries((row.route_stop_progress ?? []).filter((s) => s.photo_path).map((s) => [s.route_stop_id, s.photo_path as string])),
-    proofStatus: Object.fromEntries((row.route_stop_progress ?? []).map((s) => [s.route_stop_id, s.review_status as ProofReviewStatus])),
+    proofPaths: Object.fromEntries(
+      (row.route_stop_progress ?? [])
+        .filter((s) => s.photo_path)
+        .map((s) => [s.route_stop_id, s.photo_path as string]),
+    ),
+    proofStatus: Object.fromEntries(
+      (row.route_stop_progress ?? []).map((s) => [
+        s.route_stop_id,
+        s.review_status as ProofReviewStatus,
+      ]),
+    ),
   };
 }
 
 const PROGRESS_SELECT =
   "id, route_id, current_day, status, started_at, completed_at, route_stop_progress(route_stop_id, photo_path, review_status)";
 
-export async function fetchRouteProgress(routeId: string, userId: string): Promise<RouteProgress | null> {
+export async function fetchRouteProgress(
+  routeId: string,
+  userId: string,
+): Promise<RouteProgress | null> {
   const { data, error } = await supabase
     .from("route_progress")
     .select(PROGRESS_SELECT)
@@ -597,9 +684,12 @@ export async function startRouteProgress(routeId: string, userId: string): Promi
 export async function uploadStopProof(userId: string, file: File): Promise<string> {
   if (!file.type.startsWith("image/")) throw new Error("invalid_type");
   if (file.size > 8 * 1024 * 1024) throw new Error("too_large");
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const ext =
+    (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(ROUTE_PROOFS_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+  const { error } = await supabase.storage
+    .from(ROUTE_PROOFS_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
   if (error) throw new Error(error.message);
   return path;
 }
@@ -673,8 +763,23 @@ export async function resetRouteProgress(progressId: string) {
 // ---------- bilingual helpers + deterministic recommendations ----------
 
 export const ROUTE_INTERESTS = [
-  "beach", "culture", "food", "nature", "community", "adventure",
-  "wildlife", "history", "heritage", "local_life", "relax", "diving", "fishing", "hiking", "family", "art", "music",
+  "beach",
+  "culture",
+  "food",
+  "nature",
+  "community",
+  "adventure",
+  "wildlife",
+  "history",
+  "heritage",
+  "local_life",
+  "relax",
+  "diving",
+  "fishing",
+  "hiking",
+  "family",
+  "art",
+  "music",
 ] as const;
 
 const ROUTE_INTEREST_META: Record<string, { emoji: string; label: { pt: string; en: string } }> = {
@@ -761,12 +866,20 @@ const PREF_TO_ROUTE_INTERESTS: Record<string, string[]> = {
   adventure: ["adventure", "hiking", "diving"],
 };
 
-const norm = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+const norm = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 
 /** Number of the user's interests matched by the route (partial match). */
 export function routeInterestMatches(route: ItineraryRoute, interests: string[]): string[] {
   const have = new Set(route.interests.map(norm));
-  return interests.filter((i) => (PREF_TO_ROUTE_INTERESTS[norm(i)] ?? [norm(i)]).some((x) => have.has(x)));
+  return interests.filter((i) =>
+    (PREF_TO_ROUTE_INTERESTS[norm(i)] ?? [norm(i)]).some((x) => have.has(x)),
+  );
 }
 
 export interface PersonalizedRoutes {
@@ -785,16 +898,21 @@ export function personalizeRoutes(
   routes: ItineraryRoute[],
   prefs: { provinces: string[]; durationDays?: number; interests: string[] },
 ): PersonalizedRoutes {
-  const visible = routes.filter((r) => r.isPublic && r.status === "active" && r.reviewStatus === "approved");
+  const visible = routes.filter(
+    (r) => r.isPublic && r.status === "active" && r.reviewStatus === "approved",
+  );
   const days = prefs.durationDays;
   const score = (r: ItineraryRoute) => routeInterestMatches(r, prefs.interests).length;
   const diff = (r: ItineraryRoute) => (days ? Math.abs(r.durationDays - days) : 0);
-  const byFit = (a: ItineraryRoute, b: ItineraryRoute) => score(b) - score(a) || diff(a) - diff(b) || a.title.localeCompare(b.title);
+  const byFit = (a: ItineraryRoute, b: ItineraryRoute) =>
+    score(b) - score(a) || diff(a) - diff(b) || a.title.localeCompare(b.title);
   const inProv = visible.filter((r) => r.province && prefs.provinces.includes(r.province.code));
   const matching = inProv.filter((r) => !prefs.interests.length || score(r) > 0);
   const res: PersonalizedRoutes = {
     exact: matching.filter((r) => !days || r.durationDays === days).sort(byFit),
-    otherDuration: matching.filter((r) => !!days && r.durationDays !== days).sort((a, b) => diff(a) - diff(b) || byFit(a, b)),
+    otherDuration: matching
+      .filter((r) => !!days && r.durationDays !== days)
+      .sort((a, b) => diff(a) - diff(b) || byFit(a, b)),
     otherInProvince: inProv.filter((r) => !matching.includes(r)).sort(byFit),
     otherRegions: visible
       .filter((r) => !inProv.includes(r) && (!prefs.interests.length || score(r) > 0))
@@ -804,7 +922,11 @@ export function personalizeRoutes(
 }
 
 /** Admin decision on a pending stop proof; approving awards the stop points once (server trigger). */
-export async function reviewStopProof(progressId: string, stopId: string, approve: boolean): Promise<ProofReviewStatus> {
+export async function reviewStopProof(
+  progressId: string,
+  stopId: string,
+  approve: boolean,
+): Promise<ProofReviewStatus> {
   const { data, error } = await supabase.rpc("review_stop_proof", {
     _progress_id: progressId,
     _route_stop_id: stopId,

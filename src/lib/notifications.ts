@@ -60,10 +60,7 @@ function mapNotification(row: RawNotification): AppNotification {
 }
 
 /** Notifications for the signed-in user, newest first. */
-export async function fetchMyNotifications(
-  userId: string,
-  limit = 50,
-): Promise<AppNotification[]> {
+export async function fetchMyNotifications(userId: string, limit = 50): Promise<AppNotification[]> {
   const { data, error } = await supabase
     .from("notifications")
     .select("id, type, title_pt, title_en, body_pt, body_en, link, read_at, created_at")

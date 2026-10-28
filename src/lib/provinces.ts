@@ -17,7 +17,10 @@ export interface BusinessCategory {
 }
 
 export async function fetchProvinces(includeInactive = false): Promise<Province[]> {
-  let query = supabase.from("provinces").select("id, code, name_pt, name_en, active").order("name_pt");
+  let query = supabase
+    .from("provinces")
+    .select("id, code, name_pt, name_en, active")
+    .order("name_pt");
   if (!includeInactive) query = query.eq("active", true);
   const { data, error } = await query;
   if (error) throw new Error(error.message);

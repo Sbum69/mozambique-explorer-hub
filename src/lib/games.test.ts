@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { BADGES, badgeStatus, isUnlocked, quizPassed, type BadgeInput } from "./games";
 
-const empty: BadgeInput = { completed: {}, passedQuizzes: 0, photoSteps: 0, bookingsCompleted: 0, routesCompleted: 0 };
+const empty: BadgeInput = {
+  completed: {},
+  passedQuizzes: 0,
+  photoSteps: 0,
+  bookingsCompleted: 0,
+  routesCompleted: 0,
+};
 const badge = (id: string) => BADGES.find((b) => b.id === id)!;
 
 describe("games rules", () => {
@@ -10,7 +16,14 @@ describe("games rules", () => {
     expect(quizPassed(4, 7)).toBe(false);
   });
   it("locked game unlocks only after its prerequisite is completed", () => {
-    const g = { key: "g4", category: "tesouro", xp: 250, total: 4, verification: "photo" as const, unlockAfter: "g3" };
+    const g = {
+      key: "g4",
+      category: "tesouro",
+      xp: 250,
+      total: 4,
+      verification: "photo" as const,
+      unlockAfter: "g3",
+    };
     expect(isUnlocked(g, {})).toBe(false);
     expect(isUnlocked(g, { g3: "2026-01-01" })).toBe(true);
   });
