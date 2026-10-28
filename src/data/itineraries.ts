@@ -6,6 +6,11 @@ import vilankulo from "@/assets/dest-vilankulo.webp";
 export type StopType = "business" | "waypoint" | "story";
 export type Difficulty = "Fácil" | "Moderado" | "Difícil";
 
+/**
+ * Legacy sample itineraries (home stories, game challenges). Contacts, prices, opening hours,
+ * ratings and "sponsored" flags were invented placeholders and were removed (I18N-2); real data
+ * comes from the database.
+ */
 export interface ItineraryStop {
   id: number;
   type: StopType;
@@ -21,14 +26,8 @@ export interface ItineraryStop {
   culturalContextEn?: string;
   category?: string;
   duration?: string;
-  entryFee?: string;
-  phone?: string;
-  website?: string;
-  openingHours?: string;
   tips?: string;
-  sponsored?: boolean;
   scenic?: boolean;
-  rating?: number;
   x: number;
   y: number;
   lat?: number;
@@ -47,13 +46,10 @@ export interface Itinerary {
   image: string;
   duration: string;
   durationEn: string;
-  cost: number;
   stops: number;
   waypoints: number;
   storyStops: number;
   difficulty: Difficulty;
-  rating: number;
-  totalReviews: number;
   gradient: string;
   route: ItineraryStop[];
 }
@@ -70,13 +66,10 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
     image: inhambane,
     duration: "3 dias",
     durationEn: "3 days",
-    cost: 120,
     stops: 6,
     waypoints: 2,
     storyStops: 1,
     difficulty: "Fácil",
-    rating: 4.9,
-    totalReviews: 342,
     gradient: "from-orange-500 to-amber-600",
     route: [
       {
@@ -86,12 +79,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "market",
         description: "Mercado vibrante com artesanato e produtos locais.",
         duration: "60 min",
-        entryFee: "Grátis",
-        phone: "+258 84 111 2222",
-        openingHours: "07:00 - 17:00",
         tips: "Negoceia sempre — faz parte da cultura.",
-        sponsored: true,
-        rating: 4.7,
         x: 20,
         y: 35,
       },
@@ -129,13 +117,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "experience",
         description: "Resort com acesso direto à praia de Tofo.",
         duration: "120 min",
-        entryFee: "$25",
-        phone: "+258 84 333 4444",
-        website: "https://tofobeach.example.mz",
-        openingHours: "24h",
         tips: "Snorkeling com tubarões-baleia disponível.",
-        sponsored: false,
-        rating: 4.8,
         x: 65,
         y: 50,
       },
@@ -157,12 +139,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "food",
         description: "Pratos tradicionais de marisco fresco.",
         duration: "75 min",
-        entryFee: "$15",
-        phone: "+258 84 555 6666",
-        openingHours: "12:00 - 22:00",
         tips: "Experimenta a matapa de caranguejo.",
-        sponsored: true,
-        rating: 4.9,
         x: 55,
         y: 80,
       },
@@ -179,13 +156,10 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
     image: maputo,
     duration: "2 dias",
     durationEn: "2 days",
-    cost: 65,
     stops: 5,
     waypoints: 1,
     storyStops: 1,
     difficulty: "Moderado",
-    rating: 4.7,
-    totalReviews: 218,
     gradient: "from-purple-500 to-purple-700",
     route: [
       {
@@ -195,12 +169,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "cultural",
         description: "Fortaleza histórica do século XIX.",
         duration: "90 min",
-        entryFee: "$5",
-        phone: "+258 21 123 456",
-        openingHours: "09:00 - 17:00",
         tips: "Visita guiada em PT e EN.",
-        sponsored: false,
-        rating: 4.6,
         x: 25,
         y: 30,
       },
@@ -211,11 +180,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "market",
         description: "Arquitetura art déco e produtos frescos.",
         duration: "60 min",
-        entryFee: "Grátis",
-        openingHours: "06:00 - 18:00",
         tips: "Experimenta o pão fresco da manhã.",
-        sponsored: true,
-        rating: 4.5,
         x: 50,
         y: 45,
       },
@@ -251,11 +216,7 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "food",
         description: "Café histórico desde 1922.",
         duration: "45 min",
-        entryFee: "$8",
-        openingHours: "07:00 - 23:00",
         tips: "Pede o galão à moda da casa.",
-        sponsored: false,
-        rating: 4.7,
         x: 40,
         y: 70,
       },
@@ -272,13 +233,10 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
     image: vilankulo,
     duration: "5 dias",
     durationEn: "5 days",
-    cost: 380,
     stops: 7,
     waypoints: 3,
     storyStops: 2,
     difficulty: "Difícil",
-    rating: 4.95,
-    totalReviews: 156,
     gradient: "from-cyan-500 to-blue-700",
     route: [
       {
@@ -288,11 +246,6 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "experience",
         description: "Lodge premium na ilha principal.",
         duration: "1 noite",
-        entryFee: "$120",
-        phone: "+258 84 777 8888",
-        website: "https://bazaruto.example.mz",
-        sponsored: true,
-        rating: 4.95,
         x: 30,
         y: 30,
       },
@@ -339,10 +292,6 @@ export const SAMPLE_ITINERARIES: Itinerary[] = [
         category: "experience",
         description: "Mergulho com tubarões-touro.",
         duration: "240 min",
-        entryFee: "$95",
-        phone: "+258 84 999 0000",
-        sponsored: false,
-        rating: 4.9,
         x: 60,
         y: 65,
       },

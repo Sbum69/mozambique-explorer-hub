@@ -127,6 +127,9 @@ function bucketMax(b: DayBucket): number {
   return 99;
 }
 
+/** Legacy sample stories: not validated yet, so not shown (decision I18N-2). */
+const SHOW_STORY_STOPS = false;
+
 // Story Stops extracted from itineraries
 const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
   it.route
@@ -536,41 +539,45 @@ function HomePage() {
           )}
         </RecoRow>
 
-        {/* Story stops */}
-        <RecoRow title={lang === "pt" ? "Locais imperdíveis" : "Unmissable places"}>
-          {recoStories.map((s, i) => (
-            <motion.div
-              key={s.id}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardContent className="p-5">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">
-                    <Sparkles className="size-3" />
-                    Story Stop
-                  </div>
-                  <h3 className="mt-3 font-semibold leading-tight">{s.title[lang]}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground inline-flex items-center gap-1">
-                    <MapPin className="size-3" /> {s.location[lang]}
-                  </p>
-                  <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{s.story[lang]}</p>
-                  {/* Only stories whose itinerary exists in the database link to it. */}
-                  {s.routeId && (
-                    <Button asChild size="sm" variant="ghost" className="mt-3 -ml-2">
-                      <Link to="/itinerary/$id" params={{ id: s.routeId }}>
-                        {lang === "pt" ? "Explorar roteiro" : "Explore itinerary"}
-                        <ArrowRight className="size-3.5" />
-                      </Link>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </RecoRow>
+        {/* Story stops: hidden until the legends are validated (translations stay in src/data). */}
+        {SHOW_STORY_STOPS && (
+          <RecoRow title={lang === "pt" ? "Locais imperdíveis" : "Unmissable places"}>
+            {recoStories.map((s, i) => (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <Card className="h-full hover:shadow-lg transition-shadow">
+                  <CardContent className="p-5">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">
+                      <Sparkles className="size-3" />
+                      Story Stop
+                    </div>
+                    <h3 className="mt-3 font-semibold leading-tight">{s.title[lang]}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground inline-flex items-center gap-1">
+                      <MapPin className="size-3" /> {s.location[lang]}
+                    </p>
+                    <p className="mt-3 text-sm text-muted-foreground line-clamp-3">
+                      {s.story[lang]}
+                    </p>
+                    {/* Only stories whose itinerary exists in the database link to it. */}
+                    {s.routeId && (
+                      <Button asChild size="sm" variant="ghost" className="mt-3 -ml-2">
+                        <Link to="/itinerary/$id" params={{ id: s.routeId }}>
+                          {lang === "pt" ? "Explorar roteiro" : "Explore itinerary"}
+                          <ArrowRight className="size-3.5" />
+                        </Link>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </RecoRow>
+        )}
       </section>
 
       {/* ============ HOW IT WORKS ============ */}
