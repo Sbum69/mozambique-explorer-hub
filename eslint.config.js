@@ -12,6 +12,8 @@ export default tseslint.config(
       ".output",
       ".vinxi",
       ".wrangler",
+      // Browser QA outputs (Lighthouse keeps temporary Edge profiles there)
+      "qa-output/**",
       // Generated files: never edited by hand
       "src/routeTree.gen.ts",
       "src/integrations/supabase/**",

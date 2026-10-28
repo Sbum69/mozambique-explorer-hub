@@ -8,7 +8,7 @@
  * they compete for CPU and inflate Total Blocking Time.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
 
@@ -76,8 +76,9 @@ for (const p of selectedPages(DEFAULT_PAGES)) {
       ...(devtools ? ["--throttling-method=devtools"] : []),
     ];
     let edge: ReturnType<typeof Bun.spawn> | null = null;
+    let profile: string | null = null;
     if (p.role) {
-      const profile = await profileWithSession(p);
+      profile = await profileWithSession(p);
       edge = Bun.spawn([
         EDGE,
         "--headless=new",
@@ -98,6 +99,8 @@ for (const p of selectedPages(DEFAULT_PAGES)) {
       edge.kill();
       await Bun.sleep(1500);
     }
+    // Temporary Edge profiles are large: remove each one after its run.
+    if (profile) rmSync(profile, { recursive: true, force: true });
     if (!existsSync(file)) {
       samples.push({ error: "no report" });
       continue;
