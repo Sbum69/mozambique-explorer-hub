@@ -80,8 +80,18 @@ interface Props {
 }
 
 export function NotificationsBell({ variant = "default" }: Props) {
-  const { notifications, unreadCount, loading, error, isGuest, markRead, markAllRead, refresh, showingAll, loadAll } =
-    useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    error,
+    isGuest,
+    markRead,
+    markAllRead,
+    refresh,
+    showingAll,
+    loadAll,
+  } = useNotifications();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
   const pt = lang === "pt";
@@ -133,7 +143,12 @@ export function NotificationsBell({ variant = "default" }: Props) {
 
         {!isGuest && unreadCount > 0 && (
           <div className="mt-4 flex justify-end">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => void markAllRead()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => void markAllRead()}
+            >
               <CheckCheck className="size-4" />
               {pt ? "Marcar todas como lidas" : "Mark all as read"}
             </Button>
@@ -144,9 +159,7 @@ export function NotificationsBell({ variant = "default" }: Props) {
           {isGuest && (
             <div className="rounded-xl border bg-card p-4 text-center">
               <p className="text-sm text-muted-foreground">
-                {pt
-                  ? "Esta funcionalidade requer uma conta."
-                  : "This feature requires an account."}
+                {pt ? "Esta funcionalidade requer uma conta." : "This feature requires an account."}
               </p>
               <div className="mt-3 grid gap-2">
                 <Button asChild size="sm" onClick={() => setOpen(false)}>
