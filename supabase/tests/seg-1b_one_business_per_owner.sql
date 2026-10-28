@@ -20,7 +20,7 @@ BEGIN
     RAISE EXCEPTION 'SEG1B_TEST_ROLLBACK [SETUP FAIL no business owner]';
   END IF;
   BEGIN
-    INSERT INTO public.businesses (owner_id, name, status) VALUES (owner, 'SEG-1B segundo negócio', 'pending');
+    INSERT INTO public.businesses (owner_id, name, slug, status) VALUES (owner, 'SEG-1B segundo negócio', 'seg-1b-segundo', 'pending');
     r := r || '[second FAIL accepted] ';
   EXCEPTION WHEN unique_violation THEN
     r := r || format('[second PASS unique_violation %s] ', CASE WHEN SQLERRM LIKE '%businesses_owner_id_key%' THEN 'businesses_owner_id_key' ELSE SQLERRM END);
@@ -29,7 +29,7 @@ BEGIN
     r := r || '[first NOT RUN no profile without a business] ';
   ELSE
     BEGIN
-      INSERT INTO public.businesses (owner_id, name, status) VALUES (free_profile, 'SEG-1B primeiro negócio', 'pending');
+      INSERT INTO public.businesses (owner_id, name, slug, status) VALUES (free_profile, 'SEG-1B primeiro negócio', 'seg-1b-primeiro', 'pending');
       r := r || '[first PASS] ';
     EXCEPTION WHEN others THEN r := r || format('[first FAIL %s] ', SQLERRM);
     END;

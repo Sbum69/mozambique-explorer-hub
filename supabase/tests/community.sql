@@ -126,9 +126,10 @@ BEGIN
   RESET ROLE;
 
   SET LOCAL ROLE anon;
+  -- anon may hold the default SELECT grant, but no policy lets it see any report.
   BEGIN
     SELECT count(*) INTO n FROM public.community_reports;
-    r := r || format('[D-anon FAIL reads %s] ', n);
+    r := r || CASE WHEN n = 0 THEN '[D-anon PASS 0 rows] ' ELSE format('[D-anon FAIL reads %s] ', n) END;
   EXCEPTION WHEN insufficient_privilege THEN r := r || '[D-anon PASS denied] ';
   END;
   RESET ROLE;
@@ -151,9 +152,11 @@ BEGIN
             tour::text || '/testes-1.jpg')
     RETURNING id, status INTO ce_pend, st;
   r := r || CASE WHEN st = 'pending' THEN '[CE-submit PASS pending] ' ELSE format('[CE-submit FAIL %s] ', st) END;
+  -- No UPDATE policy for non-admins: either 0 rows or the guard trigger refuses.
   BEGIN
     UPDATE public.community_experiences SET status = 'approved' WHERE id = ce_pend;
-    r := r || '[CE-self-approve FAIL accepted] ';
+    SELECT status INTO st FROM public.community_experiences WHERE id = ce_pend;
+    r := r || CASE WHEN st = 'pending' THEN '[CE-self-approve PASS still pending] ' ELSE format('[CE-self-approve FAIL %s] ', st) END;
   EXCEPTION WHEN others THEN r := r || '[CE-self-approve PASS refused] ';
   END;
   SELECT count(*) INTO n FROM public.community_experiences WHERE id = ce_pend;
@@ -182,8 +185,11 @@ BEGIN
   END;
   IF photo THEN
   SET LOCAL ROLE anon;
-  SELECT count(*) INTO n FROM storage.objects WHERE bucket_id = 'community-photos' AND name = tour::text || '/testes-1.jpg';
-  r := r || CASE WHEN n = 0 THEN '[F-anon-pending PASS hidden] ' ELSE '[F-anon-pending FAIL] ' END;
+  BEGIN
+    SELECT count(*) INTO n FROM storage.objects WHERE bucket_id = 'community-photos' AND name = tour::text || '/testes-1.jpg';
+    r := r || CASE WHEN n = 0 THEN '[F-anon-pending PASS hidden] ' ELSE '[F-anon-pending FAIL] ' END;
+  EXCEPTION WHEN others THEN r := r || format('[F-anon-pending ERROR %s] ', SQLERRM);
+  END;
   RESET ROLE;
   PERFORM set_config('request.jwt.claims', json_build_object('sub', tour, 'role', 'authenticated')::text, true);
   SET LOCAL ROLE authenticated;
@@ -203,8 +209,11 @@ BEGIN
   r := r || CASE WHEN n = 1 THEN '[CE-notify PASS] ' ELSE format('[CE-notify FAIL %s] ', n) END;
   IF photo THEN
     SET LOCAL ROLE anon;
-    SELECT count(*) INTO n FROM storage.objects WHERE bucket_id = 'community-photos' AND name = tour::text || '/testes-1.jpg';
-    r := r || CASE WHEN n = 1 THEN '[F-anon-approved PASS visible] ' ELSE '[F-anon-approved FAIL] ' END;
+    BEGIN
+      SELECT count(*) INTO n FROM storage.objects WHERE bucket_id = 'community-photos' AND name = tour::text || '/testes-1.jpg';
+      r := r || CASE WHEN n = 1 THEN '[F-anon-approved PASS visible] ' ELSE '[F-anon-approved FAIL] ' END;
+    EXCEPTION WHEN others THEN r := r || format('[F-anon-approved ERROR %s] ', SQLERRM);
+    END;
     RESET ROLE;
   END IF;
 

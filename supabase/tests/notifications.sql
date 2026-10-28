@@ -139,7 +139,7 @@ BEGIN
   ELSE
     BEGIN
       PERFORM set_config('request.jwt.claims', '', true);
-      INSERT INTO public.businesses (owner_id, name, status) VALUES (applicant, 'TESTES-1 negócio', 'pending') RETURNING id INTO nb;
+      INSERT INTO public.businesses (owner_id, name, slug, status) VALUES (applicant, 'TESTES-1 negócio', 'testes-1-negocio', 'pending') RETURNING id INTO nb;
       PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
       UPDATE public.businesses SET status = 'approved' WHERE id = nb;
       UPDATE public.businesses SET status = 'suspended', rejection_reason = 'TESTES-1' WHERE id = nb;
@@ -209,9 +209,10 @@ BEGIN
   RESET ROLE;
 
   SET LOCAL ROLE anon;
+  -- anon may hold the default SELECT grant, but no policy lets it see any notification.
   BEGIN
     SELECT count(*) INTO n FROM public.notifications;
-    r := r || format('[L-anon FAIL reads %s] ', n);
+    r := r || CASE WHEN n = 0 THEN '[L-anon PASS 0 rows] ' ELSE format('[L-anon FAIL reads %s] ', n) END;
   EXCEPTION WHEN insufficient_privilege THEN r := r || '[L-anon PASS denied] ';
   END;
   RESET ROLE;

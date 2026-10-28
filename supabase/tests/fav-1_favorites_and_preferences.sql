@@ -68,9 +68,9 @@ BEGIN
   -- Another user
   PERFORM set_config('request.jwt.claims', json_build_object('sub', biz, 'role', 'authenticated')::text, true);
   SET LOCAL ROLE authenticated;
-  SELECT count(*) INTO n FROM public.favorites;
-  r := r || format('other user sees %s; ', n);
-  DELETE FROM public.favorites WHERE item_id = 'maputo';
+  SELECT count(*) INTO n FROM public.favorites WHERE user_id = tour;
+  r := r || format('other user sees %s of the tourist; ', n);
+  DELETE FROM public.favorites WHERE item_id = 'maputo' AND user_id = tour;
   GET DIAGNOSTICS n = ROW_COUNT;
   r := r || format('other user deleted %s; ', n);
   RESET ROLE;
