@@ -50,7 +50,7 @@ export const COMMUNITY_PHOTOS_BUCKET = "community-photos";
 const SELECT =
   "id, title_pt, title_en, description_pt, description_en, province_id, category, location, lat, lng, image_url, image_path, active, status, submitted_by, submitted_at, decided_at, rejection_reason, additional_info, provinces(code, name_pt, name_en)";
 
-interface Row {
+export interface CommunityExperienceRow {
   id: string;
   title_pt: string;
   title_en: string;
@@ -76,7 +76,7 @@ interface Row {
     | null;
 }
 
-function map(row: Row): CommunityExperience {
+export function mapCommunityExperience(row: CommunityExperienceRow): CommunityExperience {
   const p = Array.isArray(row.provinces) ? row.provinces[0] : row.provinces;
   return {
     id: row.id,
@@ -159,7 +159,9 @@ export async function fetchCommunityExperiences(
   }
   const { data, error } = await q;
   if (error) throw new Error(error.message);
-  let items = (data ?? []).map((r) => map(r as unknown as Row));
+  let items = (data ?? []).map((r) =>
+    mapCommunityExperience(r as unknown as CommunityExperienceRow),
+  );
   if (f.status === "any") {
     // Admin view: submitter names (profiles RLS decides; falls back to the id when unreadable).
     const ids = [...new Set(items.map((i) => i.submittedBy).filter((x): x is string => !!x))];

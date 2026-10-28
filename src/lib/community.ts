@@ -73,6 +73,13 @@ const POST_SELECT = `
   routes ( title )
 `;
 
+/** Fields the post form requires (title, content, category, province). */
+export function postInputMissing(
+  input: Pick<PostInput, "title" | "content" | "categoryId" | "provinceId">,
+): boolean {
+  return !input.title.trim() || !input.content.trim() || !input.categoryId || !input.provinceId;
+}
+
 /* ---------------- Categories ---------------- */
 
 export async function fetchCommunityCategories(): Promise<CommunityCategory[]> {
@@ -92,7 +99,7 @@ export async function fetchCommunityCategories(): Promise<CommunityCategory[]> {
 
 /* ---------------- Reading posts ---------------- */
 
-interface RawPost {
+export interface RawPost {
   id: string;
   author_id: string;
   title: string;
@@ -130,16 +137,17 @@ async function fetchAuthors(
   return map;
 }
 
-async function fetchReactionData(postIds: string[], userId: string | null) {
+export interface ReactionRow {
+  post_id: string;
+  user_id: string;
+  reaction: string;
+}
+
+/** Likes/dislikes per post and the signed-in user's own reaction. */
+export function tallyReactions(rows: ReactionRow[], userId: string | null) {
   const counts = new Map<string, { likes: number; dislikes: number }>();
   const mine = new Map<string, ReactionValue>();
-  if (postIds.length === 0) return { counts, mine };
-  const { data, error } = await supabase
-    .from("community_post_reactions")
-    .select("post_id, user_id, reaction")
-    .in("post_id", postIds);
-  if (error) throw new Error(error.message);
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const bucket = counts.get(row.post_id) ?? { likes: 0, dislikes: 0 };
     if (row.reaction === "like") bucket.likes += 1;
     else bucket.dislikes += 1;
@@ -149,9 +157,57 @@ async function fetchReactionData(postIds: string[], userId: string | null) {
   return { counts, mine };
 }
 
+async function fetchReactionData(postIds: string[], userId: string | null) {
+  if (postIds.length === 0) return tallyReactions([], userId);
+  const { data, error } = await supabase
+    .from("community_post_reactions")
+    .select("post_id, user_id, reaction")
+    .in("post_id", postIds);
+  if (error) throw new Error(error.message);
+  return tallyReactions(data ?? [], userId);
+}
+
 async function currentUserId(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
   return data.session?.user.id ?? null;
+}
+
+/** Raw row + author + reaction data -> the post shown in the feed. */
+export function mapPost(
+  row: RawPost,
+  author: { name: string; avatar: string | null } | undefined,
+  reactionCounts: { likes: number; dislikes: number } | undefined,
+  myReaction: ReactionValue | null,
+): CommunityPost {
+  const counts = reactionCounts ?? { likes: 0, dislikes: 0 };
+  return {
+    id: row.id,
+    authorId: row.author_id,
+    authorName: author?.name ?? "Ekaya",
+    authorAvatar: author?.avatar ?? null,
+    title: row.title,
+    content: row.content,
+    imageUrl: row.image_url,
+    categoryId: row.category_id,
+    categorySlug: row.community_categories?.slug ?? null,
+    categoryName: row.community_categories
+      ? { pt: row.community_categories.name_pt, en: row.community_categories.name_en }
+      : null,
+    provinceId: row.province_id,
+    provinceName: row.provinces ? { pt: row.provinces.name_pt, en: row.provinces.name_en } : null,
+    destinationId: row.destination_id,
+    destinationName: row.destinations?.name ?? null,
+    experienceId: row.experience_id,
+    experienceTitle: row.experiences?.title_pt ?? null,
+    routeId: row.route_id,
+    routeTitle: row.routes?.title ?? null,
+    status: row.status as PostStatus,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    likes: counts.likes,
+    dislikes: counts.dislikes,
+    myReaction: myReaction,
+  };
 }
 
 async function decorate(rows: RawPost[]): Promise<CommunityPost[]> {
@@ -164,38 +220,14 @@ async function decorate(rows: RawPost[]): Promise<CommunityPost[]> {
     ),
   ]);
 
-  return rows.map((row) => {
-    const author = authors.get(row.author_id);
-    const counts = reactions.counts.get(row.id) ?? { likes: 0, dislikes: 0 };
-    return {
-      id: row.id,
-      authorId: row.author_id,
-      authorName: author?.name ?? "Ekaya",
-      authorAvatar: author?.avatar ?? null,
-      title: row.title,
-      content: row.content,
-      imageUrl: row.image_url,
-      categoryId: row.category_id,
-      categorySlug: row.community_categories?.slug ?? null,
-      categoryName: row.community_categories
-        ? { pt: row.community_categories.name_pt, en: row.community_categories.name_en }
-        : null,
-      provinceId: row.province_id,
-      provinceName: row.provinces ? { pt: row.provinces.name_pt, en: row.provinces.name_en } : null,
-      destinationId: row.destination_id,
-      destinationName: row.destinations?.name ?? null,
-      experienceId: row.experience_id,
-      experienceTitle: row.experiences?.title_pt ?? null,
-      routeId: row.route_id,
-      routeTitle: row.routes?.title ?? null,
-      status: row.status as PostStatus,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      likes: counts.likes,
-      dislikes: counts.dislikes,
-      myReaction: reactions.mine.get(row.id) ?? null,
-    };
-  });
+  return rows.map((row) =>
+    mapPost(
+      row,
+      authors.get(row.author_id),
+      reactions.counts.get(row.id),
+      reactions.mine.get(row.id) ?? null,
+    ),
+  );
 }
 
 export interface FeedFilters {
@@ -208,6 +240,20 @@ export interface FeedFilters {
   authorId?: string | null;
 }
 
+/** Search text safe for a PostgREST or() filter (% and , would break it); null when empty. */
+export function feedSearchTerm(search: string | undefined): string | null {
+  const term = search?.trim().replace(/[%,]/g, " ");
+  return term ? term : null;
+}
+
+/** "popular": most likes first, newest first on ties; "recent" keeps the query order. */
+export function sortFeed(posts: CommunityPost[], sort: CommunitySort | undefined): CommunityPost[] {
+  if (sort !== "popular") return posts;
+  return [...posts].sort(
+    (a, b) => b.likes - a.likes || +new Date(b.createdAt) - +new Date(a.createdAt),
+  );
+}
+
 export async function fetchCommunityFeed(filters: FeedFilters = {}): Promise<CommunityPost[]> {
   let query = supabase.from("community_posts").select(POST_SELECT);
 
@@ -217,19 +263,13 @@ export async function fetchCommunityFeed(filters: FeedFilters = {}): Promise<Com
   if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
   if (filters.provinceId) query = query.eq("province_id", filters.provinceId);
   if (filters.authorId) query = query.eq("author_id", filters.authorId);
-  if (filters.search?.trim()) {
-    const term = filters.search.trim().replace(/[%,]/g, " ");
-    query = query.or(`title.ilike.%${term}%,content.ilike.%${term}%`);
-  }
+  const term = feedSearchTerm(filters.search);
+  if (term) query = query.or(`title.ilike.%${term}%,content.ilike.%${term}%`);
 
   const { data, error } = await query.order("created_at", { ascending: false }).limit(200);
   if (error) throw new Error(error.message);
 
-  const posts = await decorate((data ?? []) as RawPost[]);
-  if (filters.sort === "popular") {
-    posts.sort((a, b) => b.likes - a.likes || +new Date(b.createdAt) - +new Date(a.createdAt));
-  }
-  return posts;
+  return sortFeed(await decorate((data ?? []) as RawPost[]), filters.sort);
 }
 
 export async function fetchCommunityPost(id: string): Promise<CommunityPost | null> {
@@ -298,6 +338,15 @@ export async function setCommunityPostStatus(id: string, status: PostStatus): Pr
 
 /* ---------------- Reactions ---------------- */
 
+/** Like/dislike toggle: the same value removes it, the opposite value switches, none inserts. */
+export function reactionAction(
+  existing: ReactionValue | null,
+  value: ReactionValue,
+): "remove" | "switch" | "insert" {
+  if (existing === value) return "remove";
+  return existing ? "switch" : "insert";
+}
+
 /** Applies like/dislike toggle semantics: same value removes, opposite value switches. */
 export async function toggleReaction(
   postId: string,
@@ -314,7 +363,8 @@ export async function toggleReaction(
     .maybeSingle();
   if (readError) throw new Error(readError.message);
 
-  if (existing && existing.reaction === value) {
+  const action = reactionAction((existing?.reaction as ReactionValue | undefined) ?? null, value);
+  if (existing && action === "remove") {
     const { error } = await supabase
       .from("community_post_reactions")
       .delete()
@@ -322,7 +372,7 @@ export async function toggleReaction(
     if (error) throw new Error(error.message);
     return null;
   }
-  if (existing) {
+  if (existing && action === "switch") {
     const { error } = await supabase
       .from("community_post_reactions")
       .update({ reaction: value })
@@ -339,6 +389,10 @@ export async function toggleReaction(
 
 /* ---------------- Reports ---------------- */
 
+export function isDuplicateReport(message: string): boolean {
+  return message.includes("duplicate key");
+}
+
 export async function reportCommunityPost(
   postId: string,
   reason: ReportReason,
@@ -352,8 +406,8 @@ export async function reportCommunityPost(
     reason,
     description: description?.trim() || null,
   });
-  // A unique constraint keeps one report per user per post.
-  if (error && !error.message.includes("duplicate key")) throw new Error(error.message);
+  // A unique constraint keeps one report per user per post: a second report is not an error.
+  if (error && !isDuplicateReport(error.message)) throw new Error(error.message);
 }
 
 export async function fetchCommunityReports(

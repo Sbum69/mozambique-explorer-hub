@@ -13,6 +13,7 @@ import type { Experience } from "@/lib/experiences";
 import type { ItineraryRoute } from "@/lib/routes";
 import {
   createCommunityPost,
+  postInputMissing,
   updateCommunityPost,
   type CommunityCategory,
   type CommunityPost,
@@ -49,7 +50,7 @@ export function PostEditor({
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
-    if (!title.trim() || !content.trim() || !categoryId || !provinceId) {
+    if (postInputMissing({ title, content, categoryId, provinceId })) {
       toast.error(t("communityRequiredFields"));
       return;
     }

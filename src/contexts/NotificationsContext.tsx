@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import {
   countMyUnread,
+  unreadAfterMarkRead,
   fetchMyNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -81,7 +82,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       if (!userId) return;
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-      setUnreadTotal((c) => Math.max(0, c - 1));
+      setUnreadTotal(unreadAfterMarkRead);
       try {
         await markNotificationRead(id);
         setUnreadTotal(await countMyUnread(userId));

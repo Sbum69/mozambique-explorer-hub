@@ -35,7 +35,48 @@ export interface AppNotification {
   createdAt: string;
 }
 
-interface RawNotification {
+/** Label of each notification type (badge in the notifications panel). */
+export const NOTIFICATION_TYPE_LABEL: Record<NotificationType, { pt: string; en: string }> = {
+  system: { pt: "Sistema", en: "System" },
+  booking: { pt: "Reserva", en: "Booking" },
+  itinerary: { pt: "Roteiro", en: "Itinerary" },
+  experience: { pt: "Experiência", en: "Experience" },
+  community: { pt: "Comunidade", en: "Community" },
+  route: { pt: "Rota", en: "Route" },
+  reward: { pt: "Recompensa", en: "Reward" },
+  safety: { pt: "Segurança", en: "Safety" },
+  promo: { pt: "Promoção", en: "Promo" },
+  event: { pt: "Evento", en: "Event" },
+  business: { pt: "Negócio", en: "Business" },
+};
+
+export function notificationTypeLabel(type: string, lang: "pt" | "en"): string {
+  return (NOTIFICATION_TYPE_LABEL[type as NotificationType] ?? NOTIFICATION_TYPE_LABEL.system)[
+    lang
+  ];
+}
+
+/** "12 out, 14:30" / "12 Oct, 14:30" in the reader's language. */
+export function formatNotificationDate(iso: string, lang: "pt" | "en"): string {
+  return new Date(iso).toLocaleString(lang === "pt" ? "pt-PT" : "en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** Only in-app paths become links ("/bookings"); "//host" or external URLs are dropped. */
+export function safeInternalLink(link: string | null): string | null {
+  return link && link.startsWith("/") && !link.startsWith("//") ? link : null;
+}
+
+/** Unread badge after marking one as read: never below zero. */
+export function unreadAfterMarkRead(count: number): number {
+  return Math.max(0, count - 1);
+}
+
+export interface RawNotification {
   id: string;
   type: string;
   title_pt: string;
@@ -47,13 +88,13 @@ interface RawNotification {
   created_at: string;
 }
 
-function mapNotification(row: RawNotification): AppNotification {
+export function mapNotification(row: RawNotification): AppNotification {
   return {
     id: row.id,
     type: (row.type as NotificationType) ?? "system",
     title: { pt: row.title_pt, en: row.title_en ?? row.title_pt },
     body: { pt: row.body_pt, en: row.body_en ?? row.body_pt },
-    link: row.link,
+    link: safeInternalLink(row.link),
     read: !!row.read_at,
     createdAt: row.created_at,
   };
