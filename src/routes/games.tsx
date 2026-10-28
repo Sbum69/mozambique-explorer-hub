@@ -831,17 +831,17 @@ function GameDetailModal({
 
   const setLabel = (k: string, v?: string) => setLabels((p) => ({ ...p, [k]: v ?? "" }));
 
+  const miss = GAMES_TXT[lang].missing;
   const missing: string | null = (() => {
-    if (task.stops && !selectedStop) return "Seleciona a paragem";
-    if (task.experience && !experienceId) return "Escolhe a experiência";
-    if (task.itinerary && !itinerarySel) return "Escolhe o roteiro e a paragem";
-    if (task.timeOfDay && !timeOfDay) return "Regista o momento do dia";
-    if (task.event && !eventInfo) return "Preenche o evento e a data";
-    if (task.word && !word) return "Escreve a palavra e o significado";
-    if (task.note && note.trim().length < task.note)
-      return `Escreve pelo menos ${task.note} caracteres`;
-    if (task.share && !shared) return "Partilha para validar";
-    if (requiresPhoto && !photo) return "Tira a foto para confirmar";
+    if (task.stops && !selectedStop) return miss.stop;
+    if (task.experience && !experienceId) return miss.experience;
+    if (task.itinerary && !itinerarySel) return miss.itinerary;
+    if (task.timeOfDay && !timeOfDay) return miss.timeOfDay;
+    if (task.event && !eventInfo) return miss.event;
+    if (task.word && !word) return miss.word;
+    if (task.note && note.trim().length < task.note) return miss.note(task.note);
+    if (task.share && !shared) return miss.share;
+    if (requiresPhoto && !photo) return miss.photo;
     return null;
   })();
 
@@ -960,7 +960,7 @@ function GameDetailModal({
               {history.length > 0 && (
                 <div className="rounded-xl border p-3">
                   <p className="text-xs font-bold uppercase text-muted-foreground mb-1">
-                    Registos anteriores
+                    {GAMES_TXT[lang].previousRecords}
                   </p>
                   <ul className="space-y-1">
                     {history.slice(0, 4).map((at, i) => (
