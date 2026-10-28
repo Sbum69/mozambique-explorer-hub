@@ -449,8 +449,8 @@ function MapPage() {
             </ClientOnly>
           </Card>
 
-          {/* Sidebar list */}
-          <div className="space-y-3 lg:max-h-[640px] lg:overflow-y-auto pr-1">
+          {/* Sidebar list (phones: above the map, so the page shows content before the map loads) */}
+          <div className="space-y-3 lg:max-h-[640px] lg:overflow-y-auto pr-1 order-first lg:order-none">
             <div className="flex items-center justify-between gap-2 px-1">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 {visibleDestinations.length} {lang === "pt" ? "destinos" : "destinations"}
