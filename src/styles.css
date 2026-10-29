@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --font-sans: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -66,110 +68,143 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* DESIGN-1 "Capulana e Índico" (docs/DESIGN.md). Every text pair ≥ 4.5:1, control borders ≥ 3:1. */
 :root {
-  --radius: 0.875rem;
-  --background: oklch(0.995 0.005 80);
-  --foreground: oklch(0.2 0.04 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.04 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.04 250);
-  /* Mozambique orange — sun, energy. L 0.575 keeps white text and orange text ≥ 4.5:1 (WCAG AA). */
-  --primary: oklch(0.575 0.18 45);
-  --primary-foreground: oklch(0.99 0.01 80);
-  --primary-glow: oklch(0.57 0.17 58);
-  /* Indian Ocean blue */
-  --secondary: oklch(0.54 0.15 235);
-  --secondary-foreground: oklch(0.99 0.01 80);
-  --muted: oklch(0.96 0.01 80);
-  --muted-foreground: oklch(0.5 0.03 250);
-  --accent: oklch(0.92 0.06 50);
-  --accent-foreground: oklch(0.25 0.05 45);
-  /* Sustainability green */
-  --success: oklch(0.53 0.16 155);
-  --success-foreground: oklch(0.99 0.01 80);
-  /* Achievement yellow */
-  --warning: oklch(0.82 0.15 85);
-  --warning-foreground: oklch(0.25 0.05 45);
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.99 0.01 80);
-  --border: oklch(0.9 0.02 60);
-  /* Field borders need 3:1 against the page (WCAG 1.4.11). */
-  --input: oklch(0.655 0.02 60);
-  --ring: oklch(0.575 0.18 45);
-  --gradient-hero: linear-gradient(
-    135deg,
-    oklch(0.68 0.18 45) 0%,
-    oklch(0.78 0.17 60) 50%,
-    oklch(0.55 0.15 235) 100%
-  );
-  --gradient-sunset: linear-gradient(180deg, oklch(0.78 0.17 60) 0%, oklch(0.68 0.18 45) 100%);
-  --gradient-ocean: linear-gradient(135deg, oklch(0.55 0.15 235) 0%, oklch(0.62 0.16 200) 100%);
-  --gradient-savanna: linear-gradient(135deg, oklch(0.62 0.16 155) 0%, oklch(0.82 0.15 85) 100%);
-  --gradient-card: linear-gradient(180deg, oklch(1 0 0) 0%, oklch(0.98 0.02 60) 100%);
-  --shadow-elegant: 0 10px 40px -12px oklch(0.68 0.18 45 / 0.25);
-  --shadow-glow: 0 0 60px oklch(0.78 0.17 60 / 0.45);
-  --shadow-soft: 0 4px 20px -4px oklch(0.2 0.04 250 / 0.1);
-  --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --radius: 0.625rem;
+  --background: #f5f7f6;
+  --foreground: #15211f;
+  --card: #ffffff;
+  --card-foreground: #15211f;
+  --popover: #ffffff;
+  --popover-foreground: #15211f;
+  /* Índico — the one action colour (buttons, links, focus). */
+  --primary: #0a6670;
+  --primary-foreground: #ffffff;
+  --primary-glow: #08525a;
+  /* Mangrove green — second colour and positive states. */
+  --secondary: #2c6a43;
+  --secondary-foreground: #ffffff;
+  --muted: #e8eeec;
+  --muted-foreground: #4e5d59;
+  --accent: #e2eeee;
+  --accent-foreground: #0a3f45;
+  --success: #2c6a43;
+  --success-foreground: #ffffff;
+  /* Capulana ochre — highlights only, dark text on it. */
+  --warning: #e2a12b;
+  --warning-foreground: #15211f;
+  /* Capulana red — errors, cancel, delete. */
+  --destructive: #b3372b;
+  --destructive-foreground: #ffffff;
+  --border: #d3dcd9;
+  /* Field and control borders need 3:1 against the page (WCAG 1.4.11). */
+  --input: #7f908b;
+  --ring: #0a6670;
+  /* No colour gradients: the old gradient tokens are flat now (photo veils use black/alpha). */
+  --gradient-hero: linear-gradient(var(--primary), var(--primary));
+  --gradient-sunset: linear-gradient(var(--primary), var(--primary));
+  --gradient-ocean: linear-gradient(var(--primary), var(--primary));
+  --gradient-savanna: linear-gradient(var(--secondary), var(--secondary));
+  --gradient-card: linear-gradient(var(--card), var(--card));
+  /* Cards are set off by a 1px outline, not a shadow; one elevation for menus and dialogs. */
+  --shadow-soft: 0 0 0 1px var(--border);
+  --shadow-elegant: 0 0 0 1px var(--input);
+  --shadow-glow: none;
+  --shadow-overlay: 0 12px 32px -8px rgb(13 22 21 / 0.25);
+  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --chart-1: #0a6670;
+  --chart-2: #e2a12b;
+  --chart-3: #2c6a43;
+  --chart-4: #b3372b;
+  --chart-5: #4e5d59;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #15211f;
+  --sidebar-primary: #0a6670;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2eeee;
+  --sidebar-accent-foreground: #0a3f45;
+  --sidebar-border: #d3dcd9;
+  --sidebar-ring: #0a6670;
 }
 
-/* Dark theme with the brand: orange stays primary (dark text on it), Indian Ocean blue, green and
-   yellow keep their roles. Every text pair is ≥ 4.5:1 and field borders ≥ 3:1. */
 .dark {
-  --background: oklch(0.17 0.025 255);
-  --foreground: oklch(0.97 0.005 80);
-  --card: oklch(0.215 0.03 255);
-  --card-foreground: oklch(0.97 0.005 80);
-  --popover: oklch(0.215 0.03 255);
-  --popover-foreground: oklch(0.97 0.005 80);
-  --primary: oklch(0.75 0.16 50);
-  --primary-foreground: oklch(0.2 0.04 250);
-  --primary-glow: oklch(0.8 0.15 62);
-  --secondary: oklch(0.72 0.12 235);
-  --secondary-foreground: oklch(0.2 0.04 250);
-  --muted: oklch(0.27 0.03 255);
-  --muted-foreground: oklch(0.74 0.025 255);
-  --accent: oklch(0.3 0.04 50);
-  --accent-foreground: oklch(0.97 0.005 80);
-  --success: oklch(0.74 0.15 155);
-  --success-foreground: oklch(0.2 0.04 250);
-  --warning: oklch(0.83 0.15 85);
-  --warning-foreground: oklch(0.2 0.04 250);
-  --destructive: oklch(0.7 0.18 25);
-  --destructive-foreground: oklch(0.2 0.04 250);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(0.55 0.02 255);
-  --ring: oklch(0.75 0.16 50);
-  --gradient-card: linear-gradient(180deg, oklch(0.215 0.03 255) 0%, oklch(0.24 0.035 60) 100%);
-  --shadow-elegant: 0 10px 40px -12px oklch(0 0 0 / 0.6);
-  --shadow-glow: 0 0 50px oklch(0.75 0.16 50 / 0.3);
-  --shadow-soft: 0 4px 20px -4px oklch(0 0 0 / 0.5);
-  --chart-1: oklch(0.75 0.16 50);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.72 0.12 235);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.215 0.03 255);
-  --sidebar-foreground: oklch(0.97 0.005 80);
-  --sidebar-primary: oklch(0.75 0.16 50);
-  --sidebar-primary-foreground: oklch(0.2 0.04 250);
-  --sidebar-accent: oklch(0.27 0.03 255);
-  --sidebar-accent-foreground: oklch(0.97 0.005 80);
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.75 0.16 50);
+  --background: #0d1615;
+  --foreground: #e7eeec;
+  --card: #15201f;
+  --card-foreground: #e7eeec;
+  --popover: #15201f;
+  --popover-foreground: #e7eeec;
+  --primary: #4fb9c2;
+  --primary-foreground: #062326;
+  --primary-glow: #6ccad2;
+  --secondary: #6cc08a;
+  --secondary-foreground: #062326;
+  --muted: #22302e;
+  --muted-foreground: #9db0ab;
+  --accent: #1e3436;
+  --accent-foreground: #e7eeec;
+  --success: #6cc08a;
+  --success-foreground: #062326;
+  --warning: #f0b44a;
+  --warning-foreground: #062326;
+  --destructive: #f07a6c;
+  --destructive-foreground: #062326;
+  --border: #2a3836;
+  --input: #5e716c;
+  --ring: #4fb9c2;
+  --shadow-soft: 0 0 0 1px var(--border);
+  --shadow-elegant: 0 0 0 1px var(--input);
+  --shadow-overlay: 0 12px 32px -8px rgb(0 0 0 / 0.6);
+  --chart-1: #4fb9c2;
+  --chart-2: #f0b44a;
+  --chart-3: #6cc08a;
+  --chart-4: #f07a6c;
+  --chart-5: #9db0ab;
+  --sidebar: #15201f;
+  --sidebar-foreground: #e7eeec;
+  --sidebar-primary: #4fb9c2;
+  --sidebar-primary-foreground: #062326;
+  --sidebar-accent: #1e3436;
+  --sidebar-accent-foreground: #e7eeec;
+  --sidebar-border: #2a3836;
+  --sidebar-ring: #4fb9c2;
+}
+
+/* Self-hosted fonts (SIL Open Font License, see public/fonts/OFL.txt). */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-400-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque-variable.woff2") format("woff2");
+}
+
+/* Thin band inspired by the capulana border: header, sidebar and section dividers only. */
+@utility capulana-band {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8'%3E%3Cpath d='M0 8 6 0 12 8z' fill='%230A6670'/%3E%3Cpath d='M12 8 18 0 24 8z' fill='%23E2A12B'/%3E%3Cpath d='M6 0h12L12 8z' fill='%23B3372B'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 24px 6px;
 }
 
 @layer base {
@@ -180,6 +215,15 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    letter-spacing: -0.01em;
   }
 
   /* Visible keyboard focus everywhere; components with their own ring (outline-none + ring) override it. */

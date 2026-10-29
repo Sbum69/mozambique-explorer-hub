@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -209,9 +210,7 @@ function DashboardPage() {
           <div className="flex min-w-0 items-center gap-1">
             <AppSidebar />
             <Link to="/home" className="flex min-w-0 items-center gap-2 font-bold text-lg ml-1">
-              <span className="size-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center text-primary-foreground">
-                🌍
-              </span>
+              <BrandMark />
               <span className="sr-only min-[375px]:not-sr-only truncate">Ekaya</span>
             </Link>
           </div>

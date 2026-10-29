@@ -1,5 +1,4 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { motion } from "framer-motion";
 import {
   X,
   Home,
@@ -11,7 +10,6 @@ import {
   Trophy,
   Activity,
   BookOpen,
-  Sparkles,
   Heart,
   Users,
   Info,
@@ -32,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { SETTINGS_TXT } from "@/lib/page-texts";
 
 interface NavItem {
   to: string;
@@ -147,39 +146,50 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
   return (
     <>
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-primary via-primary-glow to-secondary text-primary-foreground p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-11 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-              {isAdmin ? <Shield className="size-5" /> : <Map className="size-5" />}
+      <div className="relative bg-card text-card-foreground border-b border-border">
+        <div className="capulana-band h-1.5" aria-hidden="true" />
+        <div className="p-5">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-md bg-primary text-primary-foreground flex items-center justify-center">
+                {isAdmin ? <Shield className="size-5" /> : <Map className="size-5" />}
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Ekaya Explore
+                </p>
+                <h2 className="font-bold leading-tight">
+                  {lang === "pt" ? "Moçambique" : "Mozambique"}
+                </h2>
+              </div>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-wider">Ekaya Explore</p>
-              <h2 className="font-bold leading-tight">
-                {lang === "pt" ? "Moçambique — Hub" : "Mozambique — Hub"}
-              </h2>
-            </div>
+            <button
+              onClick={close}
+              className="size-8 rounded-md hover:bg-accent flex items-center justify-center"
+              aria-label={lang === "pt" ? "Fechar menu" : "Close menu"}
+            >
+              <X className="size-4" />
+            </button>
           </div>
-          <button
-            onClick={close}
-            className="size-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-transform hover:rotate-90"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
 
-        {user && (
-          <div className="mt-4 rounded-2xl bg-white/15 backdrop-blur p-3 flex items-center gap-3">
-            <div className="size-10 rounded-full bg-white/25 flex items-center justify-center font-bold">
-              {user.displayName.charAt(0).toUpperCase()}
+          {user && isAuthenticated && (
+            <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
+              <div className="size-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                {user.displayName.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{user.displayName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {isAdmin
+                    ? SETTINGS_TXT[lang].roleAdmin
+                    : user.role === "business-small" || user.role === "business-large"
+                      ? SETTINGS_TXT[lang].roleBusiness
+                      : SETTINGS_TXT[lang].roleTourist}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="font-semibold truncate">{user.displayName}</p>
-              <p className="text-xs capitalize">{user.role.replace("-", " ")}</p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {!isAuthenticated && (
@@ -209,50 +219,31 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
       )}
 
       {/* Discover Adventures CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-        className="mx-4 mt-4"
-      >
-        <motion.button
-          whileHover={{ scale: 1.03, y: -2 }}
-          whileTap={{ scale: 0.97 }}
+      <div className="mx-4 mt-4">
+        <button
+          type="button"
           onClick={() => {
             navigate({ to: "/experiences" });
             close();
           }}
-          className="w-full bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 text-white rounded-2xl p-4 shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group"
+          className="w-full rounded-md bg-primary p-4 text-left text-primary-foreground hover:bg-primary-glow transition-colors"
         >
-          <motion.div
-            animate={{ x: ["-100%", "100%"], opacity: [0, 0.5, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white dark:via-background to-transparent pointer-events-none"
-          />
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="size-11 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center"
-              >
-                <Sparkles className="size-5" />
-              </motion.div>
-              <div className="text-left">
-                <div className="font-bold text-sm">
+          <span className="flex items-center justify-between gap-3">
+            <span className="flex items-center gap-3">
+              <Compass className="size-5 shrink-0" aria-hidden="true" />
+              <span>
+                <span className="block font-bold text-sm">
                   {lang === "pt" ? "Descobrir Aventuras" : "Discover Adventures"}
-                </div>
-                <div className="text-[11px] text-white/90">
+                </span>
+                <span className="block text-xs opacity-90">
                   {lang === "pt" ? "Explora experiências únicas" : "Explore unique experiences"}
-                </div>
-              </div>
-            </div>
-            <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-              <ArrowRight className="size-5" />
-            </motion.div>
-          </div>
-        </motion.button>
-      </motion.div>
+                </span>
+              </span>
+            </span>
+            <ArrowRight className="size-5 shrink-0" aria-hidden="true" />
+          </span>
+        </button>
+      </div>
 
       {/* Nav sections */}
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
@@ -269,10 +260,10 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
                     key={item.to}
                     to={item.to as never}
                     onClick={close}
-                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:translate-x-1 ${
+                    className={`group flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
                       active
-                        ? "bg-primary/10 text-primary"
-                        : "text-foreground hover:bg-orange-500/10 hover:text-primary"
+                        ? "bg-accent text-accent-foreground font-bold shadow-[inset_3px_0_0_var(--color-primary)]"
+                        : "text-foreground hover:bg-accent hover:text-accent-foreground"
                     }`}
                   >
                     <item.icon className="size-4 shrink-0" />
@@ -313,7 +304,7 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
           {isAdmin && (
             <Button
               variant="default"
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90"
+              className="w-full"
               onClick={() => {
                 navigate({ to: "/admin" });
                 close();

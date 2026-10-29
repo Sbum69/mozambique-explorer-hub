@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, ShieldCheck, Mail, Store, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
@@ -86,9 +87,7 @@ function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-black/45 via-black/35 to-black/70" />
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-2 font-bold text-2xl">
-            <span className="size-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-              🌍
-            </span>
+            <BrandMark className="size-9" />
             Ekaya Explore
           </div>
           <motion.div
