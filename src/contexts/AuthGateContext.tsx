@@ -59,13 +59,14 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
               <Lock className="size-6" />
             </div>
             <DialogTitle className="text-center">
-              {pt ? "Esta funcionalidade requer uma conta." : "This feature requires an account."}
+              {pt
+                ? `Cria conta ou entra para ${feature ?? "continuar"}`
+                : `Create an account or sign in to ${feature ?? "continue"}`}
             </DialogTitle>
             <DialogDescription className="text-center">
-              {feature ? `${feature} · ` : ""}
               {pt
-                ? "Entra ou cria uma conta para continuar."
-                : "Sign in or create an account to continue."}
+                ? "Como visitante podes ver tudo; para guardar e participar precisas de uma conta. Voltas a esta página a seguir."
+                : "As a visitor you can see everything; to save and take part you need an account. You come back to this page afterwards."}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-2 grid gap-2">

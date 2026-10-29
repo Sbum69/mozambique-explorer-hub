@@ -24,11 +24,12 @@ import {
   CalendarCheck,
   SlidersHorizontal,
   Store,
+  Settings,
+  UserPlus,
   type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 
@@ -36,10 +37,12 @@ interface NavItem {
   to: string;
   icon: LucideIcon;
   label: { pt: string; en: string };
-  badge?: string;
   /** Requires an account: hidden for guests so they are never bounced to /login. */
   privateOnly?: boolean;
 }
+
+/** Paid plans are not offered yet: the card stays in the code, hidden until there is a real plan. */
+const SHOW_PLANS = false;
 
 const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
   {
@@ -71,10 +74,15 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
         privateOnly: true,
       },
       {
+        to: "/settings",
+        icon: Settings,
+        label: { pt: "Definições", en: "Settings" },
+        privateOnly: true,
+      },
+      {
         to: "/news-alerts",
         icon: Bell,
         label: { pt: "Notícias & Avisos", en: "News & Alerts" },
-        badge: "NOVO",
       },
     ],
   },
@@ -99,8 +107,7 @@ const SECTIONS: { title: { pt: string; en: string }; items: NavItem[] }[] = [
       {
         to: "/games",
         icon: Gamepad2,
-        label: { pt: "🎮 Jogar Desafios", en: "🎮 Play Challenges" },
-        badge: "NOVO",
+        label: { pt: "Jogar Desafios", en: "Play Challenges" },
         privateOnly: true,
       },
       { to: "/impact", icon: Activity, label: { pt: "Impacto Social", en: "Social Impact" } },
@@ -175,6 +182,32 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
         )}
       </div>
 
+      {!isAuthenticated && (
+        <div className="mx-4 mt-4 grid grid-cols-2 gap-2">
+          <Button
+            className="gap-1.5"
+            onClick={() => {
+              close();
+              navigate({ to: "/login" });
+            }}
+          >
+            <LogIn className="size-4" />
+            {lang === "pt" ? "Entrar" : "Sign in"}
+          </Button>
+          <Button
+            variant="secondary"
+            className="gap-1.5"
+            onClick={() => {
+              close();
+              navigate({ to: "/signup" });
+            }}
+          >
+            <UserPlus className="size-4" />
+            {lang === "pt" ? "Criar conta" : "Create account"}
+          </Button>
+        </div>
+      )}
+
       {/* Discover Adventures CTA */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -218,9 +251,6 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
               <ArrowRight className="size-5" />
             </motion.div>
           </div>
-          <div className="absolute -top-1 -right-1 size-6 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold shadow-lg">
-            3
-          </div>
         </motion.button>
       </motion.div>
 
@@ -247,11 +277,6 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
                   >
                     <item.icon className="size-4 shrink-0" />
                     <span className="flex-1">{item.label[lang]}</span>
-                    {item.badge && (
-                      <Badge className="text-[9px] h-4 px-1.5 bg-red-500 hover:bg-red-500">
-                        {item.badge}
-                      </Badge>
-                    )}
                   </Link>
                 );
               })}
@@ -260,7 +285,7 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
         ))}
 
         {/* Premium card */}
-        {user && user.role !== "guest" && (
+        {SHOW_PLANS && user && user.role !== "guest" && (
           <div className="rounded-2xl bg-gradient-to-br from-amber-700 via-orange-700 to-pink-600 text-white p-4 shadow-lg">
             <div className="flex items-center gap-2 mb-2">
               <Crown className="size-5" />
@@ -282,58 +307,37 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
         )}
       </nav>
 
-      {/* Footer actions */}
-      <div className="border-t p-4 space-y-2 bg-muted/30">
-        {isAdmin && (
-          <Button
-            variant="default"
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90"
-            onClick={() => {
-              navigate({ to: "/admin" });
-              close();
-            }}
-          >
-            <Shield className="size-4" />
-            {lang === "pt" ? "Painel Admin" : "Admin Panel"}
-          </Button>
-        )}
-        {isAuthenticated ? (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              close();
-              void logout().then(() => navigate({ to: "/login", replace: true }));
-            }}
-          >
-            <LogOut className="size-4" />
-            {lang === "pt" ? "Sair" : "Sign out"}
-          </Button>
-        ) : (
-          <>
+      {/* Footer actions (guests sign in at the top) */}
+      {isAuthenticated && (
+        <div className="border-t p-4 space-y-2 bg-muted/30">
+          {isAdmin && (
             <Button
-              className="w-full bg-primary hover:bg-primary/90"
+              variant="default"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90"
               onClick={() => {
+                navigate({ to: "/admin" });
                 close();
-                navigate({ to: "/login" });
               }}
             >
-              <LogIn className="size-4" />
-              {lang === "pt" ? "Entrar" : "Sign in"}
+              <Shield className="size-4" />
+              {lang === "pt" ? "Painel Admin" : "Admin Panel"}
             </Button>
+          )}
+          {isAuthenticated && (
             <Button
               variant="outline"
               className="w-full"
               onClick={() => {
                 close();
-                navigate({ to: "/signup" });
+                void logout().then(() => navigate({ to: "/login", replace: true }));
               }}
             >
-              {lang === "pt" ? "Criar conta" : "Create account"}
+              <LogOut className="size-4" />
+              {lang === "pt" ? "Sair" : "Sign out"}
             </Button>
-          </>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
