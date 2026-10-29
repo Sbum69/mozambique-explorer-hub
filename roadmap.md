@@ -1,11 +1,11 @@
-# Estado atual do projeto EKAYA (atualizado a 26/10/2026)
+# Estado atual do projeto EKAYA (atualizado a 29/10/2026)
 
-Resumo: a parte funcional está praticamente completa e o tema claro/escuro e o PT/EN cobrem a app
-inteira. Faltam os testes da comunidade (bloco 11), confirmar o resto do bloco 10, os emails de
-autenticação fiáveis, o desempenho em telemóvel e o QA final com várias contas e dispositivos.
-A app **não** está publicada. Migrações aplicadas e registadas: 0034–0042.
+Resumo: a parte funcional está completa, com tema claro/escuro e PT/EN em toda a app (incluindo o
+conteúdo da base de dados), testes de unidade, de BD e de browser guardados no repositório, CI no
+GitHub, desempenho em telemóvel melhorado e auditoria de segurança feita. A app **não** está
+publicada. Migrações aplicadas e registadas: 0000–0045 (46 registos).
 
-## Concluído (22–26/10)
+## Concluído (22–29/10)
 - [x] 2B — Correções de frontend (sem alterações à base de dados) + CLAUDE.md + auditoria
 - [x] Migração do backend (`backend-migration`) juntada à `main`
 - [x] SEG-1 — Registo de negócio só para contas autenticadas
@@ -15,30 +15,36 @@ A app **não** está publicada. Migrações aplicadas e registadas: 0034–0042.
 - [x] 9B — Estatísticas e impacto verificável (/impact com RPC agregada, sem KPIs fictícios)
 - [x] 10B — Recompensas de negócio, jogos em PT/EN e provas com localização (migração 0038)
 - [x] ADM-1 — Painel de administração: suspensão, papéis, dono, reservas e atividades (migração 0039)
-- [x] ADM-2A — Admin em PT/EN, diálogo de confirmação próprio, tokens de tema nos modais (+ correção de layout e botões Aprovar/Rejeitar)
-- [x] TESTE-1 — 3 contas de teste (turista, negócio, admin) e capturas do admin antes/depois
-- [x] DADOS-1 — Meteorologia (Open-Meteo), notícias (Google News) e câmbio (0040, pg_net + pg_cron) reais; eventos e estradas escondidos até haver dados reais
-- [x] FAV-1 — Favoritos na base de dados e preferências numa só transação (migração 0041)
-- [x] ADM-2B — Tema claro/escuro com a marca em toda a app, contraste AA (143 → 0 violações axe), PT/EN completo, sem confirm() nativos
-- [x] ADM-2C — Avisos do admin a um utilizador, aos donos ou a todos, com registo do remetente (migração 0042)
+- [x] ADM-2A/2B/2C — Admin PT/EN, tema claro/escuro, contraste AA, avisos do admin (0042)
+- [x] TESTE-1 — 3 contas de teste (turista, negócio, admin)
+- [x] DADOS-1 — Meteorologia, notícias e câmbio reais (0040)
+- [x] FAV-1 — Favoritos na base de dados e preferências numa só transação (0041)
+- [x] FINAL-1 — Arrumação, recuperação de palavra-passe, desempenho em telemóvel (1.ª fase)
+- [x] PERF-2 — SSR nas páginas públicas, carregamento sob pedido, idioma no servidor, barra de topo sem cortes no telemóvel
+- [x] LIMPEZA-1 — Lint com 0 erros no repositório todo, fins de linha LF, CI no GitHub Actions
+- [x] TESTES-1 — Bloco 11 testado: Vitest da comunidade e notificações (165 → 290 testes no total), 11 ficheiros de testes de BD em `supabase/tests/`, scripts de browser em `scripts/qa/`, `docs/QA.md`
+- [x] I18N-2 — Conteúdo em EN: roteiros de catálogo (0043), localizações das experiências comunitárias (0044, `location_en`), dados estáticos, diálogo dos jogos; histórias legadas escondidas e dados inventados removidos
+- [x] PERF-3 — Mapa 63 → 81 (LCP 7,1 → 3,8 s; lista no servidor, Leaflet sob pedido, lista acima do mapa no telemóvel, miniaturas); home 74 → 78
+- [x] SEG-FINAL — Auditoria (RLS, grants, funções, storage, segredos, XSS, redireções); migração 0045 (grants do visitante, fotos aprovadas visíveis, links `//`, só imagens nos buckets); `seroval` crítico corrigido; cabeçalhos de segurança; `docs/SECURITY.md`
 
-## Em curso
-- [ ] FINAL-1 — Arrumação, emails de autenticação fiáveis e desempenho em telemóvel
-
-## Em falta
+## Pendente depois do lançamento
+- [ ] Jogos: desempenho mobile ≥ 70 (está em ~62, com grande variação). Exige mostrar o esqueleto da página vindo do servidor e redirecionar para o login no browser (decisão de produto adiada).
+- [ ] `zod` 3 → 4 (aviso alto de memória nos validadores; a correção só existe no zod 4)
+- [ ] CSP: passar de report-only a obrigatória depois de verificar o preview da Lovable e o site publicado
+- [ ] Editor de publicações da comunidade não fecha com Escape (acessibilidade)
+- [ ] Histórias da home (`src/data/itineraries.ts`): validar as lendas antes de as voltar a mostrar (`SHOW_STORY_STOPS`)
+- [ ] Eventos geridos pelo admin (tabela `events`, RLS, modal) para reativar o separador Eventos
 - [ ] Bloco 10 — confirmar se há partes além do 10B (ver plano oficial)
-- [ ] Bloco 11 — Comunidade: implementada (publicações, reações, denúncias, moderação, experiências comunitárias); **faltam os testes** (Vitest das regras e testes de BD auto-revertíveis da RLS e da moderação)
-- [ ] Eventos geridos pelo admin (tabela `events`, RLS, modal, ligação a `event_participations`) para reativar o separador Eventos
-- [ ] Tradução EN do conteúdo editorial estático (`src/data/itineraries.ts`: histórias e descrições)
-- [ ] QA integral multissessão: admin, turista, segundo dono, decisões e fechos de horário
-- [ ] QA de itinerários em multissessão e dispositivos físicos
-- [ ] Estabilização final de todos os fluxos de ponta a ponta
+- [ ] QA integral multissessão e em dispositivos físicos (admin, turista, segundo dono; itinerários)
+- [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
 
 ## Antes do lançamento
 - [ ] Apagar ou desativar as 3 contas de teste e o negócio "EKAYA Teste — não reservar" (a conta admin de teste tem poderes reais)
+- [ ] Ligar 2FA para os administradores
 - [ ] Confirmar os números de emergência (119, 117, 198) com fontes oficiais
-- [ ] Configurar o envio de emails (SMTP/domínio) e os Redirect URLs do domínio final
-- [ ] Confirmar que todas as migrações aplicadas na base de dados de produção estão na `main`
+- [ ] Configurar o envio de emails (domínio, modelos em `docs/email-templates.md`) e os Redirect URLs do domínio final
+- [ ] Juntar os branches pendentes à `main` pela ordem indicada e confirmar o CI verde
+- [ ] Correr `docs/QA.md` no projeto final (incluindo os testes de BD)
 
 ---
 

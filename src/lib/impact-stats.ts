@@ -1,7 +1,13 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type BookingStatus = "pending" | "confirmed" | "completed" | "rejected" | "cancelled" | "no_show";
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "completed"
+  | "rejected"
+  | "cancelled"
+  | "no_show";
 
 export interface ImpactStats {
   generated_at: string;
@@ -41,7 +47,10 @@ export const impactStatsQuery = () =>
   queryOptions({ queryKey: ["impact-stats"], queryFn: fetchImpactStats, staleTime: 60_000 });
 
 /** Mirrors the DB rule: only completed bookings whose start (Mozambique time) has passed are realised tourism. */
-export function isRealisedBooking(b: { status: BookingStatus; date: string; time: string }, now = new Date()): boolean {
+export function isRealisedBooking(
+  b: { status: BookingStatus; date: string; time: string },
+  now = new Date(),
+): boolean {
   if (b.status !== "completed") return false;
   const start = Date.parse(`${b.date}T${b.time.slice(0, 5)}:00+02:00`);
   return start <= now.getTime();
@@ -63,7 +72,11 @@ export function deriveImpactView(s: ImpactStats): ImpactView {
     provinceRows: Object.entries(s.platform.activities_by_province)
       .filter(([, n]) => n > 0)
       .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count, pct: total ? Math.round((count / total) * 100) : 0 })),
+      .map(([name, count]) => ({
+        name,
+        count,
+        pct: total ? Math.round((count / total) * 100) : 0,
+      })),
     verifiedProvinceRows: Object.entries(v.completed_by_province)
       .filter(([, n]) => n >= MIN_GROUP)
       .map(([name, count]) => ({ name, count })),

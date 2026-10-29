@@ -70,6 +70,7 @@ import {
   routePriceMzn,
   routeStopCount,
   routeTitle,
+  stopTitle,
   recommendRoutes,
   ROUTE_INTERESTS,
   routeInterestMeta,
@@ -332,7 +333,7 @@ function ItinerariesPage() {
             {cover ? (
               <img
                 src={cover}
-                alt={route.title}
+                alt={routeTitle(route, lang)}
                 className="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -436,7 +437,7 @@ function ItinerariesPage() {
                     ) : (
                       <MapPin className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
                     )}
-                    <span className="truncate flex-1">{s.title}</span>
+                    <span className="truncate flex-1">{stopTitle(s, lang)}</span>
                   </div>
                 ))}
               {stops > 3 && (

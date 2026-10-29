@@ -39,7 +39,10 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
       await Promise.all([
         supabaseAdmin.from("profiles").select("id, display_name, created_at").order("created_at"),
         supabaseAdmin.from("user_roles").select("user_id, role"),
-        supabaseAdmin.from("businesses").select("owner_id, name, status, verified").not("owner_id", "is", null),
+        supabaseAdmin
+          .from("businesses")
+          .select("owner_id, name, status, verified")
+          .not("owner_id", "is", null),
       ]);
     if (profilesError) throw new Error("Não foi possível ler os utilizadores.");
 

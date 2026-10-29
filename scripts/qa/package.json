@@ -1,0 +1,11 @@
+{
+  "name": "ekaya-qa",
+  "private": true,
+  "description": "Browser QA scripts (Playwright with the system Edge). Not part of the app build.",
+  "type": "module",
+  "dependencies": {
+    "axe-core": "4.10.2",
+    "lighthouse": "12.8.2",
+    "playwright": "1.48.2"
+  }
+}

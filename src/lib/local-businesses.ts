@@ -57,7 +57,10 @@ interface Row {
   images: string[] | null;
   verified: boolean;
   created_at: string;
-  business_categories: { name_pt: string; name_en: string } | { name_pt: string; name_en: string }[] | null;
+  business_categories:
+    | { name_pt: string; name_en: string }
+    | { name_pt: string; name_en: string }[]
+    | null;
   provinces: { name_pt: string; name_en: string } | { name_pt: string; name_en: string }[] | null;
   experiences: { id: string; active: boolean }[] | null;
 }

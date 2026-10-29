@@ -27,7 +27,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { type Destination } from "@/lib/destinations";
-import { useDestinations } from "@/hooks/useDestinations";
+import { loadDestinationsForRoute, useDestinations } from "@/hooks/useDestinations";
+import { useWhenVisible } from "@/hooks/useWhenVisible";
 import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import {
@@ -59,6 +60,9 @@ export const Route = createFileRoute("/map")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  // Destinations come with the server render (list and images in the HTML); the map itself
+  // still loads in the browser.
+  loader: () => loadDestinationsForRoute(),
   validateSearch: (
     search: Record<string, unknown>,
   ): { destination?: string; community?: string; category?: CommunityCategory } => ({
@@ -96,13 +100,15 @@ function MapPage() {
     setSelectedCommunityId(linkedCommunity ?? null);
   }, [linkedCommunity]);
   const preferredId = user?.preferences?.province;
+  // Destinations already in the server HTML: show them at once (no entrance fade on the LCP card).
+  const serverDestinations = Route.useLoaderData();
   const {
     destinations,
     loading: loadingDestinations,
     error: destinationsError,
     isEmpty,
     reload,
-  } = useDestinations();
+  } = useDestinations(serverDestinations);
   const [selected, setSelected] = useState<Destination | null>(null);
   const [showAllDestinations, setShowAllDestinations] = useState(!preferredId || !!linkedSlug);
   const visibleDestinations =
@@ -277,6 +283,8 @@ function MapPage() {
     }
   };
 
+  const mapBox = useWhenVisible<HTMLDivElement>();
+
   const MAP_PLACEHOLDER = (
     <div className="h-full w-full flex items-center justify-center bg-muted">
       <div className="animate-pulse text-muted-foreground">
@@ -382,7 +390,10 @@ function MapPage() {
 
         <div className="grid lg:grid-cols-[1fr_360px] gap-6">
           {/* Map */}
-          <Card className="relative overflow-hidden border-0 shadow-[var(--shadow-elegant)] h-[420px] sm:h-[500px] lg:h-[640px] p-0">
+          <Card
+            ref={mapBox.ref}
+            className="relative overflow-hidden border-0 shadow-[var(--shadow-elegant)] h-[420px] sm:h-[500px] lg:h-[640px] p-0"
+          >
             <Button
               size="sm"
               variant="secondary"
@@ -407,34 +418,39 @@ function MapPage() {
                     ? "A minha localização"
                     : "My location"}
             </Button>
-            {/* Leaflet needs the browser: the server sends the placeholder, the map loads after hydration. */}
+            {/* Leaflet needs the browser: the server sends the placeholder (same size), and the map
+                loads once its box is on screen and the page has painted. */}
             <ClientOnly fallback={MAP_PLACEHOLDER}>
-              <Suspense fallback={MAP_PLACEHOLDER}>
-                <InteractiveMap
-                  destinations={showDestinations ? mappable : []}
-                  community={showCommunity ? filteredCommunity : []}
-                  highlightCommunityId={selectedCommunityId}
-                  onSelectCommunity={(c) => setSelectedCommunityId(c.id)}
-                  onOpenCommunity={(c) =>
-                    navigate({ to: "/community-experiences", search: { open: c.id } })
-                  }
-                  selectedId={selected?.id ?? null}
-                  onPick={(d) => {
-                    setSelected(d);
-                    setDirectionsOpen(false);
-                  }}
-                  onSelect={showDetails}
-                  onDirections={openDirections}
-                  origin={origin}
-                  visitedIds={visited}
-                  focus={focus}
-                />
-              </Suspense>
+              {!mapBox.ready ? (
+                MAP_PLACEHOLDER
+              ) : (
+                <Suspense fallback={MAP_PLACEHOLDER}>
+                  <InteractiveMap
+                    destinations={showDestinations ? mappable : []}
+                    community={showCommunity ? filteredCommunity : []}
+                    highlightCommunityId={selectedCommunityId}
+                    onSelectCommunity={(c) => setSelectedCommunityId(c.id)}
+                    onOpenCommunity={(c) =>
+                      navigate({ to: "/community-experiences", search: { open: c.id } })
+                    }
+                    selectedId={selected?.id ?? null}
+                    onPick={(d) => {
+                      setSelected(d);
+                      setDirectionsOpen(false);
+                    }}
+                    onSelect={showDetails}
+                    onDirections={openDirections}
+                    origin={origin}
+                    visitedIds={visited}
+                    focus={focus}
+                  />
+                </Suspense>
+              )}
             </ClientOnly>
           </Card>
 
-          {/* Sidebar list */}
-          <div className="space-y-3 lg:max-h-[640px] lg:overflow-y-auto pr-1">
+          {/* Sidebar list (phones: above the map, so the page shows content before the map loads) */}
+          <div className="space-y-3 lg:max-h-[640px] lg:overflow-y-auto pr-1 order-first lg:order-none">
             <div className="flex items-center justify-between gap-2 px-1">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 {visibleDestinations.length} {lang === "pt" ? "destinos" : "destinations"}
@@ -481,7 +497,7 @@ function MapPage() {
             {visibleDestinations.map((d, i) => (
               <motion.div
                 key={d.id}
-                initial={{ opacity: 0, x: 20 }}
+                initial={serverDestinations ? false : { opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
@@ -493,10 +509,12 @@ function MapPage() {
                   className={`overflow-hidden border-0 cursor-pointer transition-all ${selected?.id === d.id ? "ring-2 ring-primary shadow-[var(--shadow-elegant)]" : "shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)]"}`}
                 >
                   <div className="flex">
+                    {/* The first card is in the first screen on phones: load it at once. */}
                     <img
-                      loading="lazy"
+                      loading={i === 0 ? "eager" : "lazy"}
+                      fetchPriority={i === 0 ? "high" : "auto"}
                       decoding="async"
-                      src={d.image}
+                      src={d.thumbnail}
                       alt={d.name}
                       className="size-24 object-cover"
                     />

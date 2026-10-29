@@ -23,16 +23,33 @@ export interface GameState {
   catalog: CatalogGame[];
   progress: Record<string, number>;
   completed: Record<string, string>; // key -> completed_at
-  quizAttempts: { gameKey: string; correct: number; total: number; passed: boolean | null; finishedAt: string | null }[];
+  quizAttempts: {
+    gameKey: string;
+    correct: number;
+    total: number;
+    passed: boolean | null;
+    finishedAt: string | null;
+  }[];
   steps: { gameKey: string; stepRef: string; hasPhoto: boolean; createdAt: string }[];
 }
 
 export async function fetchGameState(): Promise<GameState> {
   const [cat, steps, comps, quiz] = await Promise.all([
-    supabase.from("game_catalog").select("key, category, xp, total, verification, unlock_after").order("sort_order"),
-    supabase.from("game_steps").select("game_key, step_ref, proof_path, created_at").order("created_at", { ascending: false }).limit(1000),
+    supabase
+      .from("game_catalog")
+      .select("key, category, xp, total, verification, unlock_after")
+      .order("sort_order"),
+    supabase
+      .from("game_steps")
+      .select("game_key, step_ref, proof_path, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000),
     supabase.from("game_completions").select("game_key, completed_at"),
-    supabase.from("game_quiz_attempts").select("game_key, correct_count, question_ids, passed, finished_at").order("started_at", { ascending: false }).limit(200),
+    supabase
+      .from("game_quiz_attempts")
+      .select("game_key, correct_count, question_ids, passed, finished_at")
+      .order("started_at", { ascending: false })
+      .limit(200),
   ]);
   for (const r of [cat, steps, comps, quiz]) if (r.error) throw new Error(r.error.message);
   const progress: Record<string, number> = {};
@@ -41,15 +58,28 @@ export async function fetchGameState(): Promise<GameState> {
   for (const c of comps.data ?? []) completed[c.game_key] = c.completed_at;
   return {
     catalog: (cat.data ?? []).map((g) => ({
-      key: g.key, category: g.category, xp: g.xp, total: g.total,
-      verification: g.verification as CatalogGame["verification"], unlockAfter: g.unlock_after,
+      key: g.key,
+      category: g.category,
+      xp: g.xp,
+      total: g.total,
+      verification: g.verification as CatalogGame["verification"],
+      unlockAfter: g.unlock_after,
     })),
     progress,
     completed,
     quizAttempts: (quiz.data ?? []).map((a) => ({
-      gameKey: a.game_key, correct: a.correct_count, total: a.question_ids.length, passed: a.passed, finishedAt: a.finished_at,
+      gameKey: a.game_key,
+      correct: a.correct_count,
+      total: a.question_ids.length,
+      passed: a.passed,
+      finishedAt: a.finished_at,
     })),
-    steps: (steps.data ?? []).map((s) => ({ gameKey: s.game_key, stepRef: s.step_ref, hasPhoto: !!s.proof_path, createdAt: s.created_at })),
+    steps: (steps.data ?? []).map((s) => ({
+      gameKey: s.game_key,
+      stepRef: s.step_ref,
+      hasPhoto: !!s.proof_path,
+      createdAt: s.created_at,
+    })),
   };
 }
 
@@ -59,7 +89,9 @@ export async function uploadGameProof(userId: string, dataUrl: string): Promise<
   if (blob.size > 8 * 1024 * 1024) throw new Error("too_large");
   const ext = blob.type.split("/")[1]?.replace(/[^a-z0-9]/g, "") || "jpg";
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(GAME_PROOFS_BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+  const { error } = await supabase.storage
+    .from(GAME_PROOFS_BUCKET)
+    .upload(path, blob, { contentType: blob.type, upsert: false });
   if (error) throw new Error(error.message);
   return path;
 }
@@ -82,21 +114,34 @@ export async function submitGameStep(
   location: PreciseLocation | null = null,
 ) {
   const { data, error } = await supabase.rpc("submit_game_step", {
-    _game_key: gameKey, _step_ref: stepRef ?? "", _proof_path: proofPath ?? "", _details: details,
-    _lat: location?.lat, _lng: location?.lng, _accuracy_m: location?.accuracy,
+    _game_key: gameKey,
+    _step_ref: stepRef ?? "",
+    _proof_path: proofPath ?? "",
+    _details: details,
+    _lat: location?.lat,
+    _lng: location?.lng,
+    _accuracy_m: location?.accuracy,
   });
   if (error) throw new Error(error.message);
   return data as unknown as StepResult;
 }
 
-export interface QuizQuestion { id: string; question: string; options: string[] }
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+}
 export async function startQuiz(gameKey: string) {
   const { data, error } = await supabase.rpc("start_game_quiz", { _game_key: gameKey });
   if (error) throw new Error(error.message);
   return data as unknown as { attempt_id: string; questions: QuizQuestion[] };
 }
 export async function answerQuiz(attemptId: string, questionId: string, choice: number) {
-  const { data, error } = await supabase.rpc("answer_game_quiz", { _attempt_id: attemptId, _question_id: questionId, _choice: choice });
+  const { data, error } = await supabase.rpc("answer_game_quiz", {
+    _attempt_id: attemptId,
+    _question_id: questionId,
+    _choice: choice,
+  });
   if (error) throw new Error(error.message);
   return data as unknown as { correct: boolean; correct_index: number; explanation: string };
 }
@@ -127,10 +172,17 @@ export function gameErrorText(msg: string, pt: boolean): string {
     out_of_stock: ["Recompensa esgotada.", "Reward out of stock."],
     reward_unavailable: ["Recompensa indisponível.", "Reward unavailable."],
     reward_expired: ["Esta recompensa já expirou.", "This reward has expired."],
-    own_reward: ["Não podes resgatar uma recompensa do teu próprio negócio.", "You can't redeem a reward from your own business."],
+    own_reward: [
+      "Não podes resgatar uma recompensa do teu próprio negócio.",
+      "You can't redeem a reward from your own business.",
+    ],
   };
   const hit = Object.keys(map).find((k) => msg.includes(k));
-  return hit ? map[hit][pt ? 0 : 1] : (pt ? "Não foi possível guardar. Tenta novamente." : "Could not save. Please try again.");
+  return hit
+    ? map[hit][pt ? 0 : 1]
+    : pt
+      ? "Não foi possível guardar. Tenta novamente."
+      : "Could not save. Please try again.";
 }
 
 // ---------- Badges (selos), derived from verified server data ----------
@@ -151,14 +203,68 @@ export interface BadgeDef {
 const done = (i: BadgeInput, ...keys: string[]) => keys.filter((k) => i.completed[k]).length;
 
 export const BADGES: BadgeDef[] = [
-  { id: "s1", emoji: "🏖️", name: { pt: "Explorador de Praias", en: "Beach Explorer" }, requirement: { pt: "Concluir «Rota das Praias»", en: "Complete “Beach Route”" }, progress: (i) => [done(i, "g3"), 1] },
-  { id: "s2", emoji: "🤝", name: { pt: "Amigo da Comunidade", en: "Community Friend" }, requirement: { pt: "3 atividades reservadas concluídas", en: "3 completed booked activities" }, progress: (i) => [i.bookingsCompleted, 3] },
-  { id: "s3", emoji: "📜", name: { pt: "Historiador", en: "Historian" }, requirement: { pt: "5 quizzes aprovados", en: "5 passed quizzes" }, progress: (i) => [i.passedQuizzes, 5] },
-  { id: "s4", emoji: "👑", name: { pt: "Ekaya Master", en: "Ekaya Master" }, requirement: { pt: "1 roteiro concluído com todas as provas", en: "1 route completed with every proof" }, progress: (i) => [i.routesCompleted, 1] },
-  { id: "s5", emoji: "📸", name: { pt: "Fotógrafo Cultural", en: "Cultural Photographer" }, requirement: { pt: "10 fotos de prova em jogos", en: "10 game proof photos" }, progress: (i) => [i.photoSteps, 10] },
-  { id: "s6", emoji: "🗺️", name: { pt: "Caçador de Tesouros", en: "Treasure Hunter" }, requirement: { pt: "Concluir uma caça ao tesouro", en: "Complete a treasure hunt" }, progress: (i) => [Math.min(1, done(i, "g1", "g2", "g3", "g4")), 1] },
-  { id: "s7", emoji: "✍️", name: { pt: "Contador de Histórias", en: "Storyteller" }, requirement: { pt: "Concluir «Retrato de Artesão» e «Mercado Vivo»", en: "Complete “Artisan Portrait” and “Living Market”" }, progress: (i) => [done(i, "g8", "g10"), 2] },
-  { id: "s8", emoji: "🌅", name: { pt: "Madrugador", en: "Early Bird" }, requirement: { pt: "Concluir «Do Nascer ao Pôr-do-Sol»", en: "Complete “Sunrise to Sunset”" }, progress: (i) => [done(i, "g17"), 1] },
+  {
+    id: "s1",
+    emoji: "🏖️",
+    name: { pt: "Explorador de Praias", en: "Beach Explorer" },
+    requirement: { pt: "Concluir «Rota das Praias»", en: "Complete “Beach Route”" },
+    progress: (i) => [done(i, "g3"), 1],
+  },
+  {
+    id: "s2",
+    emoji: "🤝",
+    name: { pt: "Amigo da Comunidade", en: "Community Friend" },
+    requirement: { pt: "3 atividades reservadas concluídas", en: "3 completed booked activities" },
+    progress: (i) => [i.bookingsCompleted, 3],
+  },
+  {
+    id: "s3",
+    emoji: "📜",
+    name: { pt: "Historiador", en: "Historian" },
+    requirement: { pt: "5 quizzes aprovados", en: "5 passed quizzes" },
+    progress: (i) => [i.passedQuizzes, 5],
+  },
+  {
+    id: "s4",
+    emoji: "👑",
+    name: { pt: "Ekaya Master", en: "Ekaya Master" },
+    requirement: {
+      pt: "1 roteiro concluído com todas as provas",
+      en: "1 route completed with every proof",
+    },
+    progress: (i) => [i.routesCompleted, 1],
+  },
+  {
+    id: "s5",
+    emoji: "📸",
+    name: { pt: "Fotógrafo Cultural", en: "Cultural Photographer" },
+    requirement: { pt: "10 fotos de prova em jogos", en: "10 game proof photos" },
+    progress: (i) => [i.photoSteps, 10],
+  },
+  {
+    id: "s6",
+    emoji: "🗺️",
+    name: { pt: "Caçador de Tesouros", en: "Treasure Hunter" },
+    requirement: { pt: "Concluir uma caça ao tesouro", en: "Complete a treasure hunt" },
+    progress: (i) => [Math.min(1, done(i, "g1", "g2", "g3", "g4")), 1],
+  },
+  {
+    id: "s7",
+    emoji: "✍️",
+    name: { pt: "Contador de Histórias", en: "Storyteller" },
+    requirement: {
+      pt: "Concluir «Retrato de Artesão» e «Mercado Vivo»",
+      en: "Complete “Artisan Portrait” and “Living Market”",
+    },
+    progress: (i) => [done(i, "g8", "g10"), 2],
+  },
+  {
+    id: "s8",
+    emoji: "🌅",
+    name: { pt: "Madrugador", en: "Early Bird" },
+    requirement: { pt: "Concluir «Do Nascer ao Pôr-do-Sol»", en: "Complete “Sunrise to Sunset”" },
+    progress: (i) => [done(i, "g17"), 1],
+  },
 ];
 
 export function badgeStatus(b: BadgeDef, i: BadgeInput) {
@@ -175,8 +281,18 @@ export async function fetchLeaderboard(limit = 20) {
 
 export async function fetchRewards() {
   const [rw, rd] = await Promise.all([
-    supabase.from("rewards").select("id, title_pt, title_en, description_pt, description_en, cost_points, stock, active, valid_until, business_id, businesses(name, status)").eq("active", true).order("cost_points"),
-    supabase.from("reward_redemptions").select("id, reward_id, cost_points, code, created_at, rewards(title_pt, title_en)").order("created_at", { ascending: false }).limit(100),
+    supabase
+      .from("rewards")
+      .select(
+        "id, title_pt, title_en, description_pt, description_en, cost_points, stock, active, valid_until, business_id, businesses(name, status)",
+      )
+      .eq("active", true)
+      .order("cost_points"),
+    supabase
+      .from("reward_redemptions")
+      .select("id, reward_id, cost_points, code, created_at, rewards(title_pt, title_en)")
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
   if (rw.error) throw new Error(rw.error.message);
   if (rd.error) throw new Error(rd.error.message);
@@ -184,13 +300,19 @@ export async function fetchRewards() {
   const today = maputoToday();
   const rewards = (rw.data ?? []).filter((r) => {
     const biz = r.businesses as { name: string; status: string } | null;
-    return (r.valid_until === null || r.valid_until >= today) && (r.business_id === null || biz?.status === "approved");
+    return (
+      (r.valid_until === null || r.valid_until >= today) &&
+      (r.business_id === null || biz?.status === "approved")
+    );
   });
   return { rewards, redemptions: rd.data ?? [] };
 }
 
 export async function redeemReward(rewardId: string, requestId: string) {
-  const { data, error } = await supabase.rpc("redeem_reward", { _reward_id: rewardId, _request_id: requestId });
+  const { data, error } = await supabase.rpc("redeem_reward", {
+    _reward_id: rewardId,
+    _request_id: requestId,
+  });
   if (error) throw new Error(error.message);
   return data as unknown as { redemption_id: string; code: string; duplicate: boolean };
 }
@@ -204,7 +326,11 @@ export async function fetchBadgeInput(state: GameState): Promise<BadgeInput> {
     .limit(1000);
   if (error) throw new Error(error.message);
   const net = (reason: string) =>
-    (data ?? []).reduce((n, r) => (r.reason !== reason ? n : r.kind === "award" ? n + 1 : r.kind === "reversal" ? n - 1 : n), 0);
+    (data ?? []).reduce(
+      (n, r) =>
+        r.reason !== reason ? n : r.kind === "award" ? n + 1 : r.kind === "reversal" ? n - 1 : n,
+      0,
+    );
   return {
     completed: state.completed,
     passedQuizzes: state.quizAttempts.filter((a) => a.passed).length,

@@ -29,7 +29,9 @@ export async function fetchOwnBusiness(): Promise<OwnBusiness | null> {
 
   const { data, error } = await supabase
     .from("businesses")
-    .select("id, name, category, location, contact, description, status, verified, type, rejection_reason")
+    .select(
+      "id, name, category, location, contact, description, status, verified, type, rejection_reason",
+    )
     .eq("owner_id", userId)
     .order("created_at", { ascending: true })
     .limit(1)

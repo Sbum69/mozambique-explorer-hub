@@ -12,25 +12,30 @@ As regras de domínio detalhadas (pontos, roteiros, negócios, reservas, comunid
 
 ### Stack
 
-| Camada        | Tecnologia                                                                          |
-| ------------- | ----------------------------------------------------------------------------------- |
-| Framework     | TanStack Start (SSR) + TanStack Router (rotas por ficheiro) + React 19              |
-| Build / dev   | Vite 7 via `@lovable.dev/vite-tanstack-config` (já inclui plugins — ver `vite.config.ts`) |
-| Deploy target | Cloudflare Workers (`wrangler.jsonc`, `nodejs_compat`)                              |
-| Dados         | Supabase (Postgres + Auth + Storage + RPCs), `@supabase/supabase-js` v2             |
-| Estado remoto | TanStack Query (um `QueryClient` por router, criado em `src/router.tsx`)            |
+| Camada        | Tecnologia                                                                                    |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| Framework     | TanStack Start (SSR) + TanStack Router (rotas por ficheiro) + React 19                        |
+| Build / dev   | Vite 7 via `@lovable.dev/vite-tanstack-config` (já inclui plugins — ver `vite.config.ts`)     |
+| Deploy target | Cloudflare Workers (`wrangler.jsonc`, `nodejs_compat`)                                        |
+| Dados         | Supabase (Postgres + Auth + Storage + RPCs), `@supabase/supabase-js` v2                       |
+| Estado remoto | TanStack Query (um `QueryClient` por router, criado em `src/router.tsx`)                      |
 | UI            | Tailwind CSS 4, shadcn/ui (Radix) em `src/components/ui`, lucide-react, framer-motion, sonner |
-| Mapas         | Leaflet + react-leaflet                                                             |
-| Formulários   | react-hook-form + zod                                                               |
-| Testes        | Vitest (já nas devDependencies; testes em `src/lib/*.test.ts`, sem script `test`)   |
-| Qualidade     | TypeScript strict, ESLint 9 (typescript-eslint, react-hooks, prettier), Prettier    |
+| Mapas         | Leaflet + react-leaflet                                                                       |
+| Formulários   | react-hook-form + zod                                                                         |
+| Testes        | Vitest (já nas devDependencies; testes em `src/lib/*.test.ts`, sem script `test`)             |
+| Qualidade     | TypeScript strict, ESLint 9 (typescript-eslint, react-hooks, prettier), Prettier              |
 
 Comandos (usar sempre **bun**, nunca npm/npx): `bun run dev`, `bun run build`, `bun run lint`,
 `bunx tsc --noEmit`, `bunx vitest run`. O lockfile é `bun.lock`; o `package-lock.json` não versionado
 é um resíduo e não deve ser usado.
 
 `bun run build` (e o Vitest, que carrega a config Vite) podem regenerar `src/routeTree.gen.ts`:
-guardar uma cópia antes e repô-la depois se mudar. `.gitattributes` força LF (`* text=auto eol=lf`).
+guardar uma cópia antes e repô-la depois se mudar. `.gitattributes` força LF (`* text=auto eol=lf`);
+com a cópia local em LF o build já não o altera.
+
+`bun run lint` tem de passar com 0 erros no repositório todo (os 17 avisos `react-refresh` são
+conhecidos). O CI (`.github/workflows/ci.yml`) corre `tsc`, `vitest`, `lint` e `build` em cada PR
+e push para a `main`. Ficheiros gerados, migrações e `.lovable/` estão fora do ESLint e do Prettier.
 
 ### Pastas
 
@@ -79,15 +84,15 @@ Tipos em `src/integrations/supabase/types.ts`. Enums: `app_role` (tourist, busin
 business_large, admin), `booking_status` (pending, confirmed, rejected, cancelled, completed),
 `business_status` (pending, approved, rejected, suspended).
 
-| Domínio          | Tabelas / vistas                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------------- |
-| Utilizadores     | `profiles`, `profile_provinces`, `user_roles`                                                 |
-| Catálogo         | `provinces`, `destinations`, `experiences`, `experience_availability`, `business_categories`  |
-| Negócios/reservas| `businesses`, `bookings`                                                                      |
-| Comunidade       | `community_posts`, `community_post_reactions`, `community_reports`, `community_categories`, `community_experiences`, vista `community_post_authors` |
-| Roteiros         | `routes`, `route_days`, `route_stops`, `route_progress`, `route_stop_progress`               |
-| Gamificação      | `points_ledger` (append-only), `rewards`, `reward_redemptions`, `game_catalog`, `game_steps`, `game_completions`, `game_quiz_attempts`, `game_quiz_questions` |
-| Outros           | `notifications`, `destination_visits`, `news_likes`, `event_participations`                   |
+| Domínio           | Tabelas / vistas                                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Utilizadores      | `profiles`, `profile_provinces`, `user_roles`                                                                                                                 |
+| Catálogo          | `provinces`, `destinations`, `experiences`, `experience_availability`, `business_categories`                                                                  |
+| Negócios/reservas | `businesses`, `bookings`                                                                                                                                      |
+| Comunidade        | `community_posts`, `community_post_reactions`, `community_reports`, `community_categories`, `community_experiences`, vista `community_post_authors`           |
+| Roteiros          | `routes`, `route_days`, `route_stops`, `route_progress`, `route_stop_progress`                                                                                |
+| Gamificação       | `points_ledger` (append-only), `rewards`, `reward_redemptions`, `game_catalog`, `game_steps`, `game_completions`, `game_quiz_attempts`, `game_quiz_questions` |
+| Outros            | `notifications`, `destination_visits`, `news_likes`, `event_participations`                                                                                   |
 
 RPCs chamadas pelo cliente: `has_role`, `save_route_plan`, `reset_my_route_progress`,
 `get_experience_availability`, `cancel_my_booking`, `business_decide_booking`,
@@ -142,6 +147,10 @@ Se um pedido disser "só AUDIT", não alterar código.
 - Formatar com Prettier (`bunx prettier --write <ficheiros>`) apenas os ficheiros alterados —
   `bun run format` reformata o repositório inteiro. Se um ficheiro tocado não estava formatado na
   `main`, fazer primeiro um commit só de formatação, para o diff real se ler bem.
+- **Segurança**: cabeçalhos em `src/lib/security-headers.ts` (CSP em report-only; qualquer origem
+  nova usada pelo browser entra em `CSP_SOURCES`); links externos com `rel="noopener noreferrer"`;
+  o visitante (`anon`) não tem grants de escrita — tabelas novas não lhos devem dar. Ver
+  `docs/SECURITY.md`.
 - **Tema e acessibilidade**: só tokens (`bg-card`, `text-foreground`, `text-muted-foreground`,
   `border-border`, `primary`…), nunca `bg-white`/cinzentos fixos; contraste AA (texto 4,5:1, ícones
   e contornos 3:1) nos dois temas; estados nunca só pela cor. Confirmações com `useConfirm`
@@ -170,7 +179,8 @@ Se um pedido disser "só AUDIT", não alterar código.
   numa variável. Extensões disponíveis na Lovable Cloud: `pg_cron`, `pg_net` (não `http`).
 - **Testes de BD auto-revertíveis**: blocos `DO $$ … RAISE EXCEPTION 'TEST_…_ROLLBACK %', r; END $$`,
   com `set_config('request.jwt.claims', …)` e `SET LOCAL ROLE authenticated/anon` para a RLS; no fim,
-  confirmar por leitura que não ficaram dados de teste.
+  confirmar por leitura que não ficaram dados de teste. Guardados em `supabase/tests/*.sql` (um por
+  área, utilizadores escolhidos pelo papel, sem emails); guia em `docs/QA.md`.
 - `src/integrations/supabase/types.ts` é gerado, mas sem acesso ao gerador é atualizado à mão, e só
   com as tabelas/funções de uma migração aprovada.
 
@@ -181,8 +191,9 @@ Se um pedido disser "só AUDIT", não alterar código.
   `TEST_ADMIN_…`); nunca em logs, relatórios ou commits. **Apagar ou desativar antes do lançamento.**
 - Com sessão, os testes só leem e navegam: sessão obtida pela API de autenticação, sem submeter
   formulários da app.
-- Capturas e verificações no browser com Playwright e o Edge do sistema, instalados numa pasta
-  temporária — nunca acrescentar dependências ao `package.json` para isso.
+- Capturas e verificações no browser com Playwright e o Edge do sistema: scripts em `scripts/qa/`
+  (`package.json` próprio, `bun install` nessa pasta; ver `scripts/qa/README.md`); saídas em
+  `qa-output/` (ignorado). Nunca acrescentar estas ferramentas ao `package.json` da raiz.
 
 ---
 

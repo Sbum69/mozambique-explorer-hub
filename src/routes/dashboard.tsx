@@ -35,7 +35,7 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useRouteCatalogue } from "@/hooks/useRoutes";
 import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
-import { personalizeRoutes } from "@/lib/routes";
+import { dayTitle, personalizeRoutes, routeTitle, stopTitle } from "@/lib/routes";
 import { fetchMyVisits } from "@/lib/visits";
 
 import { requireAuthenticatedUser } from "@/lib/auth";
@@ -194,7 +194,7 @@ function DashboardPage() {
         .slice(0, Math.min(tripDays, recommendedItinerary.days.length))
         .map((day) => ({
           day: day.dayNumber,
-          title: day.title,
+          title: dayTitle(day, lang),
           stops: day.stops,
         }))
     : [];
@@ -325,8 +325,8 @@ function DashboardPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {lang === "pt"
-                    ? `${recommendedItinerary.title} · ${recommendedItinerary.durationDays} dias · ${recommendedItinerary.province?.name.pt ?? ""}`
-                    : `${recommendedItinerary.titleEn ?? recommendedItinerary.title} · ${recommendedItinerary.durationDays} days · ${recommendedItinerary.province?.name.en ?? ""}`}
+                    ? `${routeTitle(recommendedItinerary, lang)} · ${recommendedItinerary.durationDays} dias · ${recommendedItinerary.province?.name.pt ?? ""}`
+                    : `${routeTitle(recommendedItinerary, lang)} · ${recommendedItinerary.durationDays} days · ${recommendedItinerary.province?.name.en ?? ""}`}
                   {user.preferences?.interests?.length
                     ? `${lang === "pt" ? " · baseado em " : " · based on "}${user.preferences.interests.slice(0, 3).join(", ")}`
                     : ""}
@@ -372,7 +372,7 @@ function DashboardPage() {
                           ) : (
                             <MapPin className="size-4 text-primary mt-0.5 shrink-0" />
                           )}
-                          <span>{stop.title}</span>
+                          <span>{stopTitle(stop, lang)}</span>
                         </div>
                       ))}
                     </div>

@@ -12,9 +12,17 @@ export const Route = createFileRoute("/preferences")({
   head: () => ({
     meta: [
       { title: "Editar preferências — Ekaya Explore" },
-      { name: "description", content: "Actualiza a província, os dias de viagem e os teus interesses para receber recomendações à tua medida." },
+      {
+        name: "description",
+        content:
+          "Actualiza a província, os dias de viagem e os teus interesses para receber recomendações à tua medida.",
+      },
       { property: "og:title", content: "Editar preferências — Ekaya Explore" },
-      { property: "og:description", content: "Actualiza a província, os dias de viagem e os teus interesses para receber recomendações à tua medida." },
+      {
+        property: "og:description",
+        content:
+          "Actualiza a província, os dias de viagem e os teus interesses para receber recomendações à tua medida.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

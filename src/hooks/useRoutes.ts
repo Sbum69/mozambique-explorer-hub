@@ -35,7 +35,8 @@ export function useRouteCatalogue(userId: string | null) {
       setPublicRoutes(pub);
       setMyRoutes(mine);
     } catch (e) {
-      if (version === request.current && identity.current === userId) setError(e instanceof Error ? e.message : "load-failed");
+      if (version === request.current && identity.current === userId)
+        setError(e instanceof Error ? e.message : "load-failed");
     } finally {
       if (version === request.current && identity.current === userId) setLoading(false);
     }
@@ -44,7 +45,9 @@ export function useRouteCatalogue(userId: string | null) {
   useEffect(() => {
     setMyRoutes([]);
     void load();
-    return () => { request.current += 1; };
+    return () => {
+      request.current += 1;
+    };
   }, [load]);
 
   const owned = loadedFor === userId ? myRoutes : [];
@@ -87,8 +90,15 @@ export function useRoute(id: string | null, userId: string | null = null) {
 
   useEffect(() => {
     void load();
-    return () => { request.current += 1; };
+    return () => {
+      request.current += 1;
+    };
   }, [load]);
 
-  return { route: loadedKey === key ? route : null, loading: loading || (!!id && loadedKey !== key), error, reload: load };
+  return {
+    route: loadedKey === key ? route : null,
+    loading: loading || (!!id && loadedKey !== key),
+    error,
+    reload: load,
+  };
 }

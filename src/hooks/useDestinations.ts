@@ -6,17 +6,43 @@ import { fetchDestinations, type Destination } from "@/lib/destinations";
 let inflight: Promise<Destination[]> | null = null;
 let cache: Destination[] | null = null;
 
-/** Shared access point for the destination catalogue: one query, cached for the session. */
-export function useDestinations() {
-  const [destinations, setDestinations] = useState<Destination[]>(cache ?? []);
-  const [loading, setLoading] = useState(cache === null);
+const inBrowser = typeof window !== "undefined";
+
+/**
+ * Catalogue for a route loader: the same shared request in the browser; on the server a fresh read
+ * per request (no module cache across visitors). Never throws: null lets the page fetch it later.
+ */
+export async function loadDestinationsForRoute(): Promise<Destination[] | null> {
+  try {
+    if (!inBrowser) return await fetchDestinations();
+    if (cache) return cache;
+    const list = await (inflight ??= fetchDestinations().finally(() => {
+      inflight = null;
+    }));
+    cache = list;
+    return list;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Shared access point for the destination catalogue: one query, cached for the session.
+ * initial: the list a route loader already read (server render), so the page starts with it.
+ */
+export function useDestinations(initial?: Destination[] | null) {
+  const seed = cache ?? initial ?? null;
+  const [destinations, setDestinations] = useState<Destination[]>(seed ?? []);
+  const [loading, setLoading] = useState(seed === null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const list = await (inflight ??= fetchDestinations().finally(() => { inflight = null; }));
+      const list = await (inflight ??= fetchDestinations().finally(() => {
+        inflight = null;
+      }));
       cache = list;
       setDestinations(list);
     } catch {
@@ -27,12 +53,15 @@ export function useDestinations() {
   }, []);
 
   useEffect(() => {
+    if (!cache && initial) cache = initial;
     if (cache) {
       setDestinations(cache);
       setLoading(false);
       return;
     }
     void load();
+    // initial only seeds the first render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
 
   return {

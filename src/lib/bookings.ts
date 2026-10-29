@@ -233,12 +233,18 @@ export async function fetchMyBookings(): Promise<Booking[]> {
 export async function fetchBusinessBookings(): Promise<Booking[]> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error("NOT_AUTHENTICATED");
-  const { data: businesses, error: businessError } = await supabase.from("businesses").select("id").eq("owner_id", auth.user.id);
+  const { data: businesses, error: businessError } = await supabase
+    .from("businesses")
+    .select("id")
+    .eq("owner_id", auth.user.id);
   if (businessError) throw new Error(businessError.message);
   const { data, error } = await supabase
     .from("bookings")
     .select(BOOKING_SELECT)
-    .in("business_id", (businesses ?? []).map(b => b.id))
+    .in(
+      "business_id",
+      (businesses ?? []).map((b) => b.id),
+    )
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
@@ -292,7 +298,9 @@ export function translateBookingError(message: string, lang: "pt" | "en"): strin
     return lang === "pt" ? "Escolhe uma data futura." : "Pick a future date.";
   }
   if (m.includes("not active")) {
-    return lang === "pt" ? "Esta experiência não está disponível." : "This experience is unavailable.";
+    return lang === "pt"
+      ? "Esta experiência não está disponível."
+      : "This experience is unavailable.";
   }
   if (m.includes("schedule closed")) {
     return lang === "pt"

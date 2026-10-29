@@ -48,9 +48,19 @@ export interface LevelDef {
 export const LEVELS: LevelDef[] = [
   { level: 1, minPoints: 0, emoji: "🌱", name: { pt: "Visitante Curioso", en: "Curious Visitor" } },
   { level: 2, minPoints: 100, emoji: "🧭", name: { pt: "Explorador", en: "Explorer" } },
-  { level: 3, minPoints: 300, emoji: "🥾", name: { pt: "Viajante Comunitário", en: "Community Traveller" } },
+  {
+    level: 3,
+    minPoints: 300,
+    emoji: "🥾",
+    name: { pt: "Viajante Comunitário", en: "Community Traveller" },
+  },
   { level: 4, minPoints: 700, emoji: "🌍", name: { pt: "Guardião Local", en: "Local Guardian" } },
-  { level: 5, minPoints: 1500, emoji: "🏆", name: { pt: "Embaixador Ekaya", en: "Ekaya Ambassador" } },
+  {
+    level: 5,
+    minPoints: 1500,
+    emoji: "🏆",
+    name: { pt: "Embaixador Ekaya", en: "Ekaya Ambassador" },
+  },
 ];
 
 export function levelFor(total: number) {
@@ -60,7 +70,9 @@ export function levelFor(total: number) {
   const current = LEVELS[idx];
   const next = LEVELS[idx + 1] ?? null;
   const toNext = next ? next.minPoints - safe : 0;
-  const progress = next ? ((safe - current.minPoints) / (next.minPoints - current.minPoints)) * 100 : 100;
+  const progress = next
+    ? ((safe - current.minPoints) / (next.minPoints - current.minPoints)) * 100
+    : 100;
   return { current, next, toNext, progress: Math.min(100, Math.max(0, progress)) };
 }
 
@@ -72,7 +84,9 @@ export interface PointsTx {
   createdAt: string;
 }
 
-export async function fetchMyPoints(limit = 10): Promise<{ total: number; balance: number; recent: PointsTx[] }> {
+export async function fetchMyPoints(
+  limit = 10,
+): Promise<{ total: number; balance: number; recent: PointsTx[] }> {
   const [totalRes, listRes] = await Promise.all([
     supabase.rpc("my_points_summary"),
     supabase

@@ -288,6 +288,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           location: string
+          location_en: string | null
           province_id: string
           rejection_reason: string | null
           status: string
@@ -312,6 +313,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location?: string
+          location_en?: string | null
           province_id: string
           rejection_reason?: string | null
           status?: string
@@ -336,6 +338,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location?: string
+          location_en?: string | null
           province_id?: string
           rejection_reason?: string | null
           status?: string

@@ -21,7 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNotifications } from "@/contexts/NotificationsContext";
 import { useLang } from "@/contexts/LanguageContext";
-import type { NotificationType } from "@/lib/notifications";
+import {
+  formatNotificationDate,
+  notificationTypeLabel,
+  type NotificationType,
+} from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<NotificationType, typeof Bell> = {
@@ -52,20 +56,6 @@ const TONE: Record<NotificationType, string> = {
   business: "bg-primary/15 text-primary",
 };
 
-const TYPE_LABEL: Record<NotificationType, { pt: string; en: string }> = {
-  system: { pt: "Sistema", en: "System" },
-  booking: { pt: "Reserva", en: "Booking" },
-  itinerary: { pt: "Roteiro", en: "Itinerary" },
-  experience: { pt: "Experiência", en: "Experience" },
-  community: { pt: "Comunidade", en: "Community" },
-  route: { pt: "Rota", en: "Route" },
-  reward: { pt: "Recompensa", en: "Reward" },
-  safety: { pt: "Segurança", en: "Safety" },
-  promo: { pt: "Promoção", en: "Promo" },
-  event: { pt: "Evento", en: "Event" },
-  business: { pt: "Negócio", en: "Business" },
-};
-
 /** Notification list, loaded on demand: Radix only mounts it while the sheet is open. */
 export function NotificationsPanel({ close }: { close: () => void }) {
   const {
@@ -82,14 +72,6 @@ export function NotificationsPanel({ close }: { close: () => void }) {
   } = useNotifications();
   const { lang } = useLang();
   const pt = lang === "pt";
-
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString(pt ? "pt-PT" : "en-GB", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
 
   return (
     <>
@@ -168,11 +150,11 @@ export function NotificationsPanel({ close }: { close: () => void }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
-                        {(TYPE_LABEL[n.type] ?? TYPE_LABEL.system)[lang]}
+                        {notificationTypeLabel(n.type, lang)}
                       </Badge>
                       {!n.read && <span className="size-2 rounded-full bg-primary" />}
                       <span className="text-[11px] text-muted-foreground">
-                        {formatDate(n.createdAt)}
+                        {formatNotificationDate(n.createdAt, lang)}
                       </span>
                     </div>
                     <h4

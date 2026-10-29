@@ -1,0 +1,44 @@
+name: CI
+
+# Type check, unit tests, lint and production build on every PR and on pushes to main.
+# No secrets: the build reads only the public VITE_* values committed in .env.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bunx tsc --noEmit
+
+      - name: Unit tests
+        run: bunx vitest run
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Build
+        run: bun run build
+
+      - name: Generated route tree is up to date
+        run: git diff --exit-code -- src/routeTree.gen.ts

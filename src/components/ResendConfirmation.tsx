@@ -80,19 +80,43 @@ export function ResendConfirmation({ initialEmail = "" }: { initialEmail?: strin
   };
 
   return (
-    <form onSubmit={submit} className="space-y-2 rounded-xl border bg-card p-4 text-left" noValidate>
+    <form
+      onSubmit={submit}
+      className="space-y-2 rounded-xl border bg-card p-4 text-left"
+      noValidate
+    >
       <p className="font-semibold text-sm flex items-center gap-2">
         <MailCheck className="size-4 text-primary" /> {t.title}
       </p>
-      <Label htmlFor="resend-email" className="text-xs text-muted-foreground font-normal">{t.hint}</Label>
+      <Label htmlFor="resend-email" className="text-xs text-muted-foreground font-normal">
+        {t.hint}
+      </Label>
       <div className="flex gap-2">
-        <Input id="resend-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="h-10" />
+        <Input
+          id="resend-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          className="h-10"
+        />
         <Button type="submit" disabled={state === "loading"} className="h-10 shrink-0">
-          {state === "loading" ? <><Loader2 className="size-4 animate-spin" /> {t.sending}</> : t.send}
+          {state === "loading" ? (
+            <>
+              <Loader2 className="size-4 animate-spin" /> {t.sending}
+            </>
+          ) : (
+            t.send
+          )}
         </Button>
       </div>
       {msg && (
-        <p role="status" className={`text-xs ${state === "error" ? "text-destructive" : "text-muted-foreground"}`}>{msg}</p>
+        <p
+          role="status"
+          className={`text-xs ${state === "error" ? "text-destructive" : "text-muted-foreground"}`}
+        >
+          {msg}
+        </p>
       )}
     </form>
   );

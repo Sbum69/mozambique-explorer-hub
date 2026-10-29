@@ -302,6 +302,27 @@
       "when": 1793200000000,
       "tag": "0042_admin_broadcasts",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1793300000000,
+      "tag": "0043_routes_seed_english_texts",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1793400000000,
+      "tag": "0044_community_location_en_and_hide_test_route",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1793500000000,
+      "tag": "0045_security_hardening",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import { LanguageProvider, useLang } from "@/contexts/LanguageContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { DEFAULT_LANG, readLangCookie } from "@/lib/lang-pref";
+import { securityHeaders } from "@/lib/security-headers";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
@@ -40,7 +41,11 @@ function NotFoundComponent() {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   // The HTML depends on the language cookie: shared caches must not mix languages.
-  headers: () => ({ Vary: "Cookie" }),
+  // Security headers on every page; Vary: Cookie because the HTML depends on the language cookie.
+  headers: () => ({
+    Vary: "Cookie",
+    ...securityHeaders(import.meta.env.VITE_SUPABASE_URL),
+  }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },

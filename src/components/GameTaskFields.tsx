@@ -99,6 +99,8 @@ export function ItineraryTask({
   const [openId, setOpenId] = useState<string | null>(value?.itineraryId ?? null);
   const current = list.find((i) => i.id === openId);
   const t = useT();
+  const { lang } = useLang();
+  const en = lang === "en";
 
   return (
     <Wrap title={t.routeTitle} hint={t.routeHint} icon={RouteIcon}>
@@ -115,7 +117,7 @@ export function ItineraryTask({
           <option value="">{t.routePick}</option>
           {list.map((i) => (
             <option key={i.id} value={i.id}>
-              {i.name} ({i.duration})
+              {en ? i.nameEn : i.name} ({en ? i.durationEn : i.duration})
             </option>
           ))}
         </select>
@@ -124,7 +126,7 @@ export function ItineraryTask({
           <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
             {current.route.map((s) => {
               const active = value?.itineraryId === current.id && value?.stopId === s.id;
-              const name = s.name ?? s.title ?? t.stop(s.id);
+              const name = s.name ?? (en ? (s.titleEn ?? s.title) : s.title) ?? t.stop(s.id);
               return (
                 <button
                   key={s.id}
@@ -132,7 +134,7 @@ export function ItineraryTask({
                   onClick={() =>
                     onChange(
                       active ? null : { itineraryId: current.id, stopId: s.id },
-                      `${current.name} · ${name}`,
+                      `${en ? current.nameEn : current.name} · ${name}`,
                     )
                   }
                   className={`w-full text-left rounded-lg border p-2.5 transition ${
@@ -304,7 +306,7 @@ export function ShareTask({
         <a
           href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           onClick={onDone}
           className="inline-flex items-center justify-center gap-1 rounded-lg border px-3 py-2 text-sm hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

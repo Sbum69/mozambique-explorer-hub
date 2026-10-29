@@ -19,7 +19,14 @@ const dictionaries = (Object.entries(texts) as [string, unknown][]).filter(
 describe("ADM-2B page texts exist in PT and EN", () => {
   it("covers every page dictionary", () => {
     expect(dictionaries.map(([n]) => n).sort()).toEqual(
-      ["FORGOT_TXT", "GAMES_TXT", "GAME_TASK_TXT", "RESET_TXT", "SIGNUP_TXT"].sort(),
+      [
+        "FORGOT_TXT",
+        "GAMES_TXT",
+        "GAME_TASK_TXT",
+        "RESET_TXT",
+        "SIGNUP_TXT",
+        "TREASURE_TXT",
+      ].sort(),
     );
   });
 

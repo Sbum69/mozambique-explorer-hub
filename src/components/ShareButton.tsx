@@ -50,8 +50,8 @@ export function ShareButton({
       await navigator.share({ title: payload.title, text: buildText(payload), url: payload.url });
       setOpen(false);
       return true;
-    } catch (e: any) {
-      if (e?.name === "AbortError") return true;
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return true;
       return false;
     }
   };
@@ -73,8 +73,12 @@ export function ShareButton({
       const ok = await copy();
       toast.success(
         ok
-          ? pt ? "Link copiado — cola-o no Instagram." : "Link copied — paste it on Instagram."
-          : pt ? "A abrir o Instagram." : "Opening Instagram.",
+          ? pt
+            ? "Link copiado — cola-o no Instagram."
+            : "Link copied — paste it on Instagram."
+          : pt
+            ? "A abrir o Instagram."
+            : "Opening Instagram.",
       );
     }
     window.open(platformShareUrl(platform, payload), "_blank", "noopener,noreferrer");
@@ -112,7 +116,9 @@ export function ShareButton({
             onClick={() => share(it.id)}
             className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"
           >
-            <span className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold ${it.cls}`}>
+            <span
+              className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold ${it.cls}`}
+            >
               {it.label[0]}
             </span>
             {it.label}
@@ -131,7 +137,15 @@ export function ShareButton({
           type="button"
           onClick={async () => {
             const ok = await copy();
-            toast[ok ? "success" : "error"](ok ? (pt ? "Link copiado" : "Link copied") : pt ? "Não foi possível copiar" : "Couldn't copy");
+            toast[ok ? "success" : "error"](
+              ok
+                ? pt
+                  ? "Link copiado"
+                  : "Link copied"
+                : pt
+                  ? "Não foi possível copiar"
+                  : "Couldn't copy",
+            );
             setOpen(false);
           }}
           className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted"

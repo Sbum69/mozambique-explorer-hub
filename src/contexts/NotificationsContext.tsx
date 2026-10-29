@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import {
   countMyUnread,
+  unreadAfterMarkRead,
   fetchMyNotifications,
   markAllNotificationsRead,
   markNotificationRead,
@@ -44,31 +45,34 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [showingAll, setShowingAll] = useState(false);
 
-  const load = useCallback(async (all = false) => {
-    if (!userId) {
-      setNotifications([]);
-      setUnreadTotal(0);
+  const load = useCallback(
+    async (all = false) => {
+      if (!userId) {
+        setNotifications([]);
+        setUnreadTotal(0);
+        setError(null);
+        setLoading(false);
+        setShowingAll(false);
+        return;
+      }
+      setLoading(true);
       setError(null);
-      setLoading(false);
-      setShowingAll(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const [list, unread] = await Promise.all([
-        fetchMyNotifications(userId, all ? 1000 : 50),
-        countMyUnread(userId),
-      ]);
-      setNotifications(list);
-      setUnreadTotal(unread);
-      setShowingAll(all);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "load-failed");
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+      try {
+        const [list, unread] = await Promise.all([
+          fetchMyNotifications(userId, all ? 1000 : 50),
+          countMyUnread(userId),
+        ]);
+        setNotifications(list);
+        setUnreadTotal(unread);
+        setShowingAll(all);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "load-failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId],
+  );
 
   useEffect(() => {
     void load();
@@ -78,7 +82,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       if (!userId) return;
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-      setUnreadTotal((c) => Math.max(0, c - 1));
+      setUnreadTotal(unreadAfterMarkRead);
       try {
         await markNotificationRead(id);
         setUnreadTotal(await countMyUnread(userId));

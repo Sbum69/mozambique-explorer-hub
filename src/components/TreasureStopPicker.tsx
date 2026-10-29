@@ -9,12 +9,14 @@ import {
   Palmtree,
 } from "lucide-react";
 import { getTreasureStops, type TreasureStop } from "@/data/treasure-stops";
+import { useLang } from "@/contexts/LanguageContext";
+import { TREASURE_TXT } from "@/lib/page-texts";
 
-const KIND_META: Record<TreasureStop["kind"], { icon: typeof MapPin; label: string }> = {
-  story: { icon: BookOpen, label: "Story Stop" },
-  point: { icon: Building2, label: "Ponto do bairro" },
-  beach: { icon: Waves, label: "Praia" },
-  island: { icon: Palmtree, label: "Ilha" },
+const KIND_ICON: Record<TreasureStop["kind"], typeof MapPin> = {
+  story: BookOpen,
+  point: Building2,
+  beach: Waves,
+  island: Palmtree,
 };
 
 interface Props {
@@ -27,21 +29,25 @@ interface Props {
 
 export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Props) {
   const [stops] = useState<TreasureStop[]>(() => getTreasureStops(gameId));
+  const { lang } = useLang();
+  const t = TREASURE_TXT[lang];
+  const en = lang === "en";
 
   return (
     <div className="rounded-xl border bg-muted/30 p-4">
       <p className="text-xs font-bold uppercase text-muted-foreground mb-1 flex items-center gap-1">
-        <MapPin className="size-3.5" /> Seleciona a paragem que fizeste
+        <MapPin className="size-3.5" /> {t.title}
       </p>
-      <p className="text-xs text-muted-foreground mb-3">
-        Story Stops, pontos de bairro, praias e ilhas elegíveis para este desafio.
-      </p>
+      <p className="text-xs text-muted-foreground mb-3">{t.hint}</p>
 
       <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
         {stops.map((s) => {
           const done = doneIds.includes(s.id);
           const active = selectedId === s.id;
-          const Meta = KIND_META[s.kind];
+          const KindIcon = KIND_ICON[s.kind];
+          const name = (en && s.nameEn) || s.name;
+          const place = (en && s.placeEn) || s.place;
+          const hint = (en && s.hintEn) || s.hint;
           return (
             <button
               key={s.id}
@@ -57,14 +63,14 @@ export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Pr
               }`}
             >
               <div className="flex items-start gap-2">
-                <Meta.icon className="size-4 mt-0.5 shrink-0 text-muted-foreground" />
+                <KindIcon className="size-4 mt-0.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate">{s.name}</p>
+                  <p className="text-sm font-semibold truncate">{name}</p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {Meta.label} · {s.place}
+                    {t[s.kind]} · {place}
                   </p>
-                  {s.hint && (
-                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.hint}</p>
+                  {hint && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{hint}</p>
                   )}
                 </div>
                 {done ? (
@@ -73,10 +79,10 @@ export function TreasureStopPicker({ gameId, doneIds, selectedId, onSelect }: Pr
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${s.coords[0]},${s.coords[1]}`}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="shrink-0 text-muted-foreground hover:text-primary"
-                    aria-label={`Como chegar a ${s.name}`}
+                    aria-label={t.directions(name)}
                   >
                     <Navigation className="size-4" />
                   </a>

@@ -1,7 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import { IMAGE_BY_SLUG } from "@/lib/destinations";
 
-export type ExperienceCategory = "beach" | "culture" | "food" | "nature" | "community" | "adventure";
+export type ExperienceCategory =
+  | "beach"
+  | "culture"
+  | "food"
+  | "nature"
+  | "community"
+  | "adventure";
 
 const CATEGORY_VALUES: ExperienceCategory[] = [
   "beach",
@@ -95,8 +101,7 @@ export function mapExperience(row: ExperienceRow): Experience {
     destinationUuid: row.destination_id,
     destinationName: destination?.name ?? null,
     province: row.province,
-    image:
-      (destination ? IMAGE_BY_SLUG[destination.slug] : undefined) ?? row.images?.[0] ?? "",
+    image: (destination ? IMAGE_BY_SLUG[destination.slug] : undefined) ?? row.images?.[0] ?? "",
     category,
     durationHours: Number(row.duration_hours ?? 0),
     priceMzn: Number(row.price_mzn ?? 0),
@@ -181,12 +186,18 @@ export async function fetchAvailability(
 export async function fetchOwnExperiences(): Promise<Experience[]> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error("NOT_AUTHENTICATED");
-  const { data: businesses, error: businessError } = await supabase.from("businesses").select("id").eq("owner_id", auth.user.id);
+  const { data: businesses, error: businessError } = await supabase
+    .from("businesses")
+    .select("id")
+    .eq("owner_id", auth.user.id);
   if (businessError) throw new Error(businessError.message);
   const { data, error } = await supabase
     .from("experiences")
     .select(SELECT)
-    .in("business_id", (businesses ?? []).map(b => b.id))
+    .in(
+      "business_id",
+      (businesses ?? []).map((b) => b.id),
+    )
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
