@@ -58,7 +58,7 @@ export function PointsCard({
         aria-busy="true"
       >
         <div className="flex items-center gap-4">
-          <Skeleton className="size-16 rounded-2xl" />
+          <Skeleton className="size-16 rounded-md" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-6 w-40" />
@@ -102,7 +102,7 @@ export function PointsCard({
           key={lv.current.level}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="size-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground"
+          className="size-16 rounded-md bg-accent flex items-center justify-center text-accent-foreground"
           aria-hidden="true"
         >
           {(() => {

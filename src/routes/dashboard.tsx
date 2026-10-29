@@ -69,7 +69,6 @@ interface ModuleDef {
   icon: LucideIcon;
   titleKey: DictKey;
   descKey: DictKey;
-  gradient: string;
   /** Only for a module whose page does not exist yet; every module below links to a live page. */
   inDevelopment?: boolean;
 }
@@ -80,84 +79,72 @@ const MODULES: ModuleDef[] = [
     icon: Map,
     titleKey: "modMap",
     descKey: "modMapDesc",
-    gradient: "from-secondary to-blue-600",
   },
   {
     to: "/culture-history",
     icon: BookOpen,
     titleKey: "modCulture",
     descKey: "modCultureDesc",
-    gradient: "from-orange-700 to-red-600",
   },
   {
     to: "/favorites",
     icon: Bookmark,
     titleKey: "modFavorites",
     descKey: "modFavoritesDesc",
-    gradient: "from-pink-600 to-rose-600",
   },
   {
     to: "/news-alerts",
     icon: Bell,
     titleKey: "modNews",
     descKey: "modNewsDesc",
-    gradient: "from-red-600 to-orange-700",
   },
   {
     to: "/itineraries",
     icon: Compass,
     titleKey: "modItineraries",
     descKey: "modItinerariesDesc",
-    gradient: "from-primary to-primary-glow",
   },
   {
     to: "/community-experiences",
     icon: UsersIcon,
     titleKey: "modCommunityExp",
     descKey: "modCommunityExpDesc",
-    gradient: "from-emerald-700 to-teal-700",
   },
   {
     to: "/businesses",
     icon: Store,
     titleKey: "modBusinesses",
     descKey: "modBusinessesDesc",
-    gradient: "from-amber-700 to-orange-700",
   },
   {
     to: "/experiences",
     icon: Heart,
     titleKey: "modExperiences",
     descKey: "modExperiencesDesc",
-    gradient: "from-success to-emerald-700",
   },
   {
     to: "/useful-info",
     icon: Info,
     titleKey: "modInfo",
     descKey: "modInfoDesc",
-    gradient: "from-purple-600 to-violet-600",
   },
   {
     to: "/gamification",
     icon: Trophy,
     titleKey: "modAchievements",
     descKey: "modAchievementsDesc",
-    gradient: "from-warning to-yellow-700",
   },
   {
     to: "/games",
     icon: Gamepad2,
     titleKey: "modGames",
     descKey: "modGamesDesc",
-    gradient: "from-primary to-secondary",
   },
   {
     to: "/impact",
     icon: Activity,
     titleKey: "modImpact",
     descKey: "modImpactDesc",
-    gradient: "from-pink-600 to-fuchsia-600",
   },
 ];
 
@@ -203,7 +190,7 @@ function DashboardPage() {
     : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="min-h-screen bg-background">
       {/* Nav */}
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
@@ -226,16 +213,19 @@ function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Greeting card */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="overflow-hidden border-0 shadow-[var(--shadow-elegant)] bg-gradient-to-br from-primary via-primary-glow to-secondary text-primary-foreground p-6 sm:p-8">
+          <Card className="relative overflow-hidden border-0 shadow-[var(--shadow-soft)] p-6 sm:p-8 pt-8 sm:pt-10">
+            <div className="capulana-band absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div>
-                <p className="text-sm opacity-90">{t("hello")},</p>
+                <p className="text-sm font-bold uppercase tracking-wider text-primary">
+                  {t("hello")}
+                </p>
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                  {user.displayName} 👋
+                  {user.displayName}
                 </h1>
                 {province ? (
                   <>
-                    <p className="mt-2 text-sm opacity-90">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       {lang === "pt" ? "A explorar" : "Exploring"} <strong>{province.name}</strong>{" "}
                       · {tripDays} {t("days")}
                       {user.preferences?.interests?.length
@@ -244,7 +234,7 @@ function DashboardPage() {
                     </p>
                     <button
                       onClick={() => setShowChangeDest(true)}
-                      className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
+                      className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary border border-input hover:bg-accent px-3 py-1.5 rounded-md transition-colors"
                     >
                       <MapPin className="size-3.5" />{" "}
                       {lang === "pt" ? "Mudar destino" : "Change destination"}
@@ -253,7 +243,7 @@ function DashboardPage() {
                 ) : (
                   <button
                     onClick={() => setShowChangeDest(true)}
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs bg-white/20 hover:bg-white/30 backdrop-blur px-3 py-1.5 rounded-full transition-colors"
+                    className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary border border-input hover:bg-accent px-3 py-1.5 rounded-md transition-colors"
                   >
                     <MapPin className="size-3.5" />{" "}
                     {lang === "pt" ? "Escolher destino" : "Choose destination"}
@@ -336,7 +326,7 @@ function DashboardPage() {
                     className="flex gap-4 relative"
                   >
                     <div className="flex flex-col items-center">
-                      <div className="size-10 rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-bold flex items-center justify-center shadow-md shrink-0">
+                      <div className="size-10 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center shrink-0">
                         {d.day}
                       </div>
                       {i < daySlices.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
@@ -380,13 +370,10 @@ function DashboardPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -4 }}
             >
               <Link to={m.to as never}>
                 <Card className="group relative overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all duration-300 cursor-pointer h-full p-6 bg-card">
-                  <div
-                    className={`size-12 rounded-xl bg-gradient-to-br ${m.gradient} text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}
-                  >
+                  <div className="size-11 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
                     <m.icon className="size-6" />
                   </div>
                   <h3 className="mt-4 font-bold text-lg">{t(m.titleKey)}</h3>
@@ -413,9 +400,9 @@ function DashboardPage() {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-xl bg-white/15 backdrop-blur px-3 py-2 min-w-[70px]">
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide font-medium">{label}</p>
+    <div className="rounded-md border border-border px-4 py-2 min-w-[70px]">
+      <p className="font-display text-2xl font-bold tabular-nums">{value}</p>
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
     </div>
   );
 }
