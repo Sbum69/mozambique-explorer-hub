@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
@@ -584,6 +585,7 @@ function MapPage() {
                     alt={selected.name}
                     className="w-full h-64 md:h-full object-cover"
                   />
+                  <PhotoCredit src={selected.image} />
                   <div className="absolute top-3 right-3">
                     <FavoriteButton itemId={selected.slug} itemType="place" size="md" />
                   </div>

@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
+import { PHOTOS_TXT } from "@/lib/page-texts";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -402,7 +404,10 @@ function ItineraryDetailPage() {
       {/* Hero */}
       <div className="relative h-96 overflow-hidden bg-muted">
         {cover ? (
-          <img src={cover} alt={routeTitle(route, lang)} className="w-full h-full object-cover" />
+          <>
+            <img src={cover} alt={routeTitle(route, lang)} className="w-full h-full object-cover" />
+            <PhotoCredit src={cover} label={PHOTOS_TXT[lang].provinceImage} />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             <Compass className="size-10" />

@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -418,6 +419,7 @@ function ExperiencesPage() {
                       loading="lazy"
                       decoding="async"
                     />
+                    <PhotoCredit src={exp.image} />
                     <div className="absolute top-3 left-3">
                       <Badge className="bg-background/95 text-foreground backdrop-blur">
                         <Star className="size-3 mr-1 fill-warning text-warning" />
@@ -504,7 +506,7 @@ function ExperiencesPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="rounded-lg overflow-hidden border mb-2">
+              <div className="relative rounded-lg overflow-hidden border mb-2">
                 <img
                   src={openExp.image}
                   alt=""
@@ -512,6 +514,7 @@ function ExperiencesPage() {
                   loading="lazy"
                   decoding="async"
                 />
+                <PhotoCredit src={openExp.image} />
                 <div className="p-3 bg-muted/30 text-sm flex items-center justify-between">
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <MapPin className="size-3" />

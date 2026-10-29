@@ -15,6 +15,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
+import { PHOTOS } from "@/lib/photo-credits";
 import { Badge } from "@/components/ui/badge";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { UserMenu } from "@/components/UserMenu";
@@ -45,7 +47,8 @@ interface Topic {
   date: LocalizedText;
   gradient: string;
   icon: LucideIcon;
-  image: string;
+  /** Approved, credited photo (FOTOS-1); topics without a faithful free photo have none. */
+  image?: string;
   short: LocalizedText;
   sections: { heading: LocalizedText; body: LocalizedText }[];
   fact: LocalizedText;
@@ -82,7 +85,7 @@ const TOPICS: Topic[] = [
     date: { pt: "25 de Junho de 1975", en: "25 June 1975" },
     gradient: "from-green-700 to-green-700",
     icon: Flag,
-    image: "https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=1200&h=600&fit=crop",
+    image: PHOTOS["cult-independencia"].src,
     short: {
       pt: "O dia em que Moçambique conquistou a sua liberdade após séculos de colonização portuguesa.",
       en: "The day Mozambique won its freedom after centuries of Portuguese colonisation.",
@@ -129,7 +132,7 @@ const TOPICS: Topic[] = [
     date: { pt: "1933 – 1986", en: "1933–1986" },
     gradient: "from-red-600 to-red-700",
     icon: Users,
-    image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=1200&h=600&fit=crop",
+    image: PHOTOS["cult-samora"].src,
     short: {
       pt: "Líder revolucionário, primeiro Presidente de Moçambique independente e símbolo africano de luta.",
       en: "Revolutionary leader, first President of independent Mozambique and an African symbol of struggle.",
@@ -176,7 +179,7 @@ const TOPICS: Topic[] = [
     date: { pt: "Fundada a 25 de Junho de 1962", en: "Founded on 25 June 1962" },
     gradient: "from-yellow-700 to-orange-700",
     icon: BookOpen,
-    image: "https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=1200&h=600&fit=crop",
+    image: PHOTOS["cult-frelimo"].src,
     short: {
       pt: "Movimento que uniu os moçambicanos na luta pela independência e que hoje é o partido no poder.",
       en: "The movement that united Mozambicans in the struggle for independence and is now the country's governing party.",
@@ -223,7 +226,6 @@ const TOPICS: Topic[] = [
     date: { pt: "1977 – 2023", en: "1977–2023" },
     gradient: "from-purple-600 to-purple-700",
     icon: Mic2,
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=600&fit=crop",
     short: {
       pt: "Rapper e ativista que se tornou símbolo da liberdade de expressão e crítica social em Moçambique.",
       en: "Rapper and activist who became a symbol of freedom of expression and social criticism in Mozambique.",
@@ -270,7 +272,7 @@ const TOPICS: Topic[] = [
     date: { pt: "Desde os anos 1950", en: "Since the 1950s" },
     gradient: "from-blue-600 to-blue-700",
     icon: Music,
-    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&h=600&fit=crop",
+    image: PHOTOS["cult-marrabenta"].src,
     short: {
       pt: "Género musical urbano que define a identidade sonora moçambicana, nascido nos subúrbios de Lourenço Marques.",
       en: "An urban musical genre that defines Mozambique's sound identity, born in the suburbs of Lourenço Marques.",
@@ -317,7 +319,6 @@ const TOPICS: Topic[] = [
     date: { pt: "1922 – 2003", en: "1922–2003" },
     gradient: "from-teal-700 to-teal-700",
     icon: Sparkles,
-    image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1200&h=600&fit=crop",
     short: {
       pt: "Considerado o maior poeta moçambicano, foi voz literária da identidade e da resistência cultural.",
       en: "Considered Mozambique's greatest poet, he was a literary voice of identity and cultural resistance.",
@@ -382,16 +383,8 @@ function CultureHistoryPage() {
         </div>
       </header>
 
-      <section className="relative h-96 overflow-hidden">
-        <img
-          loading="lazy"
-          decoding="async"
-          src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600&h=900&fit=crop"
-          alt={copy.mozambique[lang]}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" />
-        <div className="relative h-full flex flex-col items-center justify-center text-center text-white px-4">
+      <section className="relative h-96 overflow-hidden bg-muted">
+        <div className="relative h-full flex flex-col items-center justify-center text-center text-foreground px-4">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -403,15 +396,15 @@ function CultureHistoryPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="max-w-2xl text-white/90 mb-5"
+            className="max-w-2xl text-muted-foreground mb-5"
           >
             {copy.heroDescription[lang]}
           </motion.p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Badge className="bg-white/15 backdrop-blur text-white border-white/30 px-3 py-1 text-xs">
+            <Badge className="bg-card text-foreground border-border px-3 py-1 text-xs">
               {copy.topicsCount[lang]}
             </Badge>
-            <Badge className="bg-white/15 backdrop-blur text-white border-white/30 px-3 py-1 text-xs">
+            <Badge className="bg-card text-foreground border-border px-3 py-1 text-xs">
               {copy.culturalHeritage[lang]}
             </Badge>
           </div>
@@ -432,13 +425,16 @@ function CultureHistoryPage() {
               className="text-left rounded-3xl overflow-hidden bg-card border shadow-lg transition-all"
             >
               <div className="relative h-56 overflow-hidden">
-                <img
-                  src={topic.image}
-                  alt={topic.title[lang]}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
+                {topic.image && (
+                  <img
+                    src={topic.image}
+                    alt={topic.title[lang]}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <PhotoCredit src={topic.image} />
                 <div className={`absolute inset-0 bg-gradient-to-t ${topic.gradient} opacity-80`} />
                 <div className="absolute top-4 right-4 size-11 rounded-2xl bg-card shadow-lg flex items-center justify-center">
                   <topic.icon className="size-5 text-foreground" />
@@ -484,13 +480,16 @@ function CultureHistoryPage() {
               aria-labelledby={`topic-${selected.id}`}
             >
               <div className="relative h-52 sm:h-64 lg:h-72 shrink-0">
-                <img
-                  src={selected.image}
-                  alt={selected.title[lang]}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
+                {selected.image && (
+                  <img
+                    src={selected.image}
+                    alt={selected.title[lang]}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <PhotoCredit src={selected.image} />
                 <div
                   className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`}
                 />

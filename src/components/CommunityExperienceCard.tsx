@@ -4,6 +4,9 @@ import { MapPin, Gift } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
+import { PhotoCredit } from "@/components/PhotoCredit";
+import { PHOTOS_TXT } from "@/lib/page-texts";
+import { provincePhoto } from "@/lib/photo-credits";
 import {
   categoryMeta,
   communityLocation,
@@ -17,7 +20,10 @@ const LazyDialog = lazy(() =>
   })),
 );
 
-/** Elegant neutral placeholder when the activity has no image yet. */
+/**
+ * The activity's own photo; without one, the province photo labelled "Province image" (never presented
+ * as the place itself); without either, a neutral placeholder.
+ */
 export function CommunityImage({
   item,
   className = "",
@@ -34,6 +40,22 @@ export function CommunityImage({
         loading="lazy"
         className={`object-cover ${className}`}
       />
+    );
+  }
+  const province = provincePhoto(item.provinceCode);
+  if (province) {
+    const src = province.thumb ?? province.src;
+    return (
+      <span className={`relative block overflow-hidden ${className}`}>
+        <img
+          src={src}
+          alt={`${PHOTOS_TXT[lang].provinceImage}: ${province.shows[lang]}`}
+          loading="lazy"
+          decoding="async"
+          className="size-full object-cover"
+        />
+        <PhotoCredit src={src} label={PHOTOS_TXT[lang].provinceImage} />
+      </span>
     );
   }
   const cat = categoryMeta(item.category);

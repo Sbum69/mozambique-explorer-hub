@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { PreciseLocation, ProofReviewStatus } from "@/lib/geo";
 import { IMAGE_BY_SLUG } from "@/lib/destinations";
+import { provincePhoto } from "@/lib/photo-credits";
 import { validMapCoordinate } from "@/lib/itinerary-routing";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -13,15 +14,6 @@ import type { Json } from "@/integrations/supabase/types";
 /** "experience" = business activity (public.experiences); "community" = public.community_experiences. */
 export type RouteStopKind = "destination" | "experience" | "community" | "custom";
 
-/** One reusable cover per province (bundled real photos); others stay neutral until a province image exists. */
-const PROVINCE_COVER_SLUG: Record<string, string> = {
-  "maputo-cidade": "maputo",
-  maputo: "maputo",
-  inhambane: "inhambane",
-  sofala: "gorongosa",
-  nampula: "ilha",
-  "cabo-delgado": "pemba",
-};
 export const ROUTE_PROOFS_BUCKET = "route-proofs";
 
 export interface RouteStop {
@@ -356,11 +348,11 @@ export function routeAllStops(route: ItineraryRoute) {
   return route.days.flatMap((day) => day.stops);
 }
 
-/** Cover falls back to the artwork of the first destination in the route — never an invented image. */
+/** Cover: the province photo (credited, FOTOS-1); without a province, the first destination's photo. */
 export function routeCover(route: ItineraryRoute): string {
-  const slug = route.province ? PROVINCE_COVER_SLUG[route.province.code] : undefined;
-  if (slug && IMAGE_BY_SLUG[slug]) return IMAGE_BY_SLUG[slug];
-  if (route.province) return ""; // province without image yet: neutral placeholder, no invented image
+  const photo = route.province ? provincePhoto(route.province.code) : undefined;
+  if (photo) return photo.src;
+  if (route.province) return ""; // province without a photo: neutral placeholder, no invented image
   const withImage = routeAllStops(route).find((s) => s.image);
   return withImage?.image ?? "";
 }

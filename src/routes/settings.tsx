@@ -42,7 +42,7 @@ import { exportMyData } from "@/lib/account.functions";
 import { APP_VERSION } from "@/lib/app-info";
 import { getAuthCallbackUrl } from "@/lib/app-url";
 import { requireAuthenticatedUser } from "@/lib/auth";
-import { SETTINGS_TXT } from "@/lib/page-texts";
+import { PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
 import type { ThemePreference } from "@/lib/theme";
 
 export const Route = createFileRoute("/settings")({
@@ -187,6 +187,12 @@ function SettingsPage() {
             </dd>
             <dt className="text-muted-foreground">{t.contact}</dt>
             <dd>{t.inPreparation}</dd>
+            <dt className="text-muted-foreground">{PHOTOS_TXT[lang].credits}</dt>
+            <dd>
+              <Link to="/creditos" className="text-primary underline-offset-4 hover:underline">
+                {PHOTOS_TXT[lang].creditsTitle}
+              </Link>
+            </dd>
           </dl>
         </Section>
       </main>

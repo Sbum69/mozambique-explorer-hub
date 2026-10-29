@@ -13,6 +13,8 @@ const ALLOWED = [
   /Zambézia|Ilha de Moçambique|Praça da Independência|Závora|São Sebastião|Núcleo de Arte/,
   /Península da Macaneta/,
   /Lourenço Marques|José Craveirinha|Capitão Sálvio/,
+  // Photographers' names in the photo credits (FOTOS-1).
+  /Heldo Luis Manhiça|Salazar Sérgio|Andrés Moreno/,
   // Language picker: each language is named in itself (lang="pt").
   /^Português$/,
   // User-created content is not translated (route EK-A7D872 is a user copy of a catalogue route).

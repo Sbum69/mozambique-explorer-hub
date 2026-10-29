@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Store, Search, MapPin, Compass, BadgeCheck, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BusinessMark } from "@/components/BusinessMark";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -213,11 +214,15 @@ function BusinessCard({ b }: { b: PublicBusiness }) {
   return (
     <Link to="/business/$id" params={{ id: b.id }} className="block h-full">
       <Card className="overflow-hidden h-full flex flex-col border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow">
-        <div className="h-32 bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center">
+        <div className="h-32">
           {b.image ? (
             <img src={b.image} alt={b.name} className="w-full h-full object-cover" loading="lazy" />
           ) : (
-            <Store className="size-10 text-primary/50" />
+            <BusinessMark
+              name={b.name}
+              categoryCode={b.categoryCode}
+              categoryLabel={b.category?.[lang]}
+            />
           )}
         </div>
         <div className="p-4 flex-1 flex flex-col gap-2">
