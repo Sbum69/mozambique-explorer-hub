@@ -12,6 +12,10 @@ export interface PlatformUser {
   primaryRole: PlatformRole;
   createdAt: string;
   confirmed: boolean;
+  /** Test or staff account: left out of every metric (DADOS-2). */
+  internal: boolean;
+  /** Deleted by its owner and anonymised (kept only for records others rely on). */
+  deleted: boolean;
   businessName?: string;
   businessStatus?: string;
   businessVerified?: boolean;
@@ -37,7 +41,10 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
 
     const [{ data: profiles, error: profilesError }, { data: roleRows }, { data: businesses }] =
       await Promise.all([
-        supabaseAdmin.from("profiles").select("id, display_name, created_at").order("created_at"),
+        supabaseAdmin
+          .from("profiles")
+          .select("id, display_name, created_at, is_internal, deleted_at")
+          .order("created_at"),
         supabaseAdmin.from("user_roles").select("user_id, role"),
         supabaseAdmin
           .from("businesses")
@@ -70,6 +77,8 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
         displayName: profile.display_name ?? "Sem nome",
         email: auth?.email ?? "—",
         confirmed: auth?.confirmed ?? false,
+        internal: profile.is_internal,
+        deleted: !!profile.deleted_at,
         roles,
         primaryRole: ROLE_PRIORITY.find((candidate) => roles.includes(candidate)) ?? "tourist",
         createdAt: profile.created_at,

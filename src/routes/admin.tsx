@@ -15,7 +15,7 @@ import { AdminRewardsModal } from "@/components/AdminRewards";
 import { AdminBookingsModal } from "@/components/AdminBookings";
 import { AdminExperiencesModal } from "@/components/AdminExperiences";
 import { AdminBroadcastsModal } from "@/components/AdminBroadcasts";
-import { adminErrorText, setUserRole, type ManagedRole } from "@/lib/admin";
+import { adminErrorText, setUserInternal, setUserRole, type ManagedRole } from "@/lib/admin";
 import {
   BUSINESS_STATUS_LABEL,
   COMMUNITY_EXP_TXT,
@@ -659,6 +659,18 @@ function UsersModal({ onClose }: { onClose: () => void }) {
       setBusyRole(null);
     }
   };
+  const toggleInternal = async (u: PlatformUser) => {
+    setBusyRole(u.id + "internal");
+    try {
+      await setUserInternal(u.id, !u.internal);
+      setUsers((list) => list.map((x) => (x.id === u.id ? { ...x, internal: !u.internal } : x)));
+      toast.success(t.internalUpdated);
+    } catch (e) {
+      toast.error(adminErrorText(e instanceof Error ? e.message : "", lang));
+    } finally {
+      setBusyRole(null);
+    }
+  };
   const [users, setUsers] = useState<PlatformUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -763,6 +775,12 @@ function UsersModal({ onClose }: { onClose: () => void }) {
                   ) : (
                     <span className={`${CHIP} ${TONE.warning}`}>{t.unconfirmed}</span>
                   )}
+                  {u.internal && (
+                    <span className={`${CHIP} ${TONE.neutral}`} title={t.internalHint}>
+                      {t.internal}
+                    </span>
+                  )}
+                  {u.deleted && <span className={`${CHIP} ${TONE.warning}`}>{t.deleted}</span>}
                   {u.businessStatus && (
                     <span className={`${CHIP} ${TONE.info}`}>
                       {BUSINESS_STATUS_LABEL[lang][u.businessStatus] ?? u.businessStatus}
@@ -798,6 +816,15 @@ function UsersModal({ onClose }: { onClose: () => void }) {
                       </button>
                     );
                   })}
+                  <button
+                    type="button"
+                    disabled={busyRole === u.id + "internal"}
+                    onClick={() => void toggleInternal(u)}
+                    aria-pressed={u.internal}
+                    className={`text-xs px-2 py-0.5 rounded-full border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${u.internal ? "bg-foreground text-background border-foreground" : "bg-background text-foreground border-border hover:bg-muted"} disabled:opacity-50`}
+                  >
+                    {u.internal ? t.unmarkInternal : t.markInternal}
+                  </button>
                 </div>
               </div>
             </li>

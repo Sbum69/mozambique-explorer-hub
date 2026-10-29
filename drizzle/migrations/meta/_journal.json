@@ -330,6 +330,13 @@
       "when": 1793600000000,
       "tag": "0046_settings_avatars_notifications_account",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793700000000,
+      "tag": "0047_internal_accounts",
+      "breakpoints": true
     }
   ]
 }

@@ -68,6 +68,15 @@ export async function setUserRole(
   return (data ?? []) as string[];
 }
 
+/** Marks a test/staff account as internal (left out of the metrics) or clears it. */
+export async function setUserInternal(userId: string, internal: boolean): Promise<void> {
+  const { error } = await supabase.rpc("admin_set_internal", {
+    _user_id: userId,
+    _internal: internal,
+  });
+  if (error) throw new Error(error.message);
+}
+
 // ---------- Bookings ----------
 export interface AdminBooking {
   id: string;

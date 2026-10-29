@@ -50,15 +50,9 @@ export const getAdminSummary = createServerFn({ method: "GET" })
       _role: "admin",
     });
     if (error || !admin) throw new Error("Forbidden");
-    const [profiles, businesses, activities, bookings, pending, recent] = await Promise.all([
-      context.supabase.from("profiles").select("id", { count: "exact", head: true }),
-      context.supabase.from("businesses").select("id", { count: "exact", head: true }),
-      context.supabase.from("experiences").select("id", { count: "exact", head: true }),
-      context.supabase.from("bookings").select("id", { count: "exact", head: true }),
-      context.supabase
-        .from("businesses")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending"),
+    // Counts leave out internal (test) and deleted accounts and everything they own (DADOS-2).
+    const [counts, recent] = await Promise.all([
+      context.supabase.rpc("admin_platform_summary"),
       context.supabase
         .from("businesses")
         .select("id,name,status,created_at")
@@ -66,14 +60,15 @@ export const getAdminSummary = createServerFn({ method: "GET" })
         .order("id")
         .limit(5),
     ]);
-    for (const result of [profiles, businesses, activities, bookings, pending, recent])
-      if (result.error) throw new Error("Could not load summary");
+    if (counts.error || recent.error) throw new Error("Could not load summary");
+    const c = (counts.data ?? {}) as Record<string, number>;
     return {
-      profiles: profiles.count ?? 0,
-      businesses: businesses.count ?? 0,
-      activities: activities.count ?? 0,
-      bookings: bookings.count ?? 0,
-      pending: pending.count ?? 0,
+      profiles: c.profiles ?? 0,
+      internalProfiles: c.internal_profiles ?? 0,
+      businesses: c.businesses ?? 0,
+      activities: c.activities ?? 0,
+      bookings: c.bookings ?? 0,
+      pending: c.pending ?? 0,
       recent: recent.data ?? [],
     };
   });

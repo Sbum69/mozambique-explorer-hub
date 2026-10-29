@@ -35,3 +35,6 @@ dist-ssr
 scripts/qa/node_modules
 scripts/qa/bun.lock
 qa-output/
+
+# Local database backups (personal data) — never committed
+backups/
