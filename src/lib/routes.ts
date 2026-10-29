@@ -774,28 +774,28 @@ export const ROUTE_INTERESTS = [
   "music",
 ] as const;
 
-const ROUTE_INTEREST_META: Record<string, { emoji: string; label: { pt: string; en: string } }> = {
-  beach: { emoji: "🏖️", label: { pt: "Praia", en: "Beach" } },
-  culture: { emoji: "🎨", label: { pt: "Cultura", en: "Culture" } },
-  food: { emoji: "🍽️", label: { pt: "Gastronomia", en: "Food" } },
-  nature: { emoji: "🌿", label: { pt: "Natureza", en: "Nature" } },
-  community: { emoji: "👥", label: { pt: "Comunidade", en: "Community" } },
-  adventure: { emoji: "🏃", label: { pt: "Aventura", en: "Adventure" } },
-  wildlife: { emoji: "🐘", label: { pt: "Vida selvagem", en: "Wildlife" } },
-  history: { emoji: "📜", label: { pt: "História", en: "History" } },
-  heritage: { emoji: "🏛️", label: { pt: "Património", en: "Heritage" } },
-  local_life: { emoji: "🧺", label: { pt: "Vida local", en: "Local life" } },
-  relax: { emoji: "🌅", label: { pt: "Relaxamento", en: "Relaxation" } },
-  diving: { emoji: "🤿", label: { pt: "Mergulho", en: "Diving" } },
-  fishing: { emoji: "🎣", label: { pt: "Pesca", en: "Fishing" } },
-  hiking: { emoji: "🥾", label: { pt: "Hiking", en: "Hiking" } },
-  family: { emoji: "👨‍👩‍👧", label: { pt: "Família", en: "Family" } },
-  art: { emoji: "🖼️", label: { pt: "Arte", en: "Art" } },
-  music: { emoji: "🎶", label: { pt: "Música", en: "Music" } },
+const ROUTE_INTEREST_META: Record<string, { label: { pt: string; en: string } }> = {
+  beach: { label: { pt: "Praia", en: "Beach" } },
+  culture: { label: { pt: "Cultura", en: "Culture" } },
+  food: { label: { pt: "Gastronomia", en: "Food" } },
+  nature: { label: { pt: "Natureza", en: "Nature" } },
+  community: { label: { pt: "Comunidade", en: "Community" } },
+  adventure: { label: { pt: "Aventura", en: "Adventure" } },
+  wildlife: { label: { pt: "Vida selvagem", en: "Wildlife" } },
+  history: { label: { pt: "História", en: "History" } },
+  heritage: { label: { pt: "Património", en: "Heritage" } },
+  local_life: { label: { pt: "Vida local", en: "Local life" } },
+  relax: { label: { pt: "Relaxamento", en: "Relaxation" } },
+  diving: { label: { pt: "Mergulho", en: "Diving" } },
+  fishing: { label: { pt: "Pesca", en: "Fishing" } },
+  hiking: { label: { pt: "Hiking", en: "Hiking" } },
+  family: { label: { pt: "Família", en: "Family" } },
+  art: { label: { pt: "Arte", en: "Art" } },
+  music: { label: { pt: "Música", en: "Music" } },
 };
 
 export function routeInterestMeta(id: string) {
-  return ROUTE_INTEREST_META[id] ?? { emoji: "•", label: { pt: id, en: id } };
+  return ROUTE_INTEREST_META[id] ?? { label: { pt: id, en: id } };
 }
 
 export function routeTitle(r: ItineraryRoute, lang: "pt" | "en") {

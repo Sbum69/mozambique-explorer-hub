@@ -5,16 +5,15 @@ export type CommunityCategory = "beach" | "culture" | "food" | "nature" | "commu
 
 export const COMMUNITY_CATEGORIES: {
   id: CommunityCategory | "all";
-  emoji: string;
   label: { pt: string; en: string };
 }[] = [
-  { id: "all", emoji: "✨", label: { pt: "Todas", en: "All" } },
-  { id: "beach", emoji: "🏖️", label: { pt: "Praia", en: "Beach" } },
-  { id: "culture", emoji: "🎨", label: { pt: "Cultura", en: "Culture" } },
-  { id: "food", emoji: "🍽️", label: { pt: "Gastronomia", en: "Food" } },
-  { id: "nature", emoji: "🌿", label: { pt: "Natureza", en: "Nature" } },
-  { id: "community", emoji: "👥", label: { pt: "Comunidade", en: "Community" } },
-  { id: "adventure", emoji: "🏃", label: { pt: "Aventura", en: "Adventure" } },
+  { id: "all", label: { pt: "Todas", en: "All" } },
+  { id: "beach", label: { pt: "Praia", en: "Beach" } },
+  { id: "culture", label: { pt: "Cultura", en: "Culture" } },
+  { id: "food", label: { pt: "Gastronomia", en: "Food" } },
+  { id: "nature", label: { pt: "Natureza", en: "Nature" } },
+  { id: "community", label: { pt: "Comunidade", en: "Community" } },
+  { id: "adventure", label: { pt: "Aventura", en: "Adventure" } },
 ];
 
 /** Location in the reader's language (Portuguese when there is no English text). */

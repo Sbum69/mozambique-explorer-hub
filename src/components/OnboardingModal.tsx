@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { InterestIcon } from "@/components/InterestIcon";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -413,7 +414,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                             : "border-border hover:border-primary/40 bg-card",
                         )}
                       >
-                        <div className="text-3xl mb-2">{it.emoji}</div>
+                        <InterestIcon id={it.id} className="size-7 mb-2 text-primary" />
                         <p className="text-sm font-semibold leading-tight">{t(it.labelKey)}</p>
                         {selected && (
                           <motion.div

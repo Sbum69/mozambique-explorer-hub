@@ -4,6 +4,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { getAdminSummary } from "@/lib/dashboard.functions";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { InterestIcon } from "@/components/InterestIcon";
 import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -1967,7 +1968,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
             >
               {COMMUNITY_CATEGORIES.filter((c) => c.id !== "all").map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.emoji} {c.label[lang]}
+                  <InterestIcon id={c.id} /> {c.label[lang]}
                 </option>
               ))}
             </select>

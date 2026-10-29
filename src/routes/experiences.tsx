@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { InterestIcon } from "@/components/InterestIcon";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -95,17 +96,16 @@ export const Route = createFileRoute("/experiences")({
 
 const CATEGORIES: {
   id: ExperienceCategory | "all";
-  emoji: string;
   labelPt: string;
   labelEn: string;
 }[] = [
-  { id: "all", emoji: "✨", labelPt: "Todas", labelEn: "All" },
-  { id: "beach", emoji: "🏖️", labelPt: "Praia", labelEn: "Beach" },
-  { id: "culture", emoji: "🎨", labelPt: "Cultura", labelEn: "Culture" },
-  { id: "food", emoji: "🍽️", labelPt: "Gastronomia", labelEn: "Food" },
-  { id: "nature", emoji: "🌿", labelPt: "Natureza", labelEn: "Nature" },
-  { id: "community", emoji: "👥", labelPt: "Comunidade", labelEn: "Community" },
-  { id: "adventure", emoji: "🏃", labelPt: "Aventura", labelEn: "Adventure" },
+  { id: "all", labelPt: "Todas", labelEn: "All" },
+  { id: "beach", labelPt: "Praia", labelEn: "Beach" },
+  { id: "culture", labelPt: "Cultura", labelEn: "Culture" },
+  { id: "food", labelPt: "Gastronomia", labelEn: "Food" },
+  { id: "nature", labelPt: "Natureza", labelEn: "Nature" },
+  { id: "community", labelPt: "Comunidade", labelEn: "Community" },
+  { id: "adventure", labelPt: "Aventura", labelEn: "Adventure" },
 ];
 
 interface ExperienceFilters {
@@ -353,7 +353,7 @@ function ExperiencesPage() {
                   : "bg-background border border-border hover:border-primary/40"
               }`}
             >
-              <span className="mr-1.5">{c.emoji}</span>
+              <InterestIcon id={c.id} className="mr-1.5" />
               {lang === "pt" ? c.labelPt : c.labelEn}
             </button>
           ))}
@@ -428,7 +428,7 @@ function ExperiencesPage() {
                     </div>
                     <div className="absolute top-3 right-3 flex items-center gap-2">
                       <Badge className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0">
-                        {CATEGORIES.find((c) => c.id === exp.category)?.emoji}{" "}
+                        <InterestIcon id={exp.category} className="mr-1" />
                         {lang === "pt"
                           ? CATEGORIES.find((c) => c.id === exp.category)?.labelPt
                           : CATEGORIES.find((c) => c.id === exp.category)?.labelEn}
