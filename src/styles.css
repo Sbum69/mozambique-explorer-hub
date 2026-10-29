@@ -192,12 +192,13 @@
   font-display: swap;
   src: url("/fonts/atkinson-hyperlegible-700.woff2") format("woff2");
 }
+/* Headings use one static weight (700, latin): 22 KB instead of the 75 KB variable font (PERF-4). */
 @font-face {
   font-family: "Bricolage Grotesque";
   font-style: normal;
-  font-weight: 600 700;
+  font-weight: 700;
   font-display: swap;
-  src: url("/fonts/bricolage-grotesque-variable.woff2") format("woff2");
+  src: url("/fonts/bricolage-grotesque-700.woff2") format("woff2");
 }
 
 /* Thin band inspired by the capulana border: header, sidebar and section dividers only. */
