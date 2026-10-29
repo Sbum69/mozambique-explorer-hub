@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { BusinessManagement } from "@/components/BusinessManagement";
@@ -197,6 +198,7 @@ function BusinessDashboardPage() {
           </Button>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
           <NotificationsBell />
           <Button
             variant="ghost"

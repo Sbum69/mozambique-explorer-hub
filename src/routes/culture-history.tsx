@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useBackTarget } from "@/lib/nav";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
@@ -377,6 +378,7 @@ function CultureHistoryPage() {
           <h1 className="font-bold text-sm sm:text-base truncate">🇲🇿 {copy.pageTitle[lang]}</h1>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </header>
 

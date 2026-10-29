@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -23,6 +23,7 @@ import { LazyChoiceSelect } from "@/components/LazyChoiceSelect";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -144,10 +145,9 @@ const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
 );
 
 function HomePage() {
-  const { user, needsOnboarding, logout, isGuest: guestRole, isAuthenticated } = useAuth();
+  const { user, needsOnboarding, isGuest: guestRole, isAuthenticated } = useAuth();
   const isGuest = guestRole || !isAuthenticated;
   const { t, lang } = useLang();
-  const navigate = useNavigate();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   // Loaded only for accounts that still need it; kept mounted once opened so it can animate closed.
@@ -232,6 +232,7 @@ function HomePage() {
             <NotificationsBell variant="onDark" />
             <ThemeToggle className={ON_HERO} />
             <LanguageToggle className={ON_HERO} />
+            <UserMenu />
             {isGuest ? (
               <>
                 <Button
@@ -261,16 +262,6 @@ function HomePage() {
                     <LayoutDashboard className="size-4" />
                     <span className="sr-only sm:not-sr-only">{t("dashboard")}</span>
                   </Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
-                  onClick={() => {
-                    void logout().then(() => navigate({ to: "/login", replace: true }));
-                  }}
-                >
-                  {t("logout")}
                 </Button>
               </>
             )}

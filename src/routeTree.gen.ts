@@ -32,8 +32,11 @@ import { Route as MapRouteImport } from './routes/map'
 import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PreferencesRouteImport } from './routes/preferences'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UsefulInfoRouteImport } from './routes/useful-info'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
@@ -157,14 +160,29 @@ const PreferencesRoute = PreferencesRouteImport.update({
   path: '/preferences',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UsefulInfoRoute = UsefulInfoRouteImport.update({
@@ -227,8 +245,11 @@ export interface FileRoutesByFullPath {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/preferences': typeof PreferencesRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
@@ -261,8 +282,11 @@ export interface FileRoutesByTo {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/preferences': typeof PreferencesRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
@@ -296,8 +320,11 @@ export interface FileRoutesById {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/preferences': typeof PreferencesRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
@@ -332,8 +359,11 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/preferences'
+    | '/privacy'
     | '/reset-password'
+    | '/settings'
     | '/signup'
+    | '/terms'
     | '/useful-info'
     | '/auth/callback'
     | '/business/$id'
@@ -366,8 +396,11 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/preferences'
+    | '/privacy'
     | '/reset-password'
+    | '/settings'
     | '/signup'
+    | '/terms'
     | '/useful-info'
     | '/auth/callback'
     | '/business/$id'
@@ -400,8 +433,11 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/preferences'
+    | '/privacy'
     | '/reset-password'
+    | '/settings'
     | '/signup'
+    | '/terms'
     | '/useful-info'
     | '/auth/callback'
     | '/business/$id'
@@ -435,8 +471,11 @@ export interface RootRouteChildren {
   NewsAlertsRoute: typeof NewsAlertsRoute
   OnboardingRoute: typeof OnboardingRoute
   PreferencesRoute: typeof PreferencesRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
+  TermsRoute: typeof TermsRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   BusinessIdRoute: typeof BusinessIdRoute
@@ -608,6 +647,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PreferencesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -615,11 +661,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/useful-info': {
@@ -710,8 +770,11 @@ const rootRouteChildren: RootRouteChildren = {
   NewsAlertsRoute: NewsAlertsRoute,
   OnboardingRoute: OnboardingRoute,
   PreferencesRoute: PreferencesRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
+  TermsRoute: TermsRoute,
   UsefulInfoRoute: UsefulInfoRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   BusinessIdRoute: BusinessIdRoute,

@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Info, ChevronDown, CheckCircle, ArrowLeft, Home, type LucideIcon } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useBackTarget } from "@/lib/nav";
-import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 
@@ -534,7 +534,6 @@ const CATEGORIES: Category[] = [
 ];
 
 function UsefulInfoPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
   const router = useRouter();
@@ -578,11 +577,7 @@ function UsefulInfoPage() {
           <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <ThemeToggle />
             <LanguageToggle />
-            {user && (
-              <div className="size-9 shrink-0 rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold flex items-center justify-center text-sm">
-                {user.displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <UserMenu />
           </div>
         </div>
       </header>

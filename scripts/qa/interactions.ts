@@ -16,9 +16,17 @@ const cases: Case[] = [
     open: (p) => p.getByRole("button", { name: "Menu" }).click(),
   },
   {
+    // Visitors have no bell (UX-1): opened with the tourist session.
     name: "notifications",
     path: "/experiences",
+    role: "tourist",
     open: (p) => p.getByRole("button", { name: "Notificações" }).click(),
+  },
+  {
+    name: "user menu",
+    path: "/experiences",
+    role: "tourist",
+    open: (p) => p.getByRole("button", { name: "Menu da conta" }).click(),
   },
   {
     name: "theme menu",
