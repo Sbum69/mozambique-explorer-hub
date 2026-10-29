@@ -99,7 +99,34 @@ depois trocar `Content-Security-Policy-Report-Only` por `Content-Security-Policy
 
 ## 7. Corrigido no SEG-FINAL
 
-Ver o relatório do bloco e a migração `drizzle/migrations/0045_security_hardening.sql`.
+Migração `0045_security_hardening` (aplicada; `supabase/tests/security.sql`: 15/15 PASS):
+
+- **Médio** — `anon` tinha INSERT/UPDATE/DELETE/TRUNCATE em 24 tabelas (grants por omissão; a RLS
+  já recusava as escritas, o TRUNCATE não passa pela RLS mas não é exposto pela API): retirados;
+  TRUNCATE retirado também a `authenticated`.
+- **Médio (funcional)** — visitantes não liam as fotos aprovadas de `community-photos` (a política
+  chamava `has_role`, que `anon` não executa): política dividida por papel.
+- **Baixo** — `business_decide_booking`, `can_edit_route`, `owns_experience`,
+  `generate_route_code` deixaram de ser executáveis por `anon`.
+- **Baixo** — links de notificação começados por `//` recusados pela BD.
+- **Baixo** — buckets só aceitam imagens (JPEG, PNG, WebP, GIF, HEIC/HEIF; sem SVG).
+
+Aplicação:
+
+- **Crítico** — `seroval` 1.6.0 (serialização do TanStack Start, servidor e browser): override para
+  1.7.3 (com `seroval-plugins`).
+- `bun audit fix` dentro dos intervalos: 89 → 37 vulnerabilidades, 0 críticas.
+- Cabeçalhos de segurança e `noopener` nos links externos.
+
+## 7.1 Pendente
+
+- `zod` 3.25.76 (validadores das server functions): aviso alto de memória com coleções enormes; a
+  correção só existe no zod 4 (mudança major — migrar num bloco próprio). Exposição baixa: as
+  entradas são pequenas e quase todas exigem sessão.
+- Ferramentas de desenvolvimento ainda com avisos (`undici`, `ws` 8.18.0, `sharp`, `esbuild`):
+  não entram no bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
+- CSP ainda em report-only (ver secção 5).
+- 2FA para administradores (recomendação).
 
 ## 8. Checklist de lançamento
 
