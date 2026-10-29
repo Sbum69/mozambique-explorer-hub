@@ -39,6 +39,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -148,6 +149,7 @@ function NewsAlertsPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
       </header>
@@ -246,7 +248,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
   const likes = useEngagement("news", likeKeys);
 
   const onLike = async (key: string) => {
-    if (!requireAccount(lang === "pt" ? "Gostos" : "Likes")) return;
+    if (!requireAccount(lang === "pt" ? "gostar de notícias" : "like news")) return;
     const r = await likes.toggle(key);
     if (!r.ok)
       toast.error(lang === "pt" ? "Não foi possível guardar o gosto." : "Couldn't save like.");

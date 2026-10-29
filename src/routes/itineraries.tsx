@@ -54,6 +54,15 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
+import { ResetPrefsButton } from "@/components/ResetPrefsButton";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
+import {
+  NO_ROUTE_FILTERS,
+  routeFiltersFromPrefs,
+  type DurationBucket,
+  type RouteFilters,
+} from "@/lib/pref-filters";
 import { useLang } from "@/contexts/LanguageContext";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { useProvinces } from "@/hooks/useProvinces";
@@ -82,6 +91,7 @@ import {
   type RouteStopKind,
 } from "@/lib/routes";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -130,10 +140,27 @@ function ItinerariesPage() {
   const { all, loading, error, reload } = useRouteCatalogue(userId);
   const { provinces } = useProvinces();
 
-  const [provinceFilter, setProvinceFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
-  const [durationFilter, setDurationFilter] = useState<"all" | "short" | "mid" | "long">("all");
-  const [interestFilter, setInterestFilter] = useState<string | null>(null);
+  // Filters start from the saved preferences; changing them never changes the preferences.
+  const personalPrefs = usePersonalPrefs();
+  const routeFilters = usePrefilledFilters<RouteFilters>(
+    routeFiltersFromPrefs(
+      personalPrefs.hasPrefs ? personalPrefs : null,
+      provinces,
+      ROUTE_INTERESTS,
+    ),
+    NO_ROUTE_FILTERS,
+  );
+  const {
+    province: provinceFilter,
+    duration: durationFilter,
+    interest: interestFilter,
+  } = routeFilters.value;
+  const setProvinceFilter = (province: string) => routeFilters.set((cur) => ({ ...cur, province }));
+  const setDurationFilter = (duration: DurationBucket) =>
+    routeFilters.set((cur) => ({ ...cur, duration }));
+  const setInterestFilter = (interest: string) =>
+    routeFilters.set((cur) => ({ ...cur, interest: cur.interest === interest ? null : interest }));
   const [preview, setPreview] = useState<ItineraryRoute | null>(null);
   const [quickCode, setQuickCode] = useState("");
   const [codeBusy, setCodeBusy] = useState(false);
@@ -234,7 +261,7 @@ function ItinerariesPage() {
   };
 
   const handleImport = async () => {
-    if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId)
+    if (!requireAccount(lang === "pt" ? "importar roteiros" : "import itineraries") || !userId)
       return;
     setImportBusy(true);
     try {
@@ -514,6 +541,7 @@ function ItinerariesPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -534,7 +562,7 @@ function ItinerariesPage() {
             <Button
               variant="outline"
               onClick={() => {
-                if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries"))
+                if (!requireAccount(lang === "pt" ? "importar roteiros" : "import itineraries"))
                   return;
                 setShowImportModal(true);
               }}
@@ -545,7 +573,7 @@ function ItinerariesPage() {
             </Button>
             <Button
               onClick={() => {
-                if (!requireAccount(lang === "pt" ? "Criar roteiros" : "Create itineraries"))
+                if (!requireAccount(lang === "pt" ? "criar roteiros" : "create itineraries"))
                   return;
                 setShowCreateModal(true);
               }}
@@ -630,7 +658,7 @@ function ItinerariesPage() {
               </Select>
               <Select
                 value={durationFilter}
-                onValueChange={(v) => setDurationFilter(v as typeof durationFilter)}
+                onValueChange={(v) => setDurationFilter(v as DurationBucket)}
               >
                 <SelectTrigger
                   className="w-[180px]"
@@ -647,6 +675,7 @@ function ItinerariesPage() {
                   <SelectItem value="long">5+ {lang === "pt" ? "dias" : "days"}</SelectItem>
                 </SelectContent>
               </Select>
+              {routeFilters.canReset && <ResetPrefsButton onClick={routeFilters.reset} />}
             </div>
             <div
               className="flex gap-2 flex-wrap mb-6"
@@ -660,7 +689,7 @@ function ItinerariesPage() {
                     size="sm"
                     variant={interestFilter === i ? "default" : "outline"}
                     aria-pressed={interestFilter === i}
-                    onClick={() => setInterestFilter((cur) => (cur === i ? null : i))}
+                    onClick={() => setInterestFilter(i)}
                   >
                     <span aria-hidden>{m.emoji}</span> {m.label[lang]}
                   </Button>

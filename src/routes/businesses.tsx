@@ -15,10 +15,15 @@ import {
 } from "@/components/ui/select";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
+import { ResetPrefsButton } from "@/components/ResetPrefsButton";
+import { preferredProvinceId } from "@/lib/pref-filters";
 import { fetchPublicBusinesses, type PublicBusiness } from "@/lib/local-businesses";
 
 export const Route = createFileRoute("/businesses")({
@@ -51,7 +56,14 @@ function BusinessesPage() {
   const back = useBackTarget();
   const { provinces } = useProvinces();
   const { categories } = useBusinessCategories();
-  const [provinceId, setProvinceId] = useState(ALL);
+  // Starts on the first saved province; changing it never changes the preferences.
+  const personalPrefs = usePersonalPrefs();
+  const savedProvince = personalPrefs.hasPrefs
+    ? preferredProvinceId(personalPrefs, provinces)
+    : null;
+  const provinceFilter = usePrefilledFilters<string>(savedProvince, ALL);
+  const provinceId = provinceFilter.value;
+  const setProvinceId = (id: string) => provinceFilter.set(id);
   const [category, setCategory] = useState(ALL);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -98,6 +110,7 @@ function BusinessesPage() {
           </h1>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </header>
 
@@ -145,6 +158,7 @@ function BusinessesPage() {
               ))}
             </SelectContent>
           </Select>
+          {provinceFilter.canReset && <ResetPrefsButton onClick={provinceFilter.reset} />}
         </div>
 
         {loading ? (

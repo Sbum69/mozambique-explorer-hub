@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
@@ -158,7 +159,7 @@ function CommunityPage() {
   }, [loadFeed, search]);
 
   const openNew = () => {
-    if (!requireAccount(pt ? "Publicar na comunidade" : "Post in the community")) return;
+    if (!requireAccount(pt ? "publicar na comunidade" : "post in the community")) return;
     setEditing(null);
     setEditorOpen(true);
   };
@@ -169,7 +170,7 @@ function CommunityPage() {
   };
 
   const handleReaction = async (post: CommunityPost, value: ReactionValue) => {
-    if (!requireAccount(pt ? "Reagir a publicações" : "React to posts")) return;
+    if (!requireAccount(pt ? "reagir a publicações" : "react to posts")) return;
     try {
       const next = await toggleReaction(post.id, value);
       setPosts((arr) =>
@@ -207,7 +208,7 @@ function CommunityPage() {
   };
 
   const openReport = (post: CommunityPost) => {
-    if (!requireAccount(pt ? "Denunciar publicações" : "Report posts")) return;
+    if (!requireAccount(pt ? "denunciar publicações" : "report posts")) return;
     setReporting(post);
   };
 
@@ -247,6 +248,7 @@ function CommunityPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
             {user && (
               <div className="hidden sm:flex size-9 rounded-full bg-gradient-to-br from-primary to-primary-glow text-white items-center justify-center font-bold text-sm">
                 {user.displayName.charAt(0)}

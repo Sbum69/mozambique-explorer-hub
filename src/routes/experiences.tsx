@@ -40,12 +40,18 @@ import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
 import { type Experience, type ExperienceCategory } from "@/lib/experiences";
 import { useAvailability, useExperiences } from "@/hooks/useExperiences";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ResetPrefsButton } from "@/components/ResetPrefsButton";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
+import { useProvinces } from "@/hooks/useProvinces";
+import { firstOffered, inPreferredProvinces } from "@/lib/pref-filters";
 import { useBackTarget } from "@/lib/nav";
 import {
   createBooking,
@@ -101,18 +107,45 @@ const CATEGORIES: {
   { id: "adventure", emoji: "🏃", labelPt: "Aventura", labelEn: "Adventure" },
 ];
 
+interface ExperienceFilters {
+  category: ExperienceCategory | "all";
+  /** Only the saved provinces (on by default when there are preferences). */
+  onlyMine: boolean;
+}
+
 function ExperiencesPage() {
   const { t, lang } = useLang();
   const { user } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
-  const preferredInterest = user?.preferences?.interests?.find((i) =>
-    CATEGORIES.some((c) => c.id === i),
-  ) as ExperienceCategory | undefined;
-  const [filter, setFilter] = useState<ExperienceCategory | "all">(preferredInterest ?? "all");
-  const provinceId = user?.preferences?.province;
-  const [showAllDestinations, setShowAllDestinations] = useState(!provinceId);
+  // Filters start from the saved preferences (provinces and first matching interest); changing
+  // them never changes the preferences.
+  const personalPrefs = usePersonalPrefs();
+  const { provinces } = useProvinces();
+  const expFilters = usePrefilledFilters<ExperienceFilters>(
+    personalPrefs.hasPrefs
+      ? {
+          category:
+            firstOffered(
+              personalPrefs.interests,
+              CATEGORIES.map((c) => c.id),
+            ) ?? "all",
+          onlyMine: true,
+        }
+      : null,
+    { category: "all", onlyMine: false },
+  );
+  const filter = expFilters.value.category;
+  const setFilter = (category: ExperienceFilters["category"]) =>
+    expFilters.set((cur) => ({ ...cur, category }));
+  const hasProvincePrefs = personalPrefs.hasPrefs;
+  const showAllDestinations = !expFilters.value.onlyMine;
+  const toggleAllDestinations = () =>
+    expFilters.set((cur) => ({ ...cur, onlyMine: !cur.onlyMine }));
+  const myProvinceNames = personalPrefs.provinces
+    .map((code) => provinces.find((p) => p.code === code)?.name[lang] ?? code)
+    .join(", ");
 
   const [booked, setBooked] = useState<Set<string>>(new Set());
   const [openExp, setOpenExp] = useState<Experience | null>(null);
@@ -134,11 +167,11 @@ function ExperiencesPage() {
 
   const filtered = useMemo(() => {
     let list = experiences;
-    if (provinceId && !showAllDestinations)
-      list = list.filter((e) => e.destinationId === provinceId);
+    if (hasProvincePrefs && !showAllDestinations)
+      list = list.filter((e) => inPreferredProvinces(e.province, personalPrefs));
     if (filter !== "all") list = list.filter((e) => e.category === filter);
     return list;
-  }, [experiences, filter, provinceId, showAllDestinations]);
+  }, [experiences, filter, hasProvincePrefs, showAllDestinations, personalPrefs]);
 
   const {
     slots,
@@ -200,7 +233,7 @@ function ExperiencesPage() {
 
   const openBookingModal = (exp: Experience) => {
     if (booked.has(exp.id)) return;
-    if (!requireAccount(lang === "pt" ? "Reservas" : "Bookings")) return;
+    if (!requireAccount(lang === "pt" ? "reservar" : "book")) return;
     setForm({
       date: "",
       time: "",
@@ -266,6 +299,7 @@ function ExperiencesPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -279,7 +313,7 @@ function ExperiencesPage() {
           <p className="text-muted-foreground mt-2">{t("expSub")}</p>
         </motion.div>
 
-        {provinceId && (
+        {hasProvincePrefs && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 to-orange-700/10 px-4 py-3 flex-wrap">
             <p className="text-sm">
               <Sparkles className="inline size-4 text-primary mr-1" />
@@ -288,18 +322,21 @@ function ExperiencesPage() {
                   ? "A mostrar experiências de todos os destinos"
                   : "Showing experiences from all destinations"
                 : lang === "pt"
-                  ? `A mostrar apenas experiências em ${provinceId}`
-                  : `Showing only experiences in ${provinceId}`}
+                  ? `A mostrar apenas experiências em ${myProvinceNames}`
+                  : `Showing only experiences in ${myProvinceNames}`}
             </p>
-            <Button size="sm" variant="outline" onClick={() => setShowAllDestinations((s) => !s)}>
-              {showAllDestinations
-                ? lang === "pt"
-                  ? "Filtrar pelo meu destino"
-                  : "Filter by my destination"
-                : lang === "pt"
-                  ? "Ver todos os destinos"
-                  : "Show all destinations"}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {expFilters.canReset && <ResetPrefsButton onClick={expFilters.reset} />}
+              <Button size="sm" variant="outline" onClick={toggleAllDestinations}>
+                {showAllDestinations
+                  ? lang === "pt"
+                    ? "Filtrar pelo meu destino"
+                    : "Filter by my destination"
+                  : lang === "pt"
+                    ? "Ver todos os destinos"
+                    : "Show all destinations"}
+              </Button>
+            </div>
           </div>
         )}
 

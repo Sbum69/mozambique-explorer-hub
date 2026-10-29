@@ -58,6 +58,7 @@ import {
 } from "@/lib/routes";
 import { ShareButton } from "@/components/ShareButton";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DirectionsButtons } from "@/components/DirectionsButtons";
 import { Camera, Users, Image as ImageIcon } from "lucide-react";
@@ -186,7 +187,13 @@ function ItineraryDetailPage() {
   const currentDay = progress?.currentDay ?? 1;
 
   const start = async () => {
-    if (!requireAccount(lang === "pt" ? "Progresso de rotas" : "Route progress") || !userId) return;
+    if (
+      !requireAccount(
+        lang === "pt" ? "seguir o roteiro e enviar provas" : "follow the itinerary and send proofs",
+      ) ||
+      !userId
+    )
+      return;
     setBusy(true);
     try {
       setProgress(await startRouteProgress(route.id, userId));
@@ -362,7 +369,7 @@ function ItineraryDetailPage() {
   };
 
   const importThis = async () => {
-    if (!requireAccount(lang === "pt" ? "Importar roteiros" : "Import itineraries") || !userId)
+    if (!requireAccount(lang === "pt" ? "importar roteiros" : "import itineraries") || !userId)
       return;
     setBusy(true);
     try {
@@ -412,6 +419,7 @@ function ItineraryDetailPage() {
           <div className="rounded-md bg-background/80 backdrop-blur">
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
           <FavoriteButton itemId={route.id} itemType="itinerary" size="md" />
         </div>

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useBackTarget } from "@/lib/nav";
@@ -134,7 +135,7 @@ function CommunityExperiencesPage() {
     .map((c) => provinces.find((p) => p.code === c)?.name[lang] ?? c)
     .join(", ");
   const propose = () => {
-    if (requireAccount(pt ? "Propor experiência" : "Propose experience")) setProposing(true);
+    if (requireAccount(pt ? "propor uma experiência" : "propose an experience")) setProposing(true);
   };
 
   useEffect(() => {
@@ -175,6 +176,7 @@ function CommunityExperiencesPage() {
           </h1>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </header>
 
@@ -187,7 +189,7 @@ function CommunityExperiencesPage() {
         <div className="flex flex-wrap gap-2">
           <Button size="sm" onClick={propose}>
             <Plus className="size-4" />
-            {pt ? "Propor experiência" : "Propose experience"}
+            {pt ? "propor uma experiência" : "propose an experience"}
           </Button>
           <Button
             size="sm"
