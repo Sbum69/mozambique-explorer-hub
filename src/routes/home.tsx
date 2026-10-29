@@ -54,7 +54,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
-import { HERO_AVIF_SRCSET, HeroImage } from "@/components/HeroImage";
+import { HERO_AVIF_SRCSET, HERO_PHOTO, HeroImage } from "@/components/HeroImage";
 
 // Same colours as NotificationsBell variant="onDark": the top bar sits on the dark hero photo.
 const ON_HERO = "text-white hover:bg-white/10 hover:text-white";
@@ -215,6 +215,7 @@ function HomePage() {
           <HeroImage alt="" className="size-full object-cover" priority />
           {/* Fixed dark overlay (not a theme token) so the white hero text always reads, in both themes. */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-background" />
+          <PhotoCredit photo={HERO_PHOTO} />
         </div>
 
         {/* Nav */}

@@ -1,5 +1,5 @@
 import { useLang } from "@/contexts/LanguageContext";
-import { creditFor, licenseLabel } from "@/lib/photo-credits";
+import { creditFor, licenseLabel, type PhotoCredit as Photo } from "@/lib/photo-credits";
 import { cn } from "@/lib/utils";
 
 /**
@@ -8,16 +8,19 @@ import { cn } from "@/lib/utils";
  */
 export function PhotoCredit({
   src,
+  photo,
   label,
   className,
 }: {
-  src: string | null | undefined;
+  src?: string | null;
+  /** The photo entry itself, when the image has several URLs (srcset). */
+  photo?: Photo;
   /** Extra words before the credit, e.g. "Imagem da província". */
   label?: string;
   className?: string;
 }) {
   const { lang } = useLang();
-  const c = creditFor(src);
+  const c = photo ?? creditFor(src);
   if (!c) return null;
   return (
     <span

@@ -14,7 +14,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 
-import { HeroImage } from "@/components/HeroImage";
+import { HERO_PHOTO, HeroImage } from "@/components/HeroImage";
+import { PhotoCredit } from "@/components/PhotoCredit";
 import { FORGOT_TXT } from "@/lib/page-texts";
 import { getAuthenticatedUser, roleLandingTarget, validateAuthReturnSearch } from "@/lib/auth";
 
@@ -80,11 +81,12 @@ function LoginPage() {
       <div className="relative hidden lg:block overflow-hidden">
         {/* Hidden below lg: lazy, so phones never download it. */}
         <HeroImage
-          alt={lang === "pt" ? "Costa de Moçambique" : "Mozambique coastline"}
+          alt={HERO_PHOTO.shows[lang]}
           className="absolute inset-0 size-full object-cover"
           sizes="50vw"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-black/45 via-black/35 to-black/70" />
+        <PhotoCredit photo={HERO_PHOTO} />
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-2 font-bold text-2xl">
             <BrandMark className="size-9" />

@@ -1,13 +1,19 @@
-import avif640 from "@/assets/hero-mozambique-640.avif";
-import avif1024 from "@/assets/hero-mozambique-1024.avif";
-import avif1600 from "@/assets/hero-mozambique-1600.avif";
-import webp640 from "@/assets/hero-mozambique-640.webp";
-import webp1024 from "@/assets/hero-mozambique-1024.webp";
-import webp1600 from "@/assets/hero-mozambique-1600.webp";
+import avif640 from "@/assets/hero-vilankulo-640.avif";
+import avif1024 from "@/assets/hero-vilankulo-1024.avif";
+import avif1296 from "@/assets/hero-vilankulo-1296.avif";
+import webp640 from "@/assets/hero-vilankulo-640.webp";
+import webp1024 from "@/assets/hero-vilankulo-1024.webp";
+import webp1296 from "@/assets/hero-vilankulo-1296.webp";
+import { PHOTOS } from "@/lib/photo-credits";
 
-/** Same photo as hero-mozambique.jpg (1920×1080), in modern formats and three widths. */
-export const HERO_AVIF_SRCSET = `${avif640} 640w, ${avif1024} 1024w, ${avif1600} 1600w`;
-const HERO_WEBP_SRCSET = `${webp640} 640w, ${webp1024} 1024w, ${webp1600} 1600w`;
+/**
+ * Dawn in Vilankulo (approved photo D4, credited as PHOTOS["dest-vilankulo"]), 16:9, in modern
+ * formats and three widths; the original is 1296 px wide, so nothing is upscaled.
+ */
+export const HERO_AVIF_SRCSET = `${avif640} 640w, ${avif1024} 1024w, ${avif1296} 1296w`;
+const HERO_WEBP_SRCSET = `${webp640} 640w, ${webp1024} 1024w, ${webp1296} 1296w`;
+/** Credit shown on top of the hero (see PhotoCredit). */
+export const HERO_PHOTO = PHOTOS["dest-vilankulo"];
 
 /**
  * Responsive hero photo. `priority` marks it as the page's largest image (eager, high fetch priority);
@@ -31,8 +37,8 @@ export function HeroImage({
       <img
         src={webp1024}
         alt={alt}
-        width={1920}
-        height={1080}
+        width={1296}
+        height={729}
         className={className}
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
