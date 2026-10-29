@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { InterestIcon } from "@/components/InterestIcon";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -305,7 +306,7 @@ function MapPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -395,7 +396,7 @@ function MapPage() {
                 });
               }}
             >
-              <span aria-hidden>{c.emoji}</span> {c.label[lang]}
+              <InterestIcon id={c.id} /> {c.label[lang]}
             </Button>
           ))}
         </div>
@@ -542,7 +543,7 @@ function MapPage() {
                       </p>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {isVisited(d.id) && (
-                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-white">
+                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-success-foreground">
                             <Check className="size-2.5 mr-1" />
                             {pt ? "Visitado" : "Visited"}
                           </Badge>
@@ -554,7 +555,7 @@ function MapPage() {
                           </Badge>
                         )}
                         {d.badges.includes("most-recommended") && (
-                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-white">
+                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-success-foreground">
                             <Award className="size-2.5 mr-1" />
                             {t("mostRecommended")}
                           </Badge>
@@ -621,11 +622,7 @@ function MapPage() {
                       onClick={() => void toggleVisit(selected)}
                       disabled={savingVisit}
                       variant={isVisited(selected.id) ? "outline" : "default"}
-                      className={
-                        isVisited(selected.id)
-                          ? ""
-                          : "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0 hover:opacity-90"
-                      }
+                      className={isVisited(selected.id) ? "" : ""}
                     >
                       {savingVisit ? (
                         <Loader2 className="size-4 animate-spin" />

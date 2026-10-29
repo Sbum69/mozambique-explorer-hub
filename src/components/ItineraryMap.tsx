@@ -14,7 +14,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Loader2, Car, Bike, User } from "lucide-react";
+import { Navigation, Loader2, Car, Bike, User, Ruler, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { RouteStop } from "@/lib/routes";
 
@@ -214,8 +214,10 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
         {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         {routeInfo && !loading && (
           <span className="text-xs text-muted-foreground ml-1">
-            📏 {(routeInfo.distance / 1000).toFixed(1)} km · ⏱ {Math.round(routeInfo.duration / 60)}{" "}
-            min
+            <Ruler className="inline size-3.5 mr-1" aria-hidden="true" />
+            {(routeInfo.distance / 1000).toFixed(1)} km ·{" "}
+            <Clock className="inline size-3.5 mx-1" aria-hidden="true" />
+            {Math.round(routeInfo.duration / 60)} min
           </span>
         )}
       </div>
@@ -310,7 +312,12 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
                     </p>
                   )}
                   <p style={{ fontSize: 10, color: "#888", margin: 0 }}>
-                    📍 {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
+                    <MapPin
+                      size={10}
+                      aria-hidden="true"
+                      style={{ display: "inline", verticalAlign: "-1px" }}
+                    />{" "}
+                    {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
                   </p>
                   <p
                     style={{
@@ -322,7 +329,7 @@ export function ItineraryMap({ stops, lang = "pt" }: Props) {
                       flexWrap: "wrap",
                     }}
                   >
-                    🧭{" "}
+                    <Navigation size={14} aria-hidden="true" />{" "}
                     {(() => {
                       const u = directionsUrls(coord);
                       return (

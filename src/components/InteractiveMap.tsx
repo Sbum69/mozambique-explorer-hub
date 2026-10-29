@@ -1,3 +1,4 @@
+import { Check, Users, Navigation } from "lucide-react";
 import { useEffect } from "react";
 import {
   MapContainer,
@@ -16,6 +17,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import type { CommunityExperience } from "@/lib/community-experiences";
 import { categoryMeta, communityLocation } from "@/lib/community-experiences";
 import { communityIcon } from "@/components/CommunityMiniMap";
+import { InterestIcon } from "@/components/InterestIcon";
 import { directionsUrls } from "@/lib/visits";
 
 const makePin = (bg: string, size: number) =>
@@ -29,21 +31,18 @@ const makePin = (bg: string, size: number) =>
     transform: rotate(-45deg);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     display: flex; align-items: center; justify-content: center;
-  "><span style="transform: rotate(45deg); color: white; font-weight: bold; font-size: 14px;">📍</span></div>`,
+  "><span style="transform: rotate(45deg); width: 8px; height: 8px; border-radius: 50%; background: white;"></span></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size],
     popupAnchor: [0, -size],
   });
 /** Destinations: green = available, orange = currently selected (only one). */
-const pinIcon = makePin("oklch(0.6 0.15 150)", 30);
-const selectedPinIcon = makePin(
-  "linear-gradient(135deg, oklch(0.68 0.19 45), oklch(0.74 0.16 50))",
-  40,
-);
+const pinIcon = makePin("var(--color-secondary)", 30);
+const selectedPinIcon = makePin("var(--color-primary)", 40);
 /** Community experiences keep the diamond; the selected one is larger with an orange ring. */
 const communitySelectedIcon = L.divIcon({
   className: "ekaya-community-pin-selected",
-  html: `<div style="width:36px;height:36px;background:oklch(0.55 0.16 245);border:4px solid oklch(0.7 0.19 45);border-radius:7px;transform:rotate(45deg);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 4px 14px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);font-size:15px">👥</span></div>`,
+  html: `<div style="width:36px;height:36px;background:var(--color-secondary);border:4px solid var(--color-warning);border-radius:7px;transform:rotate(45deg);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 4px 14px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(-45deg);width:10px;height:10px;border-radius:50%;background:white"></span></div>`,
   iconSize: [36, 36],
   iconAnchor: [18, 18],
   popupAnchor: [0, -20],
@@ -162,11 +161,21 @@ export function InteractiveMap({
               </p>
               {visitedIds?.has(d.id) && (
                 <p style={{ fontSize: 11, color: "#16a34a", fontWeight: 600, margin: "0 0 6px" }}>
-                  ✓ {lang === "pt" ? "Visitado" : "Visited"}
+                  <Check
+                    size={12}
+                    aria-hidden="true"
+                    style={{ display: "inline", verticalAlign: "-2px" }}
+                  />{" "}
+                  {lang === "pt" ? "Visitado" : "Visited"}
                 </p>
               )}
               <p style={{ fontSize: 11, color: "#888", margin: "0 0 8px" }}>
-                👥 {d.visitorsK}k {lang === "pt" ? "visitantes/ano" : "visitors/year"}
+                <Users
+                  size={12}
+                  aria-hidden="true"
+                  style={{ display: "inline", verticalAlign: "-2px" }}
+                />{" "}
+                {d.visitorsK}k {lang === "pt" ? "visitantes/ano" : "visitors/year"}
               </p>
               {onSelect && (
                 <button
@@ -206,7 +215,8 @@ export function InteractiveMap({
                     gap: 6,
                   }}
                 >
-                  🧭 {lang === "pt" ? "Como chegar" : "Get directions"}
+                  <Navigation size={14} aria-hidden="true" />{" "}
+                  {lang === "pt" ? "Como chegar" : "Get directions"}
                 </button>
               )}
             </div>
@@ -230,7 +240,7 @@ export function InteractiveMap({
             <Popup>
               <div style={{ minWidth: 200 }}>
                 <p style={{ fontSize: 11, fontWeight: 600, color: "#15803d", margin: 0 }}>
-                  {categoryMeta(c.category).emoji}{" "}
+                  <InterestIcon id={c.category} className="mr-1" />
                   {lang === "pt"
                     ? "Experiência comunitária · grátis"
                     : "Community experience · free"}
@@ -252,7 +262,7 @@ export function InteractiveMap({
                     flexWrap: "wrap",
                   }}
                 >
-                  🧭{" "}
+                  <Navigation size={14} aria-hidden="true" />{" "}
                   {(() => {
                     const u = directionsUrls([c.lat as number, c.lng as number]);
                     return (

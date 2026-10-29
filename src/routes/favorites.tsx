@@ -129,7 +129,7 @@ function FavoritesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-rose-50/30 dark:to-rose-950/10">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/85 backdrop-blur-md shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
@@ -183,7 +183,7 @@ function FavoritesPage() {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
                     active
-                      ? "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-md"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/70",
                   )}
                 >
@@ -306,10 +306,7 @@ function EmptyState({ lang, onAction }: { lang: "pt" | "en"; onAction: () => voi
           ? "Começa a guardar locais, experiências e roteiros para os encontrares aqui."
           : "Start saving places, experiences and itineraries to find them here."}
       </p>
-      <Button
-        onClick={onAction}
-        className="bg-gradient-to-r from-rose-600 to-rose-700 text-white hover:opacity-90"
-      >
+      <Button onClick={onAction} className="">
         {lang === "pt" ? "Explorar agora" : "Explore now"}
       </Button>
     </div>
