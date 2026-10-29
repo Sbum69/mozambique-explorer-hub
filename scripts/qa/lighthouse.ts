@@ -35,6 +35,7 @@ const DEFAULT_PAGES: QaPage[] = [
   { name: "experiences", path: "/experiences" },
   { name: "community", path: "/community" },
   { name: "games", path: "/games", role: "tourist" },
+  { name: "dashboard", path: "/dashboard", role: "tourist" },
   { name: "useful-info", path: "/useful-info" },
   { name: "login", path: "/login" },
 ];
