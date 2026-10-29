@@ -52,7 +52,11 @@ export function PointsCard({
   // points load, so the page below does not jump when they arrive.
   if (!uid || q.isLoading) {
     return (
-      <Card className="p-6 border-0 shadow-[var(--shadow-soft)]" aria-busy="true">
+      // On phones the loaded card wraps to about 384px (level row on two lines, long empty-state text).
+      <Card
+        className="p-6 border-0 shadow-[var(--shadow-soft)] min-h-96 sm:min-h-0"
+        aria-busy="true"
+      >
         <div className="flex items-center gap-4">
           <Skeleton className="size-16 rounded-2xl" />
           <div className="flex-1 space-y-2">
