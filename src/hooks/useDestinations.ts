@@ -29,8 +29,9 @@ export async function loadDestinationsForRoute(): Promise<Destination[] | null> 
 /**
  * Shared access point for the destination catalogue: one query, cached for the session.
  * initial: the list a route loader already read (server render), so the page starts with it.
+ * enabled: false skips the request (a caller that only needs the list in rare cases).
  */
-export function useDestinations(initial?: Destination[] | null) {
+export function useDestinations(initial?: Destination[] | null, { enabled = true } = {}) {
   const seed = cache ?? initial ?? null;
   const [destinations, setDestinations] = useState<Destination[]>(seed ?? []);
   const [loading, setLoading] = useState(seed === null);
@@ -53,6 +54,7 @@ export function useDestinations(initial?: Destination[] | null) {
   }, []);
 
   useEffect(() => {
+    if (!enabled) return;
     if (!cache && initial) cache = initial;
     if (cache) {
       setDestinations(cache);
@@ -62,7 +64,7 @@ export function useDestinations(initial?: Destination[] | null) {
     void load();
     // initial only seeds the first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [load]);
+  }, [load, enabled]);
 
   return {
     destinations,

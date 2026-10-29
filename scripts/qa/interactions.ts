@@ -8,7 +8,14 @@ import type { Page } from "playwright";
 
 import { launch, newContext, reporter, BASE, type Role } from "./lib";
 
-type Case = { name: string; path: string; role?: Role; open: (p: Page) => Promise<unknown> };
+type Case = {
+  name: string;
+  path: string;
+  role?: Role;
+  open: (p: Page) => Promise<unknown>;
+  /** Needs real content (e.g. a post to delete): reported as SKIP when there is none. */
+  needs?: (p: Page) => Promise<boolean>;
+};
 const cases: Case[] = [
   {
     name: "menu",
@@ -58,6 +65,7 @@ const cases: Case[] = [
     name: "delete confirmation (cancelled)",
     path: "/community",
     role: "admin",
+    needs: async (p) => (await p.getByRole("button", { name: /Eliminar/ }).count()) > 0,
     open: (p) =>
       p
         .getByRole("button", { name: /Eliminar/ })
@@ -75,6 +83,11 @@ for (const width of [320, 390, 1280]) {
     await page.goto(BASE + c.path, { waitUntil: "load", timeout: 45000 });
     await page.waitForTimeout(1500);
     let problem = "";
+    if (c.needs && !(await c.needs(page))) {
+      console.log(`SKIP @${width} ${c.name} — nothing on the page to open it from`);
+      await ctx.close();
+      continue;
+    }
     try {
       await c.open(page);
       // Radix panels have a role; the community editor is a fixed overlay with a form.
