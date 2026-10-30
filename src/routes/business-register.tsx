@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
+import { CommissionCard } from "@/components/CommissionCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { UserMenu } from "@/components/UserMenu";
@@ -449,6 +450,10 @@ function BusinessRegisterPage() {
                       required
                     />
                   </Field>
+                </div>
+
+                <div className="mt-6">
+                  <CommissionCard />
                 </div>
 
                 <button

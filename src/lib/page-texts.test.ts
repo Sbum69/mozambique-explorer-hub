@@ -20,6 +20,7 @@ describe("ADM-2B page texts exist in PT and EN", () => {
   it("covers every page dictionary", () => {
     expect(dictionaries.map(([n]) => n).sort()).toEqual(
       [
+        "COMMISSION_TXT",
         "CONTENT_TXT",
         "FORGOT_TXT",
         "GAMES_TXT",

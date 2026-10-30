@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Calendar, Edit, Plus, Save, RefreshCw, Image as ImageIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { ContentChecklist } from "@/components/ContentChecklist";
+import { CommissionCard } from "@/components/CommissionCard";
 import { ContentPhotos } from "@/components/ContentPhotos";
 import { fetchReadiness, type ExperienceMissing } from "@/lib/content";
 import { CONTENT_TXT } from "@/lib/page-texts";
@@ -253,6 +254,10 @@ export function BusinessManagement() {
           />
         </div>
       </section>
+      <CommissionCard
+        businessId={business.id}
+        examplePriceMzn={Number(activities.find((a) => Number(a.price_mzn) > 0)?.price_mzn ?? 1000)}
+      />
       <section id="business-ready" className="space-y-3 scroll-mt-24">
         <div className="flex justify-between gap-3 flex-wrap items-center">
           <h2 className="text-xl font-bold">{CONTENT_TXT[lang].readyTitle}</h2>
