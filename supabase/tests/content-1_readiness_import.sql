@@ -4,7 +4,7 @@
 -- O que testa:
 --   * uma experiência só fica ativa sem nada em falta; tirar a última foto de uma ativa é recusado;
 --     preço 0 (gratuita) é aceite;
---   * content_readiness: outro utilizador recusado, admin lê;
+--   * content_readiness: outro utilizador recusado (também em negócios sem dono, 0052), admin lê;
 --   * importação: só admin; anon recusado; simulação com erros por linha e duplicados sem escrever;
 --     importação real cria negócio pendente sem dono e experiência inativa com horários;
 --   * convites: o admin cria; o turista vê o nome, aceita e fica dono (papel de negócio);
