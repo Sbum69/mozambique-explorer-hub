@@ -103,18 +103,22 @@ BEGIN
     r := r || '[ROLE-revoke-other-admin -> ' || coalesce(array_to_string(roles, '+'), '-') || '] ';
   END IF;
 
-  -- ===== Assign owner =====
-  BEGIN PERFORM public.admin_assign_business_owner(ownerless, unconfirmed_email); r := r || '[AS-unconfirmed FAIL] ';
-  EXCEPTION WHEN others THEN r := r || '[AS-unconfirmed PASS ' || SQLERRM || '] '; END;
-  BEGIN PERFORM public.admin_assign_business_owner(ownerless, owner_email); r := r || '[AS-has-business FAIL] ';
-  EXCEPTION WHEN others THEN r := r || '[AS-has-business PASS ' || SQLERRM || '] '; END;
-  res := public.admin_assign_business_owner(ownerless, upper(cust_email));
-  SELECT count(*) INTO n FROM public.notifications WHERE user_id = cust AND title_en = 'Business assigned';
-  r := r || CASE WHEN (SELECT b.owner_id FROM public.businesses b WHERE b.id = ownerless) = cust AND public.has_role(cust, 'business_small')
-                  AND NOT public.has_role(cust, 'tourist') AND n = 1
-             THEN '[AS-ok PASS owner+role+notified] ' ELSE '[AS-ok FAIL ' || res::text || '] ' END;
-  BEGIN PERFORM public.admin_assign_business_owner(ownerless, cust_email); r := r || '[AS-already-owned FAIL] ';
-  EXCEPTION WHEN others THEN r := r || '[AS-already-owned PASS ' || SQLERRM || '] '; END;
+  -- ===== Assign owner (needs an approved business without owner) =====
+  IF ownerless IS NULL OR unconfirmed IS NULL THEN
+    r := r || '[AS-* SKIP no approved business without owner or no unconfirmed account] ';
+  ELSE
+    BEGIN PERFORM public.admin_assign_business_owner(ownerless, unconfirmed_email); r := r || '[AS-unconfirmed FAIL] ';
+    EXCEPTION WHEN others THEN r := r || '[AS-unconfirmed PASS ' || SQLERRM || '] '; END;
+    BEGIN PERFORM public.admin_assign_business_owner(ownerless, owner_email); r := r || '[AS-has-business FAIL] ';
+    EXCEPTION WHEN others THEN r := r || '[AS-has-business PASS ' || SQLERRM || '] '; END;
+    res := public.admin_assign_business_owner(ownerless, upper(cust_email));
+    SELECT count(*) INTO n FROM public.notifications WHERE user_id = cust AND title_en = 'Business assigned';
+    r := r || CASE WHEN (SELECT b.owner_id FROM public.businesses b WHERE b.id = ownerless) = cust AND public.has_role(cust, 'business_small')
+                    AND NOT public.has_role(cust, 'tourist') AND n = 1
+               THEN '[AS-ok PASS owner+role+notified] ' ELSE '[AS-ok FAIL ' || res::text || '] ' END;
+    BEGIN PERFORM public.admin_assign_business_owner(ownerless, cust_email); r := r || '[AS-already-owned FAIL] ';
+    EXCEPTION WHEN others THEN r := r || '[AS-already-owned PASS ' || SQLERRM || '] '; END;
+  END IF;
 
   -- ===== Admin booking cancel and activity toggle through RLS + guard =====
   SET LOCAL ROLE authenticated;
