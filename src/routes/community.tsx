@@ -354,11 +354,11 @@ function CommunityPage() {
             <Loader2 className="size-5 animate-spin" /> {t("communityLoading")}
           </div>
         ) : error ? (
-          <Card className="p-8 text-center text-sm text-red-600 dark:text-red-400 rounded-2xl">
+          <Card className="p-8 text-center text-sm text-red-600 dark:text-red-400 rounded-[10px]">
             {t("communityLoadError")}
           </Card>
         ) : posts.length === 0 ? (
-          <Card className="p-10 text-center rounded-2xl border-dashed">
+          <Card className="p-10 text-center rounded-[10px] border-dashed">
             <MessageSquare className="mx-auto size-10 text-muted-foreground" />
             <p className="mt-3 text-muted-foreground">{t("communityFeedEmpty")}</p>
           </Card>

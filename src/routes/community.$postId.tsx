@@ -126,12 +126,12 @@ function CommunityPostPage() {
             <Loader2 className="size-5 animate-spin" /> {t("communityLoading")}
           </div>
         ) : !post ? (
-          <Card className="p-10 text-center rounded-2xl border-dashed">
+          <Card className="p-10 text-center rounded-[10px] border-dashed">
             <p className="text-muted-foreground">{t("communityFeedEmpty")}</p>
           </Card>
         ) : (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="p-6 rounded-2xl shadow-lg border border-border bg-card">
+            <Card className="p-6 rounded-[10px] shadow-[var(--shadow-soft)] border border-border bg-card">
               <div className="flex flex-wrap items-center gap-2">
                 {post.categoryName && (
                   <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-accent text-accent-foreground">

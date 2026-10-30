@@ -1417,11 +1417,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           <Button variant="outline" onClick={onClose}>
             {lang === "pt" ? "Cancelar" : "Cancel"}
           </Button>
-          <Button
-            onClick={() => void submit()}
-            disabled={saving}
-            className="bg-gradient-to-r from-primary to-orange-700"
-          >
+          <Button onClick={() => void submit()} disabled={saving}>
             {saving && <Loader2 className="size-4 animate-spin mr-2" />}
             {isEdit
               ? lang === "pt"

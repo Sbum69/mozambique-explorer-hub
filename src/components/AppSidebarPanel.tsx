@@ -277,21 +277,17 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
 
         {/* Premium card */}
         {SHOW_PLANS && user && user.role !== "guest" && (
-          <div className="rounded-2xl bg-gradient-to-br from-amber-700 via-orange-700 to-pink-600 text-white p-4 shadow-lg">
+          <div className="rounded-[10px] border border-border bg-card p-4">
             <div className="flex items-center gap-2 mb-2">
               <Crown className="size-5" />
               <p className="font-bold text-sm">{lang === "pt" ? "Plano Básico" : "Free Plan"}</p>
             </div>
-            <p className="text-xs opacity-90 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               {lang === "pt"
                 ? "Roteiros personalizados, sem anúncios e modo offline."
                 : "Custom itineraries, no ads and offline mode."}
             </p>
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-full bg-card text-orange-700 dark:text-orange-300 hover:bg-white/90"
-            >
+            <Button size="sm" variant="secondary" className="w-full">
               {lang === "pt" ? "Ver Planos" : "View Plans"}
             </Button>
           </div>

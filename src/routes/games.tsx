@@ -705,7 +705,7 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`bg-card rounded-2xl border overflow-hidden shadow-sm ${locked ? "border-dashed" : ""}`}
+      className={`bg-card rounded-[10px] border overflow-hidden shadow-sm ${locked ? "border-dashed" : ""}`}
     >
       <div className="capulana-band h-1.5" aria-hidden="true" />
       <div className="p-5">

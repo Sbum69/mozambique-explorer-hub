@@ -207,20 +207,20 @@ function BusinessRegisterPage() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-lg w-full bg-card rounded-3xl shadow-2xl p-10 text-center"
+          className="max-w-lg w-full bg-card rounded-[10px] shadow-[var(--shadow-soft)] p-10 text-center"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
-            className="mx-auto size-24 rounded-full bg-success text-success-foreground flex items-center justify-center shadow-lg"
+            className="mx-auto size-24 rounded-full bg-success text-success-foreground flex items-center justify-center shadow-[var(--shadow-soft)]"
           >
             <Check className="size-12" />
           </motion.div>
           <h1 className="mt-6 text-3xl font-bold">{t.successTitle}</h1>
           <p className="mt-2 text-muted-foreground">{t.successBody}</p>
 
-          <div className="mt-6 flex items-start gap-3 text-left rounded-2xl border border-border bg-accent p-4">
+          <div className="mt-6 flex items-start gap-3 text-left rounded-[10px] border border-border bg-accent p-4">
             <Shield className="size-5 text-primary shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-accent-foreground">{t.pendingTitle}</p>
@@ -230,7 +230,7 @@ function BusinessRegisterPage() {
 
           <button
             onClick={() => navigate({ to: "/business-dashboard", search: { status: "all" } })}
-            className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:opacity-95 transition"
+            className="mt-6 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-soft)] hover:opacity-95 transition"
           >
             {t.goDashboard}
           </button>
@@ -285,7 +285,7 @@ function BusinessRegisterPage() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring" }}
-          className="mx-auto size-20 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-xl"
+          className="mx-auto size-20 rounded-[10px] bg-primary text-primary-foreground flex items-center justify-center shadow-[var(--shadow-soft)]"
         >
           <Store className="size-10" />
         </motion.div>
@@ -300,7 +300,7 @@ function BusinessRegisterPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-lg mx-auto bg-card shadow-xl rounded-3xl p-8 text-center"
+            className="max-w-lg mx-auto bg-card shadow-[var(--shadow-soft)] rounded-[10px] p-8 text-center"
           >
             <h2 className="text-xl font-bold">{t.gateTitle}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{t.gateBody}</p>
@@ -308,7 +308,7 @@ function BusinessRegisterPage() {
               <Link
                 to="/signup"
                 search={RETURN_SEARCH}
-                className="inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:opacity-95 transition"
+                className="inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold shadow-[var(--shadow-soft)] hover:opacity-95 transition"
               >
                 <UserPlus className="size-4" /> {t.createAccount}
               </Link>
@@ -332,14 +332,13 @@ function BusinessRegisterPage() {
                 className="grid md:grid-cols-2 gap-6"
               >
                 <motion.button
-                  whileHover={{ y: -5 }}
                   onClick={() => {
                     setBusinessType("large");
                     setStep(2);
                   }}
-                  className="text-left bg-card shadow-xl rounded-2xl p-8 border-2 border-transparent hover:border-teal-500 transition"
+                  className="text-left bg-card shadow-[var(--shadow-soft)] rounded-[10px] p-8 border-2 border-transparent hover:border-teal-500 transition"
                 >
-                  <div className="size-16 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center">
+                  <div className="size-16 rounded-[10px] bg-primary text-primary-foreground flex items-center justify-center">
                     <Building2 className="size-8" />
                   </div>
                   <h3 className="mt-4 text-xl font-bold">{t.large}</h3>
@@ -350,14 +349,13 @@ function BusinessRegisterPage() {
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ y: -5 }}
                   onClick={() => {
                     setBusinessType("small");
                     setStep(2);
                   }}
-                  className="text-left bg-card shadow-xl rounded-2xl p-8 border-2 border-transparent hover:border-primary transition"
+                  className="text-left bg-card shadow-[var(--shadow-soft)] rounded-[10px] p-8 border-2 border-transparent hover:border-primary transition"
                 >
-                  <div className="size-16 rounded-2xl bg-accent text-accent-foreground flex items-center justify-center">
+                  <div className="size-16 rounded-[10px] bg-accent text-accent-foreground flex items-center justify-center">
                     <ShoppingBag className="size-8" />
                   </div>
                   <h3 className="mt-4 text-xl font-bold">{t.small}</h3>
@@ -376,7 +374,7 @@ function BusinessRegisterPage() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -100, opacity: 0 }}
                 onSubmit={handleSubmit}
-                className="bg-card shadow-xl rounded-3xl p-8"
+                className="bg-card shadow-[var(--shadow-soft)] rounded-[10px] p-8"
               >
                 <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold bg-accent text-accent-foreground">
                   {businessType === "large" ? t.large : t.small}

@@ -77,7 +77,7 @@ export function ReportDialog({
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+        className="bg-card rounded-[10px] shadow-[var(--shadow-soft)] w-full max-w-md overflow-hidden"
       >
         <div className="bg-foreground text-background p-5 flex items-center justify-between">
           <h3 className="font-bold inline-flex items-center gap-2">

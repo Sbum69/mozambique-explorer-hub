@@ -240,7 +240,7 @@ function HomePage() {
                 <Button
                   asChild
                   size="sm"
-                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-lg gap-1.5"
+                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
                 >
                   <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
                 </Button>
@@ -258,7 +258,7 @@ function HomePage() {
                 <Button
                   asChild
                   size="sm"
-                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-lg gap-1.5"
+                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard className="size-4" />
@@ -291,7 +291,7 @@ function HomePage() {
                 : "Pick a destination, your days and the kind of experience you want. We handle the rest."}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="gap-2 shadow-xl">
+              <Button asChild size="lg" className="gap-2 shadow-[var(--shadow-soft)]">
                 <Link to="/dashboard">
                   <LayoutDashboard className="size-5" />
                   {lang === "pt" ? "Abrir o meu Painel" : "Open my Dashboard"}
@@ -420,7 +420,7 @@ function HomePage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <Card className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                 <div className="relative aspect-[16/10]">
                   <img
                     src={routeCover(it)}
@@ -479,7 +479,7 @@ function HomePage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <Card className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                 <div className="relative aspect-[16/10]">
                   <img
                     src={e.image}
@@ -542,7 +542,7 @@ function HomePage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow">
+                <Card className="h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                   <CardContent className="p-5">
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">
                       <Sparkles className="size-3" />
@@ -800,7 +800,7 @@ function PersonalSection({ lang }: { lang: Lang }) {
           {recommendedExperiences.map(({ item, reasons, matchesProvince }) => (
             <Card
               key={item.id}
-              className="overflow-hidden h-full hover:shadow-lg transition-shadow"
+              className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow"
             >
               <div className="relative aspect-[16/10]">
                 <img
@@ -846,7 +846,10 @@ function PersonalSection({ lang }: { lang: Lang }) {
       {!loading && !error && personalised && recommendedDestinations.length > 0 && (
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {recommendedDestinations.map(({ item, reasons }) => (
-            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card
+              key={item.id}
+              className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-shadow"
+            >
               <div className="relative aspect-[16/9]">
                 <img
                   src={item.image}
