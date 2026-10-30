@@ -9,13 +9,9 @@ type Stage = "consent" | "requesting" | "live" | "captured" | "denied";
 interface Props {
   /** Called with the captured photo (data URL) once the user accepts the shot */
   onPhoto: (dataUrl: string | null) => void;
-  accentClass?: string;
 }
 
-export function PhotoChallengeCapture({
-  onPhoto,
-  accentClass = "from-pink-600 to-rose-600",
-}: Props) {
+export function PhotoChallengeCapture({ onPhoto }: Props) {
   const { lang } = useLang();
   const [stage, setStage] = useState<Stage>("consent");
   const [error, setError] = useState<string | null>(null);
@@ -109,10 +105,7 @@ export function PhotoChallengeCapture({
               prova do desafio.
             </p>
           </div>
-          <Button
-            onClick={requestCamera}
-            className={`w-full bg-gradient-to-r ${accentClass} text-white hover:opacity-90`}
-          >
+          <Button onClick={requestCamera} className="w-full">
             <Camera className="size-4" /> Permitir câmara e tirar foto
           </Button>
         </div>
@@ -129,10 +122,7 @@ export function PhotoChallengeCapture({
           <div className="relative rounded-xl overflow-hidden bg-black aspect-[3/4] max-h-64 mx-auto">
             <video ref={videoRef} playsInline muted className="w-full h-full object-cover" />
           </div>
-          <Button
-            onClick={shoot}
-            className={`w-full bg-gradient-to-r ${accentClass} text-white hover:opacity-90`}
-          >
+          <Button onClick={shoot} className="w-full">
             <Camera className="size-4" /> Capturar fotografia
           </Button>
         </div>
@@ -150,7 +140,7 @@ export function PhotoChallengeCapture({
               alt={lang === "pt" ? "Prova fotográfica do desafio" : "Photo proof for the challenge"}
               className="w-full max-h-64 object-cover"
             />
-            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-green-700 text-white text-xs px-2 py-1">
+            <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-success text-success-foreground text-xs px-2 py-1">
               <CheckCircle className="size-3" /> Foto validada
             </span>
           </div>

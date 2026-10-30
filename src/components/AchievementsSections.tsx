@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Gift, Lock, Medal, Gamepad2, AlertCircle } from "lucide-react";
+import { badgeIcon } from "@/lib/badge-icons";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +97,10 @@ export function ChallengesAndBadges() {
                     >
                       <div className="text-2xl" aria-hidden="true">
                         {st.earned ? (
-                          b.emoji
+                          (() => {
+                            const I = badgeIcon(b.id);
+                            return <I className="size-6 mx-auto text-primary" />;
+                          })()
                         ) : (
                           <Lock className="size-6 mx-auto text-muted-foreground" />
                         )}

@@ -195,7 +195,6 @@ export interface BadgeInput {
 }
 export interface BadgeDef {
   id: string;
-  emoji: string;
   name: { pt: string; en: string };
   requirement: { pt: string; en: string };
   progress: (i: BadgeInput) => [number, number];
@@ -205,28 +204,24 @@ const done = (i: BadgeInput, ...keys: string[]) => keys.filter((k) => i.complete
 export const BADGES: BadgeDef[] = [
   {
     id: "s1",
-    emoji: "🏖️",
     name: { pt: "Explorador de Praias", en: "Beach Explorer" },
     requirement: { pt: "Concluir «Rota das Praias»", en: "Complete “Beach Route”" },
     progress: (i) => [done(i, "g3"), 1],
   },
   {
     id: "s2",
-    emoji: "🤝",
     name: { pt: "Amigo da Comunidade", en: "Community Friend" },
     requirement: { pt: "3 atividades reservadas concluídas", en: "3 completed booked activities" },
     progress: (i) => [i.bookingsCompleted, 3],
   },
   {
     id: "s3",
-    emoji: "📜",
     name: { pt: "Historiador", en: "Historian" },
     requirement: { pt: "5 quizzes aprovados", en: "5 passed quizzes" },
     progress: (i) => [i.passedQuizzes, 5],
   },
   {
     id: "s4",
-    emoji: "👑",
     name: { pt: "Ekaya Master", en: "Ekaya Master" },
     requirement: {
       pt: "1 roteiro concluído com todas as provas",
@@ -236,21 +231,18 @@ export const BADGES: BadgeDef[] = [
   },
   {
     id: "s5",
-    emoji: "📸",
     name: { pt: "Fotógrafo Cultural", en: "Cultural Photographer" },
     requirement: { pt: "10 fotos de prova em jogos", en: "10 game proof photos" },
     progress: (i) => [i.photoSteps, 10],
   },
   {
     id: "s6",
-    emoji: "🗺️",
     name: { pt: "Caçador de Tesouros", en: "Treasure Hunter" },
     requirement: { pt: "Concluir uma caça ao tesouro", en: "Complete a treasure hunt" },
     progress: (i) => [Math.min(1, done(i, "g1", "g2", "g3", "g4")), 1],
   },
   {
     id: "s7",
-    emoji: "✍️",
     name: { pt: "Contador de Histórias", en: "Storyteller" },
     requirement: {
       pt: "Concluir «Retrato de Artesão» e «Mercado Vivo»",
@@ -260,7 +252,6 @@ export const BADGES: BadgeDef[] = [
   },
   {
     id: "s8",
-    emoji: "🌅",
     name: { pt: "Madrugador", en: "Early Bird" },
     requirement: { pt: "Concluir «Do Nascer ao Pôr-do-Sol»", en: "Complete “Sunrise to Sunset”" },
     progress: (i) => [done(i, "g17"), 1],

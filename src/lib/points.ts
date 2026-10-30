@@ -41,24 +41,23 @@ export const SOURCE_LABELS: Record<PointsSource, { pt: string; en: string }> = {
 export interface LevelDef {
   level: number;
   minPoints: number;
-  emoji: string;
   name: { pt: string; en: string };
 }
 
 export const LEVELS: LevelDef[] = [
-  { level: 1, minPoints: 0, emoji: "🌱", name: { pt: "Visitante Curioso", en: "Curious Visitor" } },
-  { level: 2, minPoints: 100, emoji: "🧭", name: { pt: "Explorador", en: "Explorer" } },
+  { level: 1, minPoints: 0, name: { pt: "Visitante Curioso", en: "Curious Visitor" } },
+  { level: 2, minPoints: 100, name: { pt: "Explorador", en: "Explorer" } },
   {
     level: 3,
     minPoints: 300,
-    emoji: "🥾",
+
     name: { pt: "Viajante Comunitário", en: "Community Traveller" },
   },
-  { level: 4, minPoints: 700, emoji: "🌍", name: { pt: "Guardião Local", en: "Local Guardian" } },
+  { level: 4, minPoints: 700, name: { pt: "Guardião Local", en: "Local Guardian" } },
   {
     level: 5,
     minPoints: 1500,
-    emoji: "🏆",
+
     name: { pt: "Embaixador Ekaya", en: "Ekaya Ambassador" },
   },
 ];

@@ -25,6 +25,7 @@ import {
   type QuizQuestion,
   type StepResult,
 } from "@/lib/games";
+import { badgeIcon } from "@/lib/badge-icons";
 import {
   ArrowLeft,
   Zap,
@@ -41,6 +42,9 @@ import {
   Heart,
   AlertCircle,
   type LucideIcon,
+  CheckCircle2,
+  Hourglass,
+  Medal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -93,7 +97,6 @@ interface Game {
   title: string;
   description: string;
   category: string;
-  categoryColor: string;
   icon: LucideIcon;
   points: number;
   difficulty: Difficulty;
@@ -108,27 +111,17 @@ interface Game {
 
 const CATEGORIES = [
   { id: "all", label: "Todos", icon: Trophy },
-  { id: "tesouro", label: "Caça ao Tesouro", icon: MapPin, color: "from-amber-700 to-orange-700" },
-  { id: "foto", label: "Fotografia", icon: Camera, color: "from-pink-600 to-rose-600" },
-  { id: "experiencia", label: "Experiências", icon: Heart, color: "from-green-700 to-emerald-700" },
+  { id: "tesouro", label: "Caça ao Tesouro", icon: MapPin },
+  { id: "foto", label: "Fotografia", icon: Camera },
+  { id: "experiencia", label: "Experiências", icon: Heart },
   {
     id: "conhecimento",
     label: "Conhecimento",
     icon: Brain,
-    color: "from-purple-600 to-violet-600",
   },
-  { id: "tempo", label: "Tempo", icon: Clock, color: "from-blue-600 to-cyan-700" },
-  { id: "social", label: "Sociais", icon: Users, color: "from-teal-700 to-green-700" },
+  { id: "tempo", label: "Tempo", icon: Clock },
+  { id: "social", label: "Sociais", icon: Users },
 ];
-
-const COLOR_MAP: Record<string, string> = {
-  tesouro: "from-amber-700 to-orange-700",
-  foto: "from-pink-600 to-rose-600",
-  experiencia: "from-green-700 to-emerald-700",
-  conhecimento: "from-purple-600 to-violet-600",
-  tempo: "from-blue-600 to-cyan-700",
-  social: "from-teal-700 to-green-700",
-};
 
 /** Game texts (title, description, badge, detail) live in the PT/EN dictionary: gameTitle_<id> etc. */
 type GameBase = Omit<Game, "title" | "description" | "badge" | "detail">;
@@ -138,7 +131,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g1",
     category: "tesouro",
-    categoryColor: COLOR_MAP.tesouro,
     icon: MapPin,
     points: 150,
     difficulty: "medium",
@@ -150,7 +142,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g2",
     category: "tesouro",
-    categoryColor: COLOR_MAP.tesouro,
     icon: MapPin,
     points: 200,
     difficulty: "hard",
@@ -162,7 +153,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g3",
     category: "tesouro",
-    categoryColor: COLOR_MAP.tesouro,
     icon: MapPin,
     points: 180,
     difficulty: "medium",
@@ -174,7 +164,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g4",
     category: "tesouro",
-    categoryColor: COLOR_MAP.tesouro,
     icon: MapPin,
     points: 250,
     difficulty: "hard",
@@ -187,7 +176,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g5",
     category: "foto",
-    categoryColor: COLOR_MAP.foto,
     icon: Camera,
     points: 100,
     difficulty: "easy",
@@ -199,7 +187,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g6",
     category: "foto",
-    categoryColor: COLOR_MAP.foto,
     icon: Camera,
     points: 120,
     difficulty: "easy",
@@ -211,7 +198,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g7",
     category: "foto",
-    categoryColor: COLOR_MAP.foto,
     icon: Camera,
     points: 140,
     difficulty: "medium",
@@ -223,7 +209,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g8",
     category: "foto",
-    categoryColor: COLOR_MAP.foto,
     icon: Camera,
     points: 90,
     difficulty: "easy",
@@ -236,7 +221,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g9",
     category: "experiencia",
-    categoryColor: COLOR_MAP.experiencia,
     icon: Heart,
     points: 200,
     difficulty: "medium",
@@ -248,7 +232,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g10",
     category: "experiencia",
-    categoryColor: COLOR_MAP.experiencia,
     icon: Heart,
     points: 130,
     difficulty: "easy",
@@ -260,7 +243,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g11",
     category: "experiencia",
-    categoryColor: COLOR_MAP.experiencia,
     icon: Heart,
     points: 80,
     difficulty: "easy",
@@ -273,7 +255,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g12",
     category: "experiencia",
-    categoryColor: COLOR_MAP.experiencia,
     icon: Heart,
     points: 220,
     difficulty: "hard",
@@ -286,7 +267,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g13",
     category: "conhecimento",
-    categoryColor: COLOR_MAP.conhecimento,
     icon: Brain,
     points: 50,
     difficulty: "medium",
@@ -299,7 +279,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g14",
     category: "conhecimento",
-    categoryColor: COLOR_MAP.conhecimento,
     icon: Brain,
     points: 60,
     difficulty: "easy",
@@ -312,7 +291,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g15",
     category: "conhecimento",
-    categoryColor: COLOR_MAP.conhecimento,
     icon: Brain,
     points: 70,
     difficulty: "hard",
@@ -325,7 +303,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g16",
     category: "tempo",
-    categoryColor: COLOR_MAP.tempo,
     icon: Clock,
     points: 300,
     difficulty: "hard",
@@ -337,7 +314,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g17",
     category: "tempo",
-    categoryColor: COLOR_MAP.tempo,
     icon: Clock,
     points: 160,
     difficulty: "medium",
@@ -349,7 +325,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g18",
     category: "tempo",
-    categoryColor: COLOR_MAP.tempo,
     icon: Clock,
     points: 240,
     difficulty: "hard",
@@ -362,7 +337,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g19",
     category: "social",
-    categoryColor: COLOR_MAP.social,
     icon: Users,
     points: 100,
     difficulty: "easy",
@@ -374,7 +348,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g20",
     category: "social",
-    categoryColor: COLOR_MAP.social,
     icon: Users,
     points: 90,
     difficulty: "easy",
@@ -387,7 +360,6 @@ const INITIAL_GAMES: GameBase[] = [
   {
     id: "g21",
     category: "social",
-    categoryColor: COLOR_MAP.social,
     icon: Users,
     points: 250,
     difficulty: "medium",
@@ -506,7 +478,7 @@ function GamesPage() {
             <span className="sr-only sm:not-sr-only">{pt ? "Voltar" : "Back"}</span>
           </button>
           <h1 className="min-w-0 truncate font-bold text-sm sm:text-base">
-            🎮 {pt ? "Jogos & Desafios" : "Games & Challenges"}
+            {pt ? "Jogos & Desafios" : "Games & Challenges"}
           </h1>
           <div className="flex shrink-0 items-center gap-1">
             <ThemeToggle />
@@ -540,39 +512,40 @@ function GamesPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl bg-gradient-to-br from-primary to-secondary text-primary-foreground p-6 sm:p-8 shadow-xl"
+          className="relative overflow-hidden rounded-[10px] border border-border bg-card p-6 pt-8 sm:p-8 sm:pt-10"
         >
+          <div className="capulana-band absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               {
                 label: pt ? "XP de jogos" : "Game XP",
                 value: q.isLoading ? "…" : xpEarned,
-                icon: "⚡",
+                icon: Zap,
               },
               {
                 label: pt ? "Concluídos" : "Completed",
                 value: q.isLoading ? "…" : completed,
-                icon: "✅",
+                icon: CheckCircle2,
               },
               {
                 label: pt ? "Em progresso" : "In progress",
                 value: q.isLoading ? "…" : inProgress,
-                icon: "⏳",
+                icon: Hourglass,
               },
               {
                 label: pt ? "Selos" : "Badges",
                 value: q.isLoading ? "…" : `${earnedSelos}/${BADGES.length}`,
-                icon: "🏅",
+                icon: Medal,
               },
             ].map((s) => (
-              <div key={s.label} className="rounded-2xl border border-current/25 p-4">
-                <div className="text-2xl">{s.icon}</div>
-                <p className="text-3xl font-bold mt-1">{s.value}</p>
-                <p className="text-xs font-medium">{s.label}</p>
+              <div key={s.label} className="rounded-md border border-border p-4">
+                <s.icon className="size-5 text-primary" aria-hidden="true" />
+                <p className="font-display text-3xl font-bold mt-1 tabular-nums">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs opacity-90 mt-4">
+          <p className="text-xs text-muted-foreground mt-4">
             {pt
               ? "O progresso fica guardado na tua conta. O XP só é atribuído por jogos verificados (quiz corrigido no servidor ou foto de prova)."
               : "Progress is saved to your account. XP is only awarded for verified games (server-scored quiz or proof photo)."}
@@ -588,7 +561,7 @@ function GamesPage() {
                 activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tab === "jogos" ? (pt ? "🎮 Jogos" : "🎮 Games") : pt ? "🏅 Selos" : "🏅 Badges"}
+              {tab === "jogos" ? (pt ? "Jogos" : "Games") : pt ? "Selos" : "Badges"}
               {activeTab === tab && (
                 <motion.div
                   layoutId="tab-indicator"
@@ -644,12 +617,19 @@ function GamesPage() {
             {badges.map(({ b, st }) => (
               <div
                 key={b.id}
-                className={`rounded-2xl p-5 text-center border-2 ${st.earned ? "bg-accent/40 border-primary" : "bg-muted/30 border-muted"}`}
+                className={`rounded-[10px] p-5 text-center border ${st.earned ? "bg-accent border-primary" : "bg-muted/30 border-dashed border-input"}`}
               >
                 <div
-                  className={`mx-auto size-20 rounded-full flex items-center justify-center text-4xl ${st.earned ? "bg-primary/20" : "bg-muted"}`}
+                  className={`mx-auto size-20 rounded-full flex items-center justify-center ${st.earned ? "bg-card text-primary" : "bg-muted"}`}
                 >
-                  {st.earned ? b.emoji : <Lock className="size-7 text-muted-foreground" />}
+                  {st.earned ? (
+                    (() => {
+                      const I = badgeIcon(b.id);
+                      return <I className="size-9" aria-hidden="true" />;
+                    })()
+                  ) : (
+                    <Lock className="size-7 text-muted-foreground" />
+                  )}
                 </div>
                 <h3 className="mt-3 font-bold text-sm">{b.name[lang]}</h3>
                 <p className="text-xs text-muted-foreground mt-1">{b.requirement[lang]}</p>
@@ -725,15 +705,12 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      whileHover={!locked ? { y: -4 } : {}}
       className={`bg-card rounded-2xl border overflow-hidden shadow-sm ${locked ? "border-dashed" : ""}`}
     >
-      <div className={`h-2 bg-gradient-to-r ${game.categoryColor}`} />
+      <div className="capulana-band h-1.5" aria-hidden="true" />
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
-          <div
-            className={`size-12 rounded-xl bg-gradient-to-br ${game.categoryColor} text-white flex items-center justify-center shadow`}
-          >
+          <div className="size-12 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
             <game.icon className="size-5" />
           </div>
           <div className="flex flex-col items-end gap-1">
@@ -764,7 +741,7 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className={`h-full bg-gradient-to-r ${game.categoryColor}`}
+              className="h-full bg-primary"
             />
           </div>
         </div>
@@ -774,10 +751,10 @@ function GameCard({ game, index, onOpen }: { game: Game; index: number; onOpen: 
           disabled={locked}
           className={`w-full mt-4 ${
             completed
-              ? "bg-green-700 text-white hover:bg-green-800"
+              ? "bg-success text-success-foreground hover:bg-success/90"
               : locked
                 ? "bg-muted text-muted-foreground"
-                : `bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90`
+                : ""
           }`}
         >
           {locked ? (
@@ -893,22 +870,22 @@ function GameDetailModal({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-card rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+        className="bg-card rounded-[10px] w-full max-w-lg shadow-[var(--shadow-overlay)] overflow-hidden"
       >
-        <div className={`bg-gradient-to-br ${game.categoryColor} text-white p-6 relative`}>
+        <div className="border-b border-border p-6 relative">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 size-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30"
+            className="absolute top-4 right-4 size-8 rounded-md flex items-center justify-center hover:bg-accent"
           >
             <X className="size-4" />
           </button>
           <div className="flex items-center gap-3 mb-3">
-            <div className="size-12 rounded-xl bg-white/20 flex items-center justify-center">
+            <div className="size-12 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
               <game.icon className="size-6" />
             </div>
             <div>
               <h2 className="text-xl font-bold">{game.title}</h2>
-              <div className="flex items-center gap-1 text-sm opacity-90">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Zap className="size-3" /> {game.points} pts
               </div>
             </div>
@@ -1070,7 +1047,7 @@ function GameDetailModal({
 
               {requiresPhoto && (!isTreasure || selectedStop) && (
                 <>
-                  <PhotoChallengeCapture onPhoto={setPhoto} accentClass={game.categoryColor} />
+                  <PhotoChallengeCapture onPhoto={setPhoto} />
                   <p className="flex gap-2 text-xs text-muted-foreground">
                     <MapPin className="size-4 shrink-0" />
                     {LOCATION_PROMPT_TEXT[lang]}{" "}
@@ -1085,7 +1062,7 @@ function GameDetailModal({
               <Button
                 onClick={handleConfirm}
                 disabled={!!missing || saving}
-                className={`w-full bg-gradient-to-r ${game.categoryColor} text-white hover:opacity-90 disabled:opacity-50`}
+                className="w-full disabled:opacity-50"
               >
                 {missing ??
                   (saving
@@ -1204,11 +1181,11 @@ function QuizModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-card rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden"
+        className="bg-card rounded-[10px] w-full max-w-xl shadow-[var(--shadow-overlay)] overflow-hidden"
         role="dialog"
         aria-label={game.title}
       >
-        <div className="bg-gradient-to-br from-primary to-secondary text-primary-foreground p-5">
+        <div className="bg-primary text-primary-foreground p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Brain className="size-5" />
