@@ -6,13 +6,13 @@ export const SUPPORT_EMAIL = "sheldonesmad@gmail.com";
 
 /**
  * Who runs EKAYA, as shown in the Terms and the Privacy Policy. `nuit: null` = registration in progress;
- * `phone: null` = not published. The responsible person's name is added when it is supplied.
+ * `phone: null` = not published.
  */
 export const LEGAL_ENTITY = {
   name: "EKAYA",
   /** false = the company is still being incorporated (shown as "em constituição"). */
   incorporated: false,
-  responsible: null as string | null,
+  responsible: "Sheldon Jasse" as string | null,
   nuit: null as string | null,
   phone: null as string | null,
 };
