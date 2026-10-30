@@ -37,7 +37,8 @@ CREATE OR REPLACE FUNCTION public.experience_missing(e public.experiences)
  SET search_path TO 'public'
 AS $function$
   SELECT array_remove(ARRAY[
-    CASE WHEN coalesce(e.price_mzn, 0) <= 0 THEN 'price' END,
+    -- Free activities are allowed (price 0, shown as "Grátis"); the price must be set and not negative.
+    CASE WHEN e.price_mzn IS NULL OR e.price_mzn < 0 THEN 'price' END,
     CASE WHEN coalesce(e.capacity, 0) <= 0 THEN 'capacity' END,
     CASE WHEN NOT EXISTS (SELECT 1 FROM public.experience_availability a
                            WHERE a.experience_id = e.id AND a.active AND a.accepts_new_bookings)
@@ -174,12 +175,12 @@ BEGIN
      WHERE code = lower(btrim(coalesce(r ->> 'province', r ->> 'business_province', ''))) AND active;
 
     IF kind = 'business' THEN
-      IF btrim(coalesce(r ->> 'name', '')) = '' THEN errs := errs || 'name'; END IF;
-      IF prov.id IS NULL THEN errs := errs || 'province'; END IF;
+      IF btrim(coalesce(r ->> 'name', '')) = '' THEN errs := array_append(errs, 'name'); END IF;
+      IF prov.id IS NULL THEN errs := array_append(errs, 'province'); END IF;
       SELECT code INTO cat FROM public.business_categories
        WHERE code = lower(btrim(coalesce(r ->> 'category', ''))) AND active;
-      IF cat IS NULL THEN errs := errs || 'category'; END IF;
-      IF coalesce(r ->> 'type', 'small') NOT IN ('small', 'large') THEN errs := errs || 'type'; END IF;
+      IF cat IS NULL THEN errs := array_append(errs, 'category'); END IF;
+      IF coalesce(r ->> 'type', 'small') NOT IN ('small', 'large') THEN errs := array_append(errs, 'type'); END IF;
       IF prov.id IS NOT NULL AND EXISTS (
         SELECT 1 FROM public.businesses b
          WHERE lower(btrim(b.name)) = lower(btrim(r ->> 'name')) AND b.province_id = prov.id) THEN
@@ -214,22 +215,22 @@ BEGIN
            WHERE lower(x ->> 'kind') = 'business'
              AND lower(btrim(x ->> 'name')) = lower(btrim(coalesce(r ->> 'business_name', '')))
              AND lower(btrim(x ->> 'province')) = prov.code)) THEN
-        errs := errs || 'business';
+        errs := array_append(errs, 'business');
       END IF;
-      IF btrim(coalesce(r ->> 'title_pt', '')) = '' THEN errs := errs || 'title_pt'; END IF;
+      IF btrim(coalesce(r ->> 'title_pt', '')) = '' THEN errs := array_append(errs, 'title_pt'); END IF;
       IF coalesce(r ->> 'category', '') NOT IN ('beach', 'culture', 'food', 'nature', 'community', 'adventure') THEN
-        errs := errs || 'category';
+        errs := array_append(errs, 'category');
       END IF;
       BEGIN price := (r ->> 'price_mzn')::numeric; EXCEPTION WHEN OTHERS THEN price := NULL; END;
-      IF price IS NULL OR price < 0 THEN errs := errs || 'price'; END IF;
+      IF price IS NULL OR price < 0 THEN errs := array_append(errs, 'price'); END IF;
       BEGIN cap := (r ->> 'capacity')::int; EXCEPTION WHEN OTHERS THEN cap := NULL; END;
-      IF cap IS NULL OR cap < 1 OR cap > 100 THEN errs := errs || 'capacity'; END IF;
+      IF cap IS NULL OR cap < 1 OR cap > 100 THEN errs := array_append(errs, 'capacity'); END IF;
       BEGIN dur := nullif(r ->> 'duration_hours', '')::numeric; EXCEPTION WHEN OTHERS THEN dur := -1; END;
-      IF dur IS NOT NULL AND dur <= 0 THEN errs := errs || 'duration'; END IF;
+      IF dur IS NOT NULL AND dur <= 0 THEN errs := array_append(errs, 'duration'); END IF;
       dest := NULL;
       IF btrim(coalesce(r ->> 'destination', '')) <> '' THEN
         SELECT id INTO dest FROM public.destinations WHERE slug = btrim(r ->> 'destination');
-        IF dest IS NULL THEN errs := errs || 'destination'; END IF;
+        IF dest IS NULL THEN errs := array_append(errs, 'destination'); END IF;
       END IF;
       -- Optional schedule: days "0-6" or "dom,seg,ter,qua,qui,sex,sab", times HH:MM.
       days := ARRAY[]::text[];
@@ -240,14 +241,14 @@ BEGIN
           t_end := (r ->> 'end_time')::time;
         EXCEPTION WHEN OTHERS THEN t_start := NULL; t_end := NULL;
         END;
-        IF t_start IS NULL OR t_end IS NULL OR t_end <= t_start THEN errs := errs || 'times'; END IF;
+        IF t_start IS NULL OR t_end IS NULL OR t_end <= t_start THEN errs := array_append(errs, 'times'); END IF;
         BEGIN slot_cap := coalesce(nullif(r ->> 'slot_capacity', '')::int, cap);
         EXCEPTION WHEN OTHERS THEN slot_cap := NULL; END;
-        IF slot_cap IS NULL OR slot_cap < 1 OR slot_cap > 100 THEN errs := errs || 'slot_capacity'; END IF;
+        IF slot_cap IS NULL OR slot_cap < 1 OR slot_cap > 100 THEN errs := array_append(errs, 'slot_capacity'); END IF;
         FOREACH d IN ARRAY days LOOP
           IF array_position(ARRAY['dom','seg','ter','qua','qui','sex','sab'], d) IS NULL
              AND d !~ '^[0-6]$' THEN
-            errs := errs || 'days';
+            errs := array_append(errs, 'days');
             EXIT;
           END IF;
         END LOOP;
@@ -277,7 +278,7 @@ BEGIN
       END IF;
 
     ELSE
-      errs := errs || 'kind';
+      errs := array_append(errs, 'kind');
     END IF;
 
     out := out || jsonb_build_object(
@@ -366,7 +367,7 @@ CREATE OR REPLACE FUNCTION public.claim_business_invite(_token text)
  SECURITY DEFINER
  SET search_path TO 'public', 'extensions'
 AS $function$
-DECLARE inv public.business_invites; b public.businesses; me uuid := auth.uid(); owner_role app_role;
+DECLARE inv public.business_invites; b public.businesses; me uuid := auth.uid(); owner_role app_role; saved_claims text;
 BEGIN
   IF me IS NULL THEN RAISE EXCEPTION 'NOT_AUTHENTICATED'; END IF;
   SELECT * INTO inv FROM public.business_invites
@@ -380,7 +381,12 @@ BEGIN
   IF EXISTS (SELECT 1 FROM public.businesses WHERE owner_id = me) THEN RAISE EXCEPTION 'USER_HAS_BUSINESS'; END IF;
   SELECT * INTO b FROM public.businesses WHERE id = inv.business_id FOR UPDATE;
   IF b.owner_id IS NOT NULL THEN RAISE EXCEPTION 'ALREADY_OWNED'; END IF;
+  -- businesses_guard_privileged_fields keeps owner_id for non-admin sessions: after every check
+  -- above, run only this update without the user session (same pattern as 0048), then restore it.
+  saved_claims := current_setting('request.jwt.claims', true);
+  PERFORM set_config('request.jwt.claims', '', true);
   UPDATE public.businesses SET owner_id = me, updated_at = now() WHERE id = b.id;
+  PERFORM set_config('request.jwt.claims', coalesce(saved_claims, ''), true);
   UPDATE public.business_invites SET used_at = now(), used_by = me WHERE id = inv.id;
   owner_role := CASE WHEN b.type = 'large' THEN 'business_large'::app_role ELSE 'business_small'::app_role END;
   INSERT INTO public.user_roles (user_id, role) VALUES (me, owner_role) ON CONFLICT (user_id, role) DO NOTHING;

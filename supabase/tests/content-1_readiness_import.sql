@@ -3,6 +3,7 @@
 -- -------------------------------------------------------------------------------------
 -- O que testa:
 --   * uma experiência só fica ativa sem nada em falta; tirar a última foto de uma ativa é recusado;
+--     preço 0 (gratuita) é aceite;
 --   * content_readiness: outro utilizador recusado, admin lê;
 --   * importação: só admin; anon recusado; simulação com erros por linha e duplicados sem escrever;
 --     importação real cria negócio pendente sem dono e experiência inativa com horários;
@@ -94,6 +95,10 @@ BEGIN
   UPDATE public.experiences SET active = true WHERE id = exp;
   SELECT count(*) INTO n FROM public.experiences WHERE id = exp AND active;
   r := r || CASE WHEN n = 1 THEN ' E-activate-ready:PASS' ELSE ' E-activate-ready:FAIL' END;
+  -- Free activity (price 0) stays publishable.
+  UPDATE public.experiences SET price_mzn = 0 WHERE id = exp;
+  SELECT count(*) INTO n FROM public.experiences WHERE id = exp AND active AND price_mzn = 0;
+  r := r || CASE WHEN n = 1 THEN ' E-free-activity:PASS' ELSE ' E-free-activity:FAIL' END;
   BEGIN
     UPDATE public.experiences SET images = ARRAY[]::text[] WHERE id = exp;
     r := r || ' E-remove-last-photo:FAIL';
