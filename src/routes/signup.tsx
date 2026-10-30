@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +55,7 @@ interface FieldErrors {
   email?: string;
   password?: string;
   confirm?: string;
+  accept?: string;
 }
 
 function SignupPage() {
@@ -70,6 +72,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
@@ -85,6 +88,7 @@ function SignupPage() {
     if (!password) e.password = t.errPassword;
     else if (password.length < 6) e.password = t.errPasswordShort;
     if (confirm !== password) e.confirm = t.errConfirm;
+    if (!accepted) e.accept = t.errAccept;
     return e;
   };
 
@@ -94,7 +98,14 @@ function SignupPage() {
     setErrors(v);
     if (Object.keys(v).length > 0) return;
     setLoading(true);
-    const res = await registerUser({ username, password, displayName, email, returnTo });
+    const res = await registerUser({
+      username,
+      password,
+      displayName,
+      email,
+      returnTo,
+      acceptedLegal: accepted,
+    });
     setLoading(false);
     if (!res.ok) {
       const msg = res.error ?? t.errGeneric;
@@ -239,6 +250,44 @@ function SignupPage() {
                     error={errors.confirm}
                     placeholder={t.confirmPh}
                   />
+
+                  <div className="pt-1">
+                    <div className="flex items-start gap-2.5">
+                      <Checkbox
+                        id="accept-legal"
+                        checked={accepted}
+                        onCheckedChange={(v) => setAccepted(v === true)}
+                        aria-invalid={!!errors.accept}
+                        aria-describedby={errors.accept ? "accept-legal-error" : undefined}
+                        className="mt-0.5"
+                      />
+                      <Label htmlFor="accept-legal" className="text-sm font-normal leading-snug">
+                        {t.acceptPrefix}{" "}
+                        <Link
+                          to="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary font-semibold underline underline-offset-2"
+                        >
+                          {t.acceptTerms}
+                        </Link>{" "}
+                        {t.acceptAnd}{" "}
+                        <Link
+                          to="/privacy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary font-semibold underline underline-offset-2"
+                        >
+                          {t.acceptPrivacy}
+                        </Link>
+                      </Label>
+                    </div>
+                    {errors.accept && (
+                      <p id="accept-legal-error" className="text-destructive text-sm mt-1">
+                        {errors.accept}
+                      </p>
+                    )}
+                  </div>
 
                   <motion.button
                     type="submit"

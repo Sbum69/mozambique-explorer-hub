@@ -14,6 +14,7 @@ import { loadBrandFonts } from "@/lib/brand-fonts";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
+import { LegalAcceptanceGate } from "@/components/LegalAcceptanceGate";
 
 function NotFoundComponent() {
   const { lang } = useLang();
@@ -103,6 +104,7 @@ function RootComponent() {
               <NotificationsProvider>
                 <FavoritesProvider>
                   <Outlet />
+                  <LegalAcceptanceGate />
                   <ThemedToaster />
                 </FavoritesProvider>
               </NotificationsProvider>
