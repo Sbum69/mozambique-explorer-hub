@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { InterestIcon } from "@/components/InterestIcon";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
+import { JoinEkayaCard } from "@/components/JoinEkayaCard";
+import { CONTENT_TXT } from "@/lib/page-texts";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -383,13 +385,7 @@ function ExperiencesPage() {
           </Card>
         )}
 
-        {isEmpty && (
-          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
-            {lang === "pt"
-              ? "Ainda não existem experiências disponíveis."
-              : "No experiences available yet."}
-          </Card>
-        )}
+        {isEmpty && <JoinEkayaCard message={CONTENT_TXT[lang].emptyExperiences} />}
 
         {!loading && !error && !isEmpty && filtered.length === 0 && (
           <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">

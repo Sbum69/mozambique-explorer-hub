@@ -5,6 +5,8 @@ import { ArrowLeft, Store, Search, MapPin, Compass, BadgeCheck, RefreshCw } from
 import { Button } from "@/components/ui/button";
 import { BusinessMark } from "@/components/BusinessMark";
 import { Card } from "@/components/ui/card";
+import { JoinEkayaCard } from "@/components/JoinEkayaCard";
+import { CONTENT_TXT } from "@/lib/page-texts";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -180,10 +182,7 @@ function BusinessesPage() {
             </Button>
           </Card>
         ) : items.length === 0 ? (
-          <Card className="p-8 text-center text-muted-foreground">
-            <Store className="size-10 mx-auto mb-2 opacity-50" />
-            {pt ? "Sem negócios encontrados." : "No businesses found."}
-          </Card>
+          <JoinEkayaCard message={CONTENT_TXT[lang].emptyBusinesses} />
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
