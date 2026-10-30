@@ -20,7 +20,7 @@ BEGIN
    WHERE status = 'approved' AND (owner_id IS NULL OR owner_id <> admin_id) LIMIT 1;
   d := current_date + 7 + ((3 - extract(dow FROM current_date)::int + 7) % 7);  -- a Wednesday, 1–2 weeks ahead
   -- Act as admin for this transaction only.
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
 
   INSERT INTO public.experiences (business_id, title_pt, price_mzn, active)
     VALUES (biz, 'SEG-2 test', 100, true) RETURNING id INTO exp;

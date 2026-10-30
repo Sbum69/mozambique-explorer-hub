@@ -15,7 +15,7 @@ restantes ficheiros de `supabase/tests/`).
 | Segredos no Git            | Nenhum (histórico verificado: JWT, `sk_`, `service_role`, chaves privadas, passwords)                          |
 | XSS                        | Sem HTML vindo de dados; RSS só com links `http(s)`; texto sempre escapado pelo React                          |
 | Redireções                 | `?redirect=` e `return_to` passam pela lista fechada `parseAuthReturn`                                         |
-| Cabeçalhos                 | `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, CSP em modo report-only                     |
+| Cabeçalhos                 | `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, CSP obrigatória (SEG-2)                     |
 
 ## 2. Matriz de RLS (resumo por tabela)
 
@@ -55,6 +55,10 @@ Vista `community_post_authors` (sem `security_invoker`): expõe só `id`, `displ
   `platform_impact_stats`, `news_like_counts`, `event_participant_counts`, `booked_people`.
 - Retirado ao `anon` na 0045: `business_decide_booking`, `can_edit_route`, `owns_experience`,
   `generate_route_code`.
+- SEG-2 — 2FA (TOTP, Supabase Auth MFA): Definições → Segurança ativa/desativa; o pedido do código
+  aparece em qualquer página quando a conta tem 2FA e a sessão é só com palavra-passe. A rota
+  `/admin` exige `aal2` (`requireAdmin`); a 0050 faz o mesmo em `has_role(auth.uid(), 'admin')`
+  (60 políticas e 26 funções). Jobs sem sessão e verificações sobre outros utilizadores não mudam.
 - LEGAL-1 (0049), sem `anon`: `legal_acceptances` só de leitura para o próprio e o admin (sem grants
   de escrita; UPDATE bloqueado por trigger). `accept_legal_documents` só aceita as versões em vigor;
   o trigger `on_auth_user_created_legal` grava a aceitação do registo com a hora do servidor.
@@ -91,7 +95,7 @@ Upload só na pasta do próprio utilizador. Ficheiros servidos por signed URLs.
 
 Definidos em `src/lib/security-headers.ts` (rota raiz):
 
-- `Content-Security-Policy-Report-Only`: `default-src 'self'`; scripts e estilos `'self'` +
+- `Content-Security-Policy` (obrigatória desde o SEG-2): `default-src 'self'`; scripts e estilos `'self'` +
   inline (hidratação e script do tema); imagens da Supabase, dos mosaicos do mapa e do Unsplash;
   ligações à Supabase (https e wss), OSRM, Open-Meteo e Lovable; `frame-ancestors` `'self'` e os
   domínios da Lovable (o editor mostra a app num iframe); `object-src 'none'`.
@@ -114,6 +118,32 @@ depois trocar `Content-Security-Policy-Report-Only` por `Content-Security-Policy
 - Palavras-passe em fugas de dados: a app já trata a recusa da Supabase (proteção ativa).
 - Recomendações (não aplicadas): 2FA (TOTP) obrigatório para administradores; rever os limites de
   tentativas e a duração da sessão nas definições de autenticação da Lovable Cloud.
+
+### 6.1 Como um administrador ativa a verificação em dois passos (2FA)
+
+Texto para enviar a cada administrador. A administração só abre com o código.
+
+1. **Instala uma aplicação autenticadora no telemóvel**, se ainda não tiveres. Qualquer uma destas serve:
+   - Google Authenticator;
+   - Microsoft Authenticator;
+   - Aegis, em Android.
+2. **Entra no EKAYA** com o teu email e palavra-passe, no computador ou no telemóvel.
+3. **Abre as Definições** (menu da conta, no canto superior direito) e vai à secção **Segurança**.
+4. **Carrega em "Ativar verificação em dois passos".** Aparece um código QR.
+5. **Na aplicação autenticadora, escolhe "Adicionar conta" e lê o código QR.**
+   - Se não conseguires lê-lo, escreve a chave que aparece por baixo do QR.
+   - A aplicação passa a mostrar "EKAYA", com um código de 6 dígitos que muda a cada 30 segundos.
+6. **Escreve o código de 6 dígitos no EKAYA e carrega em "Confirmar".** Aparece "Verificação em dois passos ativa".
+7. A partir daí, depois da palavra-passe, o EKAYA pede sempre o código da aplicação.
+
+**Se mudares de telemóvel**, ativa a aplicação no telemóvel novo antes de apagares a antiga.
+
+**Se perderes o telemóvel**, pede a outro administrador para retirar a 2FA da tua conta e volta a ativá-la.
+
+- Hoje isso faz-se no painel da Supabase/Lovable (Authentication → Users → o utilizador → remover o fator).
+- Até haver um botão na administração, este pedido é feito ao responsável técnico.
+
+**Nunca envies o código nem a chave a ninguém.** A equipa do EKAYA nunca os pede.
 
 ## 7. Corrigido no SEG-FINAL
 
@@ -146,7 +176,8 @@ Aplicação:
   entradas são pequenas e quase todas exigem sessão.
 - Ferramentas de desenvolvimento ainda com avisos (`undici`, `ws` 8.18.0, `sharp`, `esbuild`):
   não entram no bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
-- CSP ainda em report-only (ver secção 5).
+- CSP obrigatória: verificada localmente nas 29 páginas da QA (`csp.ts`, 0 violações); confirmar a
+  consola no preview da Lovable e no site publicado (o preview pede sessão: 401).
 - 2FA para administradores (recomendação).
 
 ## 8. Checklist de lançamento

@@ -57,7 +57,7 @@ BEGIN
   END IF;
 
   -- Setup (admin): one experience with a weekly slot.
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   INSERT INTO public.experiences (business_id, title_pt, title_en, price_mzn, active)
     VALUES (biz, 'TESTES-1 notificações', 'TESTES-1 notifications', 100, true) RETURNING id INTO exp;
   INSERT INTO public.experience_availability (experience_id, day_of_week, start_time, end_time, capacity, active, accepts_new_bookings)
@@ -99,7 +99,7 @@ BEGIN
   r := r || CASE WHEN n = 1 THEN '[N-rejected PASS with reason] ' ELSE format('[N-rejected FAIL %s] ', n) END;
 
   -- ---------- Administration cancels -> tourist + owner ----------
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   BEGIN
     UPDATE public.bookings SET status = 'cancelled', decision_reason = 'TESTES-1 admin' WHERE id = b4;
     SELECT count(*) INTO n FROM public.notifications WHERE user_id = tour AND created_at = now() AND title_en = 'Booking cancelled';
@@ -140,7 +140,7 @@ BEGIN
     BEGIN
       PERFORM set_config('request.jwt.claims', '', true);
       INSERT INTO public.businesses (owner_id, name, slug, status) VALUES (applicant, 'TESTES-1 negócio', 'testes-1-negocio', 'pending') RETURNING id INTO nb;
-      PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+      PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
       UPDATE public.businesses SET status = 'approved' WHERE id = nb;
       UPDATE public.businesses SET status = 'suspended', rejection_reason = 'TESTES-1' WHERE id = nb;
       SELECT count(*) INTO n FROM public.notifications WHERE user_id = applicant AND created_at = now() AND title_en IN ('Business approved', 'Business suspended');
@@ -153,7 +153,7 @@ BEGIN
   PERFORM set_config('request.jwt.claims', json_build_object('sub', tour, 'role', 'authenticated')::text, true);
   INSERT INTO public.community_experiences (title_pt, title_en, description_pt, description_en, province_id, category)
     VALUES ('TESTES-1 proposta', 'TESTES-1 proposal', 'Descrição', 'Description', prov, 'food') RETURNING id INTO ce;
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   UPDATE public.community_experiences SET status = 'rejected', rejection_reason = 'TESTES-1' WHERE id = ce;
   SELECT count(*) INTO n FROM public.notifications WHERE user_id = tour AND created_at = now() AND title_en = 'Experience rejected' AND body_en LIKE '%Reason: TESTES-1%';
   r := r || CASE WHEN n = 1 THEN '[N-community-exp PASS] ' ELSE format('[N-community-exp FAIL %s] ', n) END;
@@ -166,7 +166,7 @@ BEGIN
     BEGIN
       PERFORM set_config('request.jwt.claims', '', true);
       UPDATE public.routes SET review_status = 'pending' WHERE id = rt;
-      PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+      PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
       UPDATE public.routes SET review_status = 'rejected', rejection_reason = 'TESTES-1' WHERE id = rt;
       SELECT count(*) INTO n FROM public.notifications n2 JOIN public.routes x ON x.id = rt
        WHERE n2.user_id = x.owner_id AND n2.created_at = now() AND n2.title_en = 'Route rejected';

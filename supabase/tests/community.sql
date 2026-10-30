@@ -72,7 +72,7 @@ BEGIN
   RESET ROLE;
 
   -- Admin hides the second post.
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   SET LOCAL ROLE authenticated;
   UPDATE public.community_posts SET status = 'hidden' WHERE id = p_hid;
   SELECT status INTO st FROM public.community_posts WHERE id = p_hid;
@@ -134,7 +134,7 @@ BEGIN
   END;
   RESET ROLE;
 
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   SET LOCAL ROLE authenticated;
   UPDATE public.community_reports SET status = 'action_taken' WHERE id = rep;
   SELECT status, resolved_by INTO st, who FROM public.community_reports WHERE id = rep;
@@ -199,7 +199,7 @@ BEGIN
   END IF;
 
   -- Admin approves: notification for the author, photo becomes public.
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   SET LOCAL ROLE authenticated;
   UPDATE public.community_experiences SET status = 'approved' WHERE id = ce_pend;
   SELECT status INTO st FROM public.community_experiences WHERE id = ce_pend;

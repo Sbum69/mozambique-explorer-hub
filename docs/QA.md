@@ -60,8 +60,12 @@ a correr na porta 4173:
 6. `guest.ts` (visitante: rotas privadas, menu, diálogo de conta)
 7. `journeys.ts` (turista, negócio e admin, só leitura)
    7a. `legal.ts` (Termos, Privacidade, caixa de aceitação, rodapé legal e pedido de aceitação; não aceita nada)
-8. `shots.ts` (revisão visual)
-9. `lighthouse.ts` (só com nenhum outro servidor ligado)
+   7b. `mfa.ts` (Definições → Segurança e redirecionamento do admin sem 2FA; não ativa nada)
+   7c. `csp.ts` (CSP obrigatória: 0 violações em todas as páginas)
+
+Admin com 2FA: com `TEST_ADMIN_TOTP_SECRET` em `.env.test.local`, `sessionFor("admin")` sobe a
+sessão a `aal2` pela API (código TOTP calculado no script, sem dependências); sem ele, os casos de
+administração dão SKIP. 8. `shots.ts` (revisão visual) 9. `lighthouse.ts` (só com nenhum outro servidor ligado)
 
 Lighthouse: as notas absolutas variam muito com a carga do PC. Para comparar versões, servir as
 duas (por exemplo a `main` numa pasta à parte, na porta 4174) e medir em alternância, com

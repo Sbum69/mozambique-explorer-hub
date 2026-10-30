@@ -97,6 +97,20 @@ export async function requireRole(allowed: AppRole[]) {
   return { user, roles };
 }
 
+/**
+ * Admin pages: the admin role and a two-step (aal2) session. Without the code, go to
+ * Settings → Security (turn 2FA on, or the code prompt asks for it). The database enforces the
+ * same rule in has_role (0050); this guard only decides what to show.
+ */
+export async function requireAdmin() {
+  const result = await requireRole(["admin"]);
+  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (data?.currentLevel !== "aal2") {
+    throw redirect({ to: "/settings", search: { mfa: "required" }, hash: "security" });
+  }
+  return result;
+}
+
 /** Where an authenticated user should land: onboarding first, then the app. */
 export async function postAuthTarget(userId: string): Promise<"/onboarding" | "/home"> {
   return (await hasCompletedOnboarding(userId)) ? "/home" : "/onboarding";

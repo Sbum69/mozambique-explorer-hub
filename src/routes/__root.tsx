@@ -15,6 +15,7 @@ import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
 import { LegalAcceptanceGate } from "@/components/LegalAcceptanceGate";
+import { MfaChallengeGate } from "@/components/MfaChallengeGate";
 
 function NotFoundComponent() {
   const { lang } = useLang();
@@ -105,6 +106,7 @@ function RootComponent() {
                 <FavoritesProvider>
                   <Outlet />
                   <LegalAcceptanceGate />
+                  <MfaChallengeGate />
                   <ThemedToaster />
                 </FavoritesProvider>
               </NotificationsProvider>

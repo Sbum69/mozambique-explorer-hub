@@ -157,9 +157,10 @@ Se um pedido disser "só AUDIT", não alterar código.
 - Formatar com Prettier (`bunx prettier --write <ficheiros>`) apenas os ficheiros alterados —
   `bun run format` reformata o repositório inteiro. Se um ficheiro tocado não estava formatado na
   `main`, fazer primeiro um commit só de formatação, para o diff real se ler bem.
-- **Segurança**: cabeçalhos em `src/lib/security-headers.ts` (CSP em report-only; qualquer origem
-  nova usada pelo browser entra em `CSP_SOURCES`); links externos com `rel="noopener noreferrer"`;
-  o visitante (`anon`) não tem grants de escrita — tabelas novas não lhos devem dar. Ver
+- **Segurança**: cabeçalhos em `src/lib/security-headers.ts` (CSP obrigatória desde o SEG-2; qualquer
+  origem nova usada pelo browser entra em `CSP_SOURCES` e passa no `scripts/qa/csp.ts`); links externos com `rel="noopener noreferrer"`;
+  o visitante (`anon`) não tem grants de escrita — tabelas novas não lhos devem dar. Os poderes de
+  administrador exigem 2FA (sessão `aal2`): `requireAdmin` na rota e `has_role` na BD (0050). Ver
   `docs/SECURITY.md`.
 - **Tema e acessibilidade**: só tokens (`bg-card`, `text-foreground`, `text-muted-foreground`,
   `border-border`, `primary`…), nunca `bg-white`/cinzentos fixos; contraste AA (texto 4,5:1, ícones
