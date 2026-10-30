@@ -55,6 +55,9 @@ Vista `community_post_authors` (sem `security_invoker`): expõe só `id`, `displ
   `platform_impact_stats`, `news_like_counts`, `event_participant_counts`, `booked_people`.
 - Retirado ao `anon` na 0045: `business_decide_booking`, `can_edit_route`, `owns_experience`,
   `generate_route_code`.
+- LEGAL-1 (0049), sem `anon`: `legal_acceptances` só de leitura para o próprio e o admin (sem grants
+  de escrita; UPDATE bloqueado por trigger). `accept_legal_documents` só aceita as versões em vigor;
+  o trigger `on_auth_user_created_legal` grava a aceitação do registo com a hora do servidor.
 - Pré-lançamento (0046–0048), todas sem `anon`:
   - `delete_my_account(_confirm)`: o próprio, com a palavra de confirmação; recusa o último admin e
     reservas futuras; sem registos apaga o utilizador (cascata), com registos anonimiza (reservas sem

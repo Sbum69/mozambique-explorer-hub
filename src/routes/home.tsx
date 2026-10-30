@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { interestIcon } from "@/lib/interest-icons";
 import { BrandMark } from "@/components/BrandMark";
 import { PhotoCredit } from "@/components/PhotoCredit";
+import { LegalFooterLinks } from "@/components/LegalFooterLinks";
 import { PHOTOS_TXT } from "@/lib/page-texts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -681,6 +682,12 @@ function HomePage() {
           </CardContent>
         </Card>
       </section>
+
+      <footer className="border-t border-border">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <LegalFooterLinks />
+        </div>
+      </footer>
 
       {onboardingMounted && (
         <Suspense fallback={null}>

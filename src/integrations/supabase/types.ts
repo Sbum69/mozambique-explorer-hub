@@ -1164,6 +1164,33 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          document: string
+          id: string
+          source: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          document: string
+          id?: string
+          source: string
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          document?: string
+          id?: string
+          source?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
       news_likes: {
         Row: {
           created_at: string
@@ -1991,6 +2018,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_legal_documents: {
+        Args: { _privacy_version: string; _terms_version: string }
+        Returns: undefined
+      }
       admin_platform_summary: { Args: never; Returns: Json }
       admin_set_internal: {
         Args: { _internal: boolean; _user_id: string }
@@ -2078,6 +2109,7 @@ export type Database = {
       can_edit_route: { Args: { _route_id: string }; Returns: boolean }
       can_view_route: { Args: { _route_id: string }; Returns: boolean }
       cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
+      current_legal_versions: { Args: never; Returns: Json }
       commercial_activity_public: {
         Args: { _business_id: string }
         Returns: boolean

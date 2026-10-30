@@ -1,4 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+
+import { LegalFooterLinks } from "@/components/LegalFooterLinks";
 import {
   X,
   Home,
@@ -325,6 +327,7 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
           )}
         </div>
       )}
+      <LegalFooterLinks className="border-t px-4 py-3" onNavigate={close} />
     </>
   );
 }

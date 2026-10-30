@@ -344,6 +344,13 @@
       "when": 1793800000000,
       "tag": "0048_delete_account_anonymise_bookings",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1793900000000,
+      "tag": "0049_legal_acceptances",
+      "breakpoints": true
     }
   ]
 }

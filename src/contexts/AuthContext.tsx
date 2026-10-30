@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { parseAuthReturn, type AppRole, type AuthReturnPath } from "@/lib/auth";
 import { getAuthCallbackUrl } from "@/lib/app-url";
+import { LEGAL_VERSIONS } from "@/lib/legal/versions";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 
@@ -54,6 +55,8 @@ interface AuthContextValue {
     email: string;
     /** Allow-listed page to open after the email is confirmed (kept in the account metadata). */
     returnTo?: AuthReturnPath;
+    /** The person ticked the Terms/Privacy box; the server records it with the versions in force. */
+    acceptedLegal: boolean;
   }) => Promise<{ ok: boolean; error?: string; needsConfirmation?: boolean }>;
 
   isGuest: boolean;
@@ -322,6 +325,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     displayName,
     email,
     returnTo,
+    acceptedLegal,
   }) => {
     const key = username.trim().toLowerCase();
     if (!key)
@@ -343,6 +347,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           display_name: displayName.trim(),
           username: key,
           ...(parseAuthReturn(returnTo) ? { return_to: returnTo } : {}),
+          ...(acceptedLegal
+            ? { terms_version: LEGAL_VERSIONS.terms, privacy_version: LEGAL_VERSIONS.privacy }
+            : {}),
         },
       },
     });
