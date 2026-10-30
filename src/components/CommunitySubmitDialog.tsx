@@ -3,6 +3,7 @@ import { Loader2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { InterestIcon } from "@/components/InterestIcon";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -226,7 +227,7 @@ export function CommunitySubmitDialog({
           >
             {COMMUNITY_CATEGORIES.filter((c) => c.id !== "all").map((c) => (
               <option key={c.id} value={c.id}>
-                {c.emoji} {c.label[lang]}
+                <InterestIcon id={c.id} /> {c.label[lang]}
               </option>
             ))}
           </select>
@@ -274,8 +275,8 @@ export function CommunitySubmitDialog({
                 : "Uploading..."
               : form.imagePath
                 ? pt
-                  ? "Fotografia anexada ✓ (clica para trocar)"
-                  : "Photo attached ✓ (click to replace)"
+                  ? "Fotografia anexada (clica para trocar)"
+                  : "Photo attached (click to replace)"
                 : pt
                   ? "Anexar fotografia real (máx. 5 MB)"
                   : "Attach a real photo (max 5 MB)"}

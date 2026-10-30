@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InterestIcon } from "@/components/InterestIcon";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { PHOTOS_TXT } from "@/lib/page-texts";
 import { Card } from "@/components/ui/card";
@@ -354,8 +355,7 @@ function ItinerariesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: Math.min(idx * 0.06, 0.4), duration: 0.4 }}
-        whileHover={{ y: -10 }}
-        className="transition-shadow hover:shadow-2xl rounded-xl"
+        className="rounded-[10px]"
       >
         <Card className="overflow-hidden h-full flex flex-col">
           <div className="relative h-48 overflow-hidden bg-muted">
@@ -378,12 +378,12 @@ function ItinerariesPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
               {route.isCurated && (
-                <Badge className="bg-gradient-to-r from-primary to-orange-700 text-white border-0 gap-1">
+                <Badge className="bg-primary text-primary-foreground border-0 gap-1">
                   <ShieldCheck className="size-3" /> {lang === "pt" ? "Oficial" : "Official"}
                 </Badge>
               )}
               {isMine(route) && (
-                <Badge className="bg-emerald-700 text-white border-0">
+                <Badge className="bg-secondary text-secondary-foreground border-0">
                   {lang === "pt" ? "Meu" : "Mine"}
                 </Badge>
               )}
@@ -528,7 +528,7 @@ function ItinerariesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="min-h-screen bg-background">
       {confirmDialog}
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -582,7 +582,7 @@ function ItinerariesPage() {
                   return;
                 setShowCreateModal(true);
               }}
-              className="gap-2 bg-gradient-to-r from-primary to-orange-700"
+              className="gap-2"
             >
               <Plus className="h-4 w-4" />
               {lang === "pt" ? "Criar Roteiro" : "Create Itinerary"}
@@ -696,7 +696,7 @@ function ItinerariesPage() {
                     aria-pressed={interestFilter === i}
                     onClick={() => setInterestFilter(i)}
                   >
-                    <span aria-hidden>{m.emoji}</span> {m.label[lang]}
+                    <InterestIcon id={i} /> {m.label[lang]}
                   </Button>
                 );
               })}
@@ -808,12 +808,7 @@ function ItinerariesPage() {
                   </p>
                   {preview.interests.length > 0 && (
                     <p className="text-xs">
-                      {preview.interests
-                        .map(
-                          (i) =>
-                            `${routeInterestMeta(i).emoji} ${routeInterestMeta(i).label[lang]}`,
-                        )
-                        .join(" · ")}
+                      {preview.interests.map((i) => routeInterestMeta(i).label[lang]).join(" · ")}
                     </p>
                   )}
                 </Card>
@@ -1186,7 +1181,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                     setInterests((cur) => (on ? cur.filter((x) => x !== i) : [...cur, i]))
                   }
                 >
-                  {m.emoji} {m.label[lang]}
+                  <InterestIcon id={i} /> {m.label[lang]}
                 </Button>
               );
             })}
@@ -1281,21 +1276,22 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
                   .filter((d) => !provinceCode || d.province === provinceCode)
                   .map((d) => (
                     <SelectItem key={d.id} value={`destination::${d.id}`}>
-                      📍 {d.name}
+                      <MapPin className="size-4 shrink-0" aria-hidden="true" /> {d.name}
                     </SelectItem>
                   ))}
                 {experiences
                   .filter((e) => !provinceCode || e.province === provinceCode)
                   .map((e) => (
                     <SelectItem key={e.id} value={`experience::${e.id}`}>
-                      🏪 {lang === "pt" ? e.title.pt : e.title.en}
+                      <Store className="size-4 shrink-0" aria-hidden="true" />{" "}
+                      {lang === "pt" ? e.title.pt : e.title.en}
                     </SelectItem>
                   ))}
                 {community
                   .filter((c) => provinceId === "none" || c.provinceId === provinceId)
                   .map((c) => (
                     <SelectItem key={c.id} value={`community::${c.id}`}>
-                      👥 {c.title[lang]}
+                      <Users className="size-4 shrink-0" aria-hidden="true" /> {c.title[lang]}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -1421,11 +1417,7 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           <Button variant="outline" onClick={onClose}>
             {lang === "pt" ? "Cancelar" : "Cancel"}
           </Button>
-          <Button
-            onClick={() => void submit()}
-            disabled={saving}
-            className="bg-gradient-to-r from-primary to-orange-700"
-          >
+          <Button onClick={() => void submit()} disabled={saving}>
             {saving && <Loader2 className="size-4 animate-spin mr-2" />}
             {isEdit
               ? lang === "pt"

@@ -200,7 +200,15 @@ export function TimeOfDayTask({
               moment === m ? "border-primary bg-primary/5" : "bg-background hover:bg-muted/60"
             } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
           >
-            {m === "sunrise" ? `🌅 ${t.sunrise}` : `🌇 ${t.sunset}`}
+            {m === "sunrise" ? (
+              <>
+                <Sunrise className="size-4" aria-hidden="true" /> {t.sunrise}
+              </>
+            ) : (
+              <>
+                <Sunset className="size-4" aria-hidden="true" /> {t.sunset}
+              </>
+            )}
           </button>
         ))}
       </div>

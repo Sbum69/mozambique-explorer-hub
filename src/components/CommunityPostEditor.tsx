@@ -93,13 +93,13 @@ export function PostEditor({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-card rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden my-8"
+        className="bg-card rounded-[10px] shadow-[var(--shadow-overlay)] w-full max-w-lg overflow-hidden my-8"
       >
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-5 flex items-center justify-between">
+        <div className="border-b border-border p-5 flex items-center justify-between">
           <h3 className="font-bold">{post ? t("communityEditPost") : t("communityNewPost")}</h3>
           <button
             onClick={onClose}
-            className="size-8 rounded-full hover:bg-white/20 flex items-center justify-center"
+            className="size-8 rounded-md hover:bg-accent flex items-center justify-center"
           >
             <X className="size-4" />
           </button>
@@ -166,11 +166,7 @@ export function PostEditor({
           <Button variant="ghost" onClick={onClose}>
             {t("cancel")}
           </Button>
-          <Button
-            onClick={() => void submit()}
-            disabled={saving}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-          >
+          <Button onClick={() => void submit()} disabled={saving} className="">
             {saving ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : (

@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { MapPin, Gift } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
+import { InterestIcon } from "@/components/InterestIcon";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { PhotoCredit } from "@/components/PhotoCredit";
@@ -60,11 +61,9 @@ export function CommunityImage({
   }
   const cat = categoryMeta(item.category);
   return (
-    <div
-      className={`bg-gradient-to-br from-primary/15 via-accent/30 to-secondary/40 flex flex-col items-center justify-center gap-1 ${className}`}
-    >
+    <div className={`bg-muted flex flex-col items-center justify-center gap-1 ${className}`}>
       <span className="text-3xl" aria-hidden>
-        {cat.emoji}
+        <InterestIcon id={item.category} className="size-8 text-muted-foreground" />
       </span>
       <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
         {item.provinceName[lang]}
@@ -88,7 +87,7 @@ export function CommunityExperienceCard({
         <div className="relative aspect-[16/10]">
           <CommunityImage item={item} className="size-full" />
           <Badge variant="secondary" className="absolute top-3 left-3">
-            {cat.emoji} {cat.label[lang]}
+            <InterestIcon id={item.category} /> {cat.label[lang]}
           </Badge>
           <Badge className="absolute top-3 right-3 gap-1">
             <Gift className="size-3" />

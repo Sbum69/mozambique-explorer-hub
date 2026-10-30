@@ -4,6 +4,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { getAdminSummary } from "@/lib/dashboard.functions";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { InterestIcon } from "@/components/InterestIcon";
 import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -150,17 +151,17 @@ const localeOf = (lang: Lang) => (lang === "pt" ? "pt-PT" : "en-GB");
 /* ---------- Shared presentation (theme tokens; status chips always carry text, not only colour) ---------- */
 
 const TONE = {
-  success: "bg-green-100 text-green-800 dark:bg-green-950/60 dark:text-green-300",
-  warning: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
-  danger: "bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300",
-  info: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300",
+  success: "bg-success/15 text-success",
+  warning: "bg-warning/30 text-foreground",
+  danger: "bg-destructive/15 text-destructive",
+  info: "bg-accent text-accent-foreground",
   neutral: "bg-muted text-muted-foreground",
 } as const;
 
 const TONE_TEXT = {
-  success: "text-green-700 dark:text-green-400",
-  warning: "text-amber-700 dark:text-amber-400 font-semibold",
-  danger: "text-red-700 dark:text-red-400",
+  success: "text-success",
+  warning: "text-foreground font-semibold",
+  danger: "text-destructive",
 } as const;
 
 const CHIP = "text-xs px-2 py-0.5 rounded-full font-semibold";
@@ -168,18 +169,12 @@ const CHIP = "text-xs px-2 py-0.5 rounded-full font-semibold";
 const FIELD_BASE =
   "rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 const FIELD = `${FIELD_BASE} w-full`;
-/** Approve / reject colours: white text ≥ 4.5:1 (green-700 4.9, red-700 6.4, red-600 4.8 in dark) and a
- *  button edge ≥ 3:1 against the dark card. The label always says the action, not only the colour. */
-const APPROVE_BTN = "bg-green-700 text-white hover:bg-green-800 focus-visible:ring-green-700";
+/** Approve / reject: mangrove and capulana red from the theme (AA in both themes). The label always
+ *  says the action, not only the colour. */
+const APPROVE_BTN =
+  "bg-success text-success-foreground hover:bg-success/90 focus-visible:ring-ring";
 const REJECT_BTN =
-  "bg-red-700 text-white hover:bg-red-800 focus-visible:ring-red-700 dark:bg-red-600 dark:hover:bg-red-700";
-
-const ROLE_COLOR: Record<PlatformRole, string> = {
-  tourist: "bg-blue-700",
-  business_small: "bg-green-700",
-  business_large: "bg-purple-700",
-  admin: "bg-gray-800",
-};
+  "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-ring";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -237,7 +232,7 @@ function AdminPage() {
       <header className="border-b bg-card text-card-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="size-10 sm:size-12 shrink-0 rounded-xl bg-gradient-to-br from-orange-600 to-blue-700 text-white flex items-center justify-center shadow-lg">
+            <div className="size-10 sm:size-12 shrink-0 rounded-xl bg-accent text-accent-foreground flex items-center justify-center shadow-[var(--shadow-soft)]">
               <Shield className="size-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
@@ -409,7 +404,6 @@ function AdminPage() {
 function ModalShell({
   title,
   subtitle,
-  headerGradient,
   onClose,
   children,
   maxWidth = "max-w-3xl",
@@ -417,7 +411,6 @@ function ModalShell({
 }: {
   title: string;
   subtitle?: React.ReactNode;
-  headerGradient: string;
   onClose: () => void;
   children: React.ReactNode;
   maxWidth?: string;
@@ -434,25 +427,22 @@ function ModalShell({
       <DialogPortal>
         <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
         <DialogPrimitive.Content
-          className={`fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] ${maxWidth} max-h-[90vh] rounded-3xl border border-border shadow-2xl overflow-hidden bg-card text-card-foreground flex flex-col focus:outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95`}
+          className={`fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] ${maxWidth} max-h-[90vh] rounded-[10px] border border-border shadow-[var(--shadow-overlay)] overflow-hidden bg-card text-card-foreground flex flex-col focus:outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95`}
         >
-          {/* White text on -700 brand shades keeps ≥ 4.5:1 in both themes. */}
-          <div
-            className={`bg-gradient-to-r ${headerGradient} text-white p-5 flex items-center justify-between gap-4`}
-          >
+          <div className="border-b border-border p-5 flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <DialogPrimitive.Title className="text-lg font-bold break-words">
                 {title}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description
-                className={subtitle ? "text-sm text-white/90" : "sr-only"}
+                className={subtitle ? "text-sm text-muted-foreground" : "sr-only"}
               >
                 {subtitle ?? title}
               </DialogPrimitive.Description>
             </div>
             <DialogPrimitive.Close
               aria-label={lang === "pt" ? "Fechar" : "Close"}
-              className="size-9 rounded-full bg-white/15 hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white flex items-center justify-center shrink-0"
+              className="size-9 rounded-md hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring flex items-center justify-center shrink-0"
             >
               <X className="size-5" />
             </DialogPrimitive.Close>
@@ -556,7 +546,6 @@ function ProvincesModal({ onClose }: { onClose: () => void }) {
 
   return (
     <ModalShell
-      headerGradient="from-orange-700 to-orange-800"
       onClose={onClose}
       title={t.title}
       subtitle={t.subtitle}
@@ -704,7 +693,6 @@ function UsersModal({ onClose }: { onClose: () => void }) {
 
   return (
     <ModalShell
-      headerGradient="from-blue-700 to-purple-700"
       onClose={onClose}
       title={t.title}
       footer={
@@ -761,7 +749,7 @@ function UsersModal({ onClose }: { onClose: () => void }) {
               className="flex flex-wrap items-center gap-3 rounded-xl border border-border p-3 hover:bg-muted/50"
             >
               <span
-                className={`size-10 rounded-full ${ROLE_COLOR[u.primaryRole]} text-white font-bold flex items-center justify-center shrink-0`}
+                className="size-10 rounded-full bg-accent text-accent-foreground font-bold flex items-center justify-center shrink-0"
                 aria-hidden="true"
               >
                 {u.displayName.charAt(0).toUpperCase()}
@@ -852,11 +840,7 @@ function ReportsModal({ onClose }: { onClose: () => void }) {
     staleTime: 30_000,
   });
   return (
-    <ModalShell
-      headerGradient="from-purple-700 to-pink-700"
-      onClose={onClose}
-      title={pt ? "Resumo da plataforma" : "Platform summary"}
-    >
+    <ModalShell onClose={onClose} title={pt ? "Resumo da plataforma" : "Platform summary"}>
       {isPending && (
         <p aria-busy="true" className="text-sm text-muted-foreground">
           {pt ? "A carregar…" : "Loading…"}
@@ -1049,7 +1033,6 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
     <ModalShell
       title={t.title}
       subtitle={t.count(routes.length)}
-      headerGradient="from-indigo-700 to-blue-700"
       onClose={onClose}
       maxWidth="max-w-4xl"
     >
@@ -1121,16 +1104,20 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
               className={`${FIELD_BASE} flex-1 min-w-[220px]`}
             >
               <option value="">{t.pickStop}</option>
-              {destinations.map((d) => (
-                <option key={d.id} value={`destination::${d.id}`}>
-                  📍 {d.name}
-                </option>
-              ))}
-              {experiences.map((e) => (
-                <option key={e.id} value={`experience::${e.id}`}>
-                  🏪 {e.title[lang]}
-                </option>
-              ))}
+              <optgroup label={t.groupDestinations}>
+                {destinations.map((d) => (
+                  <option key={d.id} value={`destination::${d.id}`}>
+                    {d.name}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label={t.groupExperiences}>
+                {experiences.map((e) => (
+                  <option key={e.id} value={`experience::${e.id}`}>
+                    {e.title[lang]}
+                  </option>
+                ))}
+              </optgroup>
             </select>
             <Button size="sm" onClick={addStop}>
               {t.addStop}
@@ -1185,7 +1172,12 @@ function RoutesModal({ onClose }: { onClose: () => void }) {
                     >
                       <span className="text-xs text-muted-foreground">#{stopIndex + 1}</span>
                       <span className="flex-1">
-                        {stop.kind === "experience" ? "🏪" : "📍"} {stop.title}
+                        {stop.kind === "experience" ? (
+                          <Store className="inline size-4 mr-1" aria-hidden="true" />
+                        ) : (
+                          <MapPin className="inline size-4 mr-1" aria-hidden="true" />
+                        )}
+                        {stop.title}
                       </span>
                       <button
                         type="button"
@@ -1476,7 +1468,6 @@ function CommunityModerationModal({ onClose }: { onClose: () => void }) {
 
   return (
     <ModalShell
-      headerGradient="from-pink-700 to-purple-700"
       onClose={onClose}
       maxWidth="max-w-4xl"
       title={t.title}
@@ -1628,7 +1619,6 @@ function CommunityReportsModal({ onClose }: { onClose: () => void }) {
 
   return (
     <ModalShell
-      headerGradient="from-red-700 to-orange-700"
       onClose={onClose}
       maxWidth="max-w-3xl"
       title={t.title}
@@ -1906,14 +1896,13 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
   return (
     <ModalShell
       onClose={onClose}
-      headerGradient="from-emerald-700 to-teal-700"
       maxWidth="max-w-4xl"
       title={t.title}
       subtitle={t.subtitle(items.length)}
     >
       {confirmDialog}
       <div className="space-y-5">
-        <div className="rounded-2xl border border-border p-4 space-y-3 bg-muted/40">
+        <div className="rounded-[10px] border border-border p-4 space-y-3 bg-muted/40">
           <p className="font-semibold">{editingId ? t.edit : t.add}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             <input
@@ -1967,7 +1956,7 @@ function CommunityExperiencesModal({ onClose }: { onClose: () => void }) {
             >
               {COMMUNITY_CATEGORIES.filter((c) => c.id !== "all").map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.emoji} {c.label[lang]}
+                  <InterestIcon id={c.id} /> {c.label[lang]}
                 </option>
               ))}
             </select>

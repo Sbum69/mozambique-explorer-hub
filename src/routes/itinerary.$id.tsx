@@ -399,7 +399,7 @@ function ItineraryDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen bg-background">
       {confirmDialog}
       {/* Hero */}
       <div className="relative h-96 overflow-hidden bg-muted">
@@ -460,9 +460,7 @@ function ItineraryDetailPage() {
             )}
             {route.interests.length > 0 && (
               <p className="text-sm text-white/90 mb-2">
-                {route.interests
-                  .map((i) => `${routeInterestMeta(i).emoji} ${routeInterestMeta(i).label[lang]}`)
-                  .join(" · ")}
+                {route.interests.map((i) => routeInterestMeta(i).label[lang]).join(" · ")}
                 {route.intensity
                   ? ` · ${lang === "pt" ? { low: "Leve", medium: "Moderada", high: "Exigente" }[route.intensity] : { low: "Low", medium: "Medium", high: "High" }[route.intensity]}`
                   : ""}
@@ -611,8 +609,10 @@ function ItineraryDetailPage() {
                         <div className="flex items-start gap-4">
                           <div
                             className={`w-12 h-12 rounded-full ${
-                              stop.kind === "experience" ? "bg-blue-500" : "bg-purple-500"
-                            } text-white flex items-center justify-center shrink-0 font-bold`}
+                              stop.kind === "experience"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-secondary-foreground"
+                            } flex items-center justify-center shrink-0 font-bold`}
                           >
                             {index + 1}
                           </div>
@@ -814,7 +814,7 @@ function ItineraryDetailPage() {
                 )}
 
                 {progress?.status === "completed" && (
-                  <Badge className="mb-3 bg-green-700 text-white">
+                  <Badge className="mb-3 bg-success text-success-foreground">
                     {lang === "pt" ? "Rota concluída" : "Route completed"}
                   </Badge>
                 )}
@@ -823,7 +823,7 @@ function ItineraryDetailPage() {
                   <Button
                     onClick={() => void start()}
                     disabled={busy || progressLoading || progressError || stops.length === 0}
-                    className="w-full mb-2 bg-gradient-to-r from-primary to-orange-700 gap-2"
+                    className="w-full mb-2 gap-2"
                   >
                     {busy ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

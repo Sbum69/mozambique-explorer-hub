@@ -175,7 +175,7 @@ function BookingsPage() {
     `${n} ${n > 1 ? (pt ? "participantes" : "participants") : pt ? "participante" : "participant"}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -261,7 +261,7 @@ function BookingsPage() {
             </p>
             {bookings.length === 0 && (
               <Button
-                className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0"
+                className="bg-primary text-primary-foreground border-0"
                 onClick={() => navigate({ to: "/experiences" })}
               >
                 {pt ? "Ver experiências" : "Browse experiences"}

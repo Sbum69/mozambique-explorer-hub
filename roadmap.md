@@ -1,11 +1,13 @@
-# Estado atual do projeto EKAYA (atualizado a 29/10/2026)
+# Estado atual do projeto EKAYA (atualizado a 30/10/2026)
 
 Resumo: a parte funcional está completa, com tema claro/escuro e PT/EN em toda a app (incluindo o
 conteúdo da base de dados), testes de unidade, de BD e de browser guardados no repositório, CI no
 GitHub, desempenho em telemóvel melhorado e auditoria de segurança feita. A app **não** está
-publicada. Migrações aplicadas e registadas: 0000–0045 (46 registos).
+publicada. Migrações aplicadas e registadas: 0000–0048 (49 registos). Identidade visual própria
+("Capulana e Índico", `docs/DESIGN.md`), fotografias livres com crédito e contas de teste fora das
+métricas.
 
-## Concluído (22–29/10)
+## Concluído (22–30/10)
 - [x] 2B — Correções de frontend (sem alterações à base de dados) + CLAUDE.md + auditoria
 - [x] Migração do backend (`backend-migration`) juntada à `main`
 - [x] SEG-1 — Registo de negócio só para contas autenticadas
@@ -25,9 +27,21 @@ publicada. Migrações aplicadas e registadas: 0000–0045 (46 registos).
 - [x] TESTES-1 — Bloco 11 testado: Vitest da comunidade e notificações (165 → 290 testes no total), 11 ficheiros de testes de BD em `supabase/tests/`, scripts de browser em `scripts/qa/`, `docs/QA.md`
 - [x] I18N-2 — Conteúdo em EN: roteiros de catálogo (0043), localizações das experiências comunitárias (0044, `location_en`), dados estáticos, diálogo dos jogos; histórias legadas escondidas e dados inventados removidos
 - [x] PERF-3 — Mapa 63 → 81 (LCP 7,1 → 3,8 s; lista no servidor, Leaflet sob pedido, lista acima do mapa no telemóvel, miniaturas); home 74 → 78
+- [x] UX-1 — Convidado só lê (rotas privadas com regresso, diálogo único), barra lateral limpa, filtros a partir das preferências com "Repor", menu do utilizador e /settings (perfil, foto, conta, preferências, aparência, notificações, exportar dados, apagar conta); migrações 0046 e 0048
+- [x] DADOS-2 — Cópia local, limpeza de contas (13 apagadas, 1 anonimizada, 5 internas), 8 negócios sem dono suspensos, métricas sem contas internas (0047)
+- [x] FOTOS-1 — 15 fotos do Wikimedia Commons com licença livre e crédito visível (províncias, destinos, home, Cultura e História), /creditos, marcador neutro para negócios
+- [x] PERF-4 — A/B com a main no mesmo PC: home e roteiros iguais ou melhores; fontes depois da primeira pintura, esqueleto do painel, menu do utilizador sob pedido; CLS do painel 0,32 → 0,002
+- [x] DESIGN-1 — Tokens, fontes próprias, sem emojis nem gradientes de cor em todas as páginas, raios/contornos/movimento com regras; axe 0 violações (28 páginas × 2 temas)
+- [x] QA-2 — Vitest 305, 13 ficheiros de testes de BD, hidratação, larguras, idioma, interações, convidado, percursos das 3 contas, Lighthouse
 - [x] SEG-FINAL — Auditoria (RLS, grants, funções, storage, segredos, XSS, redireções); migração 0045 (grants do visitante, fotos aprovadas visíveis, links `//`, só imagens nos buckets); `seroval` crítico corrigido; cabeçalhos de segurança; `docs/SECURITY.md`
 
 ## Pendente depois do lançamento
+- [ ] Painel com sessão a pintar em ≤ 2,5 s (DevTools): hoje ~6–7 s por ser renderizado no browser à espera da sessão (a main nem pinta). Exige sessão em cookies e SSR das páginas privadas.
+- [ ] Lighthouse mobile < 75 neste PC: mapa 68 (confirmar com A/B; era 81 no PERF-3), roteiros 63–68, jogos 55, painel 58. Medir no preview/site publicado (o preview da Lovable pede sessão: 401).
+- [ ] Todas as 8 experiências estão inativas: `/experiences` fica vazia e não há reservas possíveis
+- [ ] Textos dos Termos e da Privacidade (páginas "em preparação"), contacto e número de versão
+- [ ] Limpeza periódica de ficheiros de provas de contas apagadas (storage)
+- [ ] Negócios de exemplo suspensos (8): reativar quando um dono real os reclamar
 - [ ] Jogos: desempenho mobile ≥ 70 (está em ~62, com grande variação). Exige mostrar o esqueleto da página vindo do servidor e redirecionar para o login no browser (decisão de produto adiada).
 - [ ] `zod` 3 → 4 (aviso alto de memória nos validadores; a correção só existe no zod 4)
 - [ ] CSP: passar de report-only a obrigatória depois de verificar o preview da Lovable e o site publicado
@@ -39,7 +53,9 @@ publicada. Migrações aplicadas e registadas: 0000–0045 (46 registos).
 - [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
 
 ## Antes do lançamento
-- [ ] Apagar ou desativar as 3 contas de teste e o negócio "EKAYA Teste — não reservar" (a conta admin de teste tem poderes reais)
+- [ ] Apagar ou desativar as 3 contas de teste e o negócio "EKAYA Teste — não reservar" (a conta admin de teste tem poderes reais; já estão fora das métricas)
+- [ ] Decidir as 2 contas internas que ficaram (Kelvin e o 2.º admin)
+- [ ] Apagar a cópia de segurança local `backups/` quando já não for precisa (tem dados pessoais)
 - [ ] Ligar 2FA para os administradores
 - [ ] Confirmar os números de emergência (119, 117, 198) com fontes oficiais
 - [ ] Configurar o envio de emails (domínio, modelos em `docs/email-templates.md`) e os Redirect URLs do domínio final

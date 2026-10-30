@@ -70,7 +70,6 @@ export function FavoriteButton({
   return (
     <motion.button
       type="button"
-      whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={handle}
       disabled={busy}
@@ -86,7 +85,7 @@ export function FavoriteButton({
       }
       className={cn(
         sizeClass[size],
-        "bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+        "bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:shadow-[var(--shadow-elegant)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
         favorited && "bg-rose-100 dark:bg-rose-950/40",
         className,
       )}

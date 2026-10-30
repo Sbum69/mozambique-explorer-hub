@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Search, Users, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { InterestIcon } from "@/components/InterestIcon";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -246,7 +247,7 @@ function CommunityExperiencesPage() {
               variant={category === c.id ? "default" : "outline"}
               onClick={() => setCategory(c.id)}
             >
-              <span aria-hidden>{c.emoji}</span> {c.label[lang]}
+              <InterestIcon id={c.id} /> {c.label[lang]}
             </Button>
           ))}
         </div>

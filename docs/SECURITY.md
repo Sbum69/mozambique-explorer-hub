@@ -55,17 +55,32 @@ Vista `community_post_authors` (sem `security_invoker`): expõe só `id`, `displ
   `platform_impact_stats`, `news_like_counts`, `event_participant_counts`, `booked_people`.
 - Retirado ao `anon` na 0045: `business_decide_booking`, `can_edit_route`, `owns_experience`,
   `generate_route_code`.
+- Pré-lançamento (0046–0048), todas sem `anon`:
+  - `delete_my_account(_confirm)`: o próprio, com a palavra de confirmação; recusa o último admin e
+    reservas futuras; sem registos apaga o utilizador (cascata), com registos anonimiza (reservas sem
+    nome nem contactos, negócios suspensos, papéis retirados, login desligado, email libertado).
+    A anonimização das reservas passa pelo guarda só sem sessão e com a marca local
+    `ekaya.anonymise` (definida apenas dentro da função; não exposta pela API).
+  - `admin_set_internal`, `admin_platform_summary`: só admin (`FORBIDDEN`); `is_internal_user`.
+  - Trigger `profiles_guard_privileged_fields`: `deleted_at` e `is_internal` só mudam pelo admin ou
+    por funções do servidor.
+  - Trigger `notifications_skip_muted`: notificações silenciadas pelo próprio não são criadas;
+    reservas, negócio, segurança e avisos da plataforma não se podem silenciar (CHECK).
+- Guarda das rotas privadas (`requireAuthenticatedUser`): usa a sessão guardada no browser
+  (`getSession`) para decidir se mostra a página — é só navegação; todas as leituras e escritas
+  continuam protegidas pela RLS.
 - Cron (`postgres`): `expire_stale_bookings` (diário), `request_exchange_rates` +
   `apply_exchange_rates` (diário, com nova tentativa). As funções são `SECURITY DEFINER` e não
   aceitam parâmetros.
 
 ## 4. Storage
 
-| Bucket             | Público | Limite | Tipos (0045) | Leitura                                                              |
-| ------------------ | ------- | ------ | ------------ | -------------------------------------------------------------------- |
-| `community-photos` | não     | 5 MB   | imagens      | foto de experiência aprovada e ativa (todos); a própria pasta; admin |
-| `route-proofs`     | não     | 8 MB   | imagens      | a própria pasta; admin                                               |
-| `game-proofs`      | não     | 8 MB   | imagens      | a própria pasta; admin                                               |
+| Bucket             | Público | Limite | Tipos (0045)  | Leitura                                                              |
+| ------------------ | ------- | ------ | ------------- | -------------------------------------------------------------------- |
+| `community-photos` | não     | 5 MB   | imagens       | foto de experiência aprovada e ativa (todos); a própria pasta; admin |
+| `route-proofs`     | não     | 8 MB   | imagens       | a própria pasta; admin                                               |
+| `game-proofs`      | não     | 8 MB   | imagens       | a própria pasta; admin                                               |
+| `avatars` (0046)   | sim     | 2 MB   | JPEG/PNG/WebP | pública (foto de perfil); escrita só na própria pasta                |
 
 Upload só na pasta do próprio utilizador. Ficheiros servidos por signed URLs.
 
@@ -120,6 +135,9 @@ Aplicação:
 
 ## 7.1 Pendente
 
+- Ficheiros de provas (`route-proofs`, `game-proofs`) de contas apagadas ficam no storage, sem dono
+  que os possa ler (só o admin): limpeza periódica a decidir.
+
 - `zod` 3.25.76 (validadores das server functions): aviso alto de memória com coleções enormes; a
   correção só existe no zod 4 (mudança major — migrar num bloco próprio). Exposição baixa: as
   entradas são pequenas e quase todas exigem sessão.
@@ -131,7 +149,9 @@ Aplicação:
 ## 8. Checklist de lançamento
 
 - [ ] Apagar ou desativar as 3 contas de teste (turista, negócio, admin) e o negócio
-      "EKAYA Teste — não reservar".
+      "EKAYA Teste — não reservar" (estão marcadas como internas e fora das métricas, mas continuam
+      a existir).
+- [ ] Decidir sobre as 2 contas internas que ficaram (Kelvin e o 2.º admin).
 - [ ] Remover a cópia de teste das credenciais (`.env.test.local`) das máquinas de quem testou.
 - [ ] Rever os Redirect URLs (Lovable → Users → Settings → Advanced): só o domínio publicado
       (e o próprio, quando existir) com `/auth/callback`.

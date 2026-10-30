@@ -38,6 +38,13 @@ Depois, confirmar por leitura que não ficaram dados de teste (consulta no topo 
 | `fav-1_favorites_and_preferences.sql` | favoritos e preferências                                |
 | `community.sql`                       | comunidade, denúncias, experiências comunitárias, fotos |
 | `notifications.sql`                   | notificações (RLS, conteúdo imutável, triggers)         |
+| `security.sql`                        | grants do visitante, funções, fotos, links, buckets     |
+| `ux-1_settings.sql`                   | notificações silenciadas, avatares, apagar conta        |
+| `dados-2_internal_accounts.sql`       | contas internas fora das métricas                       |
+
+Alguns casos dependem de dados (por exemplo, um negócio aprovado sem dono ou uma reserva futura):
+quando não existem, o ficheiro escreve `SKIP` em vez de falhar. Um `SKIP` não é um `PASS` — dizer
+no relatório porque é que o caso não correu.
 
 ## 3. Verificações no browser (antes de um merge com mudanças visíveis)
 
@@ -47,10 +54,16 @@ a correr na porta 4173:
 1. `hydration.ts`
 2. `interactions.ts`
 3. `widths.ts`
-4. `contrast.ts`
+4. `contrast.ts` (axe, claro e escuro: 0 violações)
 5. `lang.ts`
-6. `shots.ts` (revisão visual)
-7. `lighthouse.ts` (só com nenhum outro servidor ligado)
+6. `guest.ts` (visitante: rotas privadas, menu, diálogo de conta)
+7. `journeys.ts` (turista, negócio e admin, só leitura)
+8. `shots.ts` (revisão visual)
+9. `lighthouse.ts` (só com nenhum outro servidor ligado)
+
+Lighthouse: as notas absolutas variam muito com a carga do PC. Para comparar versões, servir as
+duas (por exemplo a `main` numa pasta à parte, na porta 4174) e medir em alternância, com
+`QA_BASE` — a diferença entre elas é o que conta. `--devtools` mede com estrangulamento real.
 
 ## 4. Testes à mão (telemóvel real)
 

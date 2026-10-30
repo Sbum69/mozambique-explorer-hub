@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, ShieldCheck, Mail, Store, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,7 +14,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 
-import { HeroImage } from "@/components/HeroImage";
+import { HERO_PHOTO, HeroImage } from "@/components/HeroImage";
+import { PhotoCredit } from "@/components/PhotoCredit";
 import { FORGOT_TXT } from "@/lib/page-texts";
 import { getAuthenticatedUser, roleLandingTarget, validateAuthReturnSearch } from "@/lib/auth";
 
@@ -79,16 +81,15 @@ function LoginPage() {
       <div className="relative hidden lg:block overflow-hidden">
         {/* Hidden below lg: lazy, so phones never download it. */}
         <HeroImage
-          alt={lang === "pt" ? "Costa de Moçambique" : "Mozambique coastline"}
+          alt={HERO_PHOTO.shows[lang]}
           className="absolute inset-0 size-full object-cover"
           sizes="50vw"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-black/45 via-black/35 to-black/70" />
+        <PhotoCredit photo={HERO_PHOTO} />
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-2 font-bold text-2xl">
-            <span className="size-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-              🌍
-            </span>
+            <BrandMark className="size-9" />
             Ekaya Explore
           </div>
           <motion.div
@@ -108,7 +109,7 @@ function LoginPage() {
       </div>
 
       {/* Right form */}
-      <div className="relative flex items-center justify-center p-6 sm:p-10 bg-gradient-to-br from-background via-card to-accent/30">
+      <div className="relative flex items-center justify-center p-6 sm:p-10 bg-background">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
           <LanguageToggle />
@@ -120,7 +121,7 @@ function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", delay: 0.1 }}
-              className="inline-flex size-16 rounded-2xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground items-center justify-center shadow-[var(--shadow-elegant)]"
+              className="inline-flex size-16 rounded-[10px] bg-primary text-primary-foreground items-center justify-center shadow-[var(--shadow-elegant)]"
             >
               <ShieldCheck className="size-8" />
             </motion.div>
@@ -180,7 +181,7 @@ function LoginPage() {
               type="submit"
               size="lg"
               disabled={loading}
-              className="w-full h-11 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95"
+              className="w-full h-11 bg-primary text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95"
             >
               {loading ? "..." : t("login")}
             </Button>
@@ -225,7 +226,7 @@ function LoginPage() {
 
           <Link
             to="/signup"
-            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-orange-500 text-orange-700 dark:text-orange-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/60 transition-colors"
+            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-input text-primary font-semibold hover:bg-accent transition-colors"
           >
             <UserPlus className="size-4" />
             {lang === "pt"

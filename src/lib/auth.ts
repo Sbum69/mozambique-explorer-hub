@@ -58,7 +58,10 @@ export async function getAuthenticatedUser() {
 
 /** Route guard: without a session, go to /login and come back here afterwards (allow-listed pages only). */
 export async function requireAuthenticatedUser(ctx?: { location?: { pathname: string } }) {
-  const user = await getAuthenticatedUser();
+  // Route guard only (every read and write is protected by RLS): the session already stored in the
+  // browser decides whether to show the page, without a network round trip before the first paint.
+  const { data } = await supabase.auth.getSession();
+  const user = data.session?.user ?? null;
   if (!user) {
     const back = ctx?.location ? authReturnFor(ctx.location.pathname) : undefined;
     throw redirect({ to: "/login", search: back ? { redirect: back } : {} });

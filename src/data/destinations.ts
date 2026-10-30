@@ -4,12 +4,12 @@
  * Only the interest presets (pure UI options) remain here.
  */
 export const INTERESTS = [
-  { id: "beach", emoji: "🏖️", labelKey: "intBeach" as const },
-  { id: "culture", emoji: "🎨", labelKey: "intCulture" as const },
-  { id: "food", emoji: "🍽️", labelKey: "intFood" as const },
-  { id: "nature", emoji: "🌿", labelKey: "intNature" as const },
-  { id: "community", emoji: "👥", labelKey: "intCommunity" as const },
-  { id: "heritage", emoji: "🏛️", labelKey: "intHeritage" as const },
-  { id: "festival", emoji: "🎭", labelKey: "intFestival" as const },
-  { id: "adventure", emoji: "🏃", labelKey: "intAdventure" as const },
+  { id: "beach", labelKey: "intBeach" as const },
+  { id: "culture", labelKey: "intCulture" as const },
+  { id: "food", labelKey: "intFood" as const },
+  { id: "nature", labelKey: "intNature" as const },
+  { id: "community", labelKey: "intCommunity" as const },
+  { id: "heritage", labelKey: "intHeritage" as const },
+  { id: "festival", labelKey: "intFestival" as const },
+  { id: "adventure", labelKey: "intAdventure" as const },
 ];

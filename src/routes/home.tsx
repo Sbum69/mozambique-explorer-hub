@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { interestIcon } from "@/lib/interest-icons";
+import { BrandMark } from "@/components/BrandMark";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { PHOTOS_TXT } from "@/lib/page-texts";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,7 +54,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
-import { HERO_AVIF_SRCSET, HeroImage } from "@/components/HeroImage";
+import { HERO_AVIF_SRCSET, HERO_PHOTO, HeroImage } from "@/components/HeroImage";
 
 // Same colours as NotificationsBell variant="onDark": the top bar sits on the dark hero photo.
 const ON_HERO = "text-white hover:bg-white/10 hover:text-white";
@@ -97,17 +99,16 @@ export const Route = createFileRoute("/home")({
 type DayBucket = "1" | "2-3" | "4-7" | "7+";
 type Interest = ExperienceCategory | "heritage";
 
-const INTEREST_OPTIONS: { id: Interest; label: { pt: string; en: string }; emoji: string }[] = [
-  { id: "beach", label: { pt: "Praias e natureza", en: "Beaches & nature" }, emoji: "🏖️" },
-  { id: "culture", label: { pt: "Cultura e história", en: "Culture & history" }, emoji: "🎭" },
+const INTEREST_OPTIONS: { id: Interest; label: { pt: string; en: string } }[] = [
+  { id: "beach", label: { pt: "Praias e natureza", en: "Beaches & nature" } },
+  { id: "culture", label: { pt: "Cultura e história", en: "Culture & history" } },
   {
     id: "community",
     label: { pt: "Experiências comunitárias", en: "Community experiences" },
-    emoji: "👥",
   },
-  { id: "food", label: { pt: "Gastronomia", en: "Food & cuisine" }, emoji: "🍽️" },
-  { id: "nature", label: { pt: "Vida selvagem / safaris", en: "Wildlife & safaris" }, emoji: "🦁" },
-  { id: "adventure", label: { pt: "Aventura", en: "Adventure" }, emoji: "🚣" },
+  { id: "food", label: { pt: "Gastronomia", en: "Food & cuisine" } },
+  { id: "nature", label: { pt: "Vida selvagem / safaris", en: "Wildlife & safaris" } },
+  { id: "adventure", label: { pt: "Aventura", en: "Adventure" } },
 ];
 
 const DAY_OPTIONS: { id: DayBucket; label: { pt: string; en: string } }[] = [
@@ -214,6 +215,7 @@ function HomePage() {
           <HeroImage alt="" className="size-full object-cover" priority />
           {/* Fixed dark overlay (not a theme token) so the white hero text always reads, in both themes. */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-background" />
+          <PhotoCredit photo={HERO_PHOTO} />
         </div>
 
         {/* Nav */}
@@ -223,9 +225,7 @@ function HomePage() {
               <AppSidebar />
             </div>
             <div className="flex min-w-0 items-center gap-2 font-bold text-xl ml-1">
-              <span className="size-9 shrink-0 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
-                🌍
-              </span>
+              <BrandMark className="size-9" />
               <span className="sr-only min-[390px]:not-sr-only truncate">Ekaya</span>
             </div>
           </div>
@@ -240,7 +240,7 @@ function HomePage() {
                 <Button
                   asChild
                   size="sm"
-                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-lg gap-1.5"
+                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
                 >
                   <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
                 </Button>
@@ -258,7 +258,7 @@ function HomePage() {
                 <Button
                   asChild
                   size="sm"
-                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-lg gap-1.5"
+                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard className="size-4" />
@@ -291,7 +291,7 @@ function HomePage() {
                 : "Pick a destination, your days and the kind of experience you want. We handle the rest."}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="gap-2 shadow-xl">
+              <Button asChild size="lg" className="gap-2 shadow-[var(--shadow-soft)]">
                 <Link to="/dashboard">
                   <LayoutDashboard className="size-5" />
                   {lang === "pt" ? "Abrir o meu Painel" : "Open my Dashboard"}
@@ -306,7 +306,7 @@ function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="mt-8 rounded-2xl bg-background/95 backdrop-blur-md text-foreground border border-border shadow-2xl p-5 sm:p-6"
+            className="mt-8 rounded-[10px] bg-card text-card-foreground border border-border shadow-[var(--shadow-overlay)] p-5 sm:p-6"
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_auto] lg:items-end">
               {/* Destination */}
@@ -352,11 +352,7 @@ function HomePage() {
                 />
               </div>
 
-              <Button
-                size="lg"
-                onClick={applyFilters}
-                className="h-11 gap-2 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-glow)] hover:opacity-95"
-              >
+              <Button size="lg" onClick={applyFilters} className="h-11 gap-2">
                 {lang === "pt" ? "Ver recomendações" : "Show recommendations"}
                 <ArrowRight className="size-4" />
               </Button>
@@ -370,6 +366,7 @@ function HomePage() {
               <div className="flex flex-wrap gap-2">
                 {INTEREST_OPTIONS.map((opt) => {
                   const active = interests.includes(opt.id);
+                  const InterestIcon = interestIcon(opt.id);
                   return (
                     <button
                       key={opt.id}
@@ -377,11 +374,11 @@ function HomePage() {
                       onClick={() => toggleInterest(opt.id)}
                       className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm border transition-colors ${
                         active
-                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                          : "bg-background text-foreground border-border hover:bg-accent"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-card text-foreground border-input hover:bg-accent"
                       }`}
                     >
-                      <span>{opt.emoji}</span>
+                      <InterestIcon className="size-4" aria-hidden="true" />
                       {opt.label[lang as Lang]}
                     </button>
                   );
@@ -423,7 +420,7 @@ function HomePage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <Card className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                 <div className="relative aspect-[16/10]">
                   <img
                     src={routeCover(it)}
@@ -482,7 +479,7 @@ function HomePage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
+              <Card className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                 <div className="relative aspect-[16/10]">
                   <img
                     src={e.image}
@@ -545,7 +542,7 @@ function HomePage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow">
+                <Card className="h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                   <CardContent className="p-5">
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">
                       <Sparkles className="size-3" />
@@ -803,7 +800,7 @@ function PersonalSection({ lang }: { lang: Lang }) {
           {recommendedExperiences.map(({ item, reasons, matchesProvince }) => (
             <Card
               key={item.id}
-              className="overflow-hidden h-full hover:shadow-lg transition-shadow"
+              className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow"
             >
               <div className="relative aspect-[16/10]">
                 <img
@@ -849,7 +846,10 @@ function PersonalSection({ lang }: { lang: Lang }) {
       {!loading && !error && personalised && recommendedDestinations.length > 0 && (
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {recommendedDestinations.map(({ item, reasons }) => (
-            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card
+              key={item.id}
+              className="overflow-hidden hover:shadow-[var(--shadow-elegant)] transition-shadow"
+            >
               <div className="relative aspect-[16/9]">
                 <img
                   src={item.image}

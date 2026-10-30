@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
@@ -9,6 +10,7 @@ import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { DEFAULT_LANG, readLangCookie } from "@/lib/lang-pref";
 import { securityHeaders } from "@/lib/security-headers";
+import { loadBrandFonts } from "@/lib/brand-fonts";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
@@ -90,6 +92,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Brand fonts after the first paint (see brand-fonts.ts).
+  useEffect(() => loadBrandFonts(), []);
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

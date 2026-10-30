@@ -101,7 +101,7 @@ function CommunityPostPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 dark:from-blue-950/30 via-white dark:via-background to-purple-50 dark:to-purple-950/30">
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md shadow-sm border-b">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -126,15 +126,15 @@ function CommunityPostPage() {
             <Loader2 className="size-5 animate-spin" /> {t("communityLoading")}
           </div>
         ) : !post ? (
-          <Card className="p-10 text-center rounded-2xl border-dashed">
+          <Card className="p-10 text-center rounded-[10px] border-dashed">
             <p className="text-muted-foreground">{t("communityFeedEmpty")}</p>
           </Card>
         ) : (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="p-6 rounded-2xl shadow-lg border border-border bg-card">
+            <Card className="p-6 rounded-[10px] shadow-[var(--shadow-soft)] border border-border bg-card">
               <div className="flex flex-wrap items-center gap-2">
                 {post.categoryName && (
-                  <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400">
+                  <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-accent text-accent-foreground">
                     {post.categoryName[lang]}
                   </span>
                 )}
@@ -171,14 +171,12 @@ function CommunityPostPage() {
                   <ul className="mt-2 space-y-1 text-sm text-foreground">
                     {post.destinationName && (
                       <li className="inline-flex items-center gap-2">
-                        <Compass className="size-4 text-blue-600 dark:text-blue-400" />{" "}
-                        {post.destinationName}
+                        <Compass className="size-4 text-primary" /> {post.destinationName}
                       </li>
                     )}
                     {post.experienceTitle && (
                       <li className="inline-flex items-center gap-2">
-                        <Sparkles className="size-4 text-purple-600 dark:text-purple-400" />{" "}
-                        {post.experienceTitle}
+                        <Sparkles className="size-4 text-secondary" /> {post.experienceTitle}
                       </li>
                     )}
                     {post.routeTitle && (

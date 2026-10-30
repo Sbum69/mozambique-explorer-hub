@@ -45,7 +45,6 @@ interface Topic {
   title: LocalizedText;
   subtitle: LocalizedText;
   date: LocalizedText;
-  gradient: string;
   icon: LucideIcon;
   /** Approved, credited photo (FOTOS-1); topics without a faithful free photo have none. */
   image?: string;
@@ -83,7 +82,6 @@ const TOPICS: Topic[] = [
     title: { pt: "Independência", en: "Independence" },
     subtitle: { pt: "Nascimento de uma nação", en: "Birth of a nation" },
     date: { pt: "25 de Junho de 1975", en: "25 June 1975" },
-    gradient: "from-green-700 to-green-700",
     icon: Flag,
     image: PHOTOS["cult-independencia"].src,
     short: {
@@ -130,7 +128,6 @@ const TOPICS: Topic[] = [
     title: { pt: "Samora Machel", en: "Samora Machel" },
     subtitle: { pt: "O primeiro Presidente", en: "The first President" },
     date: { pt: "1933 – 1986", en: "1933–1986" },
-    gradient: "from-red-600 to-red-700",
     icon: Users,
     image: PHOTOS["cult-samora"].src,
     short: {
@@ -177,7 +174,6 @@ const TOPICS: Topic[] = [
     title: { pt: "FRELIMO", en: "FRELIMO" },
     subtitle: { pt: "Frente de Libertação", en: "Liberation Front" },
     date: { pt: "Fundada a 25 de Junho de 1962", en: "Founded on 25 June 1962" },
-    gradient: "from-yellow-700 to-orange-700",
     icon: BookOpen,
     image: PHOTOS["cult-frelimo"].src,
     short: {
@@ -224,7 +220,6 @@ const TOPICS: Topic[] = [
     title: { pt: "Azagaia", en: "Azagaia" },
     subtitle: { pt: "A voz da juventude", en: "The voice of youth" },
     date: { pt: "1977 – 2023", en: "1977–2023" },
-    gradient: "from-purple-600 to-purple-700",
     icon: Mic2,
     short: {
       pt: "Rapper e ativista que se tornou símbolo da liberdade de expressão e crítica social em Moçambique.",
@@ -270,7 +265,6 @@ const TOPICS: Topic[] = [
     title: { pt: "Marrabenta", en: "Marrabenta" },
     subtitle: { pt: "O ritmo do país", en: "The rhythm of the country" },
     date: { pt: "Desde os anos 1950", en: "Since the 1950s" },
-    gradient: "from-blue-600 to-blue-700",
     icon: Music,
     image: PHOTOS["cult-marrabenta"].src,
     short: {
@@ -317,7 +311,6 @@ const TOPICS: Topic[] = [
     title: { pt: "José Craveirinha", en: "José Craveirinha" },
     subtitle: { pt: "Poeta Nacional", en: "National Poet" },
     date: { pt: "1922 – 2003", en: "1922–2003" },
-    gradient: "from-teal-700 to-teal-700",
     icon: Sparkles,
     short: {
       pt: "Considerado o maior poeta moçambicano, foi voz literária da identidade e da resistência cultural.",
@@ -421,10 +414,9 @@ function CultureHistoryPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              whileHover={{ y: -10, boxShadow: "0 24px 60px -20px rgba(0,0,0,0.25)" }}
-              className="text-left rounded-3xl overflow-hidden bg-card border shadow-lg transition-all"
+              className="text-left rounded-[10px] overflow-hidden bg-card border shadow-[var(--shadow-soft)] transition-all"
             >
-              <div className="relative h-56 overflow-hidden">
+              <div className="relative h-56 overflow-hidden bg-primary">
                 {topic.image && (
                   <img
                     src={topic.image}
@@ -435,8 +427,8 @@ function CultureHistoryPage() {
                   />
                 )}
                 <PhotoCredit src={topic.image} />
-                <div className={`absolute inset-0 bg-gradient-to-t ${topic.gradient} opacity-80`} />
-                <div className="absolute top-4 right-4 size-11 rounded-2xl bg-card shadow-lg flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+                <div className="absolute top-4 right-4 size-11 rounded-[10px] bg-card shadow-[var(--shadow-soft)] flex items-center justify-center">
                   <topic.icon className="size-5 text-foreground" />
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 text-white">
@@ -449,7 +441,7 @@ function CultureHistoryPage() {
                 <p className="text-sm text-foreground/80 mb-4 line-clamp-3">{topic.short[lang]}</p>
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary group">
                   {copy.learnMore[lang]}
-                  <motion.span className="inline-block" whileHover={{ x: 4 }}>
+                  <motion.span className="inline-block">
                     <ArrowRight className="size-4" />
                   </motion.span>
                 </span>
@@ -474,12 +466,12 @@ function CultureHistoryPage() {
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 22 }}
               onClick={(event) => event.stopPropagation()}
-              className="bg-card rounded-2xl sm:rounded-3xl overflow-hidden w-full max-w-5xl shadow-2xl flex flex-col max-h-[96svh] sm:max-h-[92vh]"
+              className="bg-card rounded-[10px] sm:rounded-[10px] overflow-hidden w-full max-w-5xl shadow-[var(--shadow-soft)] flex flex-col max-h-[96svh] sm:max-h-[92vh]"
               role="dialog"
               aria-modal="true"
               aria-labelledby={`topic-${selected.id}`}
             >
-              <div className="relative h-52 sm:h-64 lg:h-72 shrink-0">
+              <div className="relative h-52 sm:h-64 lg:h-72 shrink-0 bg-primary">
                 {selected.image && (
                   <img
                     src={selected.image}
@@ -490,20 +482,17 @@ function CultureHistoryPage() {
                   />
                 )}
                 <PhotoCredit src={selected.image} />
-                <div
-                  className={`absolute inset-0 bg-gradient-to-t ${selected.gradient} opacity-85`}
-                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
                 <motion.button
-                  whileHover={{ rotate: 90 }}
                   onClick={() => setSelected(null)}
-                  className="absolute top-4 right-4 size-10 rounded-full bg-background/90 text-foreground flex items-center justify-center shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute top-4 right-4 size-10 rounded-full bg-background/90 text-foreground flex items-center justify-center shadow-[var(--shadow-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   aria-label={copy.close[lang]}
                 >
                   <X className="size-5" />
                 </motion.button>
                 <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-8 sm:right-8 text-white">
                   <div className="flex items-center gap-3 mb-1">
-                    <div className="size-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    <div className="size-12 rounded-[10px] bg-white/20 backdrop-blur flex items-center justify-center">
                       <selected.icon className="size-6" />
                     </div>
                     <div>
@@ -526,9 +515,7 @@ function CultureHistoryPage() {
                 <div className="grid gap-6 md:grid-cols-2 md:gap-x-10 md:gap-y-8">
                   {selected.sections.map((section) => (
                     <div key={section.heading.pt} className="flex gap-4">
-                      <div
-                        className={`w-1 rounded-full bg-gradient-to-b ${selected.gradient} shrink-0`}
-                      />
+                      <div className="w-1 rounded-full bg-primary shrink-0" />
                       <div>
                         <h4 className="font-bold mb-2">{section.heading[lang]}</h4>
                         <p className="text-base text-muted-foreground leading-7">
@@ -539,9 +526,7 @@ function CultureHistoryPage() {
                   ))}
                 </div>
 
-                <div
-                  className={`mt-8 rounded-2xl p-5 sm:p-6 bg-gradient-to-br ${selected.gradient} text-white`}
-                >
+                <div className="mt-8 rounded-[10px] p-5 sm:p-6 bg-accent text-accent-foreground">
                   <div className="flex items-start gap-3">
                     <Heart className="size-5 shrink-0 mt-0.5" />
                     <div>

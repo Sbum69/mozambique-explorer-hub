@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { MapPin, Map as MapIcon, Gift } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { InterestIcon } from "@/components/InterestIcon";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -57,7 +58,7 @@ export function CommunityExperienceDialog({
               <DialogDescription asChild>
                 <div className="flex flex-wrap gap-2 pt-1">
                   <Badge variant="secondary">
-                    {cat.emoji} {cat.label[lang]}
+                    <InterestIcon id={item.category} /> {cat.label[lang]}
                   </Badge>
                   <Badge variant="outline">{item.provinceName[lang]}</Badge>
                   <Badge className="gap-1">

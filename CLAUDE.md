@@ -98,10 +98,15 @@ RPCs chamadas pelo cliente: `has_role`, `save_route_plan`, `reset_my_route_progr
 `get_experience_availability`, `cancel_my_booking`, `business_decide_booking`,
 `admin_decide_business`, `admin_business_owner_emails`, `platform_impact_stats`,
 `my_points_summary`, `points_leaderboard`, `redeem_reward`, `start_game_quiz`, `answer_game_quiz`,
-`finish_game_quiz`, `submit_game_step`.
+`finish_game_quiz`, `submit_game_step`, `save_my_preferences`, `delete_my_account`,
+`admin_set_internal`, `admin_platform_summary`.
 
 Buckets de Storage (privados, servidos por signed URLs): `community-photos`, `route-proofs`,
-bucket de provas de jogos (`GAME_PROOFS_BUCKET` em `src/lib/games.ts`).
+bucket de provas de jogos (`GAME_PROOFS_BUCKET` em `src/lib/games.ts`). Público: `avatars` (foto de
+perfil, escrita só na pasta do próprio).
+
+Contas internas (`profiles.is_internal`, só o admin altera): contas de teste e de equipa, fora de
+todas as métricas (`platform_impact_stats`, `admin_platform_summary`).
 
 ### i18n PT/EN
 
@@ -157,6 +162,15 @@ Se um pedido disser "só AUDIT", não alterar código.
   (`src/components/ConfirmDialog.tsx`), nunca `confirm()`/`prompt()`/`alert()`.
 - **Textos PT/EN**: textos novos em dicionários (`LanguageContext`, `src/lib/admin-texts.ts`,
   `src/lib/page-texts.ts`) cobertos pelos testes de paridade.
+- **Identidade visual** (`docs/DESIGN.md`, "Capulana e Índico"): sem emojis na interface (ícones
+  Lucide; interesses e categorias com `InterestIcon`), sem gradientes de cor (só véus escuros sobre
+  fotos), uma cor de ação (`primary`), raio 10 px em cartões e 6 px em controlos, contorno em vez de
+  sombras, sem animações decorativas. As fontes (`public/fonts`, OFL) carregam depois da primeira
+  pintura (`src/lib/brand-fonts.ts`): não as pôr no CSS crítico.
+- **Fotografias**: só com licença livre e do sítio certo (sem foto fiel, fica sem foto ou com a da
+  província, identificada como tal). Cada foto tem entrada em `src/lib/photo-credits.ts` (autor,
+  licença, origem) e aparece em `/creditos`; o crédito "© autor · licença" fica visível
+  (`PhotoCredit`). Negócios sem foto usam `BusinessMark`.
 
 ### Git e pull requests
 

@@ -109,7 +109,7 @@ function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-orange-50 dark:from-orange-950/30 via-background to-blue-50 dark:to-blue-950/30">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-background">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -128,7 +128,7 @@ function SignupPage() {
             <LanguageToggle />
           </div>
         </div>
-        <Card className="p-8 shadow-xl border-0">
+        <Card className="p-8 shadow-[var(--shadow-soft)] border-0">
           <AnimatePresence mode="wait">
             {success ? (
               <motion.div
@@ -141,7 +141,7 @@ function SignupPage() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className="mx-auto size-20 rounded-full bg-success text-success-foreground flex items-center justify-center shadow-lg"
+                  className="mx-auto size-20 rounded-full bg-success text-success-foreground flex items-center justify-center shadow-[var(--shadow-soft)]"
                 >
                   <Check className="size-10" />
                 </motion.div>
@@ -163,7 +163,7 @@ function SignupPage() {
             ) : (
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div className="text-center mb-6">
-                  <div className="mx-auto size-14 rounded-2xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground flex items-center justify-center shadow-lg">
+                  <div className="mx-auto size-14 rounded-[10px] bg-primary text-primary-foreground flex items-center justify-center shadow-[var(--shadow-soft)]">
                     <UserPlus className="size-7" />
                   </div>
                   <h1 className="mt-4 text-2xl font-bold tracking-tight">{t.title}</h1>
@@ -243,9 +243,8 @@ function SignupPage() {
                   <motion.button
                     type="submit"
                     disabled={loading}
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full mt-4 py-4 rounded-xl bg-gradient-to-r from-primary to-primary-glow text-primary-foreground font-semibold text-lg shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2 disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="w-full mt-4 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-lg shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-shadow flex items-center justify-center gap-2 disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     {loading ? (
                       <Loader2 className="size-5 animate-spin" />
