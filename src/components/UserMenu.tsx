@@ -2,11 +2,14 @@ import { Suspense, lazy, useState } from "react";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
-import { SETTINGS_TXT } from "@/lib/page-texts";
 import { cn } from "@/lib/utils";
 
 // The Radix menu is a separate chunk, fetched only when the user reaches for the button (hover or
 // tap/Enter), so it is not part of the JavaScript every page runs while it loads.
+// Only the button's label here: the full settings dictionary (page-texts) belongs to the lazy menu,
+// so it is not on the critical path of every page (PERF-4).
+const LABEL = { pt: "Menu da conta", en: "Account menu" } as const;
+
 const UserMenuDropdown = lazy(() => import("@/components/UserMenuDropdown"));
 
 /** The user's photo (or initial) — opens Profile, Settings and Sign out. Nothing for visitors. */
@@ -17,12 +20,11 @@ export function UserMenu({ className }: { className?: string }) {
   const [menuReady, setMenuReady] = useState(false);
   const [wanted, setWanted] = useState(false);
   if (!isAuthenticated || !user || user.role === "guest") return null;
-  const t = SETTINGS_TXT[lang];
 
   const trigger = (
     <button
       type="button"
-      aria-label={t.menuLabel}
+      aria-label={LABEL[lang]}
       aria-haspopup="menu"
       aria-expanded={open}
       // A click while the menu is still loading opens it as soon as it arrives; then Radix takes over.

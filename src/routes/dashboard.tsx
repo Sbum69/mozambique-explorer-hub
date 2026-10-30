@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/BrandMark";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { PointsCard } from "@/components/PointsCard";
@@ -164,7 +165,32 @@ function DashboardPage() {
   });
   const visitedValue = visits.isError ? "—" : visits.data ? visits.data.size : "…";
 
-  if (!user) return null;
+  // While the account loads: the real header (it does not depend on the user) and placeholders with
+  // the size of the cards, so the page paints right after the JavaScript (PERF-4).
+  if (!user)
+    return (
+      <div className="min-h-screen bg-background" aria-busy="true">
+        <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1">
+              <AppSidebar />
+              <Link to="/home" className="flex min-w-0 items-center gap-2 font-bold text-lg ml-1">
+                <BrandMark />
+                <span className="sr-only min-[375px]:not-sr-only truncate">Ekaya</span>
+              </Link>
+            </div>
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              <ThemeToggle />
+              <LanguageToggle />
+            </div>
+          </div>
+        </nav>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+          <Skeleton className="h-44 w-full rounded-[10px]" />
+          <Skeleton className="h-96 sm:h-64 w-full rounded-[10px]" />
+        </main>
+      </div>
+    );
 
   const province = destinations.find((d) => d.slug === user.preferences?.province);
 
