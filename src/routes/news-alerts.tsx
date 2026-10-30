@@ -137,10 +137,10 @@ function NewsAlertsPage() {
                 ],
               }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="hidden sm:flex px-3 py-1.5 bg-destructive/15 rounded-full items-center gap-1.5"
+              className="hidden sm:flex px-3 py-1.5 bg-destructive rounded-full items-center gap-1.5"
             >
-              <span className="size-2 rounded-full bg-destructive animate-pulse" />
-              <span className="text-destructive text-xs font-semibold">
+              <span className="size-2 rounded-full bg-destructive-foreground animate-pulse" />
+              <span className="text-destructive-foreground text-xs font-semibold">
                 {lang === "pt" ? "AO VIVO" : "LIVE"}
               </span>
             </motion.div>

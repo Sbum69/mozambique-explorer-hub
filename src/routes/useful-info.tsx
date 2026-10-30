@@ -591,7 +591,7 @@ function UsefulInfoPage() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-3">
             {pt ? "Guia Completo de Moçambique" : "Complete Guide to Mozambique"}
           </h2>
-          <p className="text-white/90 max-w-2xl mx-auto">
+          <p className="text-primary-foreground max-w-2xl mx-auto">
             {pt
               ? "Tudo o que precisas saber antes e durante a tua viagem — moeda, segurança, cultura, saúde e mais."
               : "Everything you need to know before and during your trip — currency, safety, culture, health and more."}
