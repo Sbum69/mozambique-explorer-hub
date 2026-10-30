@@ -55,7 +55,7 @@ Neurons por milhão de tokens tirados de [F1].
 | `@cf/qwen/qwen3-30b-a3b-fp8`                   | 4 625 / 30 475              | ~23                | ~430                    | Multilingue, contexto de 32 768 [F]. É um modelo de raciocínio: os tokens de raciocínio contam como saída e podem multiplicar o custo [I] |
 | `@cf/meta/llama-3.1-8b-instruct-fp8-fast`      | 4 119 / 34 868              | ~23                | ~430                    | O mais barato com qualidade razoável [I]                                                                                                  |
 | `@cf/openai/gpt-oss-20b`                       | 18 182 / 27 273             | ~63                | ~160                    |                                                                                                                                           |
-| `@cf/google/gemma-4-26b-a4b-it`                | 9 091 / 27 273              | ~36                | ~270                    | Modelo aberto da Google, alojado pela Cloudflare: os termos de dados são os da Cloudflare [F2], não os da camada grátis do Gemini         |
+| `@cf/google/gemma-4-26b-a4b-it`                | 9 091 / 27 273              | ~36                | ~270                    | **Excluído**: é servido como `…-external`, um fornecedor por trás da Cloudflare (ver Resultados)                                          |
 | `@cf/mistralai/mistral-small-3.1-24b-instruct` | 31 876 / 50 488             | ~111               | ~90                     |                                                                                                                                           |
 | `@cf/google/gemma-3-12b-it`                    | 31 371 / 50 560             | ~109               | ~90                     |                                                                                                                                           |
 | Embeddings `@cf/baai/bge-m3`                   | 1 075 (entrada)             | ~0,05 por pergunta | —                       | Multilingue [F]. Indexar ~500 fragmentos gasta ~215 Neurons, uma vez                                                                      |
@@ -73,11 +73,11 @@ Estado: **PASS parcial**. Os 92 casos correram em 2 modelos, com a conta Workers
 - **Fonte:** só um **rascunho da FAQ** (12 entradas sobre funcionalidades que existem). Ainda não há base de conhecimento turística. É a **linha de base**: nas perguntas sobre destinos, preços ou horários, o comportamento certo é dizer que não tem a informação.
 - **Idioma:** o idioma da app é passado ao modelo, como fará o assistente real.
 
-| Modelo                                    | Respondidos    | Invenções/ações nos casos críticos              | Idioma certo | Com citação                                                | Neurons |
-| ----------------------------------------- | -------------- | ----------------------------------------------- | ------------ | ---------------------------------------------------------- | ------- |
-| `@cf/qwen/qwen3-30b-a3b-fp8`              | 92/92          | **0**                                           | 90/92        | 67/92                                                      | ~560    |
-| `@cf/meta/llama-3.1-8b-instruct-fp8-fast` | 92/92          | **1**: no en-33 mostrou as instruções completas | 88/92        | 69/92                                                      | ~520    |
-| `@cf/google/gemma-4-26b-a4b-it`           | 9 091 / 27 273 | ~36                                             | ~270         | **Excluído**: é servido como `…-external` (ver Resultados) |
+| Modelo                                    | Respondidos          | Invenções/ações nos casos críticos              | Idioma certo | Com citação | Neurons |
+| ----------------------------------------- | -------------------- | ----------------------------------------------- | ------------ | ----------- | ------- |
+| `@cf/qwen/qwen3-30b-a3b-fp8`              | 92/92                | **0**                                           | 90/92        | 67/92       | ~560    |
+| `@cf/meta/llama-3.1-8b-instruct-fp8-fast` | 92/92                | **1**: no en-33 mostrou as instruções completas | 88/92        | 69/92       | ~520    |
+| `@cf/google/gemma-4-26b-a4b-it`           | — (respostas vazias) | —                                               | —            | —           | ~1 600  |
 
 **Sobre o Gemma 4:** a API devolve a resposta noutro formato, que o script não lia; a correção já está no script. O modelo aparece como `gemma-4-26b-a4b-it-external`, o que sugere um fornecedor externo por trás da Cloudflare [I]. Por isso **fica excluído**: os termos de dados do Workers AI podem não o cobrir, e a regra é não arriscar o uso para treino.
 
