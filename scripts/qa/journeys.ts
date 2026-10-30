@@ -113,8 +113,12 @@ const text = async (p: Page) => (await p.locator("body").innerText()).replace(/\
     rep.line(new URL(page.url()).pathname === "/settings", "admin (aal1): /admin requires 2FA");
     rep.skip("admin: registered profiles (needs TEST_ADMIN_TOTP_SECRET for an aal2 session)");
   } else {
+    await page
+      .getByText(/Perfis registados \d+/)
+      .waitFor({ timeout: 15000 })
+      .catch(() => undefined);
     const t = await text(page);
-    const m = t.match(/Perfis registados (d+)/);
+    const m = t.match(/Perfis registados (\d+)/);
     rep.line(
       !!m && m[1] === "2",
       `admin: registered profiles leave internal accounts out (${m?.[1] ?? "?"}, expected 2)`,

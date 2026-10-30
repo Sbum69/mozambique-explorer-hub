@@ -119,6 +119,32 @@ depois trocar `Content-Security-Policy-Report-Only` por `Content-Security-Policy
 - Recomendações (não aplicadas): 2FA (TOTP) obrigatório para administradores; rever os limites de
   tentativas e a duração da sessão nas definições de autenticação da Lovable Cloud.
 
+### 6.1 Como um administrador ativa a verificação em dois passos (2FA)
+
+Texto para enviar a cada administrador. A administração só abre com o código.
+
+1. **Instala uma aplicação autenticadora no telemóvel**, se ainda não tiveres. Qualquer uma destas serve:
+   - Google Authenticator;
+   - Microsoft Authenticator;
+   - Aegis, em Android.
+2. **Entra no EKAYA** com o teu email e palavra-passe, no computador ou no telemóvel.
+3. **Abre as Definições** (menu da conta, no canto superior direito) e vai à secção **Segurança**.
+4. **Carrega em "Ativar verificação em dois passos".** Aparece um código QR.
+5. **Na aplicação autenticadora, escolhe "Adicionar conta" e lê o código QR.**
+   - Se não conseguires lê-lo, escreve a chave que aparece por baixo do QR.
+   - A aplicação passa a mostrar "EKAYA", com um código de 6 dígitos que muda a cada 30 segundos.
+6. **Escreve o código de 6 dígitos no EKAYA e carrega em "Confirmar".** Aparece "Verificação em dois passos ativa".
+7. A partir daí, depois da palavra-passe, o EKAYA pede sempre o código da aplicação.
+
+**Se mudares de telemóvel**, ativa a aplicação no telemóvel novo antes de apagares a antiga.
+
+**Se perderes o telemóvel**, pede a outro administrador para retirar a 2FA da tua conta e volta a ativá-la.
+
+- Hoje isso faz-se no painel da Supabase/Lovable (Authentication → Users → o utilizador → remover o fator).
+- Até haver um botão na administração, este pedido é feito ao responsável técnico.
+
+**Nunca envies o código nem a chave a ninguém.** A equipa do EKAYA nunca os pede.
+
 ## 7. Corrigido no SEG-FINAL
 
 Migração `0045_security_hardening` (aplicada; `supabase/tests/security.sql`: 15/15 PASS):

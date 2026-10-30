@@ -123,13 +123,14 @@ async function raiseToAal2(role: Role, session: { access_token: string }): Promi
   return v.ok ? JSON.stringify(await v.json()) : null;
 }
 
-const sessions = new Map<Role, string | null>();
+const sessions = new Map<string, string | null>();
 /**
  * Session JSON from the auth API (no app form is submitted); null if the account is not set up.
  * With a TOTP secret in .env.test.local the session is raised to aal2 (two-step verification).
  */
-export async function sessionFor(role: Role): Promise<string | null> {
-  if (sessions.has(role)) return sessions.get(role)!;
+export async function sessionFor(role: Role, raise = true): Promise<string | null> {
+  const cacheKey = `${role}:${raise}`;
+  if (sessions.has(cacheKey)) return sessions.get(cacheKey)!;
   const email = test[`TEST_${role.toUpperCase()}_EMAIL`];
   const password = test[`TEST_${role.toUpperCase()}_PASSWORD`];
   let value: string | null = null;
@@ -141,10 +142,10 @@ export async function sessionFor(role: Role): Promise<string | null> {
     });
     if (res.ok) {
       const session = (await res.json()) as { access_token: string };
-      value = (await raiseToAal2(role, session)) ?? JSON.stringify(session);
+      value = (raise ? await raiseToAal2(role, session) : null) ?? JSON.stringify(session);
     }
   }
-  sessions.set(role, value);
+  sessions.set(cacheKey, value);
   return value;
 }
 
@@ -160,6 +161,8 @@ export interface ContextOptions {
   lang?: Lang;
   theme?: Theme;
   role?: Role;
+  /** Keep the session password-only (aal1), even when the account has a TOTP secret. */
+  passwordOnly?: boolean;
 }
 
 /** Browser context with language cookie, theme and (optionally) a test account session. */
@@ -182,7 +185,7 @@ export async function newContext(
   }
   if (o.theme) await ctx.addInitScript((t) => localStorage.setItem("ekaya.theme", t), o.theme);
   if (o.role) {
-    const s = await sessionFor(o.role);
+    const s = await sessionFor(o.role, !o.passwordOnly);
     if (!s) throw new Error(`no ${o.role} test account in .env.test.local`);
     await ctx.addInitScript(([k, v]) => localStorage.setItem(k, v), [AUTH_STORAGE_KEY, s] as const);
   }
