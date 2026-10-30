@@ -38,13 +38,10 @@ métricas.
 ## Pendente depois do lançamento
 - [ ] Painel com sessão a pintar em ≤ 2,5 s (DevTools): hoje ~6–7 s por ser renderizado no browser à espera da sessão (a main nem pinta). Exige sessão em cookies e SSR das páginas privadas.
 - [ ] Lighthouse mobile < 75 neste PC: mapa 68 (confirmar com A/B; era 81 no PERF-3), roteiros 63–68, jogos 55, painel 58. Medir no preview/site publicado (o preview da Lovable pede sessão: 401).
-- [ ] Todas as 8 experiências estão inativas: `/experiences` fica vazia e não há reservas possíveis
-- [ ] Textos dos Termos e da Privacidade (páginas "em preparação"), contacto e número de versão
 - [ ] Limpeza periódica de ficheiros de provas de contas apagadas (storage)
 - [ ] Negócios de exemplo suspensos (8): reativar quando um dono real os reclamar
 - [ ] Jogos: desempenho mobile ≥ 70 (está em ~62, com grande variação). Exige mostrar o esqueleto da página vindo do servidor e redirecionar para o login no browser (decisão de produto adiada).
 - [ ] `zod` 3 → 4 (aviso alto de memória nos validadores; a correção só existe no zod 4)
-- [ ] CSP: passar de report-only a obrigatória depois de verificar o preview da Lovable e o site publicado
 - [ ] Editor de publicações da comunidade não fecha com Escape (acessibilidade)
 - [ ] Histórias da home (`src/data/itineraries.ts`): validar as lendas antes de as voltar a mostrar (`SHOW_STORY_STOPS`)
 - [ ] Eventos geridos pelo admin (tabela `events`, RLS, modal) para reativar o separador Eventos
@@ -53,10 +50,15 @@ métricas.
 - [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
 
 ## Antes do lançamento
+Decidido: o Kelvin e o 2.º admin ficam como contas internas (fora das métricas).
+
 - [ ] Apagar ou desativar as 3 contas de teste e o negócio "EKAYA Teste — não reservar" (a conta admin de teste tem poderes reais; já estão fora das métricas)
-- [ ] Decidir as 2 contas internas que ficaram (Kelvin e o 2.º admin)
 - [ ] Apagar a cópia de segurança local `backups/` quando já não for precisa (tem dados pessoais)
-- [ ] Ligar 2FA para os administradores
+- [ ] Termos de Utilização e Política de Privacidade (PT/EN, revisão jurídica), aceitação no registo com versão e data (LEGAL-1)
+- [ ] Contacto de apoio e versão da app nas Definições (LEGAL-1)
+- [ ] 2FA (TOTP) obrigatório para os administradores, rotas e RPCs de admin com `aal2` (SEG-2)
+- [ ] CSP obrigatória (de report-only a enforce), verificada no preview e no site publicado (SEG-2)
+- [ ] Ativar experiências reais: as 8 estão inativas, `/experiences` fica vazia e não há reservas possíveis (CONTEÚDO-1)
 - [ ] Confirmar os números de emergência (119, 117, 198) com fontes oficiais
 - [ ] Configurar o envio de emails (domínio, modelos em `docs/email-templates.md`) e os Redirect URLs do domínio final
 - [ ] Juntar os branches pendentes à `main` pela ordem indicada e confirmar o CI verde
