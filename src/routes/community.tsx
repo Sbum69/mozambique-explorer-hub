@@ -76,15 +76,6 @@ export const Route = createFileRoute("/community")({
   component: CommunityPage,
 });
 
-const AVATAR_GRADIENTS = [
-  "from-blue-600 to-purple-600",
-  "from-green-700 to-teal-700",
-  "from-orange-700 to-red-600",
-  "from-pink-600 to-rose-600",
-  "from-indigo-600 to-blue-600",
-  "from-amber-700 to-orange-700",
-];
-
 function CommunityPage() {
   const { t, lang } = useLang();
   const [askConfirm, confirmDialog] = useConfirm();
@@ -229,7 +220,7 @@ function CommunityPage() {
   const totalLikes = useMemo(() => posts.reduce((s, p) => s + p.likes, 0), [posts]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 dark:from-blue-950/30 via-white dark:via-background to-purple-50 dark:to-purple-950/30">
+    <div className="min-h-screen bg-background">
       {confirmDialog}
       <motion.header
         initial={{ y: -60, opacity: 0 }}
@@ -250,7 +241,7 @@ function CommunityPage() {
             <LanguageToggle />
             <UserMenu />
             {user && (
-              <div className="hidden sm:flex size-9 rounded-full bg-gradient-to-br from-primary to-primary-glow text-white items-center justify-center font-bold text-sm">
+              <div className="hidden sm:flex size-9 rounded-full bg-primary text-primary-foreground items-center justify-center font-bold text-sm">
                 {user.displayName.charAt(0)}
               </div>
             )}
@@ -264,11 +255,12 @@ function CommunityPage() {
         <motion.div
           initial={false}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl bg-gradient-to-br from-blue-600 to-purple-600 text-white p-8 sm:p-12 shadow-xl"
+          className="relative overflow-hidden rounded-[10px] border border-border bg-card p-8 pt-10 sm:p-12 sm:pt-14"
         >
-          <MessageSquare className="size-14 sm:size-16 mb-4 opacity-90" />
+          <div className="capulana-band absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
+          <MessageSquare className="size-10 mb-4 text-primary" aria-hidden="true" />
           <h2 className="text-3xl sm:text-4xl font-bold">{t("yourVoiceMatters")}</h2>
-          <p className="mt-3 text-white/90 max-w-2xl">{t("yourVoiceSub")}</p>
+          <p className="mt-3 text-muted-foreground max-w-2xl">{t("yourVoiceSub")}</p>
           <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
             <Stat value={String(posts.length)} label={t("messagesShared")} />
             <Stat value={String(totalLikes)} label={t("communityLike")} />
@@ -278,14 +270,11 @@ function CommunityPage() {
         {/* Privacy + CTA */}
         <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
           <div className="flex items-center gap-3 text-sm text-muted-foreground bg-card border border-border rounded-xl px-4 py-3 shadow-sm flex-1">
-            <Shield className="size-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <Shield className="size-4 text-primary shrink-0" />
             <span>{t("privacyNote")}</span>
           </div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              onClick={openNew}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg rounded-xl py-6 px-6 font-semibold"
-            >
+          <motion.div>
+            <Button onClick={openNew} className="rounded-md py-6 px-6 font-semibold">
               <PlusCircle className="mr-2 size-5" />
               {t("communityNewPost")}
             </Button>
@@ -314,7 +303,7 @@ function CommunityPage() {
                   onClick={() => setCategoryId(c.id)}
                   className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition ${
                     categoryId === c.id
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-card border border-border text-foreground hover:bg-muted"
                   }`}
                 >
@@ -378,7 +367,6 @@ function CommunityPage() {
             <AnimatePresence mode="popLayout">
               {posts.map((p, i) => {
                 const mine = !!authUser && p.authorId === authUser.id;
-                const grad = AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length];
                 return (
                   <motion.div
                     key={p.id}
@@ -387,18 +375,16 @@ function CommunityPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96 }}
                   >
-                    <Card className="p-5 rounded-2xl shadow-lg border border-border bg-card h-full flex flex-col">
+                    <Card className="p-5 border border-border bg-card h-full flex flex-col">
                       <div className="flex items-start gap-3">
-                        <div
-                          className={`size-12 rounded-full bg-gradient-to-br ${grad} text-white flex items-center justify-center font-bold shrink-0`}
-                        >
+                        <div className="size-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold shrink-0">
                           {initials(p.authorName)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-foreground truncate">{p.authorName}</h3>
                           <div className="mt-1 flex items-center gap-2 flex-wrap">
                             {p.categoryName && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-accent text-accent-foreground">
                                 {p.categoryName[lang]}
                               </span>
                             )}
@@ -419,7 +405,7 @@ function CommunityPage() {
                         params={{ postId: p.id }}
                         className="mt-3 block"
                       >
-                        <h4 className="font-bold text-foreground hover:text-blue-600 dark:hover:text-blue-400 transition">
+                        <h4 className="font-bold text-foreground hover:text-primary transition">
                           {p.title}
                         </h4>
                       </Link>
@@ -466,7 +452,7 @@ function CommunityPage() {
                             <>
                               <button
                                 onClick={() => openEdit(p)}
-                                className="size-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 flex items-center justify-center"
+                                className="size-8 rounded-lg bg-accent text-accent-foreground hover:bg-muted flex items-center justify-center"
                                 aria-label={t("communityEditPost")}
                               >
                                 <Pencil className="size-4" />
@@ -540,8 +526,8 @@ function CommunityPage() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs uppercase tracking-wide">{label}</p>
+      <p className="font-display text-2xl font-bold tabular-nums">{value}</p>
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
     </div>
   );
 }
