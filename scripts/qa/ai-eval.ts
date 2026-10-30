@@ -18,7 +18,8 @@ const DAILY_LIMIT = 9000;
 const NEURONS: Record<string, [number, number]> = {
   "@cf/qwen/qwen3-30b-a3b-fp8": [4625, 30475],
   "@cf/meta/llama-3.1-8b-instruct-fp8-fast": [4119, 34868],
-  "@cf/google/gemma-4-26b-a4b-it": [9091, 27273],
+  // gemma-4-26b-a4b-it is left out: it is served as "…-external" (another provider behind
+  // Cloudflare), so the Workers AI data terms may not cover it.
   "@cf/mistralai/mistral-small-3.1-24b-instruct": [31876, 50488],
 };
 const SUPPORT = "sheldonesmad@gmail.com";
@@ -164,12 +165,21 @@ async function run(c: Case) {
   const body = (await res.json()) as {
     success?: boolean;
     errors?: { message: string }[];
-    result?: { response?: string; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+    result?: {
+      // Classic Workers AI shape …
+      response?: string;
+      // … or the OpenAI-style shape some models return.
+      choices?: { message?: { content?: string } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number; neurons?: number };
+    };
   };
   if (!res.ok || !body.success) return { error: body.errors?.[0]?.message ?? `HTTP ${res.status}` };
   const u = body.result?.usage ?? {};
-  const neurons = ((u.prompt_tokens ?? 0) * rates[0] + (u.completion_tokens ?? 0) * rates[1]) / 1e6;
-  const text = (body.result?.response ?? "").replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  // Prefer the Neurons the API reports; otherwise estimate from the published rates.
+  const neurons =
+    u.neurons ?? ((u.prompt_tokens ?? 0) * rates[0] + (u.completion_tokens ?? 0) * rates[1]) / 1e6;
+  const raw = body.result?.response ?? body.result?.choices?.[0]?.message?.content ?? "";
+  const text = raw.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
   return { text, neurons };
 }
 
