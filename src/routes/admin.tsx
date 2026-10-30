@@ -60,7 +60,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { requireRole } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import {
   listPlatformUsers,
   type PlatformRole,
@@ -110,7 +110,7 @@ import {
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
-  beforeLoad: () => requireRole(["admin"]),
+  beforeLoad: () => requireAdmin(),
   head: () => ({
     meta: [
       { title: "Painel de Administração — Ekaya Explore" },
