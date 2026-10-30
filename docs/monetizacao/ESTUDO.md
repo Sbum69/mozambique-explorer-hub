@@ -1,6 +1,6 @@
 # Monetização do EKAYA — Fases 1 a 3 (auditoria, desenho, plano)
 
-Estado: **proposta para decisão**. Nenhum código, migração, dado ou configuração foi alterado.
+Estado: **decisões 1–9 tomadas a 30/10/2026** (secção 4); o resto é proposta. Nenhum código, migração, dado ou configuração foi alterado.
 Data da pesquisa: 30/10/2026.
 
 Marcas usadas em todo o documento:
@@ -192,23 +192,30 @@ Exemplo **ilustrativo** (folha `ExemplosComissao` do .xlsx): preço afixado de 2
   - ≥ 50% renovam;
   - satisfação ≥ 8/10 num inquérito curto.
 
-### 2e. Plano financeiro (resumo do .xlsx)
+### 2e. Plano financeiro (resumo do .xlsx, com as decisões de 30/10/2026)
 
-Pressupostos todos editáveis. O câmbio vem da BD: 1 USD = 63,79 MZN (30/10/2026).
+Pressupostos editáveis. Câmbio da BD: 1 USD = 63,79 MZN (30/10/2026). Com as decisões de 30/10:
 
-| Mês típico, depois do programa Fundador | Pessimista | Base      | Otimista    |
-| --------------------------------------- | ---------- | --------- | ----------- |
-| Negócios ativos                         | 10         | 30        | 60          |
-| Receita total / mês                     | 1 970 MT   | 35 333 MT | 250 900 MT  |
-| Custos fixos / mês                      | 21 360 MT  | 38 210 MT | 66 632 MT   |
-| Resultado / mês                         | −19 390 MT | −2 877 MT | +184 268 MT |
-| Negócios ativos para o equilíbrio       | 109        | 34        | 9           |
+- comissão de 10%;
+- Fundadores a 0% durante 6 meses, para os primeiros 20 negócios;
+- destaque a 500 MT/semana ou 1 500 MT/mês;
+- plano a 750 MT/mês.
+
+| Mês típico, depois do período Fundador                           | Pessimista   | Base         | Otimista       | Base, comissão 8% | Base sem patrocínios |
+| ---------------------------------------------------------------- | ------------ | ------------ | -------------- | ----------------- | -------------------- |
+| Negócios ativos                                                  | 10           | 30           | 60             | 30                | 30                   |
+| Receita total / mês                                              | 2 650 MT     | 35 333 MT    | 208 500 MT     | 31 583 MT         | 27 000 MT            |
+| Custos fixos / mês                                               | 21 360 MT    | 38 210 MT    | 66 632 MT      | 38 210 MT         | 38 210 MT            |
+| Resultado / mês                                                  | −18 710 MT   | −2 877 MT    | +141 868 MT    | −6 627 MT         | −11 210 MT           |
+| Negócios ativos para o equilíbrio                                | 81           | 34           | 11             | 39                | 43                   |
+| Total descontado ao negócio numa reserva média (comissão + taxa) | 255 MT (17%) | 400 MT (16%) | 508 MT (14,5%) | 350 MT (14%)      | 400 MT (16%)         |
 
 **Leitura [I]:**
 
-- No cenário base, só as comissões não pagam os custos: no 1.º ano, 41% da receita vem de patrocínios institucionais e 16% de destaques.
-- O ponto de equilíbrio depende mais do **número de negócios ativos** e dos **destaques** do que do valor da comissão.
-- Isto reforça a ideia de lançar primeiro os destaques e o plano, sem pagamento online.
+- Baixar a comissão de 10% para 8% custa ~3 750 MT/mês no cenário base e pede mais 5 negócios para chegar ao equilíbrio.
+- Sem patrocínios, são precisos 43 negócios, em vez de 34.
+- O ponto de equilíbrio depende sobretudo do **número de negócios ativos** e dos **destaques**.
+- No 1.º ano, o programa Fundador reduz as comissões: no cenário base, 24% da receita de 12 meses vem de comissões e 48% de patrocínios.
 
 ### 2f. Conformidade (a tratar com contabilista e advogado; não decido por ti)
 
@@ -352,3 +359,21 @@ Cada fase é um branch e um PR, com testes de BD que se revertem sozinhos, Vites
 
 Ordem proposta: M1 → M6 → M9 → M7 → M2 → M3 → M4 → M5 → M8 → M10 (o M10 pode correr em paralelo).
 Os destaques, a página "Para negócios" e o plano dão receita sem esperar pelo fornecedor nem pelo parecer jurídico.
+
+---
+
+## 4. Decisões de 30/10/2026
+
+1. **Quem recebe o dinheiro:** sem pagamento online no lançamento; depois split pelo fornecedor; se não houver split, fatura mensal da comissão. A custódia fica de fora sem parecer jurídico.
+2. **Quem paga a comissão:** opção B, descontada ao negócio. **O ecrã de adesão mostra sempre ao negócio o total descontado** (comissão + taxa do fornecedor), em MT e em %, antes de aceitar.
+3. **Valores iniciais**, todos configuráveis no admin:
+   - comissão de 10%;
+   - Parceiro Fundador: 0% durante 6 meses, para os primeiros 20 negócios;
+   - destaque a 500 MT/semana ou 1 500 MT/mês, com o 1.º grátis para os Fundadores;
+   - plano Parceiro a 750 MT/mês.
+4. **Paridade de preço:** o preço no EKAYA não pode ser mais alto do que o preço direto.
+5. **Reserva imediata** depois de pago, escolhida pelo negócio em cada experiência.
+6. **Pagamento depois de a reserva expirar:** reembolso automático; se falhar, vai para revisão do admin.
+7. **Fornecedores:** EPay e pawaPay primeiro. Os emails são enviados pelo responsável.
+8. **Ordem:** LEGAL-1 → SEG-2 → CONTEÚDO-1 → M1 → M6 → M9.
+9. **Piloto:** Maputo (cidade e província) e Inhambane (Tofo e Vilankulo).
