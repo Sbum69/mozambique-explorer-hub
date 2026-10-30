@@ -1,5 +1,9 @@
 # Assistente com IA do EKAYA — Fase 1 (estudo, sem código)
 
+> **Atualização de 30/10/2026:** sem API paga por agora. A fase 1 é FAQ + RPCs sem LLM, e a camada de IA
+> é o Cloudflare Workers AI na quota grátis, com corte automático para "só FAQ". Ver `WORKERS-AI.md`, que
+> substitui a recomendação de modelo da secção c) e os custos da secção g).
+
 Estado: **proposta para decisão**. Não foi criada nenhuma conta, instalado nada nem enviado nenhum dado a fornecedores.
 Pesquisa feita a 30/10/2026.
 
