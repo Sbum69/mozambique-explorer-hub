@@ -32,7 +32,7 @@ import {
   type Lang,
 } from "@/lib/admin-texts";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   Shield,
   LogOut,
@@ -130,8 +130,14 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+// Loaded only when the Content window opens.
+const AdminContent = lazy(() =>
+  import("@/components/AdminContent").then((m) => ({ default: m.AdminContent })),
+);
+
 type ModalKey =
   | null
+  | "content"
   | "users"
   | "routes"
   | "provinces"
@@ -211,6 +217,7 @@ function AdminPage() {
     { label: pt ? "Reservas" : "Bookings", value: summary.data?.bookings, icon: Clock },
   ];
   const quickActions = [
+    { key: "content" as const, label: "Conteúdo e importação", icon: FileText },
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users },
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store },
     { key: "bookings" as const, label: "Reservas", icon: Clock },
@@ -347,6 +354,7 @@ function AdminPage() {
                   {pt
                     ? a.label
                     : {
+                        content: "Content and import",
                         users: "Manage users",
                         businesses: "Business approvals",
                         routes: "Manage routes",
@@ -368,6 +376,17 @@ function AdminPage() {
         </div>
       </div>
 
+      {activeModal === "content" && (
+        <ModalShell
+          title={pt ? "Conteúdo e importação" : "Content and import"}
+          onClose={() => setActiveModal(null)}
+          maxWidth="max-w-5xl"
+        >
+          <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
+            <AdminContent />
+          </Suspense>
+        </ModalShell>
+      )}
       {activeModal === "users" && <UsersModal onClose={() => setActiveModal(null)} />}
       {activeModal === "routes" && <RoutesModal onClose={() => setActiveModal(null)} />}
       {activeModal === "routeProgress" && (

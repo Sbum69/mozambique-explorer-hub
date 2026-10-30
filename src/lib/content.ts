@@ -66,7 +66,8 @@ export function notReadyCodes(message: string): ExperienceMissing[] {
 
 /** RFC 4180-ish parser: quotes, escaped quotes, CRLF, BOM; delimiter "," or ";" (auto). */
 export function parseCsv(input: string): string[][] {
-  const text = input.replace(/^﻿/, "");
+  // Drop a byte-order mark (U+FEFF) that Excel adds to UTF-8 CSV files.
+  const text = input.charCodeAt(0) === 0xfeff ? input.slice(1) : input;
   const firstLine = text.split(/\r?\n/, 1)[0] ?? "";
   const delim =
     (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ";" : ",";
