@@ -605,6 +605,57 @@ export type Database = {
           },
         ]
       }
+      commercial_configs: {
+        Row: {
+          commission_bp: number
+          created_at: string
+          created_by: string | null
+          founder_cap: number
+          founder_commission_bp: number
+          founder_free_highlights: number
+          founder_months: number
+          highlight_month_cents: number
+          highlight_week_cents: number
+          id: string
+          note: string | null
+          plan_month_cents: number
+          provider_fee_bp: number
+          version: number
+        }
+        Insert: {
+          commission_bp: number
+          created_at?: string
+          created_by?: string | null
+          founder_cap: number
+          founder_commission_bp: number
+          founder_free_highlights?: number
+          founder_months: number
+          highlight_month_cents: number
+          highlight_week_cents: number
+          id?: string
+          note?: string | null
+          plan_month_cents: number
+          provider_fee_bp?: number
+          version?: number
+        }
+        Update: {
+          commission_bp?: number
+          created_at?: string
+          created_by?: string | null
+          founder_cap?: number
+          founder_commission_bp?: number
+          founder_free_highlights?: number
+          founder_months?: number
+          highlight_month_cents?: number
+          highlight_week_cents?: number
+          id?: string
+          note?: string | null
+          plan_month_cents?: number
+          provider_fee_bp?: number
+          version?: number
+        }
+        Relationships: []
+      }
       destination_visits: {
         Row: {
           destination_id: string
@@ -1163,6 +1214,108 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      admin_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          entity: string
+          entity_id: string | null
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity: string
+          entity_id?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      booking_commission_snapshots: {
+        Row: {
+          booking_id: string
+          business_id: string
+          commission_bp: number
+          commission_cents: number
+          config_version: number
+          created_at: string
+          founder: boolean
+          gross_cents: number
+          net_cents: number
+          provider_fee_bp: number
+          provider_fee_cents: number
+        }
+        Insert: {
+          booking_id: string
+          business_id: string
+          commission_bp: number
+          commission_cents: number
+          config_version: number
+          created_at?: string
+          founder: boolean
+          gross_cents: number
+          net_cents: number
+          provider_fee_bp: number
+          provider_fee_cents: number
+        }
+        Update: {
+          booking_id?: string
+          business_id?: string
+          commission_bp?: number
+          commission_cents?: number
+          config_version?: number
+          created_at?: string
+          founder?: boolean
+          gross_cents?: number
+          net_cents?: number
+          provider_fee_bp?: number
+          provider_fee_cents?: number
+        }
+        Relationships: []
+      }
+      business_commercial_terms: {
+        Row: {
+          business_id: string
+          founder_since: string | null
+          founder_until: string | null
+          free_highlights_used: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          founder_since?: string | null
+          founder_until?: string | null
+          free_highlights_used?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          founder_since?: string | null
+          founder_until?: string | null
+          free_highlights_used?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       business_invites: {
         Row: {
@@ -2063,6 +2216,25 @@ export type Database = {
         Args: { _internal: boolean; _user_id: string }
         Returns: undefined
       }
+      admin_set_commercial_config: {
+        Args: {
+          _commission_bp: number
+          _founder_cap: number
+          _founder_commission_bp: number
+          _founder_free_highlights: number
+          _founder_months: number
+          _highlight_month_cents: number
+          _highlight_week_cents: number
+          _plan_month_cents: number
+          _provider_fee_bp: number
+          _reason: string
+        }
+        Returns: number
+      }
+      admin_set_founder: {
+        Args: { _business_id: string; _founder: boolean; _reason: string }
+        Returns: Json
+      }
       admin_create_business_invite: {
         Args: { _business_id: string; _days?: number }
         Returns: string
@@ -2155,6 +2327,10 @@ export type Database = {
       can_view_route: { Args: { _route_id: string }; Returns: boolean }
       cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
       claim_business_invite: { Args: { _token: string }; Returns: string }
+      commission_quote: {
+        Args: { _business_id: string | null; _gross_cents: number }
+        Returns: Json
+      }
       content_readiness: { Args: { _business_id: string }; Returns: Json }
       current_legal_versions: { Args: never; Returns: Json }
       commercial_activity_public: {
