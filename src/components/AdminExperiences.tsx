@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { adminErrorText, fetchAdminExperiences, setExperienceActive } from "@/lib/admin";
+import { formatPrice } from "@/lib/price";
 
 const TXT = {
   pt: {
@@ -139,7 +140,7 @@ export function AdminExperiencesModal({ onClose }: { onClose: () => void }) {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {e.businessName} ({t.biz[e.businessStatus] ?? e.businessStatus}) ·{" "}
-                    {e.priceMzn.toLocaleString(lang)} MZN
+                    {formatPrice(e.priceMzn, lang)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

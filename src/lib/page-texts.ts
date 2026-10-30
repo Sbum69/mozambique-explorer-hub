@@ -818,6 +818,7 @@ export const CONTENT_TXT = {
     joinTitle: "És um negócio local?",
     joinBody: "Junta-te ao EKAYA: o perfil é grátis e ficas visível para quem visita Moçambique.",
     joinCta: "Junta-te ao EKAYA",
+    free: "Grátis",
     day: "Dia",
     start: "Início",
     end: "Fim",
@@ -949,6 +950,7 @@ export const CONTENT_TXT = {
     joinBody:
       "Join EKAYA: the profile is free and you become visible to people visiting Mozambique.",
     joinCta: "Join EKAYA",
+    free: "Free",
     day: "Day",
     start: "Start",
     end: "End",

@@ -56,6 +56,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
 import { HERO_AVIF_SRCSET, HERO_PHOTO, HeroImage } from "@/components/HeroImage";
+import { formatPrice } from "@/lib/price";
 
 // Same colours as NotificationsBell variant="onDark": the top bar sits on the dark hero photo.
 const ON_HERO = "text-white hover:bg-white/10 hover:text-white";
@@ -506,7 +507,9 @@ function HomePage() {
                     <span className="inline-flex items-center gap-1">
                       <Clock className="size-3.5" /> {e.durationHours}h
                     </span>
-                    <span className="ml-auto font-semibold text-foreground">{e.priceMzn} MZN</span>
+                    <span className="ml-auto font-semibold text-foreground">
+                      {formatPrice(e.priceMzn, lang)}
+                    </span>
                   </div>
                   <Button asChild size="sm" variant="outline" className="mt-4 w-full">
                     <Link to="/experiences">{lang === "pt" ? "Ver detalhes" : "View details"}</Link>
@@ -839,7 +842,9 @@ function PersonalSection({ lang }: { lang: Lang }) {
                   <span className="inline-flex items-center gap-1">
                     <Clock className="size-3.5" /> {item.durationHours}h
                   </span>
-                  <span className="ml-auto font-semibold text-foreground">{item.priceMzn} MZN</span>
+                  <span className="ml-auto font-semibold text-foreground">
+                    {formatPrice(item.priceMzn, lang)}
+                  </span>
                 </div>
                 <Button asChild size="sm" variant="outline" className="mt-4 w-full">
                   <Link to="/experiences">{lang === "pt" ? "Ver detalhes" : "View details"}</Link>

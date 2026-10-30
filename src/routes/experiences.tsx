@@ -57,6 +57,7 @@ import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
 import { useProvinces } from "@/hooks/useProvinces";
 import { firstOffered, inPreferredProvinces } from "@/lib/pref-filters";
 import { useBackTarget } from "@/lib/nav";
+import { formatPrice } from "@/lib/price";
 import {
   createBooking,
   fetchAvailableWeekdays,
@@ -455,8 +456,14 @@ function ExperiencesPage() {
                     <div className="flex items-end justify-between mt-5 pt-4 border-t">
                       <div>
                         <div className="text-2xl font-bold text-primary">
-                          {exp.priceMzn.toLocaleString()}{" "}
-                          <span className="text-xs font-normal text-muted-foreground">MZN</span>
+                          {exp.priceMzn === 0 ? (
+                            formatPrice(0, lang)
+                          ) : (
+                            <>
+                              {exp.priceMzn.toLocaleString(lang === "pt" ? "pt-PT" : "en-GB")}{" "}
+                              <span className="text-xs font-normal text-muted-foreground">MZN</span>
+                            </>
+                          )}
                         </div>
                         <p className="text-[11px] text-muted-foreground">{t("perPerson")}</p>
                       </div>
@@ -521,7 +528,7 @@ function ExperiencesPage() {
                     {openExp.durationHours}h
                   </span>
                   <span className="font-semibold text-primary">
-                    {openExp.priceMzn.toLocaleString()} MZN
+                    {formatPrice(openExp.priceMzn, lang)}
                   </span>
                 </div>
               </div>
@@ -673,7 +680,7 @@ function ExperiencesPage() {
                   {lang === "pt" ? "Total estimado" : "Estimated total"}
                 </span>
                 <span className="text-xl font-bold text-primary">
-                  {(openExp.priceMzn * form.people).toLocaleString()} MZN
+                  {formatPrice(openExp.priceMzn * form.people, lang)}
                 </span>
               </div>
 

@@ -30,6 +30,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { useFavorites, type FavoriteItem, type FavoriteType } from "@/contexts/FavoritesContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { formatPrice } from "@/lib/price";
 
 export const Route = createFileRoute("/favorites")({
   head: () => ({
@@ -453,7 +454,7 @@ function FavoriteCard({
           {typeof d.priceMzn === "number" && (
             <span className="flex items-center gap-1">
               <DollarSign className="size-3" />
-              {d.priceMzn} MZN
+              {formatPrice(d.priceMzn, lang)}
             </span>
           )}
         </div>

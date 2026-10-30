@@ -23,6 +23,7 @@ import {
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
+import { formatPrice } from "@/lib/price";
 import {
   getBusinessManagement,
   saveBusinessProfile,
@@ -297,8 +298,8 @@ export function BusinessManagement() {
                   {lang === "pt" ? a.title_pt : (a.title_en ?? a.title_pt)}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {Number(a.price_mzn).toLocaleString(lang)} MZN · {a.duration_hours}h ·{" "}
-                  {a.capacity} {pt ? "pessoas" : "people"}
+                  {formatPrice(Number(a.price_mzn), lang)} · {a.duration_hours}h · {a.capacity}{" "}
+                  {pt ? "pessoas" : "people"}
                 </p>
                 <p className="text-xs mt-1">
                   {a.active ? (pt ? "Ativa" : "Active") : pt ? "Desativada" : "Inactive"} ·{" "}
