@@ -39,7 +39,7 @@ import { useProvinces } from "@/hooks/useProvinces";
 import { INTERESTS } from "@/data/destinations";
 import { supabase } from "@/integrations/supabase/client";
 import { exportMyData } from "@/lib/account.functions";
-import { APP_VERSION } from "@/lib/app-info";
+import { APP_VERSION, SUPPORT_EMAIL } from "@/lib/app-info";
 import { getAuthCallbackUrl } from "@/lib/app-url";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
@@ -176,17 +176,24 @@ function SettingsPage() {
             <dt className="text-muted-foreground">{t.terms}</dt>
             <dd>
               <Link to="/terms" className="text-primary underline-offset-4 hover:underline">
-                {t.inPreparation}
+                {t.readDraft}
               </Link>
             </dd>
             <dt className="text-muted-foreground">{t.privacy}</dt>
             <dd>
               <Link to="/privacy" className="text-primary underline-offset-4 hover:underline">
-                {t.inPreparation}
+                {t.readDraft}
               </Link>
             </dd>
             <dt className="text-muted-foreground">{t.contact}</dt>
-            <dd>{t.inPreparation}</dd>
+            <dd className="min-w-0 break-words">
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="text-primary underline-offset-4 hover:underline"
+              >
+                {SUPPORT_EMAIL}
+              </a>
+            </dd>
             <dt className="text-muted-foreground">{PHOTOS_TXT[lang].credits}</dt>
             <dd>
               <Link to="/creditos" className="text-primary underline-offset-4 hover:underline">
