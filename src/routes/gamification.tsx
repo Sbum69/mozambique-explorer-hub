@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PointsCard } from "@/components/PointsCard";
@@ -94,6 +95,7 @@ function GamificationPage() {
           </div>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </nav>
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">

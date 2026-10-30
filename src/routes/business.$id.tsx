@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchPublicBusiness, type PublicBusiness } from "@/lib/local-businesses";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,6 +117,7 @@ function BusinessDetailPage() {
           </span>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </header>
 

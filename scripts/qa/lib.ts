@@ -45,6 +45,8 @@ export const PAGES: QaPage[] = [
   { name: "t-gamification", path: "/gamification", role: "tourist" },
   { name: "t-games", path: "/games", role: "tourist" },
   { name: "t-preferences", path: "/preferences", role: "tourist" },
+  { name: "t-settings", path: "/settings", role: "tourist" },
+  { name: "terms", path: "/terms" },
   { name: "b-dashboard", path: "/business-dashboard", role: "business" },
   { name: "a-admin", path: "/admin", role: "admin" },
 ];

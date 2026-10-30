@@ -12,6 +12,13 @@ describe("FAV-1 return to the page after signing in", () => {
     expect(authReturnFor("/experience/abc")).toBe("/experiences");
   });
 
+  it("UX-1: private pages and community posts are allow-listed returns", () => {
+    expect(authReturnFor("/dashboard")).toBe("/dashboard");
+    expect(authReturnFor("/games")).toBe("/games");
+    expect(authReturnFor("/settings")).toBe("/settings");
+    expect(authReturnFor("/community/6f9619ff-8b86-4d01-b42d-00cf4fc964ff")).toBe("/community");
+  });
+
   it("never returns to an arbitrary path (no open redirect)", () => {
     expect(authReturnFor("/admin")).toBeUndefined();
     expect(authReturnFor("//evil.example")).toBeUndefined();

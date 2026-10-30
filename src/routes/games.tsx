@@ -9,6 +9,7 @@ import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { GAMES_TXT } from "@/lib/page-texts";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import {
   fetchAchievements,
   isUnlocked,
@@ -510,6 +511,7 @@ function GamesPage() {
           <div className="flex shrink-0 items-center gap-1">
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
             <Button asChild size="sm" variant="outline" className="gap-1">
               <Link to="/gamification">
                 <Trophy className="size-4" />

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useLang } from "@/contexts/LanguageContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,6 +79,7 @@ function VoucherPage() {
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
         {q.isLoading ? (

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,7 +78,7 @@ function CommunityPostPage() {
 
   const react = async (value: ReactionValue) => {
     if (!post) return;
-    if (!requireAccount(pt ? "Reagir a publicações" : "React to posts")) return;
+    if (!requireAccount(pt ? "reagir a publicações" : "react to posts")) return;
     try {
       const next = await toggleReaction(post.id, value);
       setPost((p) => {
@@ -95,7 +96,7 @@ function CommunityPostPage() {
   };
 
   const openReport = () => {
-    if (!requireAccount(pt ? "Denunciar publicações" : "Report posts")) return;
+    if (!requireAccount(pt ? "denunciar publicações" : "report posts")) return;
     setReporting(true);
   };
 
@@ -109,6 +110,7 @@ function CommunityPostPage() {
           </div>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </header>
 

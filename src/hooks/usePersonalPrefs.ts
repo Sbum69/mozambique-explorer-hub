@@ -9,8 +9,10 @@ import { useDestinations } from "@/hooks/useDestinations";
  */
 export function usePersonalPrefs() {
   const { user, isAuthenticated } = useAuth();
-  const { destinations } = useDestinations();
   const prefs = user?.preferences;
+  // The catalogue is only needed for older profiles that saved a destination but no province.
+  const needsDestinations = !prefs?.provinces?.length && !!prefs?.province;
+  const { destinations } = useDestinations(undefined, { enabled: needsDestinations });
   return useMemo(() => {
     let provinces = prefs?.provinces ?? [];
     if (!provinces.length && prefs?.province) {

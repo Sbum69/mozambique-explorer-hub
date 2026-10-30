@@ -22,7 +22,11 @@ import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGate } from "@/contexts/AuthGateContext";
+import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
+import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
+import { inPreferredProvinces } from "@/lib/pref-filters";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -78,7 +82,7 @@ export const Route = createFileRoute("/map")({
 
 function MapPage() {
   const { t, lang } = useLang();
-  const { user, isAuthenticated, authUser } = useAuth();
+  const { isAuthenticated, authUser } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
   const backTarget = useBackTarget();
@@ -99,7 +103,16 @@ function MapPage() {
   useEffect(() => {
     setSelectedCommunityId(linkedCommunity ?? null);
   }, [linkedCommunity]);
-  const preferredId = user?.preferences?.province;
+  // Starts on the saved provinces (unless a link points at a destination); "Show all" never changes
+  // the preferences.
+  const personalPrefs = usePersonalPrefs();
+  const mapFilters = usePrefilledFilters<{ onlyMine: boolean }>(
+    personalPrefs.hasPrefs && !linkedSlug ? { onlyMine: true } : null,
+    { onlyMine: false },
+  );
+  const hasProvincePrefs = personalPrefs.hasPrefs;
+  const showAllDestinations = !mapFilters.value.onlyMine;
+  const isPreferred = (d: Destination) => inPreferredProvinces(d.province, personalPrefs);
   // Destinations already in the server HTML: show them at once (no entrance fade on the LCP card).
   const serverDestinations = Route.useLoaderData();
   const {
@@ -110,11 +123,8 @@ function MapPage() {
     reload,
   } = useDestinations(serverDestinations);
   const [selected, setSelected] = useState<Destination | null>(null);
-  const [showAllDestinations, setShowAllDestinations] = useState(!preferredId || !!linkedSlug);
   const visibleDestinations =
-    preferredId && !showAllDestinations
-      ? destinations.filter((d) => d.slug === preferredId)
-      : destinations;
+    hasProvincePrefs && !showAllDestinations ? destinations.filter(isPreferred) : destinations;
 
   const mappable = visibleDestinations.filter((d) => hasValidCoords(d.coords));
 
@@ -126,10 +136,10 @@ function MapPage() {
         (linkedSlug
           ? destinations.find((d) => d.slug === linkedSlug || d.id === linkedSlug)
           : undefined) ??
-        destinations.find((d) => d.slug === preferredId) ??
+        destinations.find((d) => inPreferredProvinces(d.province, personalPrefs)) ??
         destinations[0],
     );
-  }, [destinations, preferredId, linkedSlug]);
+  }, [destinations, personalPrefs, linkedSlug]);
 
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [focus, setFocus] = useState<[number, number] | null>(null);
@@ -253,7 +263,7 @@ function MapPage() {
   };
 
   const toggleVisit = async (d: Destination) => {
-    if (!requireAccount(pt ? "Marcar como visitado" : "Mark as visited")) return;
+    if (!requireAccount(pt ? "marcar como visitado" : "mark as visited")) return;
     if (!userId) return;
     const was = isVisited(d.id);
     setSavingVisit(true);
@@ -310,6 +320,7 @@ function MapPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -455,9 +466,9 @@ function MapPage() {
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 {visibleDestinations.length} {lang === "pt" ? "destinos" : "destinations"}
               </h2>
-              {preferredId && (
+              {hasProvincePrefs && (
                 <button
-                  onClick={() => setShowAllDestinations((s) => !s)}
+                  onClick={() => mapFilters.set((cur) => ({ onlyMine: !cur.onlyMine }))}
                   className="text-xs text-primary hover:underline"
                 >
                   {showAllDestinations

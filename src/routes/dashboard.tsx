@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PointsCard } from "@/components/PointsCard";
 import { useLang, type DictKey } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -68,6 +69,8 @@ interface ModuleDef {
   titleKey: DictKey;
   descKey: DictKey;
   gradient: string;
+  /** Only for a module whose page does not exist yet; every module below links to a live page. */
+  inDevelopment?: boolean;
 }
 
 const MODULES: ModuleDef[] = [
@@ -158,9 +161,8 @@ const MODULES: ModuleDef[] = [
 ];
 
 function DashboardPage() {
-  const { user, authUser, logout, needsOnboarding } = useAuth();
+  const { user, authUser, needsOnboarding } = useAuth();
   const { t, lang } = useLang();
-  const navigate = useNavigate();
   const [showChangeDest, setShowChangeDest] = useState(false);
   const { destinations } = useDestinations();
   const { publicRoutes } = useRouteCatalogue(null);
@@ -217,21 +219,7 @@ function DashboardPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm">
-              <span className="size-7 rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground flex items-center justify-center text-xs font-bold">
-                {user.displayName.charAt(0)}
-              </span>
-              <span className="font-medium">{user.displayName}</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                void logout().then(() => navigate({ to: "/login", replace: true }));
-              }}
-            >
-              {t("logout")}
-            </Button>
+            <UserMenu />
           </div>
         </div>
       </nav>
@@ -404,9 +392,11 @@ function DashboardPage() {
                   </div>
                   <h3 className="mt-4 font-bold text-lg">{t(m.titleKey)}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{t(m.descKey)}</p>
-                  <span className="mt-3 inline-block text-xs text-muted-foreground">
-                    {lang === "pt" ? "Em desenvolvimento" : "In development"}
-                  </span>
+                  {m.inDevelopment && (
+                    <span className="mt-3 inline-block text-xs text-muted-foreground">
+                      {lang === "pt" ? "Em desenvolvimento" : "In development"}
+                    </span>
+                  )}
                 </Card>
               </Link>
             </motion.div>

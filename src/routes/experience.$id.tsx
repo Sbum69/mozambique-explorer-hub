@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchExperienceById, type Experience } from "@/lib/experiences";
 
@@ -79,6 +80,7 @@ function ExperienceDetailPage() {
           <span className="font-bold flex-1 truncate">{pt ? "Experiência" : "Experience"}</span>
           <ThemeToggle />
           <LanguageToggle />
+          <UserMenu />
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-6">

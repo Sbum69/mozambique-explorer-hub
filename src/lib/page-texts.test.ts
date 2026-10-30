@@ -24,6 +24,7 @@ describe("ADM-2B page texts exist in PT and EN", () => {
         "GAMES_TXT",
         "GAME_TASK_TXT",
         "RESET_TXT",
+        "SETTINGS_TXT",
         "SIGNUP_TXT",
         "TREASURE_TXT",
       ].sort(),

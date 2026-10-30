@@ -44,7 +44,7 @@ export function FavoriteButton({
     e.stopPropagation();
     e.preventDefault();
     // Guests are asked to sign in and come back to this page.
-    if (busy || !requireAccount(pt ? "Favoritos" : "Favorites")) return;
+    if (busy || !requireAccount(pt ? "guardar favoritos" : "save favourites")) return;
     setBusy(true);
     try {
       const added = await toggleFavorite(itemType, itemId);

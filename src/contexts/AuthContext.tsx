@@ -23,6 +23,9 @@ export interface AppUser {
   role: UserRole;
   displayName: string;
   email?: string;
+  /** Public URL of the profile photo (avatars bucket), if any. */
+  avatarUrl?: string;
+  phone?: string;
   preferences?: UserPreferences;
 }
 
@@ -34,6 +37,8 @@ interface AuthContextValue {
   /** Set when the signed-in user's profile/roles could not be read; the app is blocked until a retry succeeds. */
   loadError: string | null;
   retryLoad: () => void;
+  /** Re-reads profile, roles and preferences after the user changed them (no loading screen). */
+  refreshProfile: () => Promise<void>;
   login: (
     email: string,
     password: string,
@@ -220,6 +225,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile?.display_name ??
         String(currentAuthUser.user_metadata?.display_name ?? email.split("@")[0] ?? "Explorador"),
       email,
+      avatarUrl: profile?.avatar_url ?? undefined,
+      phone: profile?.phone ?? undefined,
       preferences: {
         province: profile?.province ?? undefined,
         provinces: provinceCodes,
@@ -247,6 +254,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const retryLoad = () => {
     setIsLoading(true);
     void loadAuthenticatedUser(authUser);
+  };
+
+  const refreshProfile = async () => {
+    await loadAuthenticatedUser(authUser);
   };
 
   // In-memory only: user state is no longer persisted in the browser (the database is the source of truth).
@@ -360,6 +371,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         loadError,
         retryLoad,
+        refreshProfile,
         login,
         loginAsGuest,
         logout,

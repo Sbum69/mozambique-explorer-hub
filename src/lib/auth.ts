@@ -8,10 +8,19 @@ export type AppRole = "tourist" | "business_small" | "business_large" | "admin";
 // Fixed allowlist (no open redirects): pages a guest can return to after signing in.
 export const AUTH_RETURN_PATHS = [
   "/business-register",
+  "/home",
   "/map",
   "/experiences",
+  "/community-experiences",
   "/itineraries",
+  "/news-alerts",
+  "/community",
   "/favorites",
+  "/dashboard",
+  "/bookings",
+  "/gamification",
+  "/games",
+  "/settings",
 ] as const;
 export type AuthReturnPath = (typeof AUTH_RETURN_PATHS)[number];
 
@@ -30,6 +39,7 @@ export function postConfirmTarget(
 export function authReturnFor(pathname: string): AuthReturnPath | undefined {
   if (pathname.startsWith("/itinerary/")) return "/itineraries";
   if (pathname.startsWith("/experience/")) return "/experiences";
+  if (pathname.startsWith("/community/")) return "/community";
   return parseAuthReturn(pathname);
 }
 
@@ -46,9 +56,13 @@ export async function getAuthenticatedUser() {
   return error ? null : data.user;
 }
 
-export async function requireAuthenticatedUser() {
+/** Route guard: without a session, go to /login and come back here afterwards (allow-listed pages only). */
+export async function requireAuthenticatedUser(ctx?: { location?: { pathname: string } }) {
   const user = await getAuthenticatedUser();
-  if (!user) throw redirect({ to: "/login" });
+  if (!user) {
+    const back = ctx?.location ? authReturnFor(ctx.location.pathname) : undefined;
+    throw redirect({ to: "/login", search: back ? { redirect: back } : {} });
+  }
   return user;
 }
 

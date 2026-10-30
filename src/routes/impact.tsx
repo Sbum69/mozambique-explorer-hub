@@ -20,6 +20,7 @@ import {
 
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,7 @@ function ImpactPage() {
             <NotificationsBell />
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
       </header>

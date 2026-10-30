@@ -28,6 +28,9 @@ export function NotificationsBell({ variant = "default" }: Props) {
   const pt = lang === "pt";
   const prefetch = () => void loadPanel();
 
+  // Visitors have no notifications: the bell only shows with a session.
+  if (isGuest) return null;
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>

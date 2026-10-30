@@ -1352,11 +1352,13 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          deleted_at: string | null
           display_name: string | null
           duration_days: number | null
           id: string
           interests: string[] | null
           locale: string
+          muted_notification_types: string[]
           phone: string | null
           province: string | null
           updated_at: string
@@ -1364,11 +1366,13 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          deleted_at?: string | null
           display_name?: string | null
           duration_days?: number | null
           id: string
           interests?: string[] | null
           locale?: string
+          muted_notification_types?: string[]
           phone?: string | null
           province?: string | null
           updated_at?: string
@@ -1376,11 +1380,13 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          deleted_at?: string | null
           display_name?: string | null
           duration_days?: number | null
           id?: string
           interests?: string[] | null
           locale?: string
+          muted_notification_types?: string[]
           phone?: string | null
           province?: string | null
           updated_at?: string
@@ -2068,6 +2074,7 @@ export type Database = {
         Args: { _business_id: string }
         Returns: boolean
       }
+      delete_my_account: { Args: { _confirm: string }; Returns: string }
       event_participant_counts: {
         Args: { _keys: string[] }
         Returns: {

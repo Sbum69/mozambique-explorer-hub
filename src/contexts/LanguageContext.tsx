@@ -284,8 +284,8 @@ const dict = {
     en: "XP, badges, leaderboard and rewards",
   },
   modGamesDesc: { pt: "Quizzes e desafios que dão XP", en: "Quizzes and challenges that earn XP" },
-  modBusinesses: { pt: "🏪 Negócios Locais", en: "🏪 Local Businesses" },
-  modCommunityExp: { pt: "👥 Experiências Comunitárias", en: "👥 Community Experiences" },
+  modBusinesses: { pt: "Negócios Locais", en: "Local Businesses" },
+  modCommunityExp: { pt: "Experiências Comunitárias", en: "Community Experiences" },
   modCommunityExpDesc: {
     pt: "Atividades gratuitas, sem reserva, por província",
     en: "Free activities, no booking, by province",

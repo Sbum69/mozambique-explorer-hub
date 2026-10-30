@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { UserMenu } from "@/components/UserMenu";
 import { registerMyBusiness } from "@/lib/business-registration.functions";
 import type { BusinessRegistrationError } from "@/lib/business-registration";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
@@ -280,6 +281,7 @@ function BusinessRegisterPage() {
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
       </div>
