@@ -26,6 +26,7 @@ import { fetchPublicBusiness, type PublicBusiness } from "@/lib/local-businesses
 import { supabase } from "@/integrations/supabase/client";
 import { mapExperience, type Experience } from "@/lib/experiences";
 import { BusinessFreeActivities } from "@/components/BusinessFreeActivities";
+import { formatPrice } from "@/lib/price";
 
 export const Route = createFileRoute("/business/$id")({
   head: () => ({
@@ -288,7 +289,7 @@ function BusinessDetailPage() {
                             {e.durationHours}h
                           </p>
                           <p className="text-sm font-bold text-primary">
-                            {e.priceMzn.toLocaleString("pt-PT")} MZN
+                            {formatPrice(e.priceMzn, lang)}
                           </p>
                         </div>
                       </Card>

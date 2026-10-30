@@ -20,6 +20,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchExperienceById, type Experience } from "@/lib/experiences";
+import { formatPrice } from "@/lib/price";
 
 export const Route = createFileRoute("/experience/$id")({
   head: () => ({
@@ -156,7 +157,7 @@ function ExperienceDetailPage() {
               )}
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <span className="text-2xl font-bold text-primary">
-                  {exp.priceMzn.toLocaleString("pt-PT")} MZN
+                  {formatPrice(exp.priceMzn, lang)}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   {pt ? "por pessoa" : "per person"}

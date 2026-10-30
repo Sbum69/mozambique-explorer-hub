@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { notReadyCodes } from "@/lib/content";
+import { CONTENT_TXT } from "@/lib/page-texts";
+
 const text = z.string().trim().min(1).max(500);
 export const profileSchema = z.object({
   id: z.string().uuid(),
@@ -58,6 +61,11 @@ export type AvailabilityInput = z.infer<typeof availabilitySchema>;
 
 export function managementError(error: unknown, pt: boolean) {
   const message = error instanceof Error ? error.message : "";
+  const notReady = notReadyCodes(message);
+  if (notReady.length) {
+    const t = CONTENT_TXT[pt ? "pt" : "en"];
+    return `${t.notReadyError} ${notReady.map((c) => t.missing[c]).join(", ")}`;
+  }
   if (/PROVINCE_HAS_ACTIVITIES/.test(message))
     return pt
       ? "Este negócio já tem atividades. A mudança de província precisa de revisão para preservar os destinos associados."

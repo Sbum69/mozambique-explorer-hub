@@ -1164,6 +1164,42 @@ export type Database = {
           },
         ]
       }
+      business_invites: {
+        Row: {
+          business_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          revoked_at: string | null
+          token_hash: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          revoked_at?: string | null
+          token_hash: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          revoked_at?: string | null
+          token_hash?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       legal_acceptances: {
         Row: {
           accepted_at: string
@@ -2027,6 +2063,14 @@ export type Database = {
         Args: { _internal: boolean; _user_id: string }
         Returns: undefined
       }
+      admin_create_business_invite: {
+        Args: { _business_id: string; _days?: number }
+        Returns: string
+      }
+      admin_import_content: {
+        Args: { _dry_run?: boolean; _rows: Json }
+        Returns: Json
+      }
       admin_assign_business_owner: {
         Args: { _business_id: string; _email: string }
         Returns: Json
@@ -2098,6 +2142,7 @@ export type Database = {
         Args: { _date: string; _experience_id: string; _time: string }
         Returns: number
       }
+      business_invite_preview: { Args: { _token: string }; Returns: Json }
       business_decide_booking: {
         Args: {
           _booking_id: string
@@ -2109,6 +2154,8 @@ export type Database = {
       can_edit_route: { Args: { _route_id: string }; Returns: boolean }
       can_view_route: { Args: { _route_id: string }; Returns: boolean }
       cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
+      claim_business_invite: { Args: { _token: string }; Returns: string }
+      content_readiness: { Args: { _business_id: string }; Returns: Json }
       current_legal_versions: { Args: never; Returns: Json }
       commercial_activity_public: {
         Args: { _business_id: string }

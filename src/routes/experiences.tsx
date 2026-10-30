@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { InterestIcon } from "@/components/InterestIcon";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
+import { JoinEkayaCard } from "@/components/JoinEkayaCard";
+import { CONTENT_TXT } from "@/lib/page-texts";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -55,6 +57,7 @@ import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
 import { useProvinces } from "@/hooks/useProvinces";
 import { firstOffered, inPreferredProvinces } from "@/lib/pref-filters";
 import { useBackTarget } from "@/lib/nav";
+import { formatPrice } from "@/lib/price";
 import {
   createBooking,
   fetchAvailableWeekdays,
@@ -383,13 +386,7 @@ function ExperiencesPage() {
           </Card>
         )}
 
-        {isEmpty && (
-          <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
-            {lang === "pt"
-              ? "Ainda não existem experiências disponíveis."
-              : "No experiences available yet."}
-          </Card>
-        )}
+        {isEmpty && <JoinEkayaCard message={CONTENT_TXT[lang].emptyExperiences} />}
 
         {!loading && !error && !isEmpty && filtered.length === 0 && (
           <Card className="border-0 shadow-[var(--shadow-soft)] p-6 text-center text-sm text-muted-foreground">
@@ -459,8 +456,14 @@ function ExperiencesPage() {
                     <div className="flex items-end justify-between mt-5 pt-4 border-t">
                       <div>
                         <div className="text-2xl font-bold text-primary">
-                          {exp.priceMzn.toLocaleString()}{" "}
-                          <span className="text-xs font-normal text-muted-foreground">MZN</span>
+                          {exp.priceMzn === 0 ? (
+                            formatPrice(0, lang)
+                          ) : (
+                            <>
+                              {exp.priceMzn.toLocaleString(lang === "pt" ? "pt-PT" : "en-GB")}{" "}
+                              <span className="text-xs font-normal text-muted-foreground">MZN</span>
+                            </>
+                          )}
                         </div>
                         <p className="text-[11px] text-muted-foreground">{t("perPerson")}</p>
                       </div>
@@ -525,7 +528,7 @@ function ExperiencesPage() {
                     {openExp.durationHours}h
                   </span>
                   <span className="font-semibold text-primary">
-                    {openExp.priceMzn.toLocaleString()} MZN
+                    {formatPrice(openExp.priceMzn, lang)}
                   </span>
                 </div>
               </div>
@@ -677,7 +680,7 @@ function ExperiencesPage() {
                   {lang === "pt" ? "Total estimado" : "Estimated total"}
                 </span>
                 <span className="text-xl font-bold text-primary">
-                  {(openExp.priceMzn * form.people).toLocaleString()} MZN
+                  {formatPrice(openExp.priceMzn * form.people, lang)}
                 </span>
               </div>
 

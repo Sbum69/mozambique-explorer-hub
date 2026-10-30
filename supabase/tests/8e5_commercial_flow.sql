@@ -29,9 +29,15 @@ BEGIN
   d_cap := d_future + 7;
 
   PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
-  INSERT INTO public.experiences (business_id, title_pt, price_mzn, active) VALUES (biz, 'SEG-8E5 test', 100, true) RETURNING id INTO exp;
+  INSERT INTO public.experiences (business_id, title_pt, price_mzn, active, title_en, description_pt, description_en, capacity, destination_id, images)
+    VALUES (biz, 'SEG-8E5 test', 100, false, 'QA test', 'Atividade de teste automático (revertida no fim).', 'Automatic test activity (rolled back at the end).', 20, (SELECT id FROM public.destinations WHERE lat IS NOT NULL AND lng IS NOT NULL ORDER BY slug LIMIT 1), ARRAY['https://example.invalid/qa.jpg']) RETURNING id INTO exp;
   INSERT INTO public.experience_availability (experience_id, day_of_week, start_time, end_time, capacity, active, accepts_new_bookings)
     VALUES (exp, extract(dow FROM d_future)::int, '10:00', '12:00', 3, true, true);
+  -- 0051: activate only once the activity is complete (schedule above, business contact here).
+  UPDATE public.businesses SET contact = coalesce(contact, '{}'::jsonb) || '{"phone": "+258 000 000 000"}'::jsonb
+   WHERE id = biz AND coalesce(contact ->> 'phone', '') = '' AND coalesce(contact ->> 'email', '') = ''
+     AND coalesce(contact ->> 'whatsapp', '') = '';
+  UPDATE public.experiences SET active = true WHERE id = exp;
 
   -- ===== Expiry =====
   INSERT INTO public.bookings (experience_id, business_id, customer_id, date, "time", people, customer_name)
