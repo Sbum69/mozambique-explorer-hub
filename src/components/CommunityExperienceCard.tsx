@@ -61,9 +61,7 @@ export function CommunityImage({
   }
   const cat = categoryMeta(item.category);
   return (
-    <div
-      className={`bg-gradient-to-br from-primary/15 via-accent/30 to-secondary/40 flex flex-col items-center justify-center gap-1 ${className}`}
-    >
+    <div className={`bg-muted flex flex-col items-center justify-center gap-1 ${className}`}>
       <span className="text-3xl" aria-hidden>
         <InterestIcon id={item.category} className="size-8 text-muted-foreground" />
       </span>

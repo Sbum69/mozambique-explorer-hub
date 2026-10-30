@@ -275,8 +275,8 @@ export function CommunitySubmitDialog({
                 : "Uploading..."
               : form.imagePath
                 ? pt
-                  ? "Fotografia anexada ✓ (clica para trocar)"
-                  : "Photo attached ✓ (click to replace)"
+                  ? "Fotografia anexada (clica para trocar)"
+                  : "Photo attached (click to replace)"
                 : pt
                   ? "Anexar fotografia real (máx. 5 MB)"
                   : "Attach a real photo (max 5 MB)"}

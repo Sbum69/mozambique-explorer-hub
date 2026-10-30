@@ -284,7 +284,7 @@ function ExperiencesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="min-h-screen bg-background">
       <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -315,7 +315,7 @@ function ExperiencesPage() {
         </motion.div>
 
         {hasProvincePrefs && (
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 to-orange-700/10 px-4 py-3 flex-wrap">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-accent px-4 py-3 flex-wrap">
             <p className="text-sm">
               <Sparkles className="inline size-4 text-primary mr-1" />
               {showAllDestinations
@@ -349,7 +349,7 @@ function ExperiencesPage() {
               onClick={() => setFilter(c.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 filter === c.id
-                  ? "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)]"
+                  ? "bg-primary text-primary-foreground shadow-[var(--shadow-elegant)]"
                   : "bg-background border border-border hover:border-primary/40"
               }`}
             >
@@ -427,7 +427,7 @@ function ExperiencesPage() {
                       </Badge>
                     </div>
                     <div className="absolute top-3 right-3 flex items-center gap-2">
-                      <Badge className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0">
+                      <Badge className="bg-primary text-primary-foreground border-0">
                         <InterestIcon id={exp.category} className="mr-1" />
                         {lang === "pt"
                           ? CATEGORIES.find((c) => c.id === exp.category)?.labelPt
@@ -470,7 +470,7 @@ function ExperiencesPage() {
                         className={
                           isBooked
                             ? ""
-                            : "bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0 hover:opacity-90"
+                            : "bg-primary text-primary-foreground border-0 hover:opacity-90"
                         }
                         variant={isBooked ? "outline" : "default"}
                       >
@@ -672,7 +672,7 @@ function ExperiencesPage() {
                 </div>
               </div>
 
-              <div className="mt-2 flex items-center justify-between rounded-lg bg-gradient-to-r from-warning/10 to-primary/10 p-3">
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-accent p-3">
                 <span className="text-sm text-muted-foreground">
                   {lang === "pt" ? "Total estimado" : "Estimated total"}
                 </span>
@@ -686,7 +686,7 @@ function ExperiencesPage() {
                   {t("back")}
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0"
+                  className="bg-primary text-primary-foreground border-0"
                   onClick={() => void submitBooking()}
                   disabled={submitting || !form.date || !form.time || !selectedSlot?.available}
                 >
@@ -721,7 +721,7 @@ function ExperiencesPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="rounded-xl border bg-gradient-to-br from-warning/5 to-primary/5 p-4 space-y-3">
+              <div className="rounded-xl border bg-muted p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs uppercase tracking-wide text-muted-foreground">
                     {lang === "pt" ? "Código" : "Code"}
@@ -807,7 +807,7 @@ function ExperiencesPage() {
                   {lang === "pt" ? "Continuar a explorar" : "Keep exploring"}
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground border-0"
+                  className="bg-primary text-primary-foreground border-0"
                   onClick={() => {
                     setConfirmedBooking(null);
                     navigate({ to: "/bookings" });
