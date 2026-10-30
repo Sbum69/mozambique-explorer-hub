@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { activityMetrics } from "@/lib/business-dashboard";
 import { useServerFn } from "@tanstack/react-start";
-import { Calendar, Edit, Plus, Save, RefreshCw } from "lucide-react";
+import { Calendar, Edit, Plus, Save, RefreshCw, Image as ImageIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ContentChecklist } from "@/components/ContentChecklist";
+import { ContentPhotos } from "@/components/ContentPhotos";
+import { fetchReadiness, type ExperienceMissing } from "@/lib/content";
+import { CONTENT_TXT } from "@/lib/page-texts";
 import { toast } from "sonner";
 import { invalidateExperiencesCatalogue } from "@/hooks/useExperiences";
 import { Button } from "@/components/ui/button";
@@ -96,8 +101,13 @@ export function BusinessManagement() {
   const [editor, setEditor] = useState<Activity | "new" | null>(null);
   const [schedule, setSchedule] = useState<Activity | null>(null);
   const [profile, setProfile] = useState(false);
+  // Photos dialog: the business itself, or one activity.
+  const [photos, setPhotos] = useState<Activity | "business" | null>(null);
+  // Bumped after every save so the "ready to publish" list reloads.
+  const [readyVersion, setReadyVersion] = useState(0);
   const saved = () => {
     invalidateExperiencesCatalogue();
+    setReadyVersion((v) => v + 1);
     toast.success(pt ? "Alterações guardadas." : "Changes saved.");
   };
   const load = useCallback(async () => {
@@ -242,6 +252,27 @@ export function BusinessManagement() {
           />
         </div>
       </section>
+      <section id="business-ready" className="space-y-3 scroll-mt-24">
+        <div className="flex justify-between gap-3 flex-wrap items-center">
+          <h2 className="text-xl font-bold">{CONTENT_TXT[lang].readyTitle}</h2>
+          <Button variant="outline" onClick={() => setPhotos("business")}>
+            <ImageIcon className="size-4" />
+            {CONTENT_TXT[lang].photos}
+          </Button>
+        </div>
+        <OwnerReadiness
+          businessId={business.id}
+          version={readyVersion}
+          onFixBusiness={() => setProfile(true)}
+          onFixExperience={(id, missing) => {
+            const a = activities.find((x) => x.id === id);
+            if (!a) return;
+            if (missing.includes("schedule")) setSchedule(a);
+            else if (missing.includes("photo")) setPhotos(a);
+            else setEditor(a);
+          }}
+        />
+      </section>
       <section id="business-activities" className="space-y-4 scroll-mt-24">
         <div className="flex justify-between gap-3 flex-wrap items-center">
           <h2 className="text-xl font-bold">{pt ? "As Minhas Atividades" : "My Activities"}</h2>
@@ -288,10 +319,47 @@ export function BusinessManagement() {
                 <Calendar className="size-4" />
                 {pt ? "Disponibilidade" : "Availability"}
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setPhotos(a)}>
+                <ImageIcon className="size-4" />
+                {CONTENT_TXT[lang].photos}
+              </Button>
             </li>
           ))}
         </ul>
       </section>
+      <Dialog
+        open={photos !== null}
+        onOpenChange={(open) => {
+          if (!open) setPhotos(null);
+        }}
+      >
+        <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
+          <DialogTitle>
+            {CONTENT_TXT[lang].photosTitle} ·{" "}
+            {photos === "business"
+              ? business.name
+              : photos
+                ? pt
+                  ? photos.title_pt
+                  : (photos.title_en ?? photos.title_pt)
+                : ""}
+          </DialogTitle>
+          <DialogDescription>{CONTENT_TXT[lang].photosHint}</DialogDescription>
+          {photos && (
+            <ContentPhotos
+              businessId={business.id}
+              table={photos === "business" ? "businesses" : "experiences"}
+              rowId={photos === "business" ? business.id : photos.id}
+              images={(photos === "business" ? business.images : photos.images) ?? []}
+              onChange={(images) => {
+                setPhotos((p) => (p && p !== "business" ? { ...p, images } : p));
+                void load();
+                saved();
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
       <Dialog open={profile} onOpenChange={setProfile}>
         <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
           <DialogTitle>{pt ? "Editar perfil" : "Edit profile"}</DialogTitle>
@@ -827,5 +895,43 @@ function Submit({ busy, error, pt }: { busy: boolean; error: string; pt: boolean
         {busy ? (pt ? "A guardar…" : "Saving…") : pt ? "Guardar" : "Save"}
       </Button>
     </div>
+  );
+}
+
+/** "Ready to publish" list for the owner's business (rules from content_readiness). */
+function OwnerReadiness({
+  businessId,
+  version,
+  onFixBusiness,
+  onFixExperience,
+}: {
+  businessId: string;
+  version: number;
+  onFixBusiness: () => void;
+  onFixExperience: (id: string, missing: ExperienceMissing[]) => void;
+}) {
+  const { lang } = useLang();
+  const t = CONTENT_TXT[lang];
+  const q = useQuery({
+    queryKey: ["owner-readiness", businessId, version],
+    queryFn: () => fetchReadiness(businessId),
+  });
+  if (q.isLoading) return <p aria-busy="true">{t.loading}</p>;
+  if (q.isError || !q.data)
+    return (
+      <div role="alert" className="space-y-2">
+        <p>{t.errLoad}</p>
+        <Button variant="outline" onClick={() => void q.refetch()}>
+          <RefreshCw className="size-4" />
+          {t.retry}
+        </Button>
+      </div>
+    );
+  return (
+    <ContentChecklist
+      readiness={q.data}
+      onFixBusiness={onFixBusiness}
+      onFixExperience={onFixExperience}
+    />
   );
 }
