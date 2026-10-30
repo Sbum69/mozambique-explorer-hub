@@ -14,10 +14,10 @@ describe("security headers", () => {
     expect(h["Permissions-Policy"]).toContain("microphone=()");
   });
 
-  it("keeps the CSP in report-only mode (it cannot break the app)", () => {
+  it("enforces the CSP (no report-only header)", () => {
     const h = securityHeaders(SUPA);
-    expect(h["Content-Security-Policy-Report-Only"]).toBeTruthy();
-    expect(h["Content-Security-Policy"]).toBeUndefined();
+    expect(h["Content-Security-Policy"]).toBeTruthy();
+    expect(h["Content-Security-Policy-Report-Only"]).toBeUndefined();
   });
 
   it("allows the app's own backend and the map tiles", () => {

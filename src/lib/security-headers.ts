@@ -1,7 +1,7 @@
 /**
  * Security headers for every HTML response (set on the root route).
- * The Content-Security-Policy starts in Report-Only mode: browsers log violations in the console
- * without blocking anything, so it cannot break the app or the Lovable preview while it is checked.
+ * The Content-Security-Policy is enforced (SEG-2): the browser blocks anything not listed here.
+ * A new origin used by the browser goes into CSP_SOURCES (and is checked by scripts/qa/csp.ts).
  */
 
 /** Origins the browser talks to, besides the app itself. */
@@ -47,7 +47,7 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
 
 export function securityHeaders(supabaseUrl: string | undefined): Record<string, string> {
   return {
-    "Content-Security-Policy-Report-Only": contentSecurityPolicy(supabaseUrl),
+    "Content-Security-Policy": contentSecurityPolicy(supabaseUrl),
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     // Location for the map and the challenges, camera for photo proofs; only on this site.
