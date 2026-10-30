@@ -3,6 +3,7 @@
  * Credentials come only from .env.test.local and are never printed or written to disk.
  */
 import { chromium, type Browser, type BrowserContext } from "playwright";
+import { createHmac } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
@@ -78,8 +79,55 @@ const SUPA_URL = app.VITE_SUPABASE_URL;
 const SUPA_KEY = app.VITE_SUPABASE_PUBLISHABLE_KEY;
 export const AUTH_STORAGE_KEY = `sb-${new URL(SUPA_URL).hostname.split(".")[0]}-auth-token`;
 
+/** RFC 6238 TOTP code (SHA-1, 30 s, 6 digits) from a base32 secret. */
+export function totp(secret: string, now = Date.now()): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = "";
+  for (const ch of secret.replace(/[\s=]/g, "").toUpperCase())
+    bits += alphabet.indexOf(ch).toString(2).padStart(5, "0");
+  const key = Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)));
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(Math.floor(now / 1000 / 30)));
+  const h = createHmac("sha1", key).update(counter).digest();
+  const o = h[h.length - 1] & 0xf;
+  return String((h.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, "0");
+}
+
+/** True when .env.test.local has a TOTP secret for that account (TEST_ADMIN_TOTP_SECRET, …). */
+export function hasTotp(role: Role): boolean {
+  return !!test[`TEST_${role.toUpperCase()}_TOTP_SECRET`];
+}
+
+/** Raises a password session to aal2 with the TOTP secret of that account (auth API only). */
+async function raiseToAal2(role: Role, session: { access_token: string }): Promise<string | null> {
+  const secret = test[`TEST_${role.toUpperCase()}_TOTP_SECRET`];
+  if (!secret) return null;
+  const auth = { apikey: SUPA_KEY, Authorization: `Bearer ${session.access_token}` };
+  const user = (await (await fetch(`${SUPA_URL}/auth/v1/user`, { headers: auth })).json()) as {
+    factors?: { id: string; factor_type: string; status: string }[];
+  };
+  const factor = user.factors?.find((f) => f.factor_type === "totp" && f.status === "verified");
+  if (!factor) return null;
+  const ch = await fetch(`${SUPA_URL}/auth/v1/factors/${factor.id}/challenge`, {
+    method: "POST",
+    headers: { ...auth, "Content-Type": "application/json" },
+    body: "{}",
+  });
+  if (!ch.ok) return null;
+  const { id: challengeId } = (await ch.json()) as { id: string };
+  const v = await fetch(`${SUPA_URL}/auth/v1/factors/${factor.id}/verify`, {
+    method: "POST",
+    headers: { ...auth, "Content-Type": "application/json" },
+    body: JSON.stringify({ challenge_id: challengeId, code: totp(secret) }),
+  });
+  return v.ok ? JSON.stringify(await v.json()) : null;
+}
+
 const sessions = new Map<Role, string | null>();
-/** Session JSON from the auth API (no app form is submitted); null if the account is not set up. */
+/**
+ * Session JSON from the auth API (no app form is submitted); null if the account is not set up.
+ * With a TOTP secret in .env.test.local the session is raised to aal2 (two-step verification).
+ */
 export async function sessionFor(role: Role): Promise<string | null> {
   if (sessions.has(role)) return sessions.get(role)!;
   const email = test[`TEST_${role.toUpperCase()}_EMAIL`];
@@ -91,7 +139,10 @@ export async function sessionFor(role: Role): Promise<string | null> {
       headers: { apikey: SUPA_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (res.ok) value = JSON.stringify(await res.json());
+    if (res.ok) {
+      const session = (await res.json()) as { access_token: string };
+      value = (await raiseToAal2(role, session)) ?? JSON.stringify(session);
+    }
   }
   sessions.set(role, value);
   return value;
@@ -152,6 +203,10 @@ export function reporter() {
     line(ok: boolean, text: string) {
       if (!ok) failed++;
       console.log(`${ok ? "PASS" : "FAIL"} ${text}`);
+    },
+    /** A case that could not run (missing data or setup): not a PASS, not a FAIL. */
+    skip(text: string) {
+      console.log(`SKIP ${text}`);
     },
     finish() {
       console.log(failed ? `\n${failed} FAIL` : "\nall PASS");

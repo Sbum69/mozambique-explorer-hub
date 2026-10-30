@@ -15,7 +15,7 @@ restantes ficheiros de `supabase/tests/`).
 | Segredos no Git            | Nenhum (histórico verificado: JWT, `sk_`, `service_role`, chaves privadas, passwords)                          |
 | XSS                        | Sem HTML vindo de dados; RSS só com links `http(s)`; texto sempre escapado pelo React                          |
 | Redireções                 | `?redirect=` e `return_to` passam pela lista fechada `parseAuthReturn`                                         |
-| Cabeçalhos                 | `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, CSP em modo report-only                     |
+| Cabeçalhos                 | `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, CSP obrigatória (SEG-2)                     |
 
 ## 2. Matriz de RLS (resumo por tabela)
 
@@ -55,6 +55,10 @@ Vista `community_post_authors` (sem `security_invoker`): expõe só `id`, `displ
   `platform_impact_stats`, `news_like_counts`, `event_participant_counts`, `booked_people`.
 - Retirado ao `anon` na 0045: `business_decide_booking`, `can_edit_route`, `owns_experience`,
   `generate_route_code`.
+- SEG-2 — 2FA (TOTP, Supabase Auth MFA): Definições → Segurança ativa/desativa; o pedido do código
+  aparece em qualquer página quando a conta tem 2FA e a sessão é só com palavra-passe. A rota
+  `/admin` exige `aal2` (`requireAdmin`); a 0050 faz o mesmo em `has_role(auth.uid(), 'admin')`
+  (60 políticas e 26 funções). Jobs sem sessão e verificações sobre outros utilizadores não mudam.
 - LEGAL-1 (0049), sem `anon`: `legal_acceptances` só de leitura para o próprio e o admin (sem grants
   de escrita; UPDATE bloqueado por trigger). `accept_legal_documents` só aceita as versões em vigor;
   o trigger `on_auth_user_created_legal` grava a aceitação do registo com a hora do servidor.
@@ -91,7 +95,7 @@ Upload só na pasta do próprio utilizador. Ficheiros servidos por signed URLs.
 
 Definidos em `src/lib/security-headers.ts` (rota raiz):
 
-- `Content-Security-Policy-Report-Only`: `default-src 'self'`; scripts e estilos `'self'` +
+- `Content-Security-Policy` (obrigatória desde o SEG-2): `default-src 'self'`; scripts e estilos `'self'` +
   inline (hidratação e script do tema); imagens da Supabase, dos mosaicos do mapa e do Unsplash;
   ligações à Supabase (https e wss), OSRM, Open-Meteo e Lovable; `frame-ancestors` `'self'` e os
   domínios da Lovable (o editor mostra a app num iframe); `object-src 'none'`.
@@ -146,7 +150,8 @@ Aplicação:
   entradas são pequenas e quase todas exigem sessão.
 - Ferramentas de desenvolvimento ainda com avisos (`undici`, `ws` 8.18.0, `sharp`, `esbuild`):
   não entram no bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
-- CSP ainda em report-only (ver secção 5).
+- CSP obrigatória: verificada localmente nas 29 páginas da QA (`csp.ts`, 0 violações); confirmar a
+  consola no preview da Lovable e no site publicado (o preview pede sessão: 401).
 - 2FA para administradores (recomendação).
 
 ## 8. Checklist de lançamento

@@ -6,7 +6,7 @@
  */
 import type { Page } from "playwright";
 
-import { launch, newContext, reporter, BASE, type Role } from "./lib";
+import { hasTotp, launch, newContext, reporter, BASE, type Role } from "./lib";
 
 const rep = reporter();
 const browser = await launch();
@@ -105,14 +105,21 @@ const text = async (p: Page) => (await p.locator("body").innerText()).replace(/\
 }
 
 // ---- Admin ----
+// The administration needs an aal2 session (SEG-2). Without TEST_ADMIN_TOTP_SECRET the account
+// is password-only: /admin sends it to Settings → Security and the admin checks are skipped.
 {
   const { ctx, page, errors } = await open("admin", "/admin");
-  const t = await text(page);
-  const m = t.match(/Perfis registados (\d+)/);
-  rep.line(
-    !!m && m[1] === "2",
-    `admin: registered profiles leave internal accounts out (${m?.[1] ?? "?"}, expected 2)`,
-  );
+  if (!hasTotp("admin")) {
+    rep.line(new URL(page.url()).pathname === "/settings", "admin (aal1): /admin requires 2FA");
+    rep.skip("admin: registered profiles (needs TEST_ADMIN_TOTP_SECRET for an aal2 session)");
+  } else {
+    const t = await text(page);
+    const m = t.match(/Perfis registados (d+)/);
+    rep.line(
+      !!m && m[1] === "2",
+      `admin: registered profiles leave internal accounts out (${m?.[1] ?? "?"}, expected 2)`,
+    );
+  }
   rep.line(errors.length === 0, `admin: no page errors (${errors.length})`);
   await ctx.close();
 }
