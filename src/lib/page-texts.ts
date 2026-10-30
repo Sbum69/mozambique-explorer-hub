@@ -33,6 +33,11 @@ export const SIGNUP_TXT = {
     errPasswordShort: "Mínimo 6 caracteres",
     errConfirm: "As palavras-passe não coincidem",
     errGeneric: "Não foi possível concluir. Tenta novamente.",
+    acceptPrefix: "Li e aceito os",
+    acceptTerms: "Termos de Utilização",
+    acceptAnd: "e a",
+    acceptPrivacy: "Política de Privacidade",
+    errAccept: "Para criar a conta, tens de aceitar os Termos e a Política de Privacidade.",
   },
   en: {
     back: "Back",
@@ -66,6 +71,11 @@ export const SIGNUP_TXT = {
     errPasswordShort: "At least 6 characters",
     errConfirm: "The passwords don't match",
     errGeneric: "Could not complete. Please try again.",
+    acceptPrefix: "I have read and accept the",
+    acceptTerms: "Terms of Use",
+    acceptAnd: "and the",
+    acceptPrivacy: "Privacy Policy",
+    errAccept: "To create the account, you must accept the Terms and the Privacy Policy.",
   },
 } as const;
 
@@ -413,9 +423,8 @@ export const SETTINGS_TXT = {
     terms: "Termos de utilização",
     privacy: "Política de privacidade",
     contact: "Contacto",
-    inPreparation: "Em preparação",
     sectionShortcuts: "Atalhos",
-    legalPending: "Este texto está em preparação e será publicado antes do lançamento.",
+    readDraft: "Ler (rascunho)",
   },
   en: {
     menuLabel: "Account menu",
@@ -521,9 +530,8 @@ export const SETTINGS_TXT = {
     terms: "Terms of use",
     privacy: "Privacy policy",
     contact: "Contact",
-    inPreparation: "In preparation",
     sectionShortcuts: "Shortcuts",
-    legalPending: "This text is being prepared and will be published before launch.",
+    readDraft: "Read (draft)",
   },
 } as const;
 
@@ -558,5 +566,57 @@ export const PHOTOS_TXT = {
       "No photo where there is no faithful free photo: two Culture & History topics (Azagaia and the poet Craveirinha). Businesses without a photo show a marker with their initial and category.",
     credits: "Photo credits",
     back: "Back",
+  },
+} as const;
+
+/** LEGAL-1 — Terms, Privacy Policy, acceptance prompt and the legal footer. */
+export const LEGAL_TXT = {
+  pt: {
+    back: "Voltar",
+    draft: "Rascunho — sujeito a revisão jurídica",
+    draftBody:
+      "Este texto ainda vai ser revisto por um jurista e pode mudar antes da versão final.",
+    version: (v: string) => `Versão de ${v}`,
+    contents: "Conteúdo",
+    terms: "Termos",
+    privacy: "Privacidade",
+    credits: "Créditos",
+    footerLabel: "Informação legal",
+    promptTitle: "Atualizámos os nossos documentos",
+    promptBody:
+      "Para continuares a usar o EKAYA, lê e aceita os Termos de Utilização e a Política de Privacidade.",
+    readTerms: "Ler os Termos de Utilização",
+    readPrivacy: "Ler a Política de Privacidade",
+    accept: "Aceito",
+    accepting: "A guardar…",
+    signOut: "Sair",
+    errAccept: "Não foi possível guardar a aceitação. Tenta novamente.",
+    errLoad: "Não foi possível confirmar a aceitação dos documentos.",
+    retry: "Tentar novamente",
+    opensNewTab: "(abre num novo separador)",
+  },
+  en: {
+    back: "Back",
+    draft: "Draft — subject to legal review",
+    draftBody:
+      "This text will still be reviewed by a lawyer and may change before the final version.",
+    version: (v: string) => `Version of ${v}`,
+    contents: "Contents",
+    terms: "Terms",
+    privacy: "Privacy",
+    credits: "Credits",
+    footerLabel: "Legal information",
+    promptTitle: "We have updated our documents",
+    promptBody:
+      "To keep using EKAYA, please read and accept the Terms of Use and the Privacy Policy.",
+    readTerms: "Read the Terms of Use",
+    readPrivacy: "Read the Privacy Policy",
+    accept: "I accept",
+    accepting: "Saving…",
+    signOut: "Sign out",
+    errAccept: "Could not save your acceptance. Please try again.",
+    errLoad: "Could not confirm that you accepted the documents.",
+    retry: "Try again",
+    opensNewTab: "(opens in a new tab)",
   },
 } as const;
