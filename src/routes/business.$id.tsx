@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { DirectionsButtons } from "@/components/DirectionsButtons";
+import { BusinessMark } from "@/components/BusinessMark";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -147,11 +148,16 @@ function BusinessDetailPage() {
         ) : (
           <>
             <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)]">
-              <div className="h-40 sm:h-56 bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center">
+              <div className="h-40 sm:h-56">
                 {b.image ? (
                   <img src={b.image} alt={b.name} className="w-full h-full object-cover" />
                 ) : (
-                  <Store className="size-14 text-primary/50" />
+                  <BusinessMark
+                    name={b.name}
+                    categoryCode={b.categoryCode}
+                    categoryLabel={b.category?.[lang]}
+                    size="lg"
+                  />
                 )}
               </div>
               <div className="p-5 space-y-3">

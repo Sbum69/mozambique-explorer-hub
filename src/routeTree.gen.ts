@@ -17,6 +17,7 @@ import { Route as BusinessRegisterRouteImport } from './routes/business-register
 import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CommunityExperiencesRouteImport } from './routes/community-experiences'
+import { Route as CreditosRouteImport } from './routes/creditos'
 import { Route as CultureHistoryRouteImport } from './routes/culture-history'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExperiencesRouteImport } from './routes/experiences'
@@ -83,6 +84,11 @@ const CommunityRoute = CommunityRouteImport.update({
 const CommunityExperiencesRoute = CommunityExperiencesRouteImport.update({
   id: '/community-experiences',
   path: '/community-experiences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditosRoute = CreditosRouteImport.update({
+  id: '/creditos',
+  path: '/creditos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CultureHistoryRoute = CultureHistoryRouteImport.update({
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
   '/community-experiences': typeof CommunityExperiencesRoute
+  '/creditos': typeof CreditosRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
   '/community-experiences': typeof CommunityExperiencesRoute
+  '/creditos': typeof CreditosRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/businesses': typeof BusinessesRoute
   '/community': typeof CommunityRouteWithChildren
   '/community-experiences': typeof CommunityExperiencesRoute
+  '/creditos': typeof CreditosRoute
   '/culture-history': typeof CultureHistoryRoute
   '/dashboard': typeof DashboardRoute
   '/experiences': typeof ExperiencesRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/community'
     | '/community-experiences'
+    | '/creditos'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/community'
     | '/community-experiences'
+    | '/creditos'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/community'
     | '/community-experiences'
+    | '/creditos'
     | '/culture-history'
     | '/dashboard'
     | '/experiences'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   BusinessesRoute: typeof BusinessesRoute
   CommunityRoute: typeof CommunityRouteWithChildren
   CommunityExperiencesRoute: typeof CommunityExperiencesRoute
+  CreditosRoute: typeof CreditosRoute
   CultureHistoryRoute: typeof CultureHistoryRoute
   DashboardRoute: typeof DashboardRoute
   ExperiencesRoute: typeof ExperiencesRoute
@@ -540,6 +553,13 @@ declare module '@tanstack/react-router' {
       path: '/community-experiences'
       fullPath: '/community-experiences'
       preLoaderRoute: typeof CommunityExperiencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creditos': {
+      id: '/creditos'
+      path: '/creditos'
+      fullPath: '/creditos'
+      preLoaderRoute: typeof CreditosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/culture-history': {
@@ -755,6 +775,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessesRoute: BusinessesRoute,
   CommunityRoute: CommunityRouteWithChildren,
   CommunityExperiencesRoute: CommunityExperiencesRoute,
+  CreditosRoute: CreditosRoute,
   CultureHistoryRoute: CultureHistoryRoute,
   DashboardRoute: DashboardRoute,
   ExperiencesRoute: ExperiencesRoute,

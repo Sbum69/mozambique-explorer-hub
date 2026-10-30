@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
+import { PHOTOS_TXT } from "@/lib/page-texts";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -358,13 +360,16 @@ function ItinerariesPage() {
         <Card className="overflow-hidden h-full flex flex-col">
           <div className="relative h-48 overflow-hidden bg-muted">
             {cover ? (
-              <img
-                src={cover}
-                alt={routeTitle(route, lang)}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+              <>
+                <img
+                  src={cover}
+                  alt={routeTitle(route, lang)}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <PhotoCredit src={cover} label={PHOTOS_TXT[lang].provinceImage} />
+              </>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                 <Compass className="size-8" />

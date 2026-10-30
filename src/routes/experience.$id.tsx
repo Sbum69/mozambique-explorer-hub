@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLang } from "@/contexts/LanguageContext";
@@ -106,7 +107,14 @@ function ExperienceDetailPage() {
           <Card className="overflow-hidden border-0 shadow-[var(--shadow-soft)]">
             <div className="relative h-56 sm:h-72 bg-muted">
               {exp.image && (
-                <img src={exp.image} alt={exp.title[lang]} className="w-full h-full object-cover" />
+                <>
+                  <img
+                    src={exp.image}
+                    alt={exp.title[lang]}
+                    className="w-full h-full object-cover"
+                  />
+                  <PhotoCredit src={exp.image} />
+                </>
               )}
             </div>
             <div className="p-5 space-y-4">

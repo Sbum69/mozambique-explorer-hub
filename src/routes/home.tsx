@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { PhotoCredit } from "@/components/PhotoCredit";
+import { PHOTOS_TXT } from "@/lib/page-texts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LazyChoiceSelect } from "@/components/LazyChoiceSelect";
@@ -430,6 +432,7 @@ function HomePage() {
                     loading="lazy"
                     decoding="async"
                   />
+                  <PhotoCredit src={routeCover(it)} label={PHOTOS_TXT[lang].provinceImage} />
                   {it.province && (
                     <Badge className="absolute top-3 left-3">{it.province.name[lang]}</Badge>
                   )}
@@ -488,6 +491,7 @@ function HomePage() {
                     loading="lazy"
                     decoding="async"
                   />
+                  <PhotoCredit src={e.image} />
                   <Badge variant="secondary" className="absolute top-3 left-3 capitalize">
                     {e.category}
                   </Badge>
@@ -809,6 +813,7 @@ function PersonalSection({ lang }: { lang: Lang }) {
                   loading="lazy"
                   decoding="async"
                 />
+                <PhotoCredit src={item.image} />
                 <Badge variant="secondary" className="absolute top-3 left-3 capitalize">
                   {item.category}
                 </Badge>
@@ -853,6 +858,7 @@ function PersonalSection({ lang }: { lang: Lang }) {
                   loading="lazy"
                   decoding="async"
                 />
+                <PhotoCredit src={item.image} />
               </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold leading-tight">{item.name}</h3>
