@@ -92,14 +92,19 @@ business_large, admin), `booking_status` (pending, confirmed, rejected, cancelle
 | Comunidade        | `community_posts`, `community_post_reactions`, `community_reports`, `community_categories`, `community_experiences`, vista `community_post_authors`           |
 | Roteiros          | `routes`, `route_days`, `route_stops`, `route_progress`, `route_stop_progress`                                                                                |
 | Gamificação       | `points_ledger` (append-only), `rewards`, `reward_redemptions`, `game_catalog`, `game_steps`, `game_completions`, `game_quiz_attempts`, `game_quiz_questions` |
-| Outros            | `notifications`, `destination_visits`, `news_likes`, `event_participations`                                                                                   |
+| Outros            | `notifications`, `destination_visits`, `news_likes`, `event_participations`, `legal_acceptances`                                                              |
 
 RPCs chamadas pelo cliente: `has_role`, `save_route_plan`, `reset_my_route_progress`,
 `get_experience_availability`, `cancel_my_booking`, `business_decide_booking`,
 `admin_decide_business`, `admin_business_owner_emails`, `platform_impact_stats`,
 `my_points_summary`, `points_leaderboard`, `redeem_reward`, `start_game_quiz`, `answer_game_quiz`,
 `finish_game_quiz`, `submit_game_step`, `save_my_preferences`, `delete_my_account`,
-`admin_set_internal`, `admin_platform_summary`.
+`admin_set_internal`, `admin_platform_summary`, `accept_legal_documents`, `current_legal_versions`.
+
+Aceitação dos Termos e da Privacidade (`legal_acceptances`, 0049): o registo grava-a no servidor a
+partir dos metadados da conta; contas antigas ou versões novas aceitam pelo `LegalAcceptanceGate`.
+Ao mudar um texto legal, mudar `LEGAL_VERSIONS` (`src/lib/legal/versions.ts`) e
+`current_legal_versions()` numa migração nova (o `legal.test.ts` confirma que coincidem).
 
 Buckets de Storage (privados, servidos por signed URLs): `community-photos`, `route-proofs`,
 bucket de provas de jogos (`GAME_PROOFS_BUCKET` em `src/lib/games.ts`). Público: `avatars` (foto de
