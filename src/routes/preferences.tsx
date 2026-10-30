@@ -35,7 +35,7 @@ function PreferencesPage() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+    <div className="min-h-screen bg-muted">
       <OnboardingModal
         open
         initial={{

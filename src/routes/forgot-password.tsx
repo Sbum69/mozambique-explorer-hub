@@ -60,7 +60,7 @@ function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-background via-card to-accent/30">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-background">
       <div className="absolute top-4 right-4 flex items-center gap-1">
         <ThemeToggle />
         <LanguageToggle />
@@ -75,7 +75,7 @@ function ForgotPasswordPage() {
         ) : (
           <>
             <div className="text-center space-y-2">
-              <div className="inline-flex size-14 rounded-2xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground items-center justify-center">
+              <div className="inline-flex size-14 rounded-[10px] bg-primary text-primary-foreground items-center justify-center">
                 <KeyRound className="size-7" aria-hidden="true" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight">{t.title}</h1>

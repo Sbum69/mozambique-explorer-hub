@@ -109,7 +109,7 @@ function LoginPage() {
       </div>
 
       {/* Right form */}
-      <div className="relative flex items-center justify-center p-6 sm:p-10 bg-gradient-to-br from-background via-card to-accent/30">
+      <div className="relative flex items-center justify-center p-6 sm:p-10 bg-background">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
           <LanguageToggle />
@@ -121,7 +121,7 @@ function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", delay: 0.1 }}
-              className="inline-flex size-16 rounded-2xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground items-center justify-center shadow-[var(--shadow-elegant)]"
+              className="inline-flex size-16 rounded-[10px] bg-primary text-primary-foreground items-center justify-center shadow-[var(--shadow-elegant)]"
             >
               <ShieldCheck className="size-8" />
             </motion.div>
@@ -181,7 +181,7 @@ function LoginPage() {
               type="submit"
               size="lg"
               disabled={loading}
-              className="w-full h-11 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95"
+              className="w-full h-11 bg-primary text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95"
             >
               {loading ? "..." : t("login")}
             </Button>
@@ -226,7 +226,7 @@ function LoginPage() {
 
           <Link
             to="/signup"
-            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-orange-500 text-orange-700 dark:text-orange-300 font-semibold hover:bg-orange-50 dark:hover:bg-orange-900/60 transition-colors"
+            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-input text-primary font-semibold hover:bg-accent transition-colors"
           >
             <UserPlus className="size-4" />
             {lang === "pt"

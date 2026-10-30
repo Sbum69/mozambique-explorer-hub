@@ -139,7 +139,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 gap-0 border-0 bg-card [&>button]:hidden">
         {/* Header */}
-        <div className="px-6 sm:px-10 pt-8 pb-4 bg-gradient-to-br from-primary/10 via-card to-secondary/10">
+        <div className="px-6 sm:px-10 pt-8 pb-4 bg-muted">
           <div className="flex items-center justify-between gap-3 mb-3">
             <Badge variant="outline" className="bg-card font-medium">
               {t("step")} {step + 1} {t("of")} {totalSteps}
@@ -217,11 +217,10 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        whileHover={{ y: -4 }}
                         onClick={() => pickDestination(d.slug, d.province)}
                         aria-pressed={selected}
                         className={cn(
-                          "group relative text-left rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-card",
+                          "group relative text-left rounded-[10px] overflow-hidden border-2 transition-all duration-300 bg-card",
                           selected
                             ? "border-primary shadow-[var(--shadow-elegant)]"
                             : "border-border hover:border-primary/40 shadow-[var(--shadow-soft)]",
@@ -251,7 +250,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="absolute top-2 right-2 size-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg"
+                              className="absolute top-2 right-2 size-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-[var(--shadow-soft)]"
                             >
                               <Check className="size-4" />
                             </motion.div>
@@ -336,7 +335,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                     animate={{ scale: 1, opacity: 1 }}
                     className="inline-flex flex-col items-center"
                   >
-                    <span className="text-7xl sm:text-8xl font-bold bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent">
+                    <span className="text-7xl sm:text-8xl font-bold bg-primary text-primary-foreground bg-clip-text text-transparent">
                       {days}
                     </span>
                     <span className="text-lg text-muted-foreground font-medium mt-1">
@@ -404,11 +403,10 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.04 }}
-                        whileHover={{ scale: 1.04 }}
                         whileTap={{ scale: 0.96 }}
                         onClick={() => toggleInterest(it.id)}
                         className={cn(
-                          "relative rounded-2xl p-4 border-2 transition-all duration-300 text-left",
+                          "relative rounded-[10px] p-4 border-2 transition-all duration-300 text-left",
                           selected
                             ? "border-primary bg-primary/5 shadow-[var(--shadow-soft)]"
                             : "border-border hover:border-primary/40 bg-card",
@@ -453,7 +451,7 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
             onClick={handleNext}
             disabled={!canNext || saving}
             size="lg"
-            className="gap-1.5 bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95 transition-all"
+            className="gap-1.5 bg-primary text-primary-foreground shadow-[var(--shadow-elegant)] hover:opacity-95 transition-all"
           >
             {step === totalSteps - 1 ? t("confirm") : t("next")}
             <ChevronRight className="size-4" />

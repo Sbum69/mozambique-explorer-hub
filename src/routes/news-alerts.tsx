@@ -78,23 +78,21 @@ export const Route = createFileRoute("/news-alerts")({
 // Events stay hidden until an admin-managed events table exists (DADOS-1).
 type Tab = "news" | "weather" | "roads" | "tips";
 
-const TABS: { id: Tab; pt: string; en: string; icon: typeof Newspaper; grad: string }[] = [
-  { id: "news", pt: "Notícias", en: "News", icon: Newspaper, grad: "from-red-600 to-red-700" },
+const TABS: { id: Tab; pt: string; en: string; icon: typeof Newspaper }[] = [
+  { id: "news", pt: "Notícias", en: "News", icon: Newspaper },
   {
     id: "weather",
     pt: "Temperatura",
     en: "Weather",
     icon: Thermometer,
-    grad: "from-cyan-700 to-blue-600",
   },
   {
     id: "roads",
     pt: "Estradas",
     en: "Roads",
     icon: AlertTriangle,
-    grad: "from-orange-700 to-orange-700",
   },
-  { id: "tips", pt: "Dicas", en: "Tips", icon: Info, grad: "from-purple-600 to-pink-600" },
+  { id: "tips", pt: "Dicas", en: "Tips", icon: Info },
 ];
 
 function NewsAlertsPage() {
@@ -104,7 +102,7 @@ function NewsAlertsPage() {
   const [tab, setTab] = useState<Tab>("news");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/85 backdrop-blur-md shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
@@ -119,7 +117,7 @@ function NewsAlertsPage() {
             </button>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
-                <Newspaper className="size-5 sm:size-6 text-red-600 dark:text-red-400" />
+                <Newspaper className="size-5 sm:size-6 text-destructive" />
                 {lang === "pt" ? "Notícias & Avisos" : "News & Alerts"}
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
@@ -139,10 +137,10 @@ function NewsAlertsPage() {
                 ],
               }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="hidden sm:flex px-3 py-1.5 bg-red-100 dark:bg-red-950/40 rounded-full items-center gap-1.5"
+              className="hidden sm:flex px-3 py-1.5 bg-destructive/15 rounded-full items-center gap-1.5"
             >
-              <span className="size-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-red-700 dark:text-red-300 text-xs font-semibold">
+              <span className="size-2 rounded-full bg-destructive animate-pulse" />
+              <span className="text-destructive text-xs font-semibold">
                 {lang === "pt" ? "AO VIVO" : "LIVE"}
               </span>
             </motion.div>
@@ -168,7 +166,7 @@ function NewsAlertsPage() {
                   className={cn(
                     "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all",
                     active
-                      ? `bg-gradient-to-r ${t.grad} text-white shadow-md`
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground hover:bg-muted/70",
                   )}
                 >
@@ -286,8 +284,8 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <span className="relative flex size-2.5">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-ping" />
-              <span className="relative inline-flex rounded-full size-2.5 bg-red-600" />
+              <span className="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full size-2.5 bg-destructive" />
             </span>
             {lang === "pt" ? "Últimas notícias em tempo real" : "Live news right now"}
           </h2>
@@ -346,12 +344,12 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                     onError={(e) => (e.currentTarget.style.display = "none")}
                   />
                 ) : (
-                  <div className="size-20 rounded-lg bg-gradient-to-br from-red-600 to-orange-700 flex items-center justify-center shrink-0">
-                    <Newspaper className="size-8 text-white/90" />
+                  <div className="size-20 rounded-md bg-accent text-accent-foreground flex items-center justify-center shrink-0">
+                    <Newspaper className="size-8" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-600 dark:text-red-400 mb-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-destructive mb-1">
                     <span className="uppercase truncate">{it.source}</span>
                     <span className="text-muted-foreground font-normal">
                       · {fmtLive(it.pubDate)}
@@ -376,7 +374,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
         {lang === "pt" ? "Notícias em destaque" : "Featured stories"}
       </h2>
       <div className="space-y-4">
-        {live.loading && <div className="rounded-2xl border bg-card h-48 animate-pulse" />}
+        {live.loading && <div className="rounded-[10px] border bg-card h-48 animate-pulse" />}
         {featured.map((n, i) => {
           const liked = likes.mine.has(n.link);
           const count = likes.counts[n.link] ?? 0;
@@ -386,9 +384,9 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              className="bg-card rounded-2xl shadow-sm border overflow-hidden grid md:grid-cols-3 gap-0"
+              className="bg-card rounded-[10px] shadow-sm border overflow-hidden grid md:grid-cols-3 gap-0"
             >
-              <div className="relative h-48 md:h-auto bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-950/40 dark:to-orange-950/40">
+              <div className="relative h-48 md:h-auto bg-muted">
                 {n.thumbnail ? (
                   <img
                     src={n.thumbnail}
@@ -399,11 +397,11 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Newspaper className="size-16 text-red-300" />
+                    <Newspaper className="size-16 text-muted-foreground" />
                   </div>
                 )}
                 {i === 0 && (
-                  <div className="absolute top-3 left-3 bg-red-600 text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
+                  <div className="absolute top-3 left-3 bg-destructive text-destructive-foreground px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
                     <TrendingUp className="size-3" /> {lang === "pt" ? "MAIS RECENTE" : "LATEST"}
                   </div>
                 )}
@@ -426,7 +424,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
                   <Button
                     size="sm"
                     onClick={() => setSelected(n)}
-                    className="bg-gradient-to-r from-red-600 to-red-700 text-white hover:opacity-90"
+                    className="bg-primary text-primary-foreground hover:opacity-90"
                   >
                     {lang === "pt" ? "Ler mais" : "Read more"}
                     <ChevronRight className="size-4" />
@@ -496,11 +494,11 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
 
 /* ---------- Weather tab (Open-Meteo, real destination coordinates) ---------- */
 const WEATHER_ICON: Record<WeatherKind, { icon: typeof Sun; color: string }> = {
-  clear: { icon: Sun, color: "text-amber-700 dark:text-amber-300" },
+  clear: { icon: Sun, color: "text-primary" },
   cloud: { icon: Cloud, color: "text-muted-foreground" },
   fog: { icon: CloudFog, color: "text-muted-foreground" },
-  rain: { icon: CloudRain, color: "text-blue-600 dark:text-blue-400" },
-  storm: { icon: CloudLightning, color: "text-purple-600 dark:text-purple-400" },
+  rain: { icon: CloudRain, color: "text-primary" },
+  storm: { icon: CloudLightning, color: "text-primary" },
 };
 
 const WeatherIcon = ({ kind, className }: { kind: WeatherKind; className?: string }) => {
@@ -530,7 +528,7 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
   }
   if (q.isError || !report || report.status !== "ok") {
     return (
-      <div role="status" className="rounded-2xl border border-dashed bg-card p-8 text-center">
+      <div role="status" className="rounded-[10px] border border-dashed bg-card p-8 text-center">
         <Thermometer className="size-8 mx-auto mb-3 text-muted-foreground" aria-hidden="true" />
         <p className="font-semibold">{pt ? "Meteorologia indisponível" : "Weather unavailable"}</p>
         <p className="text-sm text-muted-foreground mt-1">
@@ -625,7 +623,7 @@ function RoadsTab({ lang }: { lang: "pt" | "en" }) {
   return (
     <div
       role="status"
-      className="rounded-2xl border border-dashed bg-card p-8 text-center max-w-xl mx-auto"
+      className="rounded-[10px] border border-dashed bg-card p-8 text-center max-w-xl mx-auto"
     >
       <Hourglass className="size-8 mx-auto mb-3 text-muted-foreground" aria-hidden="true" />
       <p className="font-semibold text-lg">{pt ? "Brevemente" : "Coming soon"}</p>
@@ -646,13 +644,6 @@ const TIP_ICON = {
   compass: Compass,
   utensils: Utensils,
 } as const;
-const TIP_GRAD = {
-  camera: "from-purple-600 to-pink-600",
-  wallet: "from-emerald-700 to-teal-700",
-  shield: "from-blue-600 to-indigo-600",
-  compass: "from-orange-700 to-red-600",
-  utensils: "from-amber-700 to-orange-700",
-} as const;
 
 function TipsTab({ lang }: { lang: "pt" | "en" }) {
   return (
@@ -668,15 +659,13 @@ function TipsTab({ lang }: { lang: "pt" | "en" }) {
           >
             <Card className="p-5 border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all h-full">
               <div className="flex items-start gap-4">
-                <div
-                  className={`size-12 bg-gradient-to-br ${TIP_GRAD[t.icon]} rounded-xl flex items-center justify-center text-white shrink-0`}
-                >
+                <div className="size-12 bg-accent text-accent-foreground rounded-md flex items-center justify-center shrink-0">
                   <Icon className="size-6" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
                     <h3 className="font-bold">{t.title[lang]}</h3>
-                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 rounded-full text-[10px] font-semibold">
+                    <span className="px-2 py-0.5 bg-accent text-accent-foreground rounded-full text-[10px] font-semibold">
                       {t.category[lang]}
                     </span>
                   </div>

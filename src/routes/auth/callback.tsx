@@ -156,7 +156,7 @@ function AuthCallbackPage() {
   const ok = status === "confirmed" || status === "redirecting";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-gradient-to-br from-background via-card to-accent/30">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-background">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
         <LanguageToggle />
