@@ -42,6 +42,7 @@ import { Route as UsefulInfoRouteImport } from './routes/useful-info'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as BusinessIdRouteImport } from './routes/business.$id'
 import { Route as CommunityPostIdRouteImport } from './routes/community.$postId'
+import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as ExperienceIdRouteImport } from './routes/experience.$id'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
@@ -211,6 +212,11 @@ const CommunityPostIdRoute = CommunityPostIdRouteImport.update({
   path: '/$postId',
   getParentRoute: () => CommunityRoute,
 } as any)
+const ConviteTokenRoute = ConviteTokenRouteImport.update({
+  id: '/convite/$token',
+  path: '/convite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExperienceIdRoute = ExperienceIdRouteImport.update({
   id: '/experience/$id',
   path: '/experience/$id',
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/business/$id': typeof BusinessIdRoute
   '/community/$postId': typeof CommunityPostIdRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/business/$id'
     | '/community/$postId'
+    | '/convite/$token'
     | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/business/$id'
     | '/community/$postId'
+    | '/convite/$token'
     | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/business/$id'
     | '/community/$postId'
+    | '/convite/$token'
     | '/experience/$id'
     | '/itinerary/$id'
     | '/voucher/$rewardId'
@@ -492,6 +504,7 @@ export interface RootRouteChildren {
   UsefulInfoRoute: typeof UsefulInfoRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   BusinessIdRoute: typeof BusinessIdRoute
+  ConviteTokenRoute: typeof ConviteTokenRoute
   ExperienceIdRoute: typeof ExperienceIdRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
   VoucherRewardIdRoute: typeof VoucherRewardIdRoute
@@ -730,6 +743,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityPostIdRouteImport
       parentRoute: typeof CommunityRoute
     }
+    '/convite/$token': {
+      id: '/convite/$token'
+      path: '/convite/$token'
+      fullPath: '/convite/$token'
+      preLoaderRoute: typeof ConviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/experience/$id': {
       id: '/experience/$id'
       path: '/experience/$id'
@@ -799,6 +819,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsefulInfoRoute: UsefulInfoRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   BusinessIdRoute: BusinessIdRoute,
+  ConviteTokenRoute: ConviteTokenRoute,
   ExperienceIdRoute: ExperienceIdRoute,
   ItineraryIdRoute: ItineraryIdRoute,
   VoucherRewardIdRoute: VoucherRewardIdRoute,
