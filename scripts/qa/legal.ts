@@ -78,33 +78,23 @@ for (const lang of ["pt", "en"] as const) {
   await ctx.close();
 }
 
-// Signed-in test tourist (created before LEGAL-1, no acceptance yet): the prompt appears;
-// the Terms page stays readable. The prompt is not accepted (that would be a write).
+// Signed-in test tourist: the 3 test accounts accepted the 2026-10-30 versions (approved 30/10),
+// so no prompt appears. The prompt itself (shown, Escape-proof, /terms readable) was checked on
+// 30/10 before that acceptance; recheck it with an account that has not accepted the versions in force.
 {
   const ctx = await newContext(browser, { lang: "pt", role: "tourist" });
   const page = await ctx.newPage();
   await page.goto(BASE + "/home", { waitUntil: "networkidle" });
   await page.waitForTimeout(3000);
-  const dialog = page.getByRole("alertdialog");
-  rep.line(
-    (await dialog.count()) === 1 &&
-      /Atualizámos os nossos documentos/.test(await dialog.innerText()),
-    "tourist: acceptance prompt shown on /home",
-  );
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
-  rep.line((await dialog.count()) === 1, "tourist: Escape does not dismiss the prompt");
-  await page.goto(BASE + "/terms", { waitUntil: "networkidle" });
-  await page.waitForTimeout(2000);
   rep.line(
     (await page.getByRole("alertdialog").count()) === 0,
-    "tourist: /terms readable without the prompt",
+    "tourist (accepted): no acceptance prompt on /home",
   );
   await page.goto(BASE + "/settings", { waitUntil: "networkidle" });
   await page.waitForTimeout(2500);
   rep.line(
     (await page.locator('a[href="mailto:sheldonesmad@gmail.com"]').count()) === 1,
-    "tourist: settings show the contact email (behind the prompt)",
+    "tourist: settings show the contact email",
   );
   await ctx.close();
 }
