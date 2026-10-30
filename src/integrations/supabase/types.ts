@@ -1357,6 +1357,7 @@ export type Database = {
           duration_days: number | null
           id: string
           interests: string[] | null
+          is_internal: boolean
           locale: string
           muted_notification_types: string[]
           phone: string | null
@@ -1371,6 +1372,7 @@ export type Database = {
           duration_days?: number | null
           id: string
           interests?: string[] | null
+          is_internal?: boolean
           locale?: string
           muted_notification_types?: string[]
           phone?: string | null
@@ -1385,6 +1387,7 @@ export type Database = {
           duration_days?: number | null
           id?: string
           interests?: string[] | null
+          is_internal?: boolean
           locale?: string
           muted_notification_types?: string[]
           phone?: string | null
@@ -1988,6 +1991,11 @@ export type Database = {
       }
     }
     Functions: {
+      admin_platform_summary: { Args: never; Returns: Json }
+      admin_set_internal: {
+        Args: { _internal: boolean; _user_id: string }
+        Returns: undefined
+      }
       admin_assign_business_owner: {
         Args: { _business_id: string; _email: string }
         Returns: Json
@@ -2125,6 +2133,7 @@ export type Database = {
       }
       my_points_summary: { Args: never; Returns: Json }
       my_points_total: { Args: never; Returns: number }
+      is_internal_user: { Args: { _user_id: string }; Returns: boolean }
       news_like_counts: {
         Args: { _keys: string[] }
         Returns: {

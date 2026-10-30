@@ -100,6 +100,12 @@ export const USERS_TXT = {
     grant: "Dar",
     revoke: "Retirar",
     updated: "Papéis atualizados.",
+    internal: "Conta interna",
+    internalHint: "Fora das métricas",
+    markInternal: "Marcar como interna",
+    unmarkInternal: "Deixar de ser interna",
+    deleted: "Conta apagada",
+    internalUpdated: "Conta atualizada.",
   },
   en: {
     title: "Manage users",
@@ -122,6 +128,12 @@ export const USERS_TXT = {
     grant: "Grant",
     revoke: "Remove",
     updated: "Roles updated.",
+    internal: "Internal account",
+    internalHint: "Left out of metrics",
+    markInternal: "Mark as internal",
+    unmarkInternal: "Stop being internal",
+    deleted: "Deleted account",
+    internalUpdated: "Account updated.",
   },
 } as const;
 
