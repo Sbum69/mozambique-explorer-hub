@@ -28,7 +28,7 @@ BEGIN
   d_past := d_future - 28;                                                             -- a past Wednesday
   d_cap := d_future + 7;
 
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   INSERT INTO public.experiences (business_id, title_pt, price_mzn, active) VALUES (biz, 'SEG-8E5 test', 100, true) RETURNING id INTO exp;
   INSERT INTO public.experience_availability (experience_id, day_of_week, start_time, end_time, capacity, active, accepts_new_bookings)
     VALUES (exp, extract(dow FROM d_future)::int, '10:00', '12:00', 3, true, true);
@@ -51,7 +51,7 @@ BEGIN
   r := r || '[EXP-notify tourist=' || notif_cust || ' owner=' || notif_owner || '] ';
 
   -- ===== No-show =====
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   INSERT INTO public.bookings (experience_id, business_id, customer_id, date, "time", people, customer_name, status)
     VALUES (exp, biz, cust, d_future, '10:00', 1, 'SEG-8E5 test', 'confirmed') RETURNING id INTO n1;
   UPDATE public.bookings SET date = d_past WHERE id = n1;
@@ -86,7 +86,7 @@ BEGIN
   EXCEPTION WHEN others THEN r := r || '[NS-tourist PASS: ' || SQLERRM || '] ';
   END;
 
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   BEGIN
     UPDATE public.bookings SET status = 'no_show' WHERE id = n3;
     r := r || '[NS-admin FAIL: accepted] ';

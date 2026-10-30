@@ -46,7 +46,7 @@ BEGIN
   RESET ROLE;
 
   -- Admin
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   SET LOCAL ROLE authenticated;
   BEGIN PERFORM public.admin_send_notification('all', NULL, 'A', 'Hi', 'Texto', 'Text'); r := r || 'SHORT TITLE SENT!; ';
   EXCEPTION WHEN check_violation THEN r := r || 'short title refused; '; END;

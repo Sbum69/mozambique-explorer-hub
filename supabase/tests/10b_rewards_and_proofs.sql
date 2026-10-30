@@ -127,7 +127,7 @@ BEGIN
   END;
 
   -- ===== Admin approves the stop without coordinates: points once =====
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   st := public.review_stop_proof(pB, sB, true);
   BEGIN
     PERFORM public.review_stop_proof(pB, sB, true);

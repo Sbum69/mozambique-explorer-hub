@@ -33,7 +33,7 @@ BEGIN
   SELECT b.id INTO ownerless FROM public.businesses b WHERE b.status = 'approved' AND b.owner_id IS NULL ORDER BY b.name LIMIT 1;
   d := current_date + 7 + ((3 - extract(dow FROM current_date)::int + 7) % 7);
 
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   INSERT INTO public.experiences (business_id, title_pt, price_mzn, active) VALUES (biz, 'ADM-1 test', 100, true) RETURNING id INTO exp;
   INSERT INTO public.experience_availability (experience_id, day_of_week, start_time, end_time, capacity, active, accepts_new_bookings)
     VALUES (exp, extract(dow FROM d)::int, '10:00', '12:00', 5, true, true);
@@ -56,13 +56,13 @@ BEGIN
   RESET ROLE;
 
   -- ===== Suspend / reactivate =====
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   BEGIN PERFORM public.admin_set_business_status(biz, 'suspended', ''); r := r || '[SUS-noreason FAIL] ';
   EXCEPTION WHEN others THEN r := r || '[SUS-noreason PASS ' || SQLERRM || '] '; END;
   PERFORM set_config('request.jwt.claims', '', true);
   SET LOCAL ROLE anon; SELECT count(*) INTO vis FROM public.experiences WHERE id = exp; RESET ROLE;
   r := r || '[visible-before=' || vis || '] ';
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   res := public.admin_set_business_status(biz, 'suspended', 'Teste de suspensão');
   r := r || '[SUS ' || (res->>'status') || ' open_bookings=' || (res->>'open_bookings') || '] ';
   PERFORM set_config('request.jwt.claims', '', true);
@@ -80,7 +80,7 @@ BEGIN
     r := r || '[SUS-new-booking FAIL accepted] ';
   EXCEPTION WHEN others THEN r := r || '[SUS-new-booking PASS ' || SQLERRM || '] ';
   END;
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   res := public.admin_set_business_status(biz, 'approved');
   PERFORM set_config('request.jwt.claims', '', true);
   SET LOCAL ROLE anon; SELECT count(*) INTO vis FROM public.experiences WHERE id = exp; RESET ROLE;
@@ -89,7 +89,7 @@ BEGIN
   r := r || '[owner notified suspend+reactivate=' || notif1 || '] ';
 
   -- ===== Roles =====
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   roles := public.admin_set_user_role(cust2, 'business_small', true);
   r := r || '[ROLE-grant ' || array_to_string(roles, '+') || '] ';
   roles := public.admin_set_user_role(cust2, 'business_small', false);

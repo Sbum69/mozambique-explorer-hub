@@ -59,7 +59,7 @@ BEGIN
 
   -- ---------- Metrics leave the marked account out ----------
   before_accounts := (public.platform_impact_stats() -> 'platform' ->> 'accounts')::int;
-  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated')::text, true);
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', adm, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   SET LOCAL ROLE authenticated;
   PERFORM public.admin_set_internal(target, true);
   RESET ROLE;
