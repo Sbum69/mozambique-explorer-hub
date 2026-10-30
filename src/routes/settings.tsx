@@ -11,6 +11,7 @@ import {
   Mail,
   Palette,
   Shield,
+  ShieldCheck,
   SlidersHorizontal,
   Store,
   Trash2,
@@ -42,11 +43,14 @@ import { exportMyData } from "@/lib/account.functions";
 import { APP_VERSION, SUPPORT_EMAIL } from "@/lib/app-info";
 import { getAuthCallbackUrl } from "@/lib/app-url";
 import { requireAuthenticatedUser } from "@/lib/auth";
-import { PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
+import { MFA_TXT, PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
+import { MfaSettings } from "@/components/MfaSettings";
 import type { ThemePreference } from "@/lib/theme";
 
 export const Route = createFileRoute("/settings")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { mfa?: "required" } =>
+    search.mfa === "required" ? { mfa: "required" } : {},
   beforeLoad: requireAuthenticatedUser,
   head: () => ({
     meta: [{ title: "Definições — Ekaya Explore" }, { name: "robots", content: "noindex" }],
@@ -102,6 +106,7 @@ function SettingsPage() {
   const { lang } = useLang();
   const t = SETTINGS_TXT[lang];
   const { user, authUser, isAdmin, isBusiness } = useAuth();
+  const mfaRequired = Route.useSearch().mfa === "required";
 
   // Opened from the user menu's "Profile": scroll to that section once the page is there.
   useEffect(() => {
@@ -143,6 +148,9 @@ function SettingsPage() {
         <p className="text-muted-foreground">{t.subtitle}</p>
         <ProfileSection t={t} />
         <AccountSection t={t} />
+        <Section id="security" icon={ShieldCheck} title={MFA_TXT[lang].title}>
+          <MfaSettings required={mfaRequired} />
+        </Section>
         <PreferencesSection t={t} />
         <AppearanceSection t={t} />
         <NotificationsSection t={t} />
