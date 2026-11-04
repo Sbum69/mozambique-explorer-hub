@@ -407,6 +407,13 @@
       "when": 1794700000000,
       "tag": "0057_launch_status_error_log",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1794800000000,
+      "tag": "0058_privacy_v2_audit_fixes",
+      "breakpoints": true
     }
   ]
 }
