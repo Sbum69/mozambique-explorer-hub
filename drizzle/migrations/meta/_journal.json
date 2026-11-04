@@ -393,6 +393,13 @@
       "when": 1794500000000,
       "tag": "0055_business_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1794600000000,
+      "tag": "0056_assistant_faq",
+      "breakpoints": true
     }
   ]
 }
