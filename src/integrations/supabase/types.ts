@@ -1221,6 +1221,33 @@ export type Database = {
           },
         ]
       }
+      app_errors: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          release: string | null
+          route: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          release?: string | null
+          route: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          release?: string | null
+          route?: string
+        }
+        Relationships: []
+      }
       assistant_faq_entries: {
         Row: {
           active: boolean
@@ -2696,6 +2723,11 @@ export type Database = {
       admin_save_faq_entry: { Args: { _entry: Json; _id: string | null; _reason: string }; Returns: string }
       assistant_log_unanswered: { Args: { _lang: string; _question: string }; Returns: undefined }
       assistant_rate_answer: { Args: { _helpful: boolean; _lang: string; _slug: string }; Returns: undefined }
+      admin_launch_status: { Args: never; Returns: Json }
+      log_app_error: {
+        Args: { _kind: string; _message: string; _release: string; _route: string }
+        Returns: undefined
+      }
       admin_set_founder: {
         Args: { _business_id: string; _founder: boolean; _reason: string }
         Returns: Json
