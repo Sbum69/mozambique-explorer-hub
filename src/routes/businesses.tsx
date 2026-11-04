@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { ArrowLeft, Store, Search, MapPin, Compass, BadgeCheck, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,10 @@ import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
 import { ResetPrefsButton } from "@/components/ResetPrefsButton";
 import { preferredProvinceId } from "@/lib/pref-filters";
 import { fetchPublicBusinesses, type PublicBusiness } from "@/lib/local-businesses";
+
+const SponsoredStrip = lazy(() =>
+  import("@/components/SponsoredStrip").then((m) => ({ default: m.SponsoredStrip })),
+);
 
 export const Route = createFileRoute("/businesses")({
   head: () => ({
@@ -163,6 +167,14 @@ function BusinessesPage() {
           </Select>
           {provinceFilter.canReset && <ResetPrefsButton onClick={provinceFilter.reset} />}
         </div>
+
+        <Suspense fallback={null}>
+          {category !== ALL ? (
+            <SponsoredStrip scope="category" categoryCode={category} />
+          ) : provinceId !== ALL ? (
+            <SponsoredStrip scope="province" provinceId={provinceId} />
+          ) : null}
+        </Suspense>
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">

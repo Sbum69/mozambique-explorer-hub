@@ -58,6 +58,10 @@ import { getLiveNews } from "@/lib/news.functions";
 import { HERO_AVIF_SRCSET, HERO_PHOTO, HeroImage } from "@/components/HeroImage";
 import { formatPrice } from "@/lib/price";
 
+const SponsoredStrip = lazy(() =>
+  import("@/components/SponsoredStrip").then((m) => ({ default: m.SponsoredStrip })),
+);
+
 // Same colours as NotificationsBell variant="onDark": the top bar sits on the dark hero photo.
 const ON_HERO = "text-white hover:bg-white/10 hover:text-white";
 
@@ -390,6 +394,10 @@ function HomePage() {
           </motion.div>
         </section>
       </div>
+
+      <Suspense fallback={null}>
+        <SponsoredStrip scope="home" className="px-6 sm:px-10 pt-12 max-w-6xl mx-auto" />
+      </Suspense>
 
       {/* ============ PERSONALISED (from saved preferences) ============ */}
       <PersonalSection lang={lang as Lang} />

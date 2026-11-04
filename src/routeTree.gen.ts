@@ -45,6 +45,7 @@ import { Route as CommunityPostIdRouteImport } from './routes/community.$postId'
 import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as ExperienceIdRouteImport } from './routes/experience.$id'
 import { Route as ItineraryIdRouteImport } from './routes/itinerary.$id'
+import { Route as ReciboIdRouteImport } from './routes/recibo.$id'
 import { Route as VoucherRewardIdRouteImport } from './routes/voucher.$rewardId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -227,6 +228,11 @@ const ItineraryIdRoute = ItineraryIdRouteImport.update({
   path: '/itinerary/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReciboIdRoute = ReciboIdRouteImport.update({
+  id: '/recibo/$id',
+  path: '/recibo/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VoucherRewardIdRoute = VoucherRewardIdRouteImport.update({
   id: '/voucher/$rewardId',
   path: '/voucher/$rewardId',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/convite/$token': typeof ConviteTokenRoute
   '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
+  '/recibo/$id': typeof ReciboIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRoutesByTo {
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/convite/$token': typeof ConviteTokenRoute
   '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
+  '/recibo/$id': typeof ReciboIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRoutesById {
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/convite/$token': typeof ConviteTokenRoute
   '/experience/$id': typeof ExperienceIdRoute
   '/itinerary/$id': typeof ItineraryIdRoute
+  '/recibo/$id': typeof ReciboIdRoute
   '/voucher/$rewardId': typeof VoucherRewardIdRoute
 }
 export interface FileRouteTypes {
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/convite/$token'
     | '/experience/$id'
     | '/itinerary/$id'
+    | '/recibo/$id'
     | '/voucher/$rewardId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/convite/$token'
     | '/experience/$id'
     | '/itinerary/$id'
+    | '/recibo/$id'
     | '/voucher/$rewardId'
   id:
     | '__root__'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/convite/$token'
     | '/experience/$id'
     | '/itinerary/$id'
+    | '/recibo/$id'
     | '/voucher/$rewardId'
   fileRoutesById: FileRoutesById
 }
@@ -507,6 +519,7 @@ export interface RootRouteChildren {
   ConviteTokenRoute: typeof ConviteTokenRoute
   ExperienceIdRoute: typeof ExperienceIdRoute
   ItineraryIdRoute: typeof ItineraryIdRoute
+  ReciboIdRoute: typeof ReciboIdRoute
   VoucherRewardIdRoute: typeof VoucherRewardIdRoute
 }
 
@@ -764,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItineraryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recibo/$id': {
+      id: '/recibo/$id'
+      path: '/recibo/$id'
+      fullPath: '/recibo/$id'
+      preLoaderRoute: typeof ReciboIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/voucher/$rewardId': {
       id: '/voucher/$rewardId'
       path: '/voucher/$rewardId'
@@ -822,6 +842,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConviteTokenRoute: ConviteTokenRoute,
   ExperienceIdRoute: ExperienceIdRoute,
   ItineraryIdRoute: ItineraryIdRoute,
+  ReciboIdRoute: ReciboIdRoute,
   VoucherRewardIdRoute: VoucherRewardIdRoute,
 }
 export const routeTree = rootRouteImport

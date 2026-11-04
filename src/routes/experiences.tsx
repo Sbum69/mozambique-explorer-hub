@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Compass,
@@ -64,6 +64,10 @@ import {
   translateBookingError,
   type Booking,
 } from "@/lib/bookings";
+
+const SponsoredStrip = lazy(() =>
+  import("@/components/SponsoredStrip").then((m) => ({ default: m.SponsoredStrip })),
+);
 
 const WEEKDAY_LABEL: { pt: string; en: string }[] = [
   { pt: "Domingo", en: "Sunday" },
@@ -147,6 +151,8 @@ function ExperiencesPage() {
   const showAllDestinations = !expFilters.value.onlyMine;
   const toggleAllDestinations = () =>
     expFilters.set((cur) => ({ ...cur, onlyMine: !cur.onlyMine }));
+  // Sponsored cards of the first saved province (the organic list below keeps its own order).
+  const sponsoredProvinceId = provinces.find((p) => p.code === personalPrefs.provinces[0])?.id;
   const myProvinceNames = personalPrefs.provinces
     .map((code) => provinces.find((p) => p.code === code)?.name[lang] ?? code)
     .join(", ");
@@ -342,6 +348,12 @@ function ExperiencesPage() {
               </Button>
             </div>
           </div>
+        )}
+
+        {sponsoredProvinceId && (
+          <Suspense fallback={null}>
+            <SponsoredStrip scope="province" provinceId={sponsoredProvinceId} className="mb-6" />
+          </Suspense>
         )}
 
         {/* Category filter */}

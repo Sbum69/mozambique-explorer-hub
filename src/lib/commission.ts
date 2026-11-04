@@ -18,6 +18,10 @@ export interface CommercialConfig {
   highlightWeekCents: number;
   highlightMonthCents: number;
   planMonthCents: number;
+  /** Highlights approved at the same time for one place (home, a province or a category). */
+  sponsoredSlotsPerScope: number;
+  /** Sponsored cards shown on one page. */
+  sponsoredPerPage: number;
   note: string | null;
   createdAt: string;
 }
@@ -66,6 +70,8 @@ type Row = {
   highlight_week_cents: number;
   highlight_month_cents: number;
   plan_month_cents: number;
+  sponsored_slots_per_scope: number;
+  sponsored_per_page: number;
   note: string | null;
   created_at: string;
 };
@@ -80,6 +86,8 @@ const fromRow = (r: Row): CommercialConfig => ({
   highlightWeekCents: Number(r.highlight_week_cents),
   highlightMonthCents: Number(r.highlight_month_cents),
   planMonthCents: Number(r.plan_month_cents),
+  sponsoredSlotsPerScope: r.sponsored_slots_per_scope,
+  sponsoredPerPage: r.sponsored_per_page,
   note: r.note,
   createdAt: r.created_at,
 });
