@@ -32,11 +32,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ParaNegociosRouteImport } from './routes/para-negocios'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UsefulInfoRouteImport } from './routes/useful-info'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -163,6 +166,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParaNegociosRoute = ParaNegociosRouteImport.update({
+  id: '/para-negocios',
+  path: '/para-negocios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreferencesRoute = PreferencesRouteImport.update({
   id: '/preferences',
   path: '/preferences',
@@ -178,6 +186,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -186,6 +199,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -263,11 +281,14 @@ export interface FileRoutesByFullPath {
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
+  '/para-negocios': typeof ParaNegociosRoute
   '/preferences': typeof PreferencesRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -303,11 +324,14 @@ export interface FileRoutesByTo {
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
+  '/para-negocios': typeof ParaNegociosRoute
   '/preferences': typeof PreferencesRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -344,11 +368,14 @@ export interface FileRoutesById {
   '/map': typeof MapRoute
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
+  '/para-negocios': typeof ParaNegociosRoute
   '/preferences': typeof PreferencesRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/useful-info': typeof UsefulInfoRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -386,11 +413,14 @@ export interface FileRouteTypes {
     | '/map'
     | '/news-alerts'
     | '/onboarding'
+    | '/para-negocios'
     | '/preferences'
     | '/privacy'
     | '/reset-password'
+    | '/robots.txt'
     | '/settings'
     | '/signup'
+    | '/sitemap.xml'
     | '/terms'
     | '/useful-info'
     | '/auth/callback'
@@ -426,11 +456,14 @@ export interface FileRouteTypes {
     | '/map'
     | '/news-alerts'
     | '/onboarding'
+    | '/para-negocios'
     | '/preferences'
     | '/privacy'
     | '/reset-password'
+    | '/robots.txt'
     | '/settings'
     | '/signup'
+    | '/sitemap.xml'
     | '/terms'
     | '/useful-info'
     | '/auth/callback'
@@ -466,11 +499,14 @@ export interface FileRouteTypes {
     | '/map'
     | '/news-alerts'
     | '/onboarding'
+    | '/para-negocios'
     | '/preferences'
     | '/privacy'
     | '/reset-password'
+    | '/robots.txt'
     | '/settings'
     | '/signup'
+    | '/sitemap.xml'
     | '/terms'
     | '/useful-info'
     | '/auth/callback'
@@ -507,11 +543,14 @@ export interface RootRouteChildren {
   MapRoute: typeof MapRoute
   NewsAlertsRoute: typeof NewsAlertsRoute
   OnboardingRoute: typeof OnboardingRoute
+  ParaNegociosRoute: typeof ParaNegociosRoute
   PreferencesRoute: typeof PreferencesRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   UsefulInfoRoute: typeof UsefulInfoRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
@@ -686,6 +725,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/para-negocios': {
+      id: '/para-negocios'
+      path: '/para-negocios'
+      fullPath: '/para-negocios'
+      preLoaderRoute: typeof ParaNegociosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/preferences': {
       id: '/preferences'
       path: '/preferences'
@@ -707,6 +753,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -719,6 +772,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -830,11 +890,14 @@ const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRoute,
   NewsAlertsRoute: NewsAlertsRoute,
   OnboardingRoute: OnboardingRoute,
+  ParaNegociosRoute: ParaNegociosRoute,
   PreferencesRoute: PreferencesRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   UsefulInfoRoute: UsefulInfoRoute,
   AuthCallbackRoute: AuthCallbackRoute,

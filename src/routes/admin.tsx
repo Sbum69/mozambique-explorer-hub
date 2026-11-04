@@ -139,6 +139,10 @@ const AdminCommercial = lazy(() =>
   import("@/components/AdminCommercial").then((m) => ({ default: m.AdminCommercial })),
 );
 
+const AdminLeads = lazy(() =>
+  import("@/components/AdminLeads").then((m) => ({ default: m.AdminLeads })),
+);
+
 const AdminSponsored = lazy(() =>
   import("@/components/AdminSponsored").then((m) => ({ default: m.AdminSponsored })),
 );
@@ -148,6 +152,7 @@ type ModalKey =
   | "content"
   | "commercial"
   | "sponsored"
+  | "leads"
   | "users"
   | "routes"
   | "provinces"
@@ -230,6 +235,7 @@ function AdminPage() {
     { key: "content" as const, label: "Conteúdo e importação", icon: FileText },
     { key: "commercial" as const, label: "Comissão e preços", icon: FileText },
     { key: "sponsored" as const, label: "Destaques", icon: FileText },
+    { key: "leads" as const, label: "Pedidos Para negócios", icon: Store },
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users },
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store },
     { key: "bookings" as const, label: "Reservas", icon: Clock },
@@ -369,6 +375,7 @@ function AdminPage() {
                         content: "Content and import",
                         commercial: "Commission and prices",
                         sponsored: "Highlights",
+                        leads: "For businesses requests",
                         users: "Manage users",
                         businesses: "Business approvals",
                         routes: "Manage routes",
@@ -409,6 +416,17 @@ function AdminPage() {
         >
           <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
             <AdminCommercial />
+          </Suspense>
+        </ModalShell>
+      )}
+      {activeModal === "leads" && (
+        <ModalShell
+          title={pt ? "Pedidos Para negócios" : "For businesses requests"}
+          onClose={() => setActiveModal(null)}
+          maxWidth="max-w-4xl"
+        >
+          <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
+            <AdminLeads />
           </Suspense>
         </ModalShell>
       )}

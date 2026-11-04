@@ -18,7 +18,7 @@ export function JoinEkayaCard({ message }: { message: string }) {
         <h2 className="text-lg font-bold">{t.joinTitle}</h2>
         <p className="text-sm">{t.joinBody}</p>
         <Button asChild>
-          <Link to="/business-register">{t.joinCta}</Link>
+          <Link to="/para-negocios">{t.joinCta}</Link>
         </Button>
       </div>
     </Card>

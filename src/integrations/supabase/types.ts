@@ -1375,7 +1375,29 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_leads_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_leads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_leads_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       business_invites: {
         Row: {
