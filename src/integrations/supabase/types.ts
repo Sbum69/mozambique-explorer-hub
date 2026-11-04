@@ -1221,6 +1221,165 @@ export type Database = {
           },
         ]
       }
+      assistant_faq_entries: {
+        Row: {
+          active: boolean
+          answer_en: string
+          answer_pt: string
+          created_at: string
+          id: string
+          keywords_en: string[]
+          keywords_pt: string[]
+          kind: string
+          links: Json
+          needs_validation: boolean
+          question_en: string
+          question_pt: string
+          slug: string
+          topic: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          answer_en: string
+          answer_pt: string
+          created_at?: string
+          id?: string
+          keywords_en?: string[]
+          keywords_pt?: string[]
+          kind?: string
+          links?: Json
+          needs_validation?: boolean
+          question_en: string
+          question_pt: string
+          slug: string
+          topic: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          active?: boolean
+          answer_en?: string
+          answer_pt?: string
+          created_at?: string
+          id?: string
+          keywords_en?: string[]
+          keywords_pt?: string[]
+          kind?: string
+          links?: Json
+          needs_validation?: boolean
+          question_en?: string
+          question_pt?: string
+          slug?: string
+          topic?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      assistant_feedback: {
+        Row: {
+          created_at: string
+          entry_slug: string
+          helpful: boolean
+          id: string
+          lang: string
+        }
+        Insert: {
+          created_at?: string
+          entry_slug: string
+          helpful: boolean
+          id?: string
+          lang: string
+        }
+        Update: {
+          created_at?: string
+          entry_slug?: string
+          helpful?: boolean
+          id?: string
+          lang?: string
+        }
+        Relationships: []
+      }
+      assistant_faq_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entry_id: string
+          id: string
+          reason: string | null
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entry_id: string
+          id?: string
+          reason?: string | null
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entry_id?: string
+          id?: string
+          reason?: string | null
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: []
+      }
+      assistant_llm_usage: {
+        Row: {
+          calls: number
+          day: string
+          neurons: number
+          updated_at: string
+        }
+        Insert: {
+          calls?: number
+          day: string
+          neurons?: number
+          updated_at?: string
+        }
+        Update: {
+          calls?: number
+          day?: string
+          neurons?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assistant_unanswered: {
+        Row: {
+          created_at: string
+          handled: boolean
+          id: string
+          lang: string
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          handled?: boolean
+          id?: string
+          lang: string
+          question: string
+        }
+        Update: {
+          created_at?: string
+          handled?: boolean
+          id?: string
+          lang?: string
+          question?: string
+        }
+        Relationships: []
+      }
       admin_audit: {
         Row: {
           action: string
@@ -2533,6 +2692,10 @@ export type Database = {
         }
         Returns: string
       }
+      admin_mark_unanswered: { Args: { _id: string }; Returns: undefined }
+      admin_save_faq_entry: { Args: { _entry: Json; _id: string | null; _reason: string }; Returns: string }
+      assistant_log_unanswered: { Args: { _lang: string; _question: string }; Returns: undefined }
+      assistant_rate_answer: { Args: { _helpful: boolean; _lang: string; _slug: string }; Returns: undefined }
       admin_set_founder: {
         Args: { _business_id: string; _founder: boolean; _reason: string }
         Returns: Json
