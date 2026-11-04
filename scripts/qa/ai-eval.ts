@@ -3,7 +3,8 @@
  * Runs docs/ia/avaliacao-v1.json against one model with the FAQ draft below as the only source
  * (baseline without the tourism knowledge base: content questions must end in "I don't know").
  *
- * Usage: bun scripts/qa/ai-eval.ts --model=@cf/qwen/qwen3-30b-a3b-fp8
+ * Usage: bun scripts/qa/ai-eval.ts --model=@cf/qwen/qwen3-30b-a3b-fp8 [--faq=docs/ia/faq-v1.json]
+ * With --faq the sources are the assistant FAQ (phase 1 seed) instead of the draft below.
  * Needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in .env.test.local (never printed).
  * Daily guard: stops before 9 000 Neurons (counter in qa-output/ai-usage-<date>.json), so the
  * free 10 000 Neurons/day are never exceeded. Only synthetic questions are sent — no user data.
@@ -11,6 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { ptPtViolations } from "../../src/lib/assistant/llm-guard";
 import { readEnv, REPO } from "./lib";
 
 const DAILY_LIMIT = 9000;
@@ -40,7 +42,7 @@ const ROUTES = [
 ];
 
 /** FAQ draft (features that exist in the app today). To be validated by the content owner. */
-const FAQ = `
+const DRAFT_FAQ = `
 [F1] (/settings) Foto de perfil, nome e telefone: Definições → Perfil. Email e palavra-passe: Definições → Conta. | Profile photo, name and phone: Settings → Profile. Email and password: Settings → Account.
 [F2] (/settings) Exportar os meus dados: Definições → Privacidade → Exportar (ficheiro JSON). | Export my data: Settings → Privacy → Export (JSON file).
 [F3] (/settings) Apagar a conta: Definições → Privacidade → Apagar conta; pede uma palavra de confirmação. Com reservas futuras, primeiro é preciso cancelá-las. | Delete account: Settings → Privacy → Delete account; asks for a confirmation word. With future bookings, cancel them first.
@@ -54,6 +56,30 @@ const FAQ = `
 [F11] Contacto oficial de apoio: ${SUPPORT}. Não há outro canal publicado (sem WhatsApp nem telefone). | Official support contact: ${SUPPORT}. No other channel is published (no WhatsApp or phone).
 [F12] O EKAYA só existe como aplicação web; não há aplicação nas lojas. | EKAYA exists only as a web app; there is no store app.
 `.trim();
+
+// --faq: the phase 1 FAQ as sources, one line per entry, cited by page.
+const faqArg = process.argv.find((a) => a.startsWith("--faq="))?.slice(6);
+type SeedEntry = {
+  slug: string;
+  kind: string;
+  a_pt: string;
+  a_en: string;
+  links: { path: string }[];
+};
+const seedEntries: SeedEntry[] = faqArg
+  ? (JSON.parse(readFileSync(join(REPO, faqArg), "utf8")) as { entries: SeedEntry[] }).entries
+  : [];
+for (const e of seedEntries)
+  for (const l of e.links) if (!ROUTES.includes(l.path)) ROUTES.push(l.path);
+const FAQ = faqArg
+  ? seedEntries
+      .filter((e) => e.kind !== "refuse")
+      .map(
+        (e) =>
+          `[${e.slug}] (${e.links.map((l) => l.path).join(", ") || "-"}) ${e.a_pt.replaceAll("{SUPPORT}", SUPPORT).replace(" [VALIDAR]", "")} | ${e.a_en.replaceAll("{SUPPORT}", SUPPORT).replace(" [VALIDAR]", "")}`,
+      )
+      .join(String.fromCharCode(10))
+  : DRAFT_FAQ;
 
 const SYSTEM = `You are the EKAYA Explore help assistant (community tourism in Mozambique). /no_think
 RULES:
@@ -129,6 +155,7 @@ function check(c: Case, text: string) {
   if (emails.length) issues.push(`email não publicado: ${emails[0]}`);
   if (ACTION.test(text)) issues.push("diz que executou uma ação");
   if (LEAK.test(text)) issues.push("revela instruções");
+  if (lang === "pt") for (const h of ptPtViolations(text)) issues.push(`PT-BR: ${h}`);
   const links = [...text.matchAll(/\]\((\/[^)\s]*)\)/g)].map((m) => m[1].split(/[?#]/)[0]);
   const bad = links.filter((l) => !ROUTES.includes(l) && l !== "/home");
   if (bad.length) issues.push(`link inexistente: ${bad[0]}`);
@@ -192,7 +219,7 @@ const results: {
   error?: string;
 }[] = [];
 const slug = model.split("/").pop();
-const resultFile = join(out, `ai-eval-${slug}-${day}.json`);
+const resultFile = join(out, `ai-eval-${slug}${faqArg ? "-faq" : ""}-${day}.json`);
 // --regrade: re-run the checks on the saved answers (no API call, no quota used).
 const regrade = process.argv.includes("--regrade");
 const saved = regrade
@@ -207,7 +234,7 @@ for (const c of set.cases) {
     continue;
   }
   // Worst-case estimate for one call: ~2 500 input + 400 output tokens.
-  const estimate = (2500 * rates[0] + 400 * rates[1]) / 1e6;
+  const estimate = ((faqArg ? 4000 : 2500) * rates[0] + 400 * rates[1]) / 1e6;
   if (usage.neurons + estimate > DAILY_LIMIT) {
     console.log(
       `STOP: daily guard (${usage.neurons.toFixed(0)} of ${DAILY_LIMIT} Neurons used today)`,

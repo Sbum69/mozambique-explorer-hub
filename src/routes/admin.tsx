@@ -139,6 +139,10 @@ const AdminCommercial = lazy(() =>
   import("@/components/AdminCommercial").then((m) => ({ default: m.AdminCommercial })),
 );
 
+const AdminAssistant = lazy(() =>
+  import("@/components/AdminAssistant").then((m) => ({ default: m.AdminAssistant })),
+);
+
 const AdminLeads = lazy(() =>
   import("@/components/AdminLeads").then((m) => ({ default: m.AdminLeads })),
 );
@@ -153,6 +157,7 @@ type ModalKey =
   | "commercial"
   | "sponsored"
   | "leads"
+  | "assistant"
   | "users"
   | "routes"
   | "provinces"
@@ -236,6 +241,7 @@ function AdminPage() {
     { key: "commercial" as const, label: "Comissão e preços", icon: FileText },
     { key: "sponsored" as const, label: "Destaques", icon: FileText },
     { key: "leads" as const, label: "Pedidos Para negócios", icon: Store },
+    { key: "assistant" as const, label: "Assistente", icon: FileText },
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users },
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store },
     { key: "bookings" as const, label: "Reservas", icon: Clock },
@@ -376,6 +382,7 @@ function AdminPage() {
                         commercial: "Commission and prices",
                         sponsored: "Highlights",
                         leads: "For businesses requests",
+                        assistant: "Assistant",
                         users: "Manage users",
                         businesses: "Business approvals",
                         routes: "Manage routes",
@@ -416,6 +423,17 @@ function AdminPage() {
         >
           <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
             <AdminCommercial />
+          </Suspense>
+        </ModalShell>
+      )}
+      {activeModal === "assistant" && (
+        <ModalShell
+          title={pt ? "Assistente" : "Assistant"}
+          onClose={() => setActiveModal(null)}
+          maxWidth="max-w-4xl"
+        >
+          <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
+            <AdminAssistant />
           </Suspense>
         </ModalShell>
       )}
