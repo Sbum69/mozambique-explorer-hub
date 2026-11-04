@@ -139,6 +139,10 @@ const AdminCommercial = lazy(() =>
   import("@/components/AdminCommercial").then((m) => ({ default: m.AdminCommercial })),
 );
 
+const AdminLaunchStatus = lazy(() =>
+  import("@/components/AdminLaunchStatus").then((m) => ({ default: m.AdminLaunchStatus })),
+);
+
 const AdminAssistant = lazy(() =>
   import("@/components/AdminAssistant").then((m) => ({ default: m.AdminAssistant })),
 );
@@ -158,6 +162,7 @@ type ModalKey =
   | "sponsored"
   | "leads"
   | "assistant"
+  | "launch"
   | "users"
   | "routes"
   | "provinces"
@@ -237,6 +242,7 @@ function AdminPage() {
     { label: pt ? "Reservas" : "Bookings", value: summary.data?.bookings, icon: Clock },
   ];
   const quickActions = [
+    { key: "launch" as const, label: "Estado do lançamento", icon: Activity },
     { key: "content" as const, label: "Conteúdo e importação", icon: FileText },
     { key: "commercial" as const, label: "Comissão e preços", icon: FileText },
     { key: "sponsored" as const, label: "Destaques", icon: FileText },
@@ -378,6 +384,7 @@ function AdminPage() {
                   {pt
                     ? a.label
                     : {
+                        launch: "Launch status",
                         content: "Content and import",
                         commercial: "Commission and prices",
                         sponsored: "Highlights",
@@ -423,6 +430,17 @@ function AdminPage() {
         >
           <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
             <AdminCommercial />
+          </Suspense>
+        </ModalShell>
+      )}
+      {activeModal === "launch" && (
+        <ModalShell
+          title={pt ? "Estado do lançamento" : "Launch status"}
+          onClose={() => setActiveModal(null)}
+          maxWidth="max-w-4xl"
+        >
+          <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
+            <AdminLaunchStatus />
           </Suspense>
         </ModalShell>
       )}

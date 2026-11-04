@@ -15,5 +15,7 @@ if (missing.length) {
   console.log(`BLOCKED: missing ${missing.join(", ")} in .env.test.local`);
   process.exit(2);
 }
-const hashes = keys.map((k) => createHash("sha256").update(env[k].trim().toLowerCase()).digest("hex"));
+const hashes = keys.map((k) =>
+  createHash("sha256").update(env[k].trim().toLowerCase()).digest("hex"),
+);
 console.log(hashes.map((h) => `  ('${h}')`).join(",\n"));
