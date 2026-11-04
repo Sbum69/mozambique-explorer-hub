@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { MessageCircleQuestion } from "lucide-react";
 
@@ -15,12 +15,20 @@ export function AssistantLauncher() {
   const { lang } = useLang();
   const t = ASSISTANT_TXT[lang];
   const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  // Focus goes back to the help button when the panel closes.
+  useEffect(() => {
+    if (wasOpen.current && !open) button.current?.focus();
+    wasOpen.current = open;
+  }, [open]);
   const { pathname } = useLocation();
   if (pathname.startsWith("/admin") || pathname.startsWith("/recibo/")) return null;
   return (
     <>
       {!open && (
         <button
+          ref={button}
           type="button"
           onClick={() => setOpen(true)}
           aria-label={t.openLabel}

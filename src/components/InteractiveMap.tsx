@@ -16,7 +16,7 @@ import type { Destination } from "@/lib/destinations";
 import { useLang } from "@/contexts/LanguageContext";
 import type { CommunityExperience } from "@/lib/community-experiences";
 import { categoryMeta, communityLocation } from "@/lib/community-experiences";
-import { communityIcon } from "@/components/CommunityMiniMap";
+import { communityIcon } from "@/components/community-pin";
 import { InterestIcon } from "@/components/InterestIcon";
 import { directionsUrls } from "@/lib/visits";
 

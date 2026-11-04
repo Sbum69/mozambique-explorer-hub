@@ -19,7 +19,7 @@ function buildText(p: SharePayload) {
   return `${p.title}${d}`;
 }
 
-export function platformShareUrl(platform: Platform, p: SharePayload): string {
+function platformShareUrl(platform: Platform, p: SharePayload): string {
   const text = buildText(p);
   switch (platform) {
     case "whatsapp":
