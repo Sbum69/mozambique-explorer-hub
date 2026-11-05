@@ -43,6 +43,7 @@ describe("assistant FAQ seed", () => {
       "/para-negocios",
       "/business-register",
       "/businesses",
+      "/news-alerts",
     ]);
     for (const e of entries) {
       expect(e.aPt.length && e.aEn.length).toBeTruthy();
