@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 
 import { useLang } from "@/contexts/LanguageContext";
 import { APP_VERSION } from "@/lib/app-info";
-import { LEGAL_TXT } from "@/lib/page-texts";
+import { FOR_BUSINESS_TXT, LEGAL_TXT } from "@/lib/page-texts";
 import { cn } from "@/lib/utils";
 
-/** Legal footer: Terms, Privacy, Credits and the app version. */
+/** Footer: For businesses, Terms, Privacy, Credits and the app version. */
 export function LegalFooterLinks({
   className,
   onNavigate,
@@ -19,6 +19,11 @@ export function LegalFooterLinks({
   return (
     <nav aria-label={t.footerLabel} className={cn("text-xs text-muted-foreground", className)}>
       <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <li>
+          <Link to="/para-negocios" className={link} onClick={onNavigate}>
+            {FOR_BUSINESS_TXT[lang].nav}
+          </Link>
+        </li>
         <li>
           <Link to="/terms" className={link} onClick={onNavigate}>
             {t.terms}

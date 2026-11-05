@@ -43,6 +43,7 @@ Depois, confirmar por leitura que não ficaram dados de teste (consulta no topo 
 | `dados-2_internal_accounts.sql`       | contas internas fora das métricas                                                                          |
 | `m1_commission.sql`                   | comissão: arredondamento, versões, Fundador, snapshot, adulteração                                         |
 | `m6_sponsored.sql`                    | destaques: preço da configuração, sem escrita pelo browser, só o admin ativa, limites, expiração, Fundador |
+| `m9_business_leads.sql`               | pedidos Para negócios: só pela RPC, honeypot, limite por IP, só o admin lê e muda                          |
 | `content-1_readiness_import.sql`      | pronto para publicar, importação como rascunho e convites                                                  |
 | `legal-1_acceptances.sql`             | aceitação dos Termos e da Privacidade (registo e pedido)                                                   |
 
@@ -68,6 +69,7 @@ a correr na porta 4173:
    7d. `content.ts` (estados vazios, convite, janela Conteúdo do admin, pronto para publicar no painel do negócio; não importa nem ativa nada)
    7e. `commission.ts` (cartão Comissão e taxas no painel do negócio e janela Comissão e preços do admin; não guarda nada)
    7f. `sponsored.ts` (etiqueta Patrocinado em todos os cartões e limite por página; secção Destaques no painel do negócio e janela Destaques do admin; não guarda nada)
+   7g. `for-business.ts` (página Para negócios PT/EN, validação do formulário sem enviar, rodapé, sitemap.xml e robots.txt)
 
 Admin com 2FA: com `TEST_ADMIN_TOTP_SECRET` em `.env.test.local`, `sessionFor("admin")` sobe a
 sessão a `aal2` pela API (código TOTP calculado no script, sem dependências); sem ele, os casos de

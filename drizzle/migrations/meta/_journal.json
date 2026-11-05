@@ -386,6 +386,13 @@
       "when": 1794400000000,
       "tag": "0054_sponsored_placements",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1794500000000,
+      "tag": "0055_business_leads",
+      "breakpoints": true
     }
   ]
 }

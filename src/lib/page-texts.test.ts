@@ -23,6 +23,7 @@ describe("ADM-2B page texts exist in PT and EN", () => {
         "COMMISSION_TXT",
         "CONTENT_TXT",
         "FORGOT_TXT",
+        "FOR_BUSINESS_TXT",
         "GAMES_TXT",
         "GAME_TASK_TXT",
         "LEGAL_TXT",

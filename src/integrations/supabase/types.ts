@@ -1323,6 +1323,82 @@ export type Database = {
         }
         Relationships: []
       }
+      business_leads: {
+        Row: {
+          accepts_bookings: boolean
+          admin_note: string | null
+          business_id: string | null
+          business_name: string
+          category_code: string
+          contact: string
+          contact_name: string
+          created_at: string
+          id: string
+          ip_day_hash: string
+          lang: string
+          message: string | null
+          province_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepts_bookings: boolean
+          admin_note?: string | null
+          business_id?: string | null
+          business_name: string
+          category_code: string
+          contact: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          ip_day_hash: string
+          lang?: string
+          message?: string | null
+          province_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepts_bookings?: boolean
+          admin_note?: string | null
+          business_id?: string | null
+          business_name?: string
+          category_code?: string
+          contact?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          ip_day_hash?: string
+          lang?: string
+          message?: string | null
+          province_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_leads_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_leads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_leads_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       business_invites: {
         Row: {
           business_id: string
@@ -2437,6 +2513,25 @@ export type Database = {
           _title_pt: string | null
         }
         Returns: Json
+      }
+      admin_set_lead_status: {
+        Args: { _business_id?: string; _id: string; _note?: string; _status: string }
+        Returns: undefined
+      }
+      founder_places_left: { Args: never; Returns: number }
+      submit_business_lead: {
+        Args: {
+          _accepts_bookings: boolean
+          _business_name: string
+          _category_code: string
+          _contact: string
+          _contact_name: string
+          _lang: string
+          _message: string | null
+          _province_id: string
+          _website?: string
+        }
+        Returns: string
       }
       admin_set_founder: {
         Args: { _business_id: string; _founder: boolean; _reason: string }
