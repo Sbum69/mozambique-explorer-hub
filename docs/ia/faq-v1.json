@@ -577,9 +577,9 @@
       "topic": "content",
       "kind": "faq",
       "q_pt": "Onde encontro informação útil para a viagem?",
-      "q_en": "Where do I find useful travel information?",
-      "a_pt": "Na página Informação útil há conselhos sobre dinheiro, segurança, transporte, clima, saúde e internet. Para vistos e regras de entrada, confirma sempre nas fontes oficiais. Em caso de emergência, contacta as autoridades locais ou o teu alojamento.",
-      "a_en": "The Useful information page has advice on money, safety, transport, weather, health and internet. For visas and entry rules, always check official sources. In an emergency, contact the local authorities or your accommodation.",
+      "q_en": "Where can I find useful travel information?",
+      "a_pt": "Na página Informação útil encontras o câmbio e conselhos para a viagem; o tempo e as notícias estão em Notícias e alertas. Para vistos e regras de entrada, confirma sempre nas fontes oficiais. Em caso de emergência, contacta as autoridades locais ou o teu alojamento.",
+      "a_en": "On the Useful information page you'll find exchange rates and travel tips; weather and news are in News and alerts. For visas and entry rules, always check official sources. In an emergency, contact the local authorities or your accommodation.",
       "kw_pt": [
         "visto",
         "emergencia",
@@ -603,10 +603,16 @@
       "links": [
         {
           "path": "/useful-info",
-          "pt": "Informação útil",
-          "en": "Useful information"
+          "pt": "Informações Úteis",
+          "en": "Useful Information"
+        },
+        {
+          "path": "/news-alerts",
+          "pt": "Notícias & Avisos",
+          "en": "News & Alerts"
         }
-      ]
+      ],
+      "validate": false
     },
     {
       "slug": "app-lojas",
