@@ -64,15 +64,19 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [ ] Painel (`/dashboard`): **59** (LCP 6,0 s). Objetivo ≤ 2,5 s a pintar com sessão: sessão em cookies e SSR das páginas privadas.
 - [ ] Bundle inicial **~250 KB gz**: separar os dicionários de texto não reduziu (o empacotador volta a juntá-los); rever a divisão em blocos (`manualChunks`) e o que o root importa.
 
+**Prioridade 2 — segurança (auditoria de 05/11/2026)**
+- [ ] `zod` 3 → 4 (aviso alto: memória com coleções enormes; hoje o servidor só valida `{ lang }`).
+- [ ] CSP com nonces (ou hashes) nos scripts inline, para retirar `script-src 'unsafe-inline'`.
+- [ ] Atualizar as ferramentas de desenvolvimento com avisos (`undici`, `ws`, `esbuild`, `minimatch`, `sharp`) quando o wrangler e o plugin da Lovable subirem.
+- [ ] `admin_set_user_role` não escreve no `admin_audit`: registar as mudanças de papel na própria RPC.
+
 **Outros**
 - [ ] Limpeza periódica de ficheiros de provas de contas apagadas (storage)
 - [ ] Negócios de exemplo suspensos (8): reativar quando um dono real os reclamar
-- [ ] `zod` 3 → 4 (aviso alto de memória nos validadores; a correção só existe no zod 4)
 - [ ] Histórias da home (`src/data/itineraries.ts`): validar as lendas antes de as voltar a mostrar (`SHOW_STORY_STOPS`)
 - [ ] Eventos geridos pelo admin (tabela `events`, RLS, modal) para reativar o separador Eventos
 - [ ] Bloco 10 — confirmar se há partes além do 10B (ver plano oficial)
 - [ ] QA integral multissessão e em dispositivos físicos (admin, turista, segundo dono; itinerários)
-- [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
 - [ ] Assistente fase 2 (Qwen3): **desligado no lançamento** (`ASSISTANT_LLM_ENABLED = false`). Antes de ligar: corrigir os 5 casos críticos sinalizados (pt-10, pt-18, pt-23, pt-39, pt-40) e o português do Brasil ("você", "contato", "me diga" em 7 de 92): PT-PT/PT-MZ no prompt + `ptPtViolations` no servidor a rejeitar e repetir a resposta; voltar a correr os 92 casos sem sinalizações críticas
 
 ---

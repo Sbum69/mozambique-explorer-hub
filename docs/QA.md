@@ -46,6 +46,7 @@ Depois, confirmar por leitura que não ficaram dados de teste (consulta no topo 
 | `m9_business_leads.sql`               | pedidos Para negócios: só pela RPC, honeypot, limite por IP, só o admin lê e muda                                |
 | `ai-1_assistant.sql`                  | assistente: FAQ pública, edição só pelo admin com versões, perguntas sem resposta anónimas e mascaradas, 30 dias |
 | `content-1_readiness_import.sql`      | pronto para publicar, importação como rascunho e convites                                                        |
+| `content-2_photos_policies.sql`       | fotos de conteúdo: dono só na pasta do seu negócio, turista recusado, admin (aal2) aceite                        |
 | `legal-1_acceptances.sql`             | aceitação dos Termos e da Privacidade (registo e pedido)                                                         |
 
 Alguns casos dependem de dados (por exemplo, um negócio aprovado sem dono ou uma reserva futura):
