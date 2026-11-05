@@ -3,4 +3,4 @@
  * public.current_legal_versions() in the latest migration that defines it (checked by legal.test.ts):
  * change both together, in a new migration, whenever a text changes.
  */
-export const LEGAL_VERSIONS = { terms: "2026-10-30", privacy: "2026-10-30" } as const;
+export const LEGAL_VERSIONS = { terms: "2026-10-30", privacy: "2026-11-04" } as const;

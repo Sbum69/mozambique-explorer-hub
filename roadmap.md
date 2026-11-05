@@ -57,19 +57,23 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [x] SEG-FINAL — Auditoria (RLS, grants, funções, storage, segredos, XSS, redireções); migração 0045 (grants do visitante, fotos aprovadas visíveis, links `//`, só imagens nos buckets); `seroval` crítico corrigido; cabeçalhos de segurança; `docs/SECURITY.md`
 
 ## Depois do lançamento
-- [ ] Painel com sessão a pintar em ≤ 2,5 s (DevTools): hoje ~6–7 s por ser renderizado no browser à espera da sessão (a main nem pinta). Exige sessão em cookies e SSR das páginas privadas.
-- [ ] Lighthouse mobile < 75 neste PC: mapa 68 (confirmar com A/B; era 81 no PERF-3), roteiros 63–68, jogos 55, painel 58. Medir no preview/site publicado (o preview da Lovable pede sessão: 401).
+
+**Prioridade 1 — desempenho** (Lighthouse mobile, mediana de 3, medido a 05/11/2026 no `prelaunch.ts`):
+- [ ] Roteiros (`/itineraries`): **57** (TBT 1,05 s). Objetivo ≥ 70: reduzir o trabalho no primeiro carregamento da lista.
+- [ ] Jogos (`/games`): **59** (LCP 5,2 s, TBT 1,18 s). Objetivo ≥ 70: esqueleto vindo do servidor e redireção para o login no browser (decisão de produto adiada).
+- [ ] Painel (`/dashboard`): **59** (LCP 6,0 s). Objetivo ≤ 2,5 s a pintar com sessão: sessão em cookies e SSR das páginas privadas.
+- [ ] Bundle inicial **~250 KB gz**: separar os dicionários de texto não reduziu (o empacotador volta a juntá-los); rever a divisão em blocos (`manualChunks`) e o que o root importa.
+
+**Outros**
 - [ ] Limpeza periódica de ficheiros de provas de contas apagadas (storage)
 - [ ] Negócios de exemplo suspensos (8): reativar quando um dono real os reclamar
-- [ ] Jogos: desempenho mobile ≥ 70 (está em ~62, com grande variação). Exige mostrar o esqueleto da página vindo do servidor e redirecionar para o login no browser (decisão de produto adiada).
 - [ ] `zod` 3 → 4 (aviso alto de memória nos validadores; a correção só existe no zod 4)
 - [ ] Histórias da home (`src/data/itineraries.ts`): validar as lendas antes de as voltar a mostrar (`SHOW_STORY_STOPS`)
 - [ ] Eventos geridos pelo admin (tabela `events`, RLS, modal) para reativar o separador Eventos
 - [ ] Bloco 10 — confirmar se há partes além do 10B (ver plano oficial)
 - [ ] QA integral multissessão e em dispositivos físicos (admin, turista, segundo dono; itinerários)
 - [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
-- [ ] Desempenho: bundle inicial ~250 KB gz (medido 04/11); separar dicionários de texto não reduziu (o empacotador volta a juntá-los) — exige rever a divisão em blocos
-- [ ] Assistente fase 2 (modelo de linguagem): só com decisão; precisa de PT-PT no servidor (Qwen3 usou "você" em 7 de 92)
+- [ ] Assistente fase 2 (Qwen3): **desligado no lançamento** (`ASSISTANT_LLM_ENABLED = false`). Antes de ligar: corrigir os 5 casos críticos sinalizados (pt-10, pt-18, pt-23, pt-39, pt-40) e o português do Brasil ("você", "contato", "me diga" em 7 de 92): PT-PT/PT-MZ no prompt + `ptPtViolations` no servidor a rejeitar e repetir a resposta; voltar a correr os 92 casos sem sinalizações críticas
 
 ---
 

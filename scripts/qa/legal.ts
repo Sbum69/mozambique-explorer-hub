@@ -70,9 +70,9 @@ for (const lang of ["pt", "en"] as const) {
   await page.waitForTimeout(2000);
   const footer = page.locator("footer nav");
   rep.line(
-    (await footer.getByRole("link").count()) === 3 &&
+    (await footer.getByRole("link").count()) === 4 &&
       /v\d+\.\d+\.\d+/.test(await footer.innerText()),
-    `${lang} home: legal footer with 3 links and version`,
+    `${lang} home: footer with For businesses, 3 legal links and version`,
   );
   rep.line(errors.length === 0, `${lang}: no page errors (${errors.length})`);
   await ctx.close();
