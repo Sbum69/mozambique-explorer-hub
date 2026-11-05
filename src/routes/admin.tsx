@@ -139,6 +139,14 @@ const AdminCommercial = lazy(() =>
   import("@/components/AdminCommercial").then((m) => ({ default: m.AdminCommercial })),
 );
 
+const AdminLaunchStatus = lazy(() =>
+  import("@/components/AdminLaunchStatus").then((m) => ({ default: m.AdminLaunchStatus })),
+);
+
+const AdminAssistant = lazy(() =>
+  import("@/components/AdminAssistant").then((m) => ({ default: m.AdminAssistant })),
+);
+
 const AdminLeads = lazy(() =>
   import("@/components/AdminLeads").then((m) => ({ default: m.AdminLeads })),
 );
@@ -153,6 +161,8 @@ type ModalKey =
   | "commercial"
   | "sponsored"
   | "leads"
+  | "assistant"
+  | "launch"
   | "users"
   | "routes"
   | "provinces"
@@ -232,10 +242,12 @@ function AdminPage() {
     { label: pt ? "Reservas" : "Bookings", value: summary.data?.bookings, icon: Clock },
   ];
   const quickActions = [
+    { key: "launch" as const, label: "Estado do lançamento", icon: Activity },
     { key: "content" as const, label: "Conteúdo e importação", icon: FileText },
     { key: "commercial" as const, label: "Comissão e preços", icon: FileText },
     { key: "sponsored" as const, label: "Destaques", icon: FileText },
     { key: "leads" as const, label: "Pedidos Para negócios", icon: Store },
+    { key: "assistant" as const, label: "Assistente", icon: FileText },
     { key: "users" as const, label: "Gerir Utilizadores", icon: Users },
     { key: "businesses" as const, label: "Aprovação de Negócios", icon: Store },
     { key: "bookings" as const, label: "Reservas", icon: Clock },
@@ -372,10 +384,12 @@ function AdminPage() {
                   {pt
                     ? a.label
                     : {
+                        launch: "Launch status",
                         content: "Content and import",
                         commercial: "Commission and prices",
                         sponsored: "Highlights",
                         leads: "For businesses requests",
+                        assistant: "Assistant",
                         users: "Manage users",
                         businesses: "Business approvals",
                         routes: "Manage routes",
@@ -416,6 +430,28 @@ function AdminPage() {
         >
           <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
             <AdminCommercial />
+          </Suspense>
+        </ModalShell>
+      )}
+      {activeModal === "launch" && (
+        <ModalShell
+          title={pt ? "Estado do lançamento" : "Launch status"}
+          onClose={() => setActiveModal(null)}
+          maxWidth="max-w-4xl"
+        >
+          <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
+            <AdminLaunchStatus />
+          </Suspense>
+        </ModalShell>
+      )}
+      {activeModal === "assistant" && (
+        <ModalShell
+          title={pt ? "Assistente" : "Assistant"}
+          onClose={() => setActiveModal(null)}
+          maxWidth="max-w-4xl"
+        >
+          <Suspense fallback={<p aria-busy="true">{pt ? "A carregar…" : "Loading…"}</p>}>
+            <AdminAssistant />
           </Suspense>
         </ModalShell>
       )}

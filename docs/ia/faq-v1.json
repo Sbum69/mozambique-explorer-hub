@@ -1,0 +1,902 @@
+{
+  "version": 1,
+  "note": "Initial FAQ for the assistant (phase 1, no LLM). Only features that exist in the app (checked in the code on 2026-11-04). Entries with validate=true are [VALIDAR]. After launch the database (assistant_faq_entries) is the source of truth; edit in Admin -> Assistente.",
+  "entries": [
+    {
+      "slug": "conta-foto-perfil",
+      "topic": "account",
+      "kind": "faq",
+      "q_pt": "Como mudo a foto de perfil, o nome ou o telefone?",
+      "q_en": "How do I change my profile photo, name or phone?",
+      "a_pt": "Em Definições → Perfil podes mudar a foto, o nome e o telefone.",
+      "a_en": "In Settings → Profile you can change your photo, name and phone.",
+      "kw_pt": ["foto", "perfil", "avatar", "nome", "telefone", "imagem"],
+      "kw_en": ["photo", "profile", "avatar", "name", "phone", "picture"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "conta-email-palavra-passe",
+      "topic": "account",
+      "kind": "faq",
+      "q_pt": "Como mudo o email ou a palavra-passe?",
+      "q_en": "How do I change my email or password?",
+      "a_pt": "Em Definições → Conta. Se te esqueceste da palavra-passe, usa \"Esqueci-me da palavra-passe\" na página de entrada.",
+      "a_en": "In Settings → Account. If you forgot your password, use \"Forgot password\" on the sign-in page.",
+      "kw_pt": ["email", "palavra-passe", "password", "senha", "esqueci", "entrar", "login"],
+      "kw_en": ["email", "password", "forgot", "reset", "sign", "login"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        },
+        {
+          "path": "/forgot-password",
+          "pt": "Recuperar a palavra-passe",
+          "en": "Reset password"
+        }
+      ]
+    },
+    {
+      "slug": "conta-sem-conta",
+      "topic": "account",
+      "kind": "faq",
+      "q_pt": "Posso usar a aplicação sem criar conta?",
+      "q_en": "Can I use the app without an account?",
+      "a_pt": "Sim: sem conta podes ver destinos, experiências, roteiros, o mapa e a comunidade. Para reservar, guardar favoritos, publicar e jogar precisas de conta.",
+      "a_en": "Yes: without an account you can browse destinations, experiences, itineraries, the map and the community. Booking, favourites, posting and games need an account.",
+      "kw_pt": ["sem conta", "conta", "registar", "criar conta", "convidado", "obrigatorio"],
+      "kw_en": ["without account", "account", "sign up", "register", "guest", "required"],
+      "links": [
+        {
+          "path": "/signup",
+          "pt": "Criar conta",
+          "en": "Sign up"
+        }
+      ]
+    },
+    {
+      "slug": "conta-exportar-dados",
+      "topic": "privacy",
+      "kind": "faq",
+      "q_pt": "Posso exportar os meus dados?",
+      "q_en": "Can I export my data?",
+      "a_pt": "Sim. Em Definições → Privacidade → Exportar os meus dados recebes um ficheiro JSON.",
+      "a_en": "Yes. In Settings → Privacy → Export my data you get a JSON file.",
+      "kw_pt": ["exportar", "dados", "copia", "descarregar", "json"],
+      "kw_en": ["export", "data", "copy", "download", "json"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "conta-apagar",
+      "topic": "privacy",
+      "kind": "faq",
+      "q_pt": "Como apago a minha conta?",
+      "q_en": "How do I delete my account?",
+      "a_pt": "Em Definições → Privacidade → Apagar a minha conta. É pedida uma confirmação. Eu não consigo apagar a conta por ti.",
+      "a_en": "In Settings → Privacy → Delete my account. A confirmation is required. I cannot delete the account for you.",
+      "kw_pt": ["apagar", "eliminar", "conta", "remover", "sair", "fechar conta"],
+      "kw_en": ["delete", "remove", "account", "close account", "erase"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "idioma-tema",
+      "topic": "settings",
+      "kind": "faq",
+      "q_pt": "Como mudo o idioma ou o tema?",
+      "q_en": "How do I change the language or the theme?",
+      "a_pt": "Usa o botão de idioma (PT/EN) e o de tema no topo das páginas, ou Definições → Aparência.",
+      "a_en": "Use the language (PT/EN) and theme buttons at the top of the pages, or Settings → Appearance.",
+      "kw_pt": ["idioma", "lingua", "ingles", "portugues", "tema", "escuro", "claro", "aparencia"],
+      "kw_en": ["language", "english", "portuguese", "theme", "dark", "light", "appearance"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "notificacoes",
+      "topic": "settings",
+      "kind": "faq",
+      "q_pt": "Como escolho as notificações que recebo?",
+      "q_en": "How do I choose which notifications I get?",
+      "a_pt": "Em Definições → Notificações na app escolhes os tipos de aviso. As notificações aparecem no sino no topo.",
+      "a_en": "In Settings → In-app notifications you choose the kinds of notice. Notifications appear under the bell at the top.",
+      "kw_pt": ["notificacoes", "avisos", "alertas", "sino"],
+      "kw_en": ["notifications", "alerts", "notices", "bell"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "preferencias-viagem",
+      "topic": "settings",
+      "kind": "faq",
+      "q_pt": "Para que servem as preferências de viagem?",
+      "q_en": "What are travel preferences for?",
+      "a_pt": "As províncias e interesses que escolhes servem para filtrar e recomendar experiências. Mudas em Definições → Preferências de viagem.",
+      "a_en": "The provinces and interests you choose are used to filter and recommend experiences. Change them in Settings → Travel preferences.",
+      "kw_pt": ["preferencias", "interesses", "recomendacoes", "provincias favoritas"],
+      "kw_en": ["preferences", "interests", "recommendations"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "seguranca-2fa",
+      "topic": "security",
+      "kind": "faq",
+      "q_pt": "Como ativo a verificação em dois passos?",
+      "q_en": "How do I turn on two-step verification?",
+      "a_pt": "Em Definições → Segurança, com uma aplicação de autenticação (código de 6 dígitos). Para administradores é obrigatória.",
+      "a_en": "In Settings → Security, with an authenticator app (6-digit code). It is mandatory for administrators.",
+      "kw_pt": ["dois passos", "2fa", "autenticacao", "codigo", "seguranca", "totp"],
+      "kw_en": ["two-step", "2fa", "two factor", "authenticator", "code", "security", "totp"],
+      "links": [
+        {
+          "path": "/settings",
+          "pt": "Definições",
+          "en": "Settings"
+        }
+      ]
+    },
+    {
+      "slug": "reservas-como",
+      "topic": "bookings",
+      "kind": "faq",
+      "q_pt": "Como faço uma reserva?",
+      "q_en": "How do I make a booking?",
+      "a_pt": "Abre a experiência, escolhe a data e o horário e envia o pedido. O pedido fica pendente até o negócio confirmar ou recusar. Eu não consigo reservar por ti.",
+      "a_en": "Open the experience, pick the date and time and send the request. It stays pending until the business confirms or declines. I cannot book for you.",
+      "kw_pt": ["reservar", "reserva", "marcar", "pedido", "agendar", "reserva-me"],
+      "kw_en": ["book", "booking", "reserve", "request", "schedule"],
+      "links": [
+        {
+          "path": "/experiences",
+          "pt": "Experiências",
+          "en": "Experiences"
+        },
+        {
+          "path": "/bookings",
+          "pt": "As minhas reservas",
+          "en": "My bookings"
+        }
+      ]
+    },
+    {
+      "slug": "reservas-estado",
+      "topic": "bookings",
+      "kind": "faq",
+      "q_pt": "Onde vejo o estado das minhas reservas?",
+      "q_en": "Where do I see the status of my bookings?",
+      "a_pt": "Em As minhas reservas. Quando o negócio confirma ou recusa, recebes uma notificação. Eu não consigo confirmar reservas.",
+      "a_en": "In My bookings. When the business confirms or declines, you get a notification. I cannot confirm bookings.",
+      "kw_pt": ["estado", "confirmada", "confirmar", "pendente", "minhas reservas", "ek-"],
+      "kw_en": ["status", "confirmed", "confirm", "pending", "my bookings"],
+      "links": [
+        {
+          "path": "/bookings",
+          "pt": "As minhas reservas",
+          "en": "My bookings"
+        }
+      ]
+    },
+    {
+      "slug": "reservas-cancelar",
+      "topic": "cancellation",
+      "kind": "faq",
+      "validate": true,
+      "q_pt": "Como cancelo uma reserva? Qual é a política de cancelamento?",
+      "q_en": "How do I cancel a booking? What is the cancellation policy?",
+      "a_pt": "Em As minhas reservas podes cancelar um pedido enquanto está pendente. Depois de confirmado, fala com o negócio. Um pedido sem resposta expira na hora de início. [VALIDAR]",
+      "a_en": "In My bookings you can cancel a request while it is pending. Once confirmed, talk to the business. A request with no answer expires at the start time. [VALIDAR]",
+      "kw_pt": ["cancelar", "cancelamento", "desmarcar", "politica", "anular"],
+      "kw_en": ["cancel", "cancellation", "policy", "call off"],
+      "links": [
+        {
+          "path": "/bookings",
+          "pt": "As minhas reservas",
+          "en": "My bookings"
+        }
+      ]
+    },
+    {
+      "slug": "reservas-pagamento",
+      "topic": "bookings",
+      "kind": "faq",
+      "q_pt": "Como pago? Posso pagar com M-Pesa?",
+      "q_en": "How do I pay? Can I pay with M-Pesa?",
+      "a_pt": "Hoje o pagamento das reservas não é feito na aplicação: combina-se diretamente com o negócio.",
+      "a_en": "Today booking payment is not made in the app: it is arranged directly with the business.",
+      "kw_pt": ["pagar", "pagamento", "m-pesa", "mpesa", "cartao", "dinheiro", "emola"],
+      "kw_en": ["pay", "payment", "m-pesa", "mpesa", "card", "cash"],
+      "links": [
+        {
+          "path": "/bookings",
+          "pt": "As minhas reservas",
+          "en": "My bookings"
+        }
+      ]
+    },
+    {
+      "slug": "reservas-reembolso",
+      "topic": "bookings",
+      "kind": "support",
+      "q_pt": "Quero um reembolso.",
+      "q_en": "I want a refund.",
+      "a_pt": "Como o pagamento é combinado com o negócio, o reembolso trata-se com ele. Se precisares de ajuda, escreve à equipa do EKAYA: {SUPPORT}. Eu não consigo fazer reembolsos.",
+      "a_en": "As payment is arranged with the business, refunds are handled with it. If you need help, write to the EKAYA team: {SUPPORT}. I cannot make refunds.",
+      "kw_pt": [
+        "reembolso",
+        "devolver",
+        "dinheiro de volta",
+        "devolucao",
+        "um reembolso",
+        "reembolsar"
+      ],
+      "kw_en": ["refund", "money back", "return", "a refund", "refunded"],
+      "links": [
+        {
+          "path": "/bookings",
+          "pt": "As minhas reservas",
+          "en": "My bookings"
+        }
+      ]
+    },
+    {
+      "slug": "precos-disponibilidade",
+      "topic": "bookings",
+      "kind": "live",
+      "q_pt": "Quanto custa e há disponibilidade?",
+      "q_en": "How much is it and is it available?",
+      "a_pt": "Os preços e horários estão na página de cada experiência e podem mudar. Diz-me o nome da experiência e eu consulto os dados em vigor.",
+      "a_en": "Prices and schedules are on each experience page and may change. Tell me the experience name and I will check the current data.",
+      "kw_pt": [
+        "preco",
+        "custa",
+        "quanto",
+        "disponibilidade",
+        "horario",
+        "vagas",
+        "lugares",
+        "abre",
+        "ainda",
+        "facebook",
+        "e verdade",
+        "vi no",
+        "mudou",
+        "mesmo preco"
+      ],
+      "kw_en": [
+        "price",
+        "cost",
+        "how much",
+        "availability",
+        "available",
+        "schedule",
+        "slot",
+        "open",
+        "still",
+        "facebook",
+        "is that right",
+        "saw on",
+        "changed",
+        "same price",
+        "costs"
+      ],
+      "links": [
+        {
+          "path": "/experiences",
+          "pt": "Experiências",
+          "en": "Experiences"
+        }
+      ]
+    },
+    {
+      "slug": "favoritos",
+      "topic": "favourites",
+      "kind": "faq",
+      "q_pt": "Como guardo favoritos?",
+      "q_en": "How do I save favourites?",
+      "a_pt": "Toca no coração de um destino, experiência ou roteiro. Vês tudo em Favoritos. Precisas de conta.",
+      "a_en": "Tap the heart on a destination, experience or itinerary. You see them all in Favourites. You need an account.",
+      "kw_pt": ["favoritos", "guardar", "coracao", "gostar", "lista"],
+      "kw_en": ["favourites", "favorites", "save", "heart", "wishlist"],
+      "links": [
+        {
+          "path": "/favorites",
+          "pt": "Favoritos",
+          "en": "Favourites"
+        }
+      ]
+    },
+    {
+      "slug": "roteiros",
+      "topic": "itineraries",
+      "kind": "faq",
+      "q_pt": "Como funcionam os roteiros?",
+      "q_en": "How do itineraries work?",
+      "a_pt": "Em Roteiros vês planos de vários dias com paragens. Podes guardar um roteiro e marcar o progresso das paragens.",
+      "a_en": "In Itineraries you see multi-day plans with stops. You can save an itinerary and track progress on its stops.",
+      "kw_pt": ["roteiro", "roteiros", "itinerario", "plano", "dias", "paragens", "viagem"],
+      "kw_en": ["itinerary", "itineraries", "route", "plan", "days", "stops", "trip"],
+      "links": [
+        {
+          "path": "/itineraries",
+          "pt": "Roteiros",
+          "en": "Itineraries"
+        }
+      ]
+    },
+    {
+      "slug": "roteiros-progresso",
+      "topic": "itineraries",
+      "kind": "faq",
+      "validate": true,
+      "q_pt": "Como provo que visitei uma paragem do roteiro?",
+      "q_en": "How do I prove I visited an itinerary stop?",
+      "a_pt": "Na paragem do roteiro podes enviar uma fotografia como prova; a equipa revê-a antes de contar. [VALIDAR]",
+      "a_en": "At the itinerary stop you can send a photo as proof; the team reviews it before it counts. [VALIDAR]",
+      "kw_pt": ["prova", "paragem", "progresso", "visitei", "check-in"],
+      "kw_en": ["proof", "stop", "progress", "visited", "check-in"],
+      "links": [
+        {
+          "path": "/itineraries",
+          "pt": "Roteiros",
+          "en": "Itineraries"
+        }
+      ]
+    },
+    {
+      "slug": "pontos",
+      "topic": "points",
+      "kind": "faq",
+      "q_pt": "Como funcionam os pontos?",
+      "q_en": "How do points work?",
+      "a_pt": "Ganhas pontos ao concluir reservas, roteiros e jogos. Trocam-se pelas recompensas publicadas na página de pontos. Não têm valor em dinheiro nem dão viagens.",
+      "a_en": "You earn points by completing bookings, itineraries and games. They are exchanged for the rewards published on the points page. They have no cash value and do not give trips.",
+      "kw_pt": ["pontos", "recompensas", "premios", "xp", "trocar", "voos", "gratis"],
+      "kw_en": ["points", "rewards", "prizes", "xp", "redeem", "flights", "free"],
+      "links": [
+        {
+          "path": "/gamification",
+          "pt": "Pontos e recompensas",
+          "en": "Points and rewards"
+        }
+      ]
+    },
+    {
+      "slug": "jogos",
+      "topic": "games",
+      "kind": "faq",
+      "q_pt": "Que jogos há?",
+      "q_en": "What games are there?",
+      "a_pt": "Em Jogos há quizzes e desafios sobre Moçambique. Ao concluí-los ganhas pontos. Precisas de conta.",
+      "a_en": "In Games there are quizzes and challenges about Mozambique. Completing them earns points. You need an account.",
+      "kw_pt": ["jogos", "jogo", "quiz", "desafio", "caca ao tesouro", "jogar"],
+      "kw_en": ["games", "game", "quiz", "challenge", "treasure hunt", "play"],
+      "links": [
+        {
+          "path": "/games",
+          "pt": "Jogos",
+          "en": "Games"
+        }
+      ]
+    },
+    {
+      "slug": "comunidade-publicar",
+      "topic": "community",
+      "kind": "faq",
+      "q_pt": "Como publico na comunidade?",
+      "q_en": "How do I post in the community?",
+      "a_pt": "Na Comunidade, com sessão iniciada, escreves uma publicação e podes juntar fotografias. Os outros podem reagir.",
+      "a_en": "In the Community, signed in, you write a post and can add photos. Others can react.",
+      "kw_pt": ["comunidade", "publicar", "publicacao", "post", "partilhar", "fotos"],
+      "kw_en": ["community", "post", "share", "publish", "photos"],
+      "links": [
+        {
+          "path": "/community",
+          "pt": "Comunidade",
+          "en": "Community"
+        }
+      ]
+    },
+    {
+      "slug": "comunidade-denunciar",
+      "topic": "community",
+      "kind": "faq",
+      "q_pt": "Como denuncio uma publicação?",
+      "q_en": "How do I report a post?",
+      "a_pt": "Na publicação, usa a opção Denunciar e escolhe o motivo. A equipa revê a denúncia.",
+      "a_en": "On the post, use Report and choose the reason. The team reviews the report.",
+      "kw_pt": ["denunciar", "denuncia", "abuso", "spam", "ofensivo", "reportar"],
+      "kw_en": ["report", "abuse", "spam", "offensive", "flag"],
+      "links": [
+        {
+          "path": "/community",
+          "pt": "Comunidade",
+          "en": "Community"
+        }
+      ]
+    },
+    {
+      "slug": "mapa",
+      "topic": "map",
+      "kind": "faq",
+      "q_pt": "O que é o mapa do EKAYA?",
+      "q_en": "What is the EKAYA map?",
+      "a_pt": "O mapa mostra destinos e negócios aprovados. A tua localização só é usada se a permitires no dispositivo.",
+      "a_en": "The map shows destinations and approved businesses. Your location is only used if you allow it on your device.",
+      "kw_pt": ["mapa", "localizacao", "onde fica", "gps", "funciona o mapa"],
+      "kw_en": ["map", "location", "where is", "gps", "map thing"],
+      "links": [
+        {
+          "path": "/map",
+          "pt": "Mapa",
+          "en": "Map"
+        }
+      ]
+    },
+    {
+      "slug": "explorar-provincia",
+      "topic": "content",
+      "kind": "faq",
+      "q_pt": "O que posso ver numa província?",
+      "q_en": "What can I see in a province?",
+      "a_pt": "Em Experiências e no Mapa filtras por província; os Roteiros mostram planos por região. Só aparece o que está publicado no EKAYA.",
+      "a_en": "In Experiences and on the Map you filter by province; Itineraries show plans by region. Only what is published on EKAYA appears.",
+      "kw_pt": [
+        "provincia",
+        "ver",
+        "visitar",
+        "inhambane",
+        "maputo",
+        "gaza",
+        "sofala",
+        "nampula",
+        "tete",
+        "niassa",
+        "zambezia",
+        "manica",
+        "cabo delgado",
+        "destinos",
+        "negocios",
+        "ilha",
+        "historia",
+        "tofo",
+        "bazaruto",
+        "vilankulo",
+        "gorongosa"
+      ],
+      "kw_en": [
+        "province",
+        "see",
+        "visit",
+        "inhambane",
+        "maputo",
+        "gaza",
+        "sofala",
+        "nampula",
+        "tete",
+        "niassa",
+        "zambezia",
+        "manica",
+        "cabo delgado",
+        "destinations",
+        "businesses",
+        "island",
+        "history",
+        "tofo",
+        "bazaruto",
+        "vilankulo",
+        "gorongosa"
+      ],
+      "links": [
+        {
+          "path": "/experiences",
+          "pt": "Experiências",
+          "en": "Experiences"
+        },
+        {
+          "path": "/map",
+          "pt": "Mapa",
+          "en": "Map"
+        },
+        {
+          "path": "/itineraries",
+          "pt": "Roteiros",
+          "en": "Itineraries"
+        }
+      ]
+    },
+    {
+      "slug": "detalhes-negocio",
+      "topic": "content",
+      "kind": "faq",
+      "q_pt": "Qual é o telefone, o wifi ou outro detalhe de um negócio?",
+      "q_en": "What is a business phone, wifi or other detail?",
+      "a_pt": "Não tenho essa informação no EKAYA. Os contactos e serviços de cada negócio aparecem na página do negócio, se o negócio os publicou; confirma diretamente com ele.",
+      "a_en": "I do not have that information in EKAYA. Each business contact details and services are on its page, if the business published them; check directly with it.",
+      "kw_pt": [
+        "wifi",
+        "telefone do",
+        "numero do",
+        "contacto do",
+        "guia",
+        "alojamento",
+        "internet",
+        "estacionamento"
+      ],
+      "kw_en": [
+        "wifi",
+        "phone number of",
+        "number of the",
+        "contact of",
+        "guide",
+        "lodging",
+        "internet",
+        "parking"
+      ],
+      "links": [
+        {
+          "path": "/businesses",
+          "pt": "Negócios",
+          "en": "Businesses"
+        }
+      ]
+    },
+    {
+      "slug": "informacao-util",
+      "topic": "content",
+      "kind": "faq",
+      "validate": true,
+      "q_pt": "Onde encontro informação útil para a viagem (vistos, emergência)?",
+      "q_en": "Where do I find useful travel information (visas, emergencies)?",
+      "a_pt": "Na página Informação útil. Para vistos e regras de entrada, confirma sempre nas fontes oficiais. [VALIDAR]",
+      "a_en": "On the Useful information page. For visas and entry rules, always check official sources. [VALIDAR]",
+      "kw_pt": [
+        "visto",
+        "emergencia",
+        "policia",
+        "saude",
+        "informacao util",
+        "entrada",
+        "fronteira",
+        "seguranca"
+      ],
+      "kw_en": [
+        "visa",
+        "emergency",
+        "police",
+        "health",
+        "useful information",
+        "entry",
+        "border",
+        "safety"
+      ],
+      "links": [
+        {
+          "path": "/useful-info",
+          "pt": "Informação útil",
+          "en": "Useful information"
+        }
+      ]
+    },
+    {
+      "slug": "app-lojas",
+      "topic": "account",
+      "kind": "faq",
+      "q_pt": "Há aplicação para iPhone ou Android?",
+      "q_en": "Is there an iPhone or Android app?",
+      "a_pt": "Não tenho informação sobre uma aplicação nas lojas: o EKAYA funciona no navegador do telemóvel ou do computador.",
+      "a_en": "I do not have information about a store app: EKAYA works in the browser on your phone or computer.",
+      "kw_pt": [
+        "iphone",
+        "android",
+        "app store",
+        "play store",
+        "descarregar",
+        "instalar",
+        "aplicacao"
+      ],
+      "kw_en": ["iphone", "android", "app store", "play store", "download", "install", "app"],
+      "links": [
+        {
+          "path": "/home",
+          "pt": "Início",
+          "en": "Home"
+        }
+      ]
+    },
+    {
+      "slug": "legal",
+      "topic": "privacy",
+      "kind": "faq",
+      "q_pt": "Onde estão os Termos e a Política de Privacidade?",
+      "q_en": "Where are the Terms and the Privacy Policy?",
+      "a_pt": "Nos links Termos e Privacidade no rodapé. Ainda são rascunhos sujeitos a revisão jurídica.",
+      "a_en": "In the Terms and Privacy links in the footer. They are still drafts subject to legal review.",
+      "kw_pt": ["termos", "privacidade", "politica", "dados pessoais", "legal", "rgpd"],
+      "kw_en": ["terms", "privacy", "policy", "personal data", "legal", "gdpr"],
+      "links": [
+        {
+          "path": "/terms",
+          "pt": "Termos",
+          "en": "Terms"
+        },
+        {
+          "path": "/privacy",
+          "pt": "Privacidade",
+          "en": "Privacy"
+        }
+      ]
+    },
+    {
+      "slug": "negocio-registar",
+      "topic": "business",
+      "kind": "faq",
+      "q_pt": "Como registo o meu negócio?",
+      "q_en": "How do I register my business?",
+      "a_pt": "Na página Para negócios deixas um pedido, ou, com conta, em Registar negócio. O negócio só aparece depois de aprovado pela administração.",
+      "a_en": "On the For businesses page you leave a request or, with an account, use Register business. The business only appears after the administration approves it.",
+      "kw_pt": [
+        "negocio",
+        "registar negocio",
+        "aderir",
+        "parceiro",
+        "loja",
+        "restaurante",
+        "hotel",
+        "meu negocio"
+      ],
+      "kw_en": [
+        "business",
+        "register business",
+        "join",
+        "partner",
+        "shop",
+        "restaurant",
+        "hotel",
+        "my business"
+      ],
+      "links": [
+        {
+          "path": "/para-negocios",
+          "pt": "Para negócios",
+          "en": "For businesses"
+        },
+        {
+          "path": "/business-register",
+          "pt": "Registar negócio",
+          "en": "Register business"
+        }
+      ]
+    },
+    {
+      "slug": "negocio-atividade",
+      "topic": "business",
+      "kind": "faq",
+      "q_pt": "O que preciso para publicar uma atividade?",
+      "q_en": "What do I need to publish an activity?",
+      "a_pt": "Preço (pode ser grátis), capacidade, pelo menos um horário, local, uma fotografia, título em inglês, descrição em português e em inglês e um contacto do negócio. O painel do negócio mostra o que falta.",
+      "a_en": "Price (it can be free), capacity, at least one schedule, location, a photo, an English title, a description in Portuguese and English and a business contact. The business dashboard shows what is missing.",
+      "kw_pt": ["publicar atividade", "atividade", "painel", "falta", "pronto"],
+      "kw_en": ["publish activity", "activity", "dashboard", "missing", "ready"],
+      "links": [
+        {
+          "path": "/para-negocios",
+          "pt": "Para negócios",
+          "en": "For businesses"
+        }
+      ]
+    },
+    {
+      "slug": "negocio-reservas",
+      "topic": "business",
+      "kind": "faq",
+      "q_pt": "Como respondo aos pedidos de reserva do meu negócio?",
+      "q_en": "How do I answer booking requests for my business?",
+      "a_pt": "No painel do negócio confirmas ou recusas cada pedido. O turista é notificado.",
+      "a_en": "In the business dashboard you confirm or decline each request. The visitor is notified.",
+      "kw_pt": ["painel do negocio", "pedidos de reserva", "recusar", "aceitar"],
+      "kw_en": ["business dashboard", "booking requests", "decline", "accept"],
+      "links": [
+        {
+          "path": "/para-negocios",
+          "pt": "Para negócios",
+          "en": "For businesses"
+        }
+      ]
+    },
+    {
+      "slug": "negocio-comissao",
+      "topic": "commission",
+      "kind": "faq",
+      "q_pt": "Quanto custa para um negócio? Qual é a comissão?",
+      "q_en": "How much does it cost a business? What is the commission?",
+      "a_pt": "O perfil é grátis. A comissão em vigor e o total descontado estão na página Para negócios e no painel do negócio; só se aplica a reservas pagas no EKAYA, que hoje ainda não existem.",
+      "a_en": "The profile is free. The commission in force and the total deducted are on the For businesses page and in the business dashboard; it only applies to bookings paid on EKAYA, which do not exist yet.",
+      "kw_pt": ["comissao", "taxa", "custo", "percentagem", "fundador"],
+      "kw_en": ["commission", "fee", "cost", "percentage", "founder"],
+      "links": [
+        {
+          "path": "/para-negocios",
+          "pt": "Para negócios",
+          "en": "For businesses"
+        }
+      ]
+    },
+    {
+      "slug": "negocio-destaques",
+      "topic": "highlights",
+      "kind": "faq",
+      "q_pt": "O que são os destaques Patrocinado?",
+      "q_en": "What are Sponsored highlights?",
+      "a_pt": "Um negócio pode pagar um destaque por uma semana ou um mês. Aparece com a etiqueta Patrocinado e não muda a ordem dos outros resultados. Pede-se no painel do negócio e paga-se por M-Pesa.",
+      "a_en": "A business can pay for a highlight for one week or one month. It shows with the Sponsored label and does not change the order of other results. It is requested in the business dashboard and paid by M-Pesa.",
+      "kw_pt": ["destaque", "patrocinado", "publicidade", "anuncio", "campanha"],
+      "kw_en": ["highlight", "sponsored", "advert", "ad", "campaign"],
+      "links": [
+        {
+          "path": "/para-negocios",
+          "pt": "Para negócios",
+          "en": "For businesses"
+        }
+      ]
+    },
+    {
+      "slug": "apoio-contacto",
+      "topic": "contact",
+      "kind": "support",
+      "q_pt": "Como falo com a equipa do EKAYA?",
+      "q_en": "How do I talk to the EKAYA team?",
+      "a_pt": "Escreve para o email de apoio: {SUPPORT}. É o único canal publicado (não há WhatsApp nem telefone).",
+      "a_en": "Write to the support email: {SUPPORT}. It is the only published channel (no WhatsApp or phone).",
+      "kw_pt": [
+        "contacto",
+        "equipa",
+        "pessoa",
+        "apoio",
+        "ajuda",
+        "whatsapp",
+        "telefone",
+        "falar",
+        "suporte"
+      ],
+      "kw_en": [
+        "contact",
+        "team",
+        "person",
+        "support",
+        "help",
+        "whatsapp",
+        "phone",
+        "talk",
+        "human"
+      ],
+      "links": []
+    },
+    {
+      "slug": "recusa-dados-outros",
+      "topic": "refuse",
+      "kind": "refuse",
+      "q_pt": "Pedidos de dados de outras pessoas",
+      "q_en": "Requests for other people's data",
+      "a_pt": "Não posso mostrar dados de outras pessoas (reservas, emails ou contas). Cada pessoa vê só os seus dados na aplicação.",
+      "a_en": "I cannot show other people's data (bookings, emails or accounts). Each person only sees their own data in the app.",
+      "kw_pt": [
+        "reservas do",
+        "email do dono",
+        "quem reservou",
+        "lista de utilizadores",
+        "sou admin",
+        "dados de"
+      ],
+      "kw_en": [
+        "bookings of",
+        "'s bookings",
+        "email of the owner",
+        "who booked",
+        "user list",
+        "i'm an admin",
+        "data of"
+      ],
+      "links": []
+    },
+    {
+      "slug": "recusa-sistema",
+      "topic": "refuse",
+      "kind": "refuse",
+      "q_pt": "Pedidos sobre instruções internas ou chaves",
+      "q_en": "Requests for internal instructions or keys",
+      "a_pt": "Não posso partilhar instruções internas nem chaves. Posso ajudar com dúvidas sobre o EKAYA.",
+      "a_en": "I cannot share internal instructions or keys. I can help with questions about EKAYA.",
+      "kw_pt": ["prompt", "instrucoes", "ignora", "chave da api", "api"],
+      "kw_en": ["prompt", "instructions", "ignore", "api key"],
+      "links": []
+    },
+    {
+      "slug": "recusa-fora-ambito",
+      "topic": "refuse",
+      "kind": "refuse",
+      "q_pt": "Pedidos fora do âmbito do EKAYA",
+      "q_en": "Requests outside EKAYA",
+      "a_pt": "Só posso ajudar com o EKAYA e viagens em Moçambique.",
+      "a_en": "I can only help with EKAYA and travel in Mozambique.",
+      "kw_pt": [
+        "trabalho de casa",
+        "fotossintese",
+        "criptomoeda",
+        "investir",
+        "bitcoin",
+        "raca",
+        "changana",
+        "so em"
+      ],
+      "kw_en": [
+        "homework",
+        "photosynthesis",
+        "crypto",
+        "invest",
+        "bitcoin",
+        "race",
+        "swahili",
+        "only in"
+      ],
+      "links": []
+    },
+    {
+      "slug": "ofensivo",
+      "topic": "contact",
+      "kind": "support",
+      "q_pt": "Mensagens de insatisfação",
+      "q_en": "Complaints",
+      "a_pt": "Lamento que a experiência não esteja a correr bem. Diz-me o que aconteceu ou escreve à equipa: {SUPPORT}.",
+      "a_en": "I am sorry things are not going well. Tell me what happened or write to the team: {SUPPORT}.",
+      "kw_pt": ["porcaria", "idiotas", "lixo", "pessimo", "horrivel", "reclamacao"],
+      "kw_en": ["useless", "idiots", "rubbish", "terrible", "awful", "complaint"],
+      "links": []
+    },
+    {
+      "slug": "assistente-o-que-faz",
+      "topic": "contact",
+      "kind": "faq",
+      "q_pt": "O que o assistente consegue fazer?",
+      "q_en": "What can the assistant do?",
+      "a_pt": "Respondo a dúvidas sobre o EKAYA a partir desta lista de perguntas e consulto preços e horários publicados. Não faço reservas, pagamentos nem alterações à conta.",
+      "a_en": "I answer questions about EKAYA from this list of questions and check published prices and schedules. I do not make bookings, payments or account changes.",
+      "kw_pt": ["assistente", "o que fazes", "ajudar", "ajuda-me", "podes ajudar"],
+      "kw_en": ["assistant", "what can you do", "help me", "can you help"],
+      "links": []
+    }
+  ]
+}

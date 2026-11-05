@@ -16,6 +16,8 @@ import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { Toaster } from "@/components/ui/sonner";
 import { LegalAcceptanceGate } from "@/components/LegalAcceptanceGate";
 import { MfaChallengeGate } from "@/components/MfaChallengeGate";
+import { AssistantLauncher } from "@/components/AssistantLauncher";
+import { installErrorLogger } from "@/lib/launch";
 
 function NotFoundComponent() {
   const { lang } = useLang();
@@ -96,6 +98,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   // Brand fonts after the first paint (see brand-fonts.ts).
   useEffect(() => loadBrandFonts(), []);
+  // Simple error monitoring in production (no personal data; see launch.ts).
+  useEffect(() => installErrorLogger(), []);
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -107,6 +111,7 @@ function RootComponent() {
                   <Outlet />
                   <LegalAcceptanceGate />
                   <MfaChallengeGate />
+                  <AssistantLauncher />
                   <ThemedToaster />
                 </FavoritesProvider>
               </NotificationsProvider>
