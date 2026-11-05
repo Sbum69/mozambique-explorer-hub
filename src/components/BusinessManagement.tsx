@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { Suspense, lazy, useCallback, useEffect, useState, type ReactNode } from "react";
 import { activityMetrics } from "@/lib/business-dashboard";
 import { useServerFn } from "@tanstack/react-start";
 import { Calendar, Edit, Plus, Save, RefreshCw, Image as ImageIcon } from "lucide-react";
@@ -6,6 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import { ContentChecklist } from "@/components/ContentChecklist";
 import { CommissionCard } from "@/components/CommissionCard";
 import { ContentPhotos } from "@/components/ContentPhotos";
+
+const SponsoredSection = lazy(() =>
+  import("@/components/SponsoredSection").then((m) => ({ default: m.SponsoredSection })),
+);
 import { fetchReadiness, type ExperienceMissing } from "@/lib/content";
 import { CONTENT_TXT } from "@/lib/page-texts";
 import { toast } from "sonner";
@@ -258,6 +262,16 @@ export function BusinessManagement() {
         businessId={business.id}
         examplePriceMzn={Number(activities.find((a) => Number(a.price_mzn) > 0)?.price_mzn ?? 1000)}
       />
+      <Suspense fallback={null}>
+        <SponsoredSection
+          businessId={business.id}
+          approved={business.status === "approved"}
+          activities={activities.map((a) => ({
+            id: a.id,
+            title: pt ? a.title_pt : (a.title_en ?? a.title_pt),
+          }))}
+        />
+      </Suspense>
       <section id="business-ready" className="space-y-3 scroll-mt-24">
         <div className="flex justify-between gap-3 flex-wrap items-center">
           <h2 className="text-xl font-bold">{CONTENT_TXT[lang].readyTitle}</h2>

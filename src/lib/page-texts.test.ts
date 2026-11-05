@@ -31,6 +31,7 @@ describe("ADM-2B page texts exist in PT and EN", () => {
         "RESET_TXT",
         "SETTINGS_TXT",
         "SIGNUP_TXT",
+        "SPONSORED_TXT",
         "TREASURE_TXT",
       ].sort(),
     );

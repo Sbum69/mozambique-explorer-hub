@@ -620,6 +620,8 @@ export type Database = {
           note: string | null
           plan_month_cents: number
           provider_fee_bp: number
+          sponsored_per_page: number
+          sponsored_slots_per_scope: number
           version: number
         }
         Insert: {
@@ -636,6 +638,8 @@ export type Database = {
           note?: string | null
           plan_month_cents: number
           provider_fee_bp?: number
+          sponsored_per_page?: number
+          sponsored_slots_per_scope?: number
           version?: number
         }
         Update: {
@@ -652,6 +656,8 @@ export type Database = {
           note?: string | null
           plan_month_cents?: number
           provider_fee_bp?: number
+          sponsored_per_page?: number
+          sponsored_slots_per_scope?: number
           version?: number
         }
         Relationships: []
@@ -1416,6 +1422,39 @@ export type Database = {
           },
         ]
       }
+      manual_payment_configs: {
+        Row: {
+          account_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          instructions_en: string
+          instructions_pt: string
+          mpesa_number: string
+          version: number
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions_en: string
+          instructions_pt: string
+          mpesa_number: string
+          version?: number
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions_en?: string
+          instructions_pt?: string
+          mpesa_number?: string
+          version?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body_en: string | null
@@ -2149,6 +2188,118 @@ export type Database = {
           },
         ]
       }
+      sponsored_placements: {
+        Row: {
+          body_en: string | null
+          body_pt: string | null
+          business_id: string
+          campaign_type: string | null
+          category_code: string | null
+          config_version: number
+          created_at: string
+          decision_reason: string | null
+          duration: string
+          ends_on: string
+          experience_id: string | null
+          free: boolean
+          id: string
+          kind: string
+          paid_at: string | null
+          paid_marked_by: string | null
+          payment_note: string | null
+          price_cents: number
+          province_id: string | null
+          reference: string
+          requested_by: string | null
+          scope: string
+          starts_on: string
+          status: string
+          title_en: string | null
+          title_pt: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_en?: string | null
+          body_pt?: string | null
+          business_id: string
+          campaign_type?: string | null
+          category_code?: string | null
+          config_version: number
+          created_at?: string
+          decision_reason?: string | null
+          duration: string
+          ends_on: string
+          experience_id?: string | null
+          free?: boolean
+          id?: string
+          kind: string
+          paid_at?: string | null
+          paid_marked_by?: string | null
+          payment_note?: string | null
+          price_cents: number
+          province_id?: string | null
+          reference: string
+          requested_by?: string | null
+          scope: string
+          starts_on: string
+          status?: string
+          title_en?: string | null
+          title_pt?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_en?: string | null
+          body_pt?: string | null
+          business_id?: string
+          campaign_type?: string | null
+          category_code?: string | null
+          config_version?: number
+          created_at?: string
+          decision_reason?: string | null
+          duration?: string
+          ends_on?: string
+          experience_id?: string | null
+          free?: boolean
+          id?: string
+          kind?: string
+          paid_at?: string | null
+          paid_marked_by?: string | null
+          payment_note?: string | null
+          price_cents?: number
+          province_id?: string | null
+          reference?: string
+          requested_by?: string | null
+          scope?: string
+          starts_on?: string
+          status?: string
+          title_en?: string | null
+          title_pt?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_placements_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_placements_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_placements_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2230,6 +2381,62 @@ export type Database = {
           _reason: string
         }
         Returns: number
+      }
+      admin_decide_placement: {
+        Args: { _decision: string; _id: string; _payment_note?: string; _reason?: string }
+        Returns: Json
+      }
+      admin_set_manual_payment: {
+        Args: {
+          _account_name: string
+          _instructions_en: string
+          _instructions_pt: string
+          _mpesa_number: string
+          _reason: string
+        }
+        Returns: number
+      }
+      admin_set_sponsored_limits: {
+        Args: { _per_page: number; _reason: string; _slots_per_scope: number }
+        Returns: number
+      }
+      active_sponsored: {
+        Args: { _category_code?: string; _province_id?: string; _scope: string }
+        Returns: {
+          body_en: string | null
+          body_pt: string | null
+          business_id: string
+          business_name: string
+          campaign_type: string | null
+          ends_on: string
+          experience_id: string | null
+          id: string
+          kind: string
+          title_en: string | null
+          title_pt: string | null
+        }[]
+      }
+      cancel_my_placement: {
+        Args: { _id: string; _reason: string }
+        Returns: undefined
+      }
+      request_sponsored_placement: {
+        Args: {
+          _body_en: string | null
+          _body_pt: string | null
+          _business_id: string
+          _campaign_type: string | null
+          _category_code: string | null
+          _duration: string
+          _experience_id: string | null
+          _kind: string
+          _province_id: string | null
+          _scope: string
+          _starts_on: string
+          _title_en: string | null
+          _title_pt: string | null
+        }
+        Returns: Json
       }
       admin_set_founder: {
         Args: { _business_id: string; _founder: boolean; _reason: string }

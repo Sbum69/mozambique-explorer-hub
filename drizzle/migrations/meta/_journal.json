@@ -379,6 +379,13 @@
       "when": 1794300000000,
       "tag": "0053_commission_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1794400000000,
+      "tag": "0054_sponsored_placements",
+      "breakpoints": true
     }
   ]
 }

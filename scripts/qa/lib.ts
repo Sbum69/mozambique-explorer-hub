@@ -75,8 +75,8 @@ export function readEnv(file: string): Record<string, string> {
 
 const app = readEnv(join(REPO, ".env"));
 const test = readEnv(join(REPO, ".env.test.local"));
-const SUPA_URL = app.VITE_SUPABASE_URL;
-const SUPA_KEY = app.VITE_SUPABASE_PUBLISHABLE_KEY;
+export const SUPA_URL = app.VITE_SUPABASE_URL;
+export const SUPA_KEY = app.VITE_SUPABASE_PUBLISHABLE_KEY;
 export const AUTH_STORAGE_KEY = `sb-${new URL(SUPA_URL).hostname.split(".")[0]}-auth-token`;
 
 /** RFC 6238 TOTP code (SHA-1, 30 s, 6 digits) from a base32 secret. */
