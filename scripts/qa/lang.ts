@@ -19,6 +19,8 @@ const ALLOWED = [
   /^Português$/,
   // User-created content is not translated (route EK-A7D872 is a user copy of a catalogue route).
   /^Mergulha nas praias paradisíacas e na cultura costeira de Inhambane.$/,
+  // Business names are proper nouns (a hotel on the map).
+  /São Paulo Palace/,
   // Internal test business (to be deleted before launch).
   /EKAYA Teste|Negócio de teste interno/,
 ];

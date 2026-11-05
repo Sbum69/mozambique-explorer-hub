@@ -30,7 +30,7 @@ for (const lang of ["pt", "en"] as const) {
     rep.skip(`${lang}: answers (0056 not applied — error state shown)`);
   } else {
     await page
-      .getByLabel(lang === "pt" ? "Pergunta" : "Question")
+      .getByLabel(lang === "pt" ? "Pergunta" : "Question", { exact: true })
       .fill(
         lang === "pt" ? "Como mudo a minha foto de perfil?" : "How do I change my profile photo?",
       );

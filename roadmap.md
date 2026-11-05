@@ -69,7 +69,7 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [ ] QA integral multissessão e em dispositivos físicos (admin, turista, segundo dono; itinerários)
 - [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
 - [ ] Desempenho: bundle inicial ~250 KB gz (medido 04/11); separar dicionários de texto não reduziu (o empacotador volta a juntá-los) — exige rever a divisão em blocos
-- [ ] Assistente fase 2 (modelo de linguagem): só com decisão; precisa de PT-PT no servidor (Qwen3 usou "você" em 7 de 92)
+- [ ] Assistente fase 2 (Qwen3): **desligado no lançamento** (`ASSISTANT_LLM_ENABLED = false`). Antes de ligar: corrigir os 5 casos críticos sinalizados (pt-10, pt-18, pt-23, pt-39, pt-40) e o português do Brasil ("você", "contato", "me diga" em 7 de 92): PT-PT/PT-MZ no prompt + `ptPtViolations` no servidor a rejeitar e repetir a resposta; voltar a correr os 92 casos sem sinalizações críticas
 
 ---
 

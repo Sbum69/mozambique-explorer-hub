@@ -6,7 +6,7 @@
  */
 import type { Page } from "playwright";
 
-import { hasTotp, launch, newContext, reporter, BASE, type Role } from "./lib";
+import { hasTotp, launch, newContext, reporter, BASE, type Role, SUPA_KEY, SUPA_URL } from "./lib";
 
 const rep = reporter();
 const browser = await launch();
@@ -119,9 +119,18 @@ const text = async (p: Page) => (await p.locator("body").innerText()).replace(/\
       .catch(() => undefined);
     const t = await text(page);
     const m = t.match(/Perfis registados (\d+)/);
+    // Expected value from the public impact RPC, which also leaves internal accounts out.
+    const impact = (await (
+      await fetch(`${SUPA_URL}/rest/v1/rpc/platform_impact_stats`, {
+        method: "POST",
+        headers: { apikey: SUPA_KEY, "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json()) as { platform?: { accounts?: number } };
+    const expected = String(impact.platform?.accounts ?? "?");
     rep.line(
-      !!m && m[1] === "2",
-      `admin: registered profiles leave internal accounts out (${m?.[1] ?? "?"}, expected 2)`,
+      !!m && m[1] === expected,
+      `admin: registered profiles leave internal accounts out (${m?.[1] ?? "?"}, expected ${expected})`,
     );
   }
   rep.line(errors.length === 0, `admin: no page errors (${errors.length})`);

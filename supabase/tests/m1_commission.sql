@@ -59,6 +59,9 @@ BEGIN
   v := public.admin_set_commercial_config(800, 0, 6, 20, 1, 0, 50000, 150000, 75000, 'Teste M1');
   r := r || CASE WHEN (public.current_commercial_config()).commission_bp = 800 AND (public.current_commercial_config()).version = v
                  THEN ' B-new-version:PASS' ELSE ' B-new-version:FAIL' END;
+  -- 0054: a new commercial version keeps the sponsored limits in force.
+  r := r || CASE WHEN (public.current_commercial_config()).sponsored_per_page = 2 AND (public.current_commercial_config()).sponsored_slots_per_scope = 3
+                 THEN ' B-keeps-sponsored-limits:PASS' ELSE ' B-keeps-sponsored-limits:FAIL' END;
   SELECT count(*) INTO n FROM public.admin_audit WHERE action = 'commercial_config.set' AND entity_id = v::text AND reason = 'Teste M1';
   r := r || CASE WHEN n = 1 THEN ' B-audited:PASS' ELSE ' B-audited:FAIL' END;
   q := public.commission_quote(biz, 100000);
@@ -167,6 +170,12 @@ BEGIN
     PERFORM public.admin_set_founder(biz, false, 'x');
     r := r || ' G-anon-founder:FAIL';
   EXCEPTION WHEN insufficient_privilege THEN r := r || ' G-anon-founder:PASS';
+  END;
+  -- 0058: the quote needs a session (it told anyone whether a business is a Founder).
+  BEGIN
+    PERFORM public.commission_quote(biz, 100000);
+    r := r || ' G-anon-quote:FAIL';
+  EXCEPTION WHEN insufficient_privilege THEN r := r || ' G-anon-quote:PASS';
   END;
   RESET ROLE;
 

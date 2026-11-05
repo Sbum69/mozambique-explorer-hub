@@ -1,7 +1,7 @@
 # Assistente — fase 1 (sem modelo de linguagem): resultados
 
 Data: 04/11/2026. Casos: [`avaliacao-v1.json`](avaliacao-v1.json) (92). FAQ: [`faq-v1.json`](faq-v1.json)
-(39 entradas, 4 marcadas `[VALIDAR]`), carregada na base de dados pela migração 0056.
+(39 entradas, 3 marcadas `[VALIDAR]`), carregada na base de dados pela migração 0056.
 
 ## 1. Motor de FAQ (o que corre na aplicação)
 
@@ -37,6 +37,6 @@ citação pedida; 4 respostas que não parecem PT pela heurística (falsos posit
 PT correto); 2 com o slug da FAQ como texto do link. **Nenhuma** inventou preços, horários,
 contactos nem disse que executou ações.
 
-Conclusão: a fase 1 (FAQ) é mais segura e chega para o lançamento. A fase 2 fica preparada e
+Conclusão: a fase 1 (FAQ) é mais segura e chega para o lançamento. **Decisão (05/11/2026): o Qwen3 fica desligado no lançamento.** A fase 2 fica preparada e
 desligada (`ASSISTANT_LLM_ENABLED = false`); se for ligada, precisa da correção PT-PT no prompt,
 da verificação no servidor e das citações transformadas em links (`linkifyCitations`).
