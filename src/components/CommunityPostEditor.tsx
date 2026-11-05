@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Send, X } from "lucide-react";
 import { toast } from "sonner";
@@ -48,6 +48,19 @@ export function PostEditor({
   const [experienceId, setExperienceId] = useState(post?.experienceId ?? "");
   const [routeId, setRouteId] = useState(post?.routeId ?? "");
   const [saving, setSaving] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard: Escape closes (not while saving) and focus starts inside the editor.
+  useEffect(() => {
+    dialogRef.current?.querySelector<HTMLElement>("input, textarea, select")?.focus();
+  }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !saving) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose, saving]);
 
   const submit = async () => {
     if (postInputMissing({ title, content, categoryId, provinceId })) {
@@ -92,11 +105,17 @@ export function PostEditor({
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0 }}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="community-editor-title"
         onClick={(e) => e.stopPropagation()}
         className="bg-card rounded-[10px] shadow-[var(--shadow-overlay)] w-full max-w-lg overflow-hidden my-8"
       >
         <div className="border-b border-border p-5 flex items-center justify-between">
-          <h3 className="font-bold">{post ? t("communityEditPost") : t("communityNewPost")}</h3>
+          <h3 id="community-editor-title" className="font-bold">
+            {post ? t("communityEditPost") : t("communityNewPost")}
+          </h3>
           <button
             onClick={onClose}
             className="size-8 rounded-md hover:bg-accent flex items-center justify-center"

@@ -1,11 +1,32 @@
-# Estado atual do projeto EKAYA (atualizado a 30/10/2026)
+# Estado atual do projeto EKAYA (atualizado a 04/11/2026)
 
-Resumo: a parte funcional está completa, com tema claro/escuro e PT/EN em toda a app (incluindo o
-conteúdo da base de dados), testes de unidade, de BD e de browser guardados no repositório, CI no
-GitHub, desempenho em telemóvel melhorado e auditoria de segurança feita. A app **não** está
-publicada. Migrações aplicadas e registadas: 0000–0048 (49 registos). Identidade visual própria
-("Capulana e Índico", `docs/DESIGN.md`), fotografias livres com crédito e contas de teste fora das
-métricas.
+Resumo: o código de lançamento está fechado. Comissão (M1), destaques pagos por M-Pesa (M6),
+página Para negócios com pedidos (M9), assistente de ajuda por FAQ (fase 1; fase 2 preparada e
+desligada), estado do lançamento e registo de erros no admin. A app **não** está publicada.
+Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidade visual "Capulana e
+Índico", PT-PT/PT-MZ + EN, tema claro/escuro.
+
+## Concluído (31/10–04/11)
+- [x] LEGAL-1 — Termos e Privacidade (rascunho), aceitação com versão (0049), contacto e versão nas Definições
+- [x] SEG-2 — 2FA (TOTP) obrigatório para administradores, `aal2` nas rotas e no `has_role` (0050); CSP obrigatória
+- [x] CONTEÚDO-1 — Pronto para publicar, importação por ficheiro, convites para donos, fotos (0051, 0052)
+- [x] M1 — Motor de comissão versionado, Parceiro Fundador, cartão "Comissão e taxas" (0053)
+- [x] M6 — Destaques e campanhas com pagamento manual M-Pesa, etiqueta Patrocinado, recibo não fiscal (0054, por aprovar)
+- [x] M9 — `/para-negocios`, pedidos com anti-spam, criar negócio a partir do pedido, sitemap e robots, `docs/sales/` (0055, por aprovar)
+- [x] Assistente fase 1 — FAQ (39 entradas) editável com versões, motor PT/EN, preços e horários ao vivo, perguntas sem resposta 30 dias; 92 casos: FAQ 90/92 (0056, por aprovar)
+- [x] Lançamento — `docs/LAUNCH.md`, SQL do dia D ensaiado (não aplicado), `prelaunch.ts`, estado do lançamento e erros no admin (0057, por aprovar)
+- [x] Polimento — guarda PT-PT no Vitest, Escape e foco no editor da comunidade, foco de volta no assistente, 2 avisos de lint resolvidos (17 → 15)
+
+## Lançamento (por fazer — ver `docs/LAUNCH.md`)
+- [ ] Aprovar e aplicar o Lote B (0054–0057) e correr os testes de BD e o `prelaunch.ts`
+- [ ] ≥ 5 negócios aprovados e ≥ 5 atividades ativas (hoje: 1 e 0)
+- [ ] 2FA em todos os administradores (hoje: 1 sem 2FA)
+- [ ] Domínio, email (SPF, DKIM, DMARC, SMTP) e Redirect URLs; contacto `apoio@<domínio>`
+- [ ] Revisão jurídica de Termos, Privacidade e acordo de parceiro; NUIT
+- [ ] Instruções de pagamento M-Pesa reais no admin
+- [ ] Dia D: SQL das contas de teste (aprovado), Storage, apagar `.env.test.local`, publicar
+- [ ] Confirmar os números de emergência (119, 117, 198) com fontes oficiais
+- [ ] Juntar os branches à `main` pela ordem indicada e confirmar o CI verde
 
 ## Concluído (22–30/10)
 - [x] 2B — Correções de frontend (sem alterações à base de dados) + CLAUDE.md + auditoria
@@ -35,34 +56,20 @@ métricas.
 - [x] QA-2 — Vitest 305, 13 ficheiros de testes de BD, hidratação, larguras, idioma, interações, convidado, percursos das 3 contas, Lighthouse
 - [x] SEG-FINAL — Auditoria (RLS, grants, funções, storage, segredos, XSS, redireções); migração 0045 (grants do visitante, fotos aprovadas visíveis, links `//`, só imagens nos buckets); `seroval` crítico corrigido; cabeçalhos de segurança; `docs/SECURITY.md`
 
-## Pendente depois do lançamento
+## Depois do lançamento
 - [ ] Painel com sessão a pintar em ≤ 2,5 s (DevTools): hoje ~6–7 s por ser renderizado no browser à espera da sessão (a main nem pinta). Exige sessão em cookies e SSR das páginas privadas.
 - [ ] Lighthouse mobile < 75 neste PC: mapa 68 (confirmar com A/B; era 81 no PERF-3), roteiros 63–68, jogos 55, painel 58. Medir no preview/site publicado (o preview da Lovable pede sessão: 401).
 - [ ] Limpeza periódica de ficheiros de provas de contas apagadas (storage)
 - [ ] Negócios de exemplo suspensos (8): reativar quando um dono real os reclamar
 - [ ] Jogos: desempenho mobile ≥ 70 (está em ~62, com grande variação). Exige mostrar o esqueleto da página vindo do servidor e redirecionar para o login no browser (decisão de produto adiada).
 - [ ] `zod` 3 → 4 (aviso alto de memória nos validadores; a correção só existe no zod 4)
-- [ ] Editor de publicações da comunidade não fecha com Escape (acessibilidade)
 - [ ] Histórias da home (`src/data/itineraries.ts`): validar as lendas antes de as voltar a mostrar (`SHOW_STORY_STOPS`)
 - [ ] Eventos geridos pelo admin (tabela `events`, RLS, modal) para reativar o separador Eventos
 - [ ] Bloco 10 — confirmar se há partes além do 10B (ver plano oficial)
 - [ ] QA integral multissessão e em dispositivos físicos (admin, turista, segundo dono; itinerários)
 - [ ] Atualizar ferramentas de desenvolvimento com avisos (`undici`, `ws`, `sharp`, `esbuild`) quando o wrangler subir
-
-## Antes do lançamento
-Decidido: o Kelvin e o 2.º admin ficam como contas internas (fora das métricas).
-
-- [ ] Apagar ou desativar as 3 contas de teste e o negócio "EKAYA Teste — não reservar" (a conta admin de teste tem poderes reais; já estão fora das métricas)
-- [ ] Apagar a cópia de segurança local `backups/` quando já não for precisa (tem dados pessoais)
-- [ ] Termos de Utilização e Política de Privacidade (PT/EN, revisão jurídica), aceitação no registo com versão e data (LEGAL-1)
-- [ ] Contacto de apoio e versão da app nas Definições (LEGAL-1)
-- [ ] 2FA (TOTP) obrigatório para os administradores, rotas e RPCs de admin com `aal2` (SEG-2)
-- [ ] CSP obrigatória (de report-only a enforce), verificada no preview e no site publicado (SEG-2)
-- [ ] Ativar experiências reais: as 8 estão inativas, `/experiences` fica vazia e não há reservas possíveis (CONTEÚDO-1)
-- [ ] Confirmar os números de emergência (119, 117, 198) com fontes oficiais
-- [ ] Configurar o envio de emails (domínio, modelos em `docs/email-templates.md`) e os Redirect URLs do domínio final
-- [ ] Juntar os branches pendentes à `main` pela ordem indicada e confirmar o CI verde
-- [ ] Correr `docs/QA.md` no projeto final (incluindo os testes de BD)
+- [ ] Desempenho: bundle inicial ~250 KB gz (medido 04/11); separar dicionários de texto não reduziu (o empacotador volta a juntá-los) — exige rever a divisão em blocos
+- [ ] Assistente fase 2 (modelo de linguagem): só com decisão; precisa de PT-PT no servidor (Qwen3 usou "você" em 7 de 92)
 
 ---
 

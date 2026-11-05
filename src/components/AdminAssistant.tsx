@@ -275,7 +275,6 @@ function EntryForm({
           e.preventDefault();
           void save();
         }}
-        onKeyDown={(e) => e.key === "Escape" && onCancel()}
       >
         <div className="space-y-1">
           <Label htmlFor="faq-slug">{t.slug}</Label>

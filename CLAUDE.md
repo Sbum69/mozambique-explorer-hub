@@ -33,7 +33,7 @@ Comandos (usar sempre **bun**, nunca npm/npx): `bun run dev`, `bun run build`, `
 guardar uma cópia antes e repô-la depois se mudar. `.gitattributes` força LF (`* text=auto eol=lf`);
 com a cópia local em LF o build já não o altera.
 
-`bun run lint` tem de passar com 0 erros no repositório todo (os 17 avisos `react-refresh` são
+`bun run lint` tem de passar com 0 erros no repositório todo (os 15 avisos `react-refresh` são
 conhecidos). O CI (`.github/workflows/ci.yml`) corre `tsc`, `vitest`, `lint` e `build` em cada PR
 e push para a `main`. Ficheiros gerados, migrações e `.lovable/` estão fora do ESLint e do Prettier.
 
