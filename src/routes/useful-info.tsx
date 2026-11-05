@@ -73,6 +73,16 @@ interface Category {
 
 const same = (s: string) => l(s, s);
 
+/**
+ * Emergency numbers stay hidden until they are confirmed with an official source (owner decision,
+ * 05/11/2026). Set to true only after that check.
+ */
+const SHOW_EMERGENCY_NUMBERS = false;
+const EMERGENCY_PENDING = l(
+  "Em caso de emergência, contacta as autoridades locais ou o teu alojamento. Os números oficiais serão publicados aqui depois de confirmados.",
+  "In an emergency, contact the local authorities or your accommodation. The official numbers will be published here once confirmed.",
+);
+
 const CATEGORIES: Category[] = [
   {
     id: "moeda",
@@ -132,11 +142,13 @@ const CATEGORIES: Category[] = [
       },
       {
         title: l("Números de emergência", "Emergency numbers"),
-        items: [
-          l("Polícia: 119", "Police: 119"),
-          l("Emergência médica: 117", "Medical emergency: 117"),
-          l("Bombeiros: 198", "Fire brigade: 198"),
-        ],
+        items: SHOW_EMERGENCY_NUMBERS
+          ? [
+              l("Polícia: 119", "Police: 119"),
+              l("Emergência médica: 117", "Medical emergency: 117"),
+              l("Bombeiros: 198", "Fire brigade: 198"),
+            ]
+          : [EMERGENCY_PENDING],
       },
       {
         title: l("Cuidados especiais", "Special care"),

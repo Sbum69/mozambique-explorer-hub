@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Initial FAQ for the assistant (phase 1, no LLM). Only features that exist in the app (checked in the code on 2026-11-04). Entries with validate=true are [VALIDAR]. After launch the database (assistant_faq_entries) is the source of truth; edit in Admin -> Assistente.",
+  "note": "Initial FAQ for the assistant (phase 1, no LLM). Only features that exist in the app (checked in the code on 2026-11-04). Entries with validate=true are [VALIDAR]. After launch the database (assistant_faq_entries) is the source of truth; edit in Admin -> Assistente. 05/11/2026: reservas-cancelar, roteiros-progresso e informacao-util validados pelo dono (versão 2 na BD).",
   "entries": [
     {
       "slug": "conta-foto-perfil",
@@ -214,11 +214,10 @@
       "slug": "reservas-cancelar",
       "topic": "cancellation",
       "kind": "faq",
-      "validate": true,
       "q_pt": "Como cancelo uma reserva? Qual é a política de cancelamento?",
       "q_en": "How do I cancel a booking? What is the cancellation policy?",
-      "a_pt": "Em As minhas reservas podes cancelar um pedido enquanto está pendente. Depois de confirmado, fala com o negócio. Um pedido sem resposta expira na hora de início. [VALIDAR]",
-      "a_en": "In My bookings you can cancel a request while it is pending. Once confirmed, talk to the business. A request with no answer expires at the start time. [VALIDAR]",
+      "a_pt": "Em As minhas reservas podes cancelar um pedido enquanto está pendente. Depois de confirmado, contacta o negócio diretamente para cancelar ou alterar. Um pedido sem resposta expira à hora de início.",
+      "a_en": "In My bookings you can cancel a request while it is pending. Once confirmed, contact the business directly to cancel or change it. A request with no answer expires at the start time.",
       "kw_pt": ["cancelar", "cancelamento", "desmarcar", "politica", "anular"],
       "kw_en": ["cancel", "cancellation", "policy", "call off"],
       "links": [
@@ -361,11 +360,10 @@
       "slug": "roteiros-progresso",
       "topic": "itineraries",
       "kind": "faq",
-      "validate": true,
       "q_pt": "Como provo que visitei uma paragem do roteiro?",
       "q_en": "How do I prove I visited an itinerary stop?",
-      "a_pt": "Na paragem do roteiro podes enviar uma fotografia como prova; a equipa revê-a antes de contar. [VALIDAR]",
-      "a_en": "At the itinerary stop you can send a photo as proof; the team reviews it before it counts. [VALIDAR]",
+      "a_pt": "Na paragem do roteiro podes enviar uma fotografia como prova. Se a localização do telemóvel confirmar que estás no local, conta logo; nos outros casos a equipa revê-a antes de contar.",
+      "a_en": "At the itinerary stop you can send a photo as proof. If your phone's location confirms you are there, it counts right away; otherwise the team reviews it before it counts.",
       "kw_pt": ["prova", "paragem", "progresso", "visitei", "check-in"],
       "kw_en": ["proof", "stop", "progress", "visited", "check-in"],
       "links": [
@@ -578,11 +576,10 @@
       "slug": "informacao-util",
       "topic": "content",
       "kind": "faq",
-      "validate": true,
-      "q_pt": "Onde encontro informação útil para a viagem (vistos, emergência)?",
-      "q_en": "Where do I find useful travel information (visas, emergencies)?",
-      "a_pt": "Na página Informação útil. Para vistos e regras de entrada, confirma sempre nas fontes oficiais. [VALIDAR]",
-      "a_en": "On the Useful information page. For visas and entry rules, always check official sources. [VALIDAR]",
+      "q_pt": "Onde encontro informação útil para a viagem?",
+      "q_en": "Where do I find useful travel information?",
+      "a_pt": "Na página Informação útil há conselhos sobre dinheiro, segurança, transporte, clima, saúde e internet. Para vistos e regras de entrada, confirma sempre nas fontes oficiais. Em caso de emergência, contacta as autoridades locais ou o teu alojamento.",
+      "a_en": "The Useful information page has advice on money, safety, transport, weather, health and internet. For visas and entry rules, always check official sources. In an emergency, contact the local authorities or your accommodation.",
       "kw_pt": [
         "visto",
         "emergencia",
