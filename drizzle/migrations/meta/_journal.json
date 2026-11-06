@@ -421,6 +421,20 @@
       "when": 1794900000000,
       "tag": "0059_content_photos_policies_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1795000000000,
+      "tag": "0060_admin_role_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1795100000000,
+      "tag": "0061_legal_versions_2026_11_06",
+      "breakpoints": true
     }
   ]
 }
