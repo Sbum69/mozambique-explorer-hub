@@ -1,7 +1,12 @@
 import { readAll } from "@/lib/read-all";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { profileSchema, activitySchema, availabilitySchema } from "@/lib/business-management";
+import {
+  profileSchema,
+  activitySchema,
+  availabilitySchema,
+  slotAcceptsSchema,
+} from "@/lib/business-management";
 
 export const getBusinessManagement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -206,17 +211,7 @@ export const saveBusinessAvailability = createServerFn({ method: "POST" })
  */
 export const setSlotAcceptsNewBookings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => {
-    const value = input as { id?: unknown; experienceId?: unknown; accepts?: unknown };
-    if (
-      typeof value.id !== "string" ||
-      typeof value.experienceId !== "string" ||
-      typeof value.accepts !== "boolean"
-    ) {
-      throw new Error("INVALID_INPUT");
-    }
-    return { id: value.id, experienceId: value.experienceId, accepts: value.accepts };
-  })
+  .inputValidator((input: unknown) => slotAcceptsSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: activity } = await supabase

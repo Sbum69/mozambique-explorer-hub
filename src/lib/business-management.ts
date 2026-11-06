@@ -12,11 +12,12 @@ export const profileSchema = z.object({
   provinceId: z.string().uuid(),
   address: text,
   phone: z.string().trim().max(80),
-  email: z.union([z.literal(""), z.string().email()]),
+  email: z.union([z.literal(""), z.string().max(254).email()]),
   website: z.union([
     z.literal(""),
     z
       .string()
+      .max(2000)
       .url()
       .refine((v) => /^https?:\/\//.test(v)),
   ]),
@@ -37,8 +38,8 @@ export const activitySchema = z.object({
   descriptionPt: z.string().trim().min(1).max(5000),
   descriptionEn: z.string().trim().min(1).max(5000),
   category: z.enum(activityCategories),
-  priceMzn: z.number().finite().min(0),
-  durationHours: z.number().finite().positive(),
+  priceMzn: z.number().finite().min(0).max(100_000_000),
+  durationHours: z.number().finite().positive().max(720),
   capacity: z.number().int().min(1).max(100),
   location: text,
   destinationId: z.string().uuid().nullable(),
@@ -55,6 +56,12 @@ export const availabilitySchema = z
     active: z.boolean(),
   })
   .refine((v) => v.endTime > v.startTime, { message: "TIME_ORDER", path: ["endTime"] });
+/** setSlotAcceptsNewBookings: ids are UUIDs (bounded size), the flag a boolean. */
+export const slotAcceptsSchema = z.object({
+  id: z.string().uuid(),
+  experienceId: z.string().uuid(),
+  accepts: z.boolean(),
+});
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type ActivityInput = z.infer<typeof activitySchema>;
 export type AvailabilityInput = z.infer<typeof availabilitySchema>;

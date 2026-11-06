@@ -5,17 +5,24 @@
 **PR com CI verde + revisão por mim (Sheldon Jasse) antes do merge.**
 
 - Nada entra na `main` sem PR. O agente nunca faz merge.
-- O CI corre `tsc`, Vitest, ESLint, build e as verificações de ficheiros gerados.
+- O CI corre `tsc`, Vitest, ESLint, build e a verificação do `routeTree.gen.ts`. O
+  `public/licenses.json` não é verificado: o `prebuild` gera-o em cada build.
 - A auditoria de dependências (`bun audit --audit-level=high`) está em **modo aviso**:
   - aparece como falhada no resumo do CI, mas não bloqueia;
-  - hoje todos os avisos "high" vêm de ferramentas de build (miniflare, wrangler, devtools, gerador de
-    rotas), e não do código publicado;
+  - **correção (06/11/2026):** antes dizia-se aqui que todos os avisos "high" vinham de ferramentas
+    de build. Não era verdade para o `zod`: estava em `dependencies` na versão 3 (aviso "high" de
+    uso excessivo de memória ao validar coleções grandes, corrigido na 4.6.6) e valida os dados das
+    server functions. Passou para o zod 4 e todos os esquemas das server functions têm limites de
+    tamanho (`.max()` nas strings, números com máximo, ids como UUID);
+  - os avisos "high" que restam vêm de ferramentas de build (miniflare, wrangler, devtools, o zod 3
+    interno do gerador de rotas), e não do código publicado;
   - o `bun audit` não tem opção "só produção".
 - Se surgir um aviso "high" num pacote de `dependencies` que vá para o browser ou para o Worker, é
   corrigido antes do merge.
 - Escritas na BD (migrações, dados): o SQL é validado em ROLLBACK e mostrado. Só se aplica com
   "aprovo" explícito.
 - Os PRs do Dependabot seguem a mesma regra (CI verde + revisão). Nunca entram automaticamente.
+  Até ao pós-lançamento não há versões major, e o TanStack e o Vite vêm em grupos próprios.
 
 ## Checklist de segurança do PR
 
