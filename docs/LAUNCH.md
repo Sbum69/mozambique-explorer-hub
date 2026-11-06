@@ -14,21 +14,40 @@ Admin → **Estado do lançamento** mostra tudo isto ao vivo (contas internas n�
       sem resposta).
 - [ ] `bun scripts/qa/prelaunch.ts` → **PRELAUNCH: PASS** (ver §6).
 
-## 1. Domínio (Lovable)
+## 1. Domínio exploreekaya.com (Lovable)
 
-1. Lovable → projeto EKAYA → **Settings → Domains → Connect domain**. Escrever `<domínio>` (e
-   depois `www.<domínio>`). **[CONFIRMAR]**
-2. No fornecedor do domínio, criar os registos DNS que o Lovable mostrar. Normalmente:
+Precisa de um plano pago da Lovable (domínios próprios não estão no plano grátis).
 
-   | Tipo | Nome       | Valor                                |
-   | ---- | ---------- | ------------------------------------ |
-   | A    | `@`        | `<IP indicado pelo Lovable>`         |
-   | A    | `www`      | `<IP indicado pelo Lovable>`         |
-   | TXT  | `_lovable` | `<código de verificação do Lovable>` |
+1. Lovable → projeto EKAYA → **Project → Settings → Domains → Connect domain**.
+2. Escrever `exploreekaya.com` → **Continue** → **Root domain**. Deixar ligado
+   **Redirect www.exploreekaya.com → exploreekaya.com** (vem ligado por omissão). Não ligar
+   "Uses Cloudflare or similar proxy".
+3. Escolher **manual setup** e copiar para o DNS do domínio (no registrador, ou no Cloudflare se
+   mudares os nameservers no passo do email, §4) os registos que a janela mostrar:
 
-3. Esperar a verificação e o certificado HTTPS (minutos a 48 h). Confirmar: `https://<domínio>`
-   abre a aplicação com o cadeado.
-4. Escolher o domínio principal (com ou sem `www`) e redirecionar o outro para ele.
+   | Tipo | Nome       | Valor                                                               |
+   | ---- | ---------- | ------------------------------------------------------------------- |
+   | A    | `@`        | o IP que a Lovable mostrar                                          |
+   | A    | `www`      | o mesmo IP (a janela mostra-o quando o redirect do www está ligado) |
+   | TXT  | `_lovable` | `lovable_verify=…` (o valor completo da janela)                     |
+   - Se a Lovable mostrar também um registo AAAA, criá-lo.
+   - No Cloudflare: os dois registos A em **DNS only** (nuvem cinzenta), não "Proxied".
+   - Se houver registos CAA, têm de permitir `letsencrypt.org` ou `pki.goog`.
+
+4. **Done** e esperar o estado **Active** (normalmente algumas horas; até 72 h). O certificado HTTPS
+   é emitido pela Lovable.
+5. **Publish** (o domínio só serve a app depois de publicar).
+6. Confirmar:
+   - `https://exploreekaya.com` abre com o cadeado;
+   - `https://www.exploreekaya.com` redireciona para a raiz;
+   - `https://exploreekaya.com/robots.txt` tem `Sitemap: https://exploreekaya.com/sitemap.xml`;
+   - o URL `*.lovable.app` responde com `X-Robots-Tag: noindex` e o seu `robots.txt` é `Disallow: /`.
+7. **HSTS**: a app envia `Strict-Transport-Security: max-age=31536000; includeSubDomains` em cada
+   página. Confirmar no domínio real:
+
+   ```sh
+   curl -sI https://exploreekaya.com/home | grep -i strict-transport-security
+   ```
 
 ## 2. Email (envio de emails de conta)
 
@@ -49,12 +68,20 @@ Admin → **Estado do lançamento** mostra tudo isto ao vivo (contas internas n�
 
 ## 3. Autenticação: URLs de retorno
 
-Lovable Cloud → **Authentication → URL configuration** **[CONFIRMAR]**:
+Lovable → **Cloud → Users → Auth settings → URL configuration** **[CONFIRMAR]** (o nome do menu
+pode mudar):
 
-- Site URL: `https://<domínio>`
-- Redirect URLs: `https://<domínio>/auth/callback`, `https://www.<domínio>/auth/callback` e, até
-  ao fim dos testes, o URL de pré-visualização do Lovable.
-- Confirmar: "Esqueci-me da palavra-passe" envia um link que abre `https://<domínio>/auth/callback`.
+- **Site URL:** `https://exploreekaya.com`
+- **Redirect URLs** (uma por linha):
+  - `https://exploreekaya.com/auth/callback`
+  - `https://www.exploreekaya.com/auth/callback`
+  - `https://<o teu projeto>.lovable.app/auth/callback` (o URL publicado atual, enquanto o piloto
+    também correr lá)
+- Os emails de confirmação e recuperação voltam para o domínio onde a pessoa se registou: `www`
+  vai sempre para a raiz, e as pré-visualizações privadas nunca são usadas. Depois do login, a app só
+  volta para páginas da lista fixa (`parseAuthReturn`).
+- Confirmar: em `https://exploreekaya.com/forgot-password`, pedir o email. O link abre
+  `https://exploreekaya.com/auth/callback` e leva a `/reset-password`.
 
 ## 4. Contacto oficial
 

@@ -52,5 +52,8 @@ export function securityHeaders(supabaseUrl: string | undefined): Record<string,
     "Referrer-Policy": "strict-origin-when-cross-origin",
     // Location for the map and the challenges, camera for photo proofs; only on this site.
     "Permissions-Policy": "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()",
+    // HTTPS only for a year on exploreekaya.com and its subdomains (ignored by browsers over http).
+    // No "preload" until the domain has run on HTTPS for a while.
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   };
 }

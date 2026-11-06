@@ -5,6 +5,8 @@
  * used as email destinations: without a configured URL we omit the redirect and the
  * backend falls back to its configured Site URL.
  */
+import { CANONICAL_HOST, CANONICAL_ORIGIN } from "@/lib/app-info";
+
 export const AUTH_CALLBACK_PATH = "/auth/callback";
 
 const PRIVATE_HOST =
@@ -19,6 +21,8 @@ function normalizeBase(raw: string | undefined | null): string | null {
   try {
     const url = new URL(raw);
     if (url.protocol !== "https:" || isPrivateHost(url.hostname)) return null;
+    // www.exploreekaya.com redirects to the root: emails always point at the root domain.
+    if (url.hostname === `www.${CANONICAL_HOST}`) return CANONICAL_ORIGIN;
     return url.origin;
   } catch {
     return null;

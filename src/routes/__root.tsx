@@ -10,6 +10,7 @@ import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { DEFAULT_LANG, readLangCookie } from "@/lib/lang-pref";
 import { securityHeaders } from "@/lib/security-headers";
+import { canonicalUrl } from "@/lib/seo";
 import { loadBrandFonts } from "@/lib/brand-fonts";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
@@ -53,28 +54,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     Vary: "Cookie",
     ...securityHeaders(import.meta.env.VITE_SUPABASE_URL),
   }),
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ekaya Explore — Turismo comunitário em Moçambique" },
-      {
-        name: "description",
-        content:
-          "Descobre Moçambique de forma autêntica. Conecta-te a comunidades locais, cria roteiros personalizados e gera impacto positivo em cada viagem.",
-      },
-      { property: "og:title", content: "Ekaya Explore" },
-      {
-        property: "og:description",
-        content: "Hub de turismo comunitário inteligente para Moçambique.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "stylesheet", href: appCss }],
-    // Applies the saved (or system) theme before the first paint: no white flash in dark mode.
-    scripts: [{ children: THEME_INIT_SCRIPT }],
-  }),
+  head: ({ matches }) => {
+    // Canonical link and og:url on exploreekaya.com for public pages (private pages have none).
+    const canonical = canonicalUrl(matches[matches.length - 1]?.pathname ?? "/");
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "Ekaya Explore — Turismo comunitário em Moçambique" },
+        {
+          name: "description",
+          content:
+            "Descobre Moçambique de forma autêntica. Conecta-te a comunidades locais, cria roteiros personalizados e gera impacto positivo em cada viagem.",
+        },
+        { property: "og:title", content: "Ekaya Explore" },
+        {
+          property: "og:description",
+          content: "Hub de turismo comunitário inteligente para Moçambique.",
+        },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+        ...(canonical ? [{ property: "og:url", content: canonical }] : []),
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        ...(canonical ? [{ rel: "canonical", href: canonical }] : []),
+      ],
+      // Applies the saved (or system) theme before the first paint: no white flash in dark mode.
+      scripts: [{ children: THEME_INIT_SCRIPT }],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
