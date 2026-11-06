@@ -154,11 +154,6 @@ function PricingPage() {
           </h2>
           <p>{t.refundBefore}</p>
           <p>{t.refundAfter}</p>
-          <div className="rounded-[10px] border border-dashed border-foreground/40 p-3 space-y-1 text-sm">
-            <p className="font-semibold">{t.refundDecide}</p>
-            <p>{t.refundOptionA}</p>
-            <p>{t.refundOptionB}</p>
-          </div>
           <p>{t.refundAdmin}</p>
         </section>
 
