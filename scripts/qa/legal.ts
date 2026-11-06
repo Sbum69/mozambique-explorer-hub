@@ -70,9 +70,10 @@ for (const lang of ["pt", "en"] as const) {
   await page.waitForTimeout(2000);
   const footer = page.locator("footer nav");
   rep.line(
-    (await footer.getByRole("link").count()) === 4 &&
+    (await footer.getByRole("link").count()) === 6 &&
+      /NUIT/.test(await footer.innerText()) &&
       /v\d+\.\d+\.\d+/.test(await footer.innerText()),
-    `${lang} home: footer with For businesses, 3 legal links and version`,
+    `${lang} home: footer with For businesses, prices, 3 legal links, version and provider (NUIT, email)`,
   );
   rep.line(errors.length === 0, `${lang}: no page errors (${errors.length})`);
   await ctx.close();
