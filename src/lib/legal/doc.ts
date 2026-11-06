@@ -1,8 +1,20 @@
 import { LEGAL_ENTITY, SUPPORT_EMAIL } from "@/lib/app-info";
 import type { Lang } from "@/contexts/LanguageContext";
 
-/** A paragraph, or a bullet list when it is an array. */
-export type LegalBlock = string | string[];
+/** A two-column table (first row is the header). */
+export interface LegalTable {
+  table: string[][];
+}
+
+/** A paragraph, a bullet list when it is an array, or a table. */
+export type LegalBlock = string | string[] | LegalTable;
+
+/** Every text of a block, for tests and search. */
+export function blockTexts(b: LegalBlock): string[] {
+  if (typeof b === "string") return [b];
+  if (Array.isArray(b)) return b;
+  return b.table.flat();
+}
 
 export interface LegalSection {
   id: string;

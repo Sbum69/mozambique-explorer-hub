@@ -53,7 +53,7 @@ function termsPt(): LegalDoc {
             "O preço mostrado é o que o negócio definiu no momento do pedido.",
             "Hoje, o pagamento não é feito na aplicação: combina-se diretamente com o negócio.",
           ],
-          "Quando houver pagamento na aplicação, as regras de pagamento, reembolso e cancelamento serão publicadas nestes Termos antes de entrarem em vigor.",
+          "Quando houver pagamento na aplicação, as regras de pagamento, reembolso e cancelamento das reservas serão publicadas nestes Termos e na página Preços e reembolsos antes de entrarem em vigor.",
         ],
       },
       {
@@ -61,7 +61,7 @@ function termsPt(): LegalDoc {
         heading: "5. Taxas e comissões da plataforma",
         blocks: [
           "Hoje, usar o EKAYA é gratuito para turistas e o perfil básico é gratuito para negócios. Nenhum negócio é obrigado a aceitar reservas nem a pagar.",
-          "O EKAYA poderá cobrar aos negócios uma comissão sobre reservas pagas na aplicação, destaques patrocinados e um plano opcional. Os valores em vigor estarão sempre na página de preços para negócios, publicada antes de qualquer cobrança.",
+          "O EKAYA poderá cobrar aos negócios uma comissão sobre reservas pagas na aplicação, destaques patrocinados e um plano opcional. Os valores em vigor, a forma de pagamento (M-Pesa, fora da aplicação) e as regras de cancelamento e reembolso dos destaques estão na página Preços e reembolsos (/precos-e-reembolsos), que faz parte destes Termos. Nenhum valor é cobrado sem estar publicado nessa página.",
           "Nada é cobrado sem aviso prévio e sem o negócio aceitar. Antes de aderir, o negócio vê sempre o total descontado: comissão e taxa do fornecedor de pagamento.",
           "Ao turista não serão acrescentadas taxas do EKAYA ao preço do negócio.",
         ],
@@ -198,7 +198,7 @@ function termsEn(): LegalDoc {
             "The price shown is the one the business set at the time of the request.",
             "Today, payment is not made in the app: it is arranged directly with the business.",
           ],
-          "When in-app payment exists, the payment, refund and cancellation rules will be published in these Terms before they take effect.",
+          "When in-app payment exists, the payment, refund and cancellation rules for bookings will be published in these Terms and on the Prices and refunds page before they take effect.",
         ],
       },
       {
@@ -206,7 +206,7 @@ function termsEn(): LegalDoc {
         heading: "5. Platform fees and commissions",
         blocks: [
           "Today, EKAYA is free for tourists and the basic profile is free for businesses. No business is required to accept bookings or to pay.",
-          "EKAYA may charge businesses a commission on bookings paid in the app, sponsored highlights and an optional plan. The prices in force will always be on the pricing page for businesses, published before anything is charged.",
+          "EKAYA may charge businesses a commission on bookings paid in the app, sponsored highlights and an optional plan. The prices in force, how to pay (M-Pesa, outside the app) and the cancellation and refund rules for highlights are on the Prices and refunds page (/precos-e-reembolsos), which is part of these Terms. Nothing is charged unless it is published on that page.",
           "Nothing is charged without prior notice and without the business accepting. Before joining, the business always sees the total deducted: commission and payment provider fee.",
           "EKAYA will not add its own fees to the business's price for tourists.",
         ],

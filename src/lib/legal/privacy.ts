@@ -63,10 +63,11 @@ function privacyPt(): LegalDoc {
           [
             "Negócio da reserva: recebe o nome, o contacto, as notas e os detalhes da reserva que fizeste.",
             "Público: o que publicas na comunidade e nos roteiros públicos, com o teu nome a mostrar e a tua foto de perfil.",
-            "Lovable (alojamento da aplicação e da base de dados) e Supabase (base de dados, autenticação e ficheiros), como subcontratantes.",
-            "Serviços chamados pelo teu browser quando usas o mapa e as rotas: OpenStreetMap e Esri (mapas), OSRM (cálculo de rotas, recebe as coordenadas dos pontos da rota), Open-Meteo (previsão do tempo dos destinos) e Unsplash (imagens). Recebem o teu endereço IP.",
+            "Subcontratantes que tratam dados por nossa conta: Lovable (alojamento da aplicação e da base de dados), Supabase (base de dados, autenticação e ficheiros) e Cloudflare (rede e execução da aplicação, através do alojamento). Recebem os dados da conta e da atividade guardados na aplicação e os dados técnicos de acesso.",
+            "Serviços chamados pelo teu browser quando usas o mapa, as rotas ou a meteorologia: OpenStreetMap e Esri/ArcGIS (mapas), OSRM (cálculo de rotas, recebe as coordenadas dos pontos da rota) e Open-Meteo (previsão do tempo dos destinos). Recebem o teu endereço IP e as coordenadas pedidas, não a tua conta.",
           ],
-          "Hoje não há fornecedor de pagamentos na aplicação: os destaques dos negócios pagam-se por M-Pesa, fora da aplicação. O assistente de ajuda responde a partir de perguntas frequentes, sem inteligência artificial. Se forem acrescentados fornecedores ou inteligência artificial, serão indicados aqui antes de serem usados.",
+          "As fontes de letra e as imagens da aplicação são servidas pelo próprio EKAYA: não usamos Google Fonts nem bancos de imagens externos. Hoje não há fornecedor de pagamentos na aplicação: os destaques dos negócios pagam-se por M-Pesa, fora da aplicação.",
+          "Assistente de ajuda: responde de forma automática a partir das perguntas frequentes do EKAYA, sem inteligência artificial generativa. Se um dia passar a usar um fornecedor de inteligência artificial, este será indicado aqui antes de ser usado, com os dados que recebe (a pergunta, sem conta nem endereço IP), e o assistente passará a avisar que as respostas são geradas por IA e podem ter erros.",
         ],
       },
       {
@@ -80,16 +81,40 @@ function privacyPt(): LegalDoc {
         id: "prazos",
         heading: "6. Durante quanto tempo guardamos os dados",
         blocks: [
-          [
-            "Conta, preferências, favoritos e atividade: enquanto a conta existir.",
-            "Ao apagar a conta: se não tiveres reservas nem outros registos, a conta e os dados são apagados. Se tiveres, a conta é anonimizada: as reservas passadas ficam com o negócio, sem o teu nome nem contactos, e o login deixa de funcionar.",
-            "Fotos e provas de contas apagadas deixam de estar acessíveis e serão eliminadas por uma limpeza periódica (em preparação).",
-            "Perguntas sem resposta e avaliações do assistente, e erros técnicos: 30 dias, apagados automaticamente.",
-            "Pedidos de adesão: enquanto forem precisos para o contacto ou, se derem origem a um negócio, enquanto o negócio existir. Podes pedir que sejam apagados.",
-            "Destaques e comprovativos de pagamento: pelo prazo exigido pela lei para documentos contabilísticos.",
-            "Registo da aceitação dos Termos e desta Política: enquanto a conta existir, como prova da aceitação.",
-            "Dados técnicos de acesso: pelos prazos dos subcontratantes de alojamento.",
-          ],
+          {
+            table: [
+              ["Dados", "Prazo"],
+              ["Conta, preferências, favoritos e atividade", "Enquanto a conta existir."],
+              [
+                "Reservas",
+                "Enquanto a conta existir. Se apagares a conta, as reservas passadas ficam com o negócio, sem o teu nome nem contactos.",
+              ],
+              [
+                "Fotos e provas (comunidade, roteiros e jogos)",
+                "Enquanto a conta existir. As de contas apagadas deixam de estar acessíveis e serão eliminadas por uma limpeza periódica (em preparação).",
+              ],
+              [
+                "Perguntas sem resposta e avaliações do assistente",
+                "30 dias, apagadas automaticamente.",
+              ],
+              ["Registo de erros técnicos", "30 dias, apagado automaticamente."],
+              [
+                "Registo de auditoria das ações de administração",
+                "Enquanto for preciso para a segurança e para provar as decisões tomadas; revisto uma vez por ano.",
+              ],
+              [
+                "Pedidos de adesão",
+                "Enquanto forem precisos para o contacto ou, se derem origem a um negócio, enquanto o negócio existir. Podes pedir que sejam apagados.",
+              ],
+              [
+                "Destaques e comprovativos de pagamento",
+                "Pelo prazo exigido pela lei para documentos contabilísticos.",
+              ],
+              ["Aceitação dos Termos e desta Política", "Enquanto a conta existir, como prova."],
+              ["Dados técnicos de acesso", "Pelos prazos dos subcontratantes de alojamento."],
+            ],
+          },
+          "Ao apagar a conta: se não tiveres reservas nem outros registos, a conta e os dados são apagados. Se tiveres, a conta é anonimizada e o login deixa de funcionar.",
         ],
       },
       {
@@ -98,11 +123,11 @@ function privacyPt(): LegalDoc {
         blocks: [
           [
             "Acesso e portabilidade: Definições → Privacidade → Exportar os meus dados.",
-            "Retificação: Definições → Perfil e Conta.",
+            "Retificação: corrige o nome, a foto, o telefone e as preferências em Definições → Perfil e Conta. Para corrigir outros dados (por exemplo, uma reserva ou o email), pede por email, indicando o que está errado e o valor certo.",
             "Apagamento: Definições → Privacidade → Apagar conta.",
             "Oposição, limitação e retirada do consentimento: pelo email de contacto, ou no browser, no caso da localização.",
           ],
-          `Respondemos no prazo de um mês. Contacto: ${SUPPORT_EMAIL}. Podes também apresentar queixa à autoridade de proteção de dados competente.`,
+          `Contacto para questões de privacidade: ${SUPPORT_EMAIL}. Respondemos no prazo de 30 dias a contar do pedido; se o pedido for complexo, avisamos-te dentro desse prazo e o prazo pode ser prolongado, no máximo, por mais 60 dias. Podemos pedir-te que confirmes a identidade antes de responder. Podes também apresentar queixa à autoridade de proteção de dados competente.`,
         ],
       },
       {
@@ -121,9 +146,39 @@ function privacyPt(): LegalDoc {
       },
       {
         id: "armazenamento",
-        heading: "10. Armazenamento no teu dispositivo",
+        heading: "10. Cookies e armazenamento local",
         blocks: [
-          "Guardamos no teu browser apenas o que a aplicação precisa para funcionar: a sessão de login, o idioma, o tema e o modo convidado. Não usamos cookies de publicidade nem ferramentas de análise de terceiros.",
+          "Guardamos no teu browser apenas o que a aplicação precisa para funcionar. Não usamos cookies de publicidade nem ferramentas de análise de terceiros, por isso não te pedimos consentimento para cookies. Esta é a lista completa:",
+          {
+            table: [
+              ["O que é guardado", "Para quê e durante quanto tempo"],
+              [
+                "Sessão de login (sb-…-auth-token, armazenamento local)",
+                "Manter-te com sessão iniciada. Até terminares a sessão.",
+              ],
+              [
+                "Idioma (ekaya.lang, cookie e armazenamento local)",
+                "Mostrar a aplicação no teu idioma desde a primeira página. O cookie dura 1 ano; o armazenamento local, até o apagares.",
+              ],
+              [
+                "Tema (ekaya.theme, armazenamento local)",
+                "Lembrar o tema claro ou escuro. Até o apagares.",
+              ],
+              [
+                "Modo convidado (ekaya.guest-mode, armazenamento da sessão)",
+                "Explorar sem conta. Apagado quando fechas o separador.",
+              ],
+              [
+                "Recuperação da palavra-passe (ekaya.recovery, armazenamento local)",
+                "Reconhecer o link de recuperação que pediste. Válido 1 hora e apagado quando defines a nova palavra-passe.",
+              ],
+              [
+                "Aviso de armazenamento (ekaya.storage-notice, armazenamento local)",
+                "Não voltar a mostrar este aviso. Até o apagares.",
+              ],
+            ],
+          },
+          "Versões antigas da aplicação guardavam os favoritos no browser (ekaya_favorites); são passados para a tua conta e apagados do browser. Podes apagar tudo isto nas definições do browser; a aplicação volta aos valores por omissão.",
         ],
       },
       {
@@ -193,10 +248,11 @@ function privacyEn(): LegalDoc {
           [
             "The business you book with: receives your name, contact, notes and the booking details.",
             "The public: what you post in the community and in public itineraries, with your display name and profile photo.",
-            "Lovable (app and database hosting) and Supabase (database, authentication and files), as processors.",
-            "Services your browser calls when you use the map and routes: OpenStreetMap and Esri (maps), OSRM (route calculation, receives the coordinates of the route points), Open-Meteo (weather forecasts for destinations) and Unsplash (images). They receive your IP address.",
+            "Processors that handle data on our behalf: Lovable (app and database hosting), Supabase (database, authentication and files) and Cloudflare (network and running the app, through the hosting). They receive the account and activity data stored in the app and the technical access data.",
+            "Services your browser calls when you use the map, routes or weather: OpenStreetMap and Esri/ArcGIS (maps), OSRM (route calculation, receives the coordinates of the route points) and Open-Meteo (weather forecasts for destinations). They receive your IP address and the coordinates requested, not your account.",
           ],
-          "Today there is no payment provider in the app: business highlights are paid by M-Pesa, outside the app. The help assistant answers from frequently asked questions, without artificial intelligence. If providers or artificial intelligence are added, they will be listed here before they are used.",
+          "The app's fonts and images are served by EKAYA itself: we do not use Google Fonts or external image banks. Today there is no payment provider in the app: business highlights are paid by M-Pesa, outside the app.",
+          "Help assistant: it answers automatically from the EKAYA frequently asked questions, without generative artificial intelligence. If it ever uses an artificial intelligence provider, that provider will be listed here before it is used, with the data it receives (the question, without account or IP address), and the assistant will warn that its answers are AI-generated and may contain mistakes.",
         ],
       },
       {
@@ -210,16 +266,40 @@ function privacyEn(): LegalDoc {
         id: "prazos",
         heading: "6. How long we keep the data",
         blocks: [
-          [
-            "Account, preferences, favourites and activity: while the account exists.",
-            "When you delete your account: if you have no bookings or other records, the account and its data are deleted. If you do, the account is anonymised: past bookings stay with the business without your name or contacts, and you can no longer sign in.",
-            "Photos and proofs of deleted accounts are no longer accessible and will be removed by a periodic clean-up (being prepared).",
-            "Unanswered questions and ratings of the assistant, and technical errors: 30 days, deleted automatically.",
-            "Requests to join: while needed to contact you or, if they lead to a business, while the business exists. You can ask for them to be deleted.",
-            "Highlights and payment proofs: for the period the law requires for accounting records.",
-            "Record of your acceptance of the Terms and this Policy: while the account exists, as proof of acceptance.",
-            "Technical access data: for the periods set by the hosting processors.",
-          ],
+          {
+            table: [
+              ["Data", "Period"],
+              ["Account, preferences, favourites and activity", "While the account exists."],
+              [
+                "Bookings",
+                "While the account exists. If you delete your account, past bookings stay with the business without your name or contacts.",
+              ],
+              [
+                "Photos and proofs (community, itineraries and games)",
+                "While the account exists. Those of deleted accounts are no longer accessible and will be removed by a periodic clean-up (being prepared).",
+              ],
+              [
+                "Unanswered questions and ratings of the assistant",
+                "30 days, deleted automatically.",
+              ],
+              ["Technical error log", "30 days, deleted automatically."],
+              [
+                "Audit log of administration actions",
+                "While needed for security and to prove the decisions taken; reviewed once a year.",
+              ],
+              [
+                "Requests to join",
+                "While needed to contact you or, if they lead to a business, while the business exists. You can ask for them to be deleted.",
+              ],
+              [
+                "Highlights and payment proofs",
+                "For the period the law requires for accounting records.",
+              ],
+              ["Acceptance of the Terms and this Policy", "While the account exists, as proof."],
+              ["Technical access data", "For the periods set by the hosting processors."],
+            ],
+          },
+          "When you delete your account: if you have no bookings or other records, the account and its data are deleted. If you do, the account is anonymised and you can no longer sign in.",
         ],
       },
       {
@@ -228,11 +308,11 @@ function privacyEn(): LegalDoc {
         blocks: [
           [
             "Access and portability: Settings → Privacy → Export my data.",
-            "Correction: Settings → Profile and Account.",
+            "Correction: fix your name, photo, phone and preferences in Settings → Profile and Account. To correct other data (for example, a booking or your email), ask by email, saying what is wrong and the right value.",
             "Erasure: Settings → Privacy → Delete account.",
             "Objection, restriction and withdrawal of consent: through the contact email, or in your browser for location.",
           ],
-          `We reply within one month. Contact: ${SUPPORT_EMAIL}. You can also complain to the competent data protection authority.`,
+          `Contact for privacy questions: ${SUPPORT_EMAIL}. We reply within 30 days of the request; if the request is complex, we tell you within that period and it may be extended by up to 60 more days. We may ask you to confirm your identity before replying. You can also complain to the competent data protection authority.`,
         ],
       },
       {
@@ -251,9 +331,39 @@ function privacyEn(): LegalDoc {
       },
       {
         id: "armazenamento",
-        heading: "10. Storage on your device",
+        heading: "10. Cookies and local storage",
         blocks: [
-          "We only store in your browser what the app needs to work: your sign-in session, language, theme and guest mode. We use no advertising cookies and no third-party analytics tools.",
+          "We only store in your browser what the app needs to work. We use no advertising cookies and no third-party analytics tools, so we do not ask you to consent to cookies. This is the full list:",
+          {
+            table: [
+              ["What is stored", "What for and for how long"],
+              [
+                "Sign-in session (sb-…-auth-token, local storage)",
+                "Keep you signed in. Until you sign out.",
+              ],
+              [
+                "Language (ekaya.lang, cookie and local storage)",
+                "Show the app in your language from the first page. The cookie lasts 1 year; local storage, until you clear it.",
+              ],
+              [
+                "Theme (ekaya.theme, local storage)",
+                "Remember the light or dark theme. Until you clear it.",
+              ],
+              [
+                "Guest mode (ekaya.guest-mode, session storage)",
+                "Explore without an account. Removed when you close the tab.",
+              ],
+              [
+                "Password recovery (ekaya.recovery, local storage)",
+                "Recognise the recovery link you asked for. Valid for 1 hour and removed when you set the new password.",
+              ],
+              [
+                "Storage notice (ekaya.storage-notice, local storage)",
+                "Not show this notice again. Until you clear it.",
+              ],
+            ],
+          },
+          "Older versions of the app kept favourites in the browser (ekaya_favorites); they are moved to your account and removed from the browser. You can clear all of this in your browser settings; the app goes back to its defaults.",
         ],
       },
       {
