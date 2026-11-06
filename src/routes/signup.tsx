@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
 import { getAuthenticatedUser, postAuthTarget, validateAuthReturnSearch } from "@/lib/auth";
 import { SIGNUP_TXT } from "@/lib/page-texts";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password-reset";
 
 export const Route = createFileRoute("/signup")({
   ssr: false,
@@ -86,7 +87,7 @@ function SignupPage() {
     if (!email.trim()) e.email = t.errEmailRequired;
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = t.errEmailInvalid;
     if (!password) e.password = t.errPassword;
-    else if (password.length < 6) e.password = t.errPasswordShort;
+    else if (password.length < MIN_PASSWORD_LENGTH) e.password = t.errPasswordShort;
     if (confirm !== password) e.confirm = t.errConfirm;
     if (!accepted) e.accept = t.errAccept;
     return e;

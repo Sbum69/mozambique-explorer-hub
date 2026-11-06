@@ -222,3 +222,64 @@ a licença permite uso comercial e o satélite volta ao mapa dos roteiros. Fonte
    - Eu passo-a para o `.env` num PR, meço o Lighthouse do mapa e confirmo a atribuição
      "Powered by Esri" com os dados que a Esri publica para o estilo `arcgis/streets`.
 7. No painel da Location Platform, confirmar todos os meses o consumo de mosaicos (aviso a 80 %).
+
+## 8. Painel do Auth (Lovable Cloud)
+
+Lovable → **Cloud → Users → Auth settings** **[CONFIRMAR]** (os nomes dos menus podem mudar).
+Fonte dos valores por omissão: <https://supabase.com/docs/guides/auth/rate-limits>.
+
+1. **Rate limits → Token endpoint** (login com palavra-passe e renovação da sessão): de **150** para
+   **90** pedidos por 5 minutos e por IP. Não descer mais, porque muitos telemóveis em Moçambique
+   partilham o mesmo IP.
+2. **Rate limits → Sign-ups and sign-ins:** manter **30** por 5 minutos.
+3. **Rate limits → Rate limit for sending emails:** **60** por hora, depois de ativar os Emails (§2).
+4. **Password → Minimum password length:** **8**. Em **Password requirements**, escolher letras e
+   números.
+   - A app já pede 8 caracteres (`MIN_PASSWORD_LENGTH`).
+   - Quem tem palavra-passe de 6 ou 7 caracteres continua a entrar; a regra só se aplica a
+     palavras-passe novas.
+5. **Password → Leaked password protection / HIBP check** (recusa palavras-passe que aparecem em
+   fugas conhecidas): **ligar, se o teu plano o mostrar** **[CONFIRMAR]**. A app já tem a mensagem
+   para esse caso.
+6. Confirmar: no registo, uma palavra-passe de 7 caracteres mostra "Mínimo 8 caracteres".
+
+## 9. Dia do piloto (checklist)
+
+As contas de teste **ficam** durante o piloto. O SQL do dia D (`supabase/launch/launch-day.sql`) só
+corre no lançamento público.
+
+1. **Merges**, por esta ordem e cada um com o CI verde:
+   1. `chore/deps-pre-launch`
+   2. `launch/domain`
+   3. `launch/email`
+   4. `launch/commercial-services`
+   5. `launch/pilot`
+
+   As migrações aprovadas (0063) já estão aplicadas antes do merge do passo 4.
+
+2. **Domínio "Active"** na Lovable (§1).
+3. **Emails ativos** (§2) e **apoio@ a receber** (§4).
+4. **Painel do Auth** configurado (§3 e §8).
+5. **Publish** na Lovable.
+6. **Verificação técnica contra o domínio real:**
+
+   ```sh
+   QA_BASE=https://exploreekaya.com bun scripts/qa/prelaunch.ts --skip-build
+   QA_BASE=https://exploreekaya.com bun scripts/qa/lighthouse.ts --pages=home,itineraries,experiences,map,dashboard --runs=3
+   ```
+
+   Ou diz-me **"está no ar"** e eu corro-os e dou-te o relatório PASS/FAIL.
+
+7. **No telemóvel, com a rede móvel:**
+   - [ ] registo de uma conta tua nova → o email de confirmação chega (caixa de entrada, não spam)
+         → o link abre `https://exploreekaya.com/auth/callback` e entra;
+   - [ ] recuperação da palavra-passe → o email chega → definir uma nova;
+   - [ ] uma reserva de teste num negócio real (e cancelá-la);
+   - [ ] painel do negócio (conta de teste de negócio): a reserva aparece;
+   - [ ] admin com 2FA: entrar, pedir o código, abrir Admin → Estado do lançamento;
+   - [ ] mapa, roteiro ("Abrir no Google Maps"), meteorologia (Notícias e alertas → Tempo);
+   - [ ] o aviso de armazenamento aparece no primeiro toque e o OK fecha-o.
+8. **Consola do browser sem erros de CSP** (computador: F12 → Console, nas páginas acima).
+9. **Lighthouse no domínio real** (passo 6). Comparar com o relatório do PR; nenhuma página pode
+   piorar mais de 2 pontos.
+10. Nas 48 h seguintes: Admin → Estado do lançamento → erros, e Gmail → `apoio@`.

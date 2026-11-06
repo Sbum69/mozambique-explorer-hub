@@ -119,16 +119,16 @@ const AUTH_ERRORS = {
   registered: ["Este email já está registado.", "This email is already registered."],
   email: ["Introduz um email válido.", "Enter a valid email."],
   shortAndPwned: [
-    "Usa pelo menos 6 caracteres e escolhe uma palavra-passe diferente: esta aparece em fugas de dados conhecidas.",
-    "Use at least 6 characters and choose a different password: this one appears in known data leaks.",
+    "Usa pelo menos 8 caracteres e escolhe uma palavra-passe diferente: esta aparece em fugas de dados conhecidas.",
+    "Use at least 8 characters and choose a different password: this one appears in known data leaks.",
   ],
   pwned: [
     "Esta palavra-passe aparece em fugas de dados conhecidas. Escolhe outra (podes juntar palavras ou números que só tu saibas).",
     "This password appears in known data leaks. Choose another (you can combine words or numbers only you know).",
   ],
   short: [
-    "A palavra-passe precisa de pelo menos 6 caracteres.",
-    "The password needs at least 6 characters.",
+    "A palavra-passe precisa de pelo menos 8 caracteres.",
+    "The password needs at least 8 characters.",
   ],
   network: [
     "Sem ligação. Verifica a internet e tenta novamente.",
@@ -146,7 +146,7 @@ function authErrorMessage(message: string, lang: Lang = "pt") {
     return pick("registered");
   if (normalized.includes("valid email")) return pick("email");
   const tooShort =
-    normalized.includes("at least 6 characters") ||
+    /at least \d+ characters/.test(normalized) ||
     (normalized.includes("password") && normalized.includes("characters"));
   const pwned =
     normalized.includes("known to be weak") ||
