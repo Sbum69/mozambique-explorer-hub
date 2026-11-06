@@ -75,8 +75,8 @@ for (const lang of ["pt", "en"] as const) {
   await page.waitForTimeout(1500);
   const credits = await page.locator("main").innerText();
   rep.line(
-    /OpenStreetMap/.test(credits) && /Esri/.test(credits) && /CC BY 4\.0/.test(credits),
-    `${lang} creditos: OSM, Esri and Open-Meteo attributions`,
+    /OpenStreetMap/.test(credits) && /MET Norway/.test(credits) && /CC BY 4\.0/.test(credits),
+    `${lang} creditos: OSM and MET Norway attributions (Esri only with the ArcGIS key)`,
   );
   rep.line(!fetchedEarly, `${lang} creditos: licence list not downloaded until asked`);
   await page.getByRole("button", { name: pt ? "Mostrar licenças" : "Show licences" }).click();

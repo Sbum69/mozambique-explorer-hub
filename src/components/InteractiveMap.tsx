@@ -19,6 +19,7 @@ import { categoryMeta, communityLocation } from "@/lib/community-experiences";
 import { communityIcon } from "@/components/community-pin";
 import { InterestIcon } from "@/components/InterestIcon";
 import { directionsUrls } from "@/lib/visits";
+import { BASEMAP } from "@/lib/map-tiles";
 
 const makePin = (bg: string, size: number) =>
   L.divIcon({
@@ -117,10 +118,7 @@ export function InteractiveMap({
       <MapResizer />
       <FitRoute coords={routeCoords ?? null} />
       <FlyTo target={focus ?? null} />
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer {...BASEMAP} />
 
       {routeCoords && routeCoords.length > 1 && (
         <Polyline

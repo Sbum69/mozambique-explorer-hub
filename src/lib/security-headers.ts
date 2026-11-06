@@ -6,12 +6,14 @@
 
 /** Origins the browser talks to, besides the app itself. */
 export const CSP_SOURCES = {
+  /** Map tiles (src/lib/map-tiles.ts): OpenStreetMap, or Esri with the ArcGIS key. */
   tiles: [
-    "https://*.tile.openstreetmap.org",
     "https://tile.openstreetmap.org",
-    "https://server.arcgisonline.com",
+    "https://static-map-tiles-api.arcgis.com",
+    "https://ibasemaps-api.arcgis.com",
   ],
-  apis: ["https://router.project-osrm.org", "https://api.open-meteo.com"],
+  /** APIs called from the browser. Weather (MET Norway) is fetched by the server; no routing API. */
+  apis: [] as string[],
   /** The Lovable editor shows the app inside its own page (preview) and brokers the session. */
   lovable: ["https://lovable.dev", "https://*.lovable.dev", "https://*.lovable.app"],
 };

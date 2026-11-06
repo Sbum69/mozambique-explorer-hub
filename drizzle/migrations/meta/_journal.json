@@ -442,6 +442,13 @@
       "when": 1795200000000,
       "tag": "0062_terms_version_2026_11_07",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1795300000000,
+      "tag": "0063_privacy_version_2026_11_07",
+      "breakpoints": true
     }
   ]
 }

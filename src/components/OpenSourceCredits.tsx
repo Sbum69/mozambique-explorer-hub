@@ -3,6 +3,8 @@ import { ExternalLink, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/contexts/LanguageContext";
+import { TILES_PROVIDER } from "@/lib/map-tiles";
+import { WEATHER_SOURCE_URL } from "@/lib/weather";
 
 /**
  * Data attributions and open-source licences on /creditos. Loaded on demand by the page; the licence
@@ -11,14 +13,16 @@ import { useLang } from "@/contexts/LanguageContext";
  */
 export const OPEN_SOURCE_TXT = {
   pt: {
-    dataTitle: "Mapas, rotas e meteorologia",
-    osm: "Mapas e rotas: dados © contribuidores do OpenStreetMap, disponíveis sob a licença ODbL.",
-    esri: "Imagens de satélite: Tiles © Esri — Fonte: Esri, Maxar, Earthstar Geographics e a comunidade de utilizadores SIG.",
-    osrm: "Cálculo de rotas: OSRM (Project OSRM), com dados do OpenStreetMap.",
-    meteo: "Dados meteorológicos: Open-Meteo.com, sob a licença CC BY 4.0.",
+    dataTitle: "Mapas e meteorologia",
+    osm: "Mapas: dados © contribuidores do OpenStreetMap, disponíveis sob a licença ODbL.",
+    esri: "Mapa base e imagens de satélite: Powered by Esri — Fonte: Esri, Maxar, Earthstar Geographics, contribuidores do OpenStreetMap e a comunidade de utilizadores SIG.",
+    meteo:
+      "Meteorologia: dados da MET Norway (Instituto Meteorológico da Noruega), sob a licença CC BY 4.0.",
+    directions:
+      "Direções: a aplicação não calcula percursos; abre o Google Maps ou o OpenStreetMap com as paragens do roteiro.",
     linkOsm: "Direitos de autor do OpenStreetMap",
     linkEsri: "Termos da Esri",
-    linkMeteo: "Open-Meteo",
+    linkMeteo: "MET Norway",
     softwareTitle: "Software de código aberto",
     softwareIntro:
       "O EKAYA é feito com estas bibliotecas de código aberto. A lista mostra o nome, a versão e a licença de cada uma, como estão na versão publicada da aplicação.",
@@ -31,14 +35,16 @@ export const OPEN_SOURCE_TXT = {
     license: "Licença",
   },
   en: {
-    dataTitle: "Maps, routes and weather",
-    osm: "Maps and routes: data © OpenStreetMap contributors, available under the ODbL licence.",
-    esri: "Satellite imagery: Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics and the GIS User Community.",
-    osrm: "Route calculation: OSRM (Project OSRM), using OpenStreetMap data.",
-    meteo: "Weather data: Open-Meteo.com, under the CC BY 4.0 licence.",
+    dataTitle: "Maps and weather",
+    osm: "Maps: data © OpenStreetMap contributors, available under the ODbL licence.",
+    esri: "Basemap and satellite imagery: Powered by Esri — Source: Esri, Maxar, Earthstar Geographics, OpenStreetMap contributors and the GIS User Community.",
+    meteo:
+      "Weather: data from MET Norway (Norwegian Meteorological Institute), under the CC BY 4.0 licence.",
+    directions:
+      "Directions: the app does not calculate routes; it opens Google Maps or OpenStreetMap with the itinerary stops.",
     linkOsm: "OpenStreetMap copyright",
     linkEsri: "Esri terms",
-    linkMeteo: "Open-Meteo",
+    linkMeteo: "MET Norway",
     softwareTitle: "Open-source software",
     softwareIntro:
       "EKAYA is built with these open-source libraries. The list shows the name, version and licence of each one, as in the published version of the app.",
@@ -98,16 +104,18 @@ export function OpenSourceCredits() {
           <li>
             {t.osm} <Ext href="https://www.openstreetmap.org/copyright">{t.linkOsm}</Ext>
           </li>
+          {TILES_PROVIDER === "esri" && (
+            <li>
+              {t.esri}{" "}
+              <Ext href="https://www.esri.com/en-us/legal/terms/full-master-agreement">
+                {t.linkEsri}
+              </Ext>
+            </li>
+          )}
           <li>
-            {t.esri}{" "}
-            <Ext href="https://www.esri.com/en-us/legal/terms/full-master-agreement">
-              {t.linkEsri}
-            </Ext>
+            {t.meteo} <Ext href={WEATHER_SOURCE_URL}>{t.linkMeteo}</Ext>
           </li>
-          <li>{t.osrm}</li>
-          <li>
-            {t.meteo} <Ext href="https://open-meteo.com/">{t.linkMeteo}</Ext>
-          </li>
+          <li>{t.directions}</li>
         </ul>
       </section>
 

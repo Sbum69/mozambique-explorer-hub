@@ -1,19 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  WEATHER_CACHE_MS,
-  WEATHER_SOURCE,
-  fetchWeatherReport,
-  type WeatherReport,
-} from "./weather";
+import { WEATHER_SOURCE, fetchWeatherReport, type WeatherReport } from "./weather";
 
-// One cached report per server instance; Open-Meteo updates hourly. Failures are never cached.
-let cache: { at: number; report: WeatherReport } | null = null;
+// One cached report per server instance, kept at least an hour and never less than MET Norway's
+// Expires header (its terms forbid asking again earlier). Failures are never cached.
+let cache: { until: number; report: WeatherReport } | null = null;
 
 /** Public: current weather and short forecast for every destination with real coordinates. */
 export const getDestinationWeather = createServerFn({ method: "GET" }).handler(
   async (): Promise<WeatherReport> => {
-    if (cache && Date.now() - cache.at < WEATHER_CACHE_MS) return cache.report;
+    if (cache && Date.now() < cache.until) return cache.report;
     const { data, error } = await supabase
       .from("destinations")
       .select("slug, name, lat, lng")
@@ -24,7 +20,7 @@ export const getDestinationWeather = createServerFn({ method: "GET" }).handler(
       console.error("[weather] destinations:", error.message);
       return { status: "unavailable", source: WEATHER_SOURCE };
     }
-    const report = await fetchWeatherReport(
+    const { report, notBefore } = await fetchWeatherReport(
       (data ?? []).map((d) => ({
         slug: d.slug,
         name: d.name,
@@ -32,7 +28,7 @@ export const getDestinationWeather = createServerFn({ method: "GET" }).handler(
         lng: Number(d.lng),
       })),
     );
-    if (report.status === "ok") cache = { at: Date.now(), report };
+    if (report.status === "ok") cache = { until: notBefore, report };
     return report;
   },
 );

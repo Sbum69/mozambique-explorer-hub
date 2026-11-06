@@ -25,7 +25,10 @@ describe("security headers", () => {
     const csp = contentSecurityPolicy(SUPA);
     expect(csp).toMatch(/connect-src [^;]*https:\/\/abcd\.supabase\.co/);
     expect(csp).toMatch(/connect-src [^;]*wss:\/\/abcd\.supabase\.co/);
-    expect(csp).toMatch(/img-src [^;]*https:\/\/\*\.tile\.openstreetmap\.org/);
+    expect(csp).toMatch(/img-src [^;]*https:\/\/tile\.openstreetmap\.org/);
+    expect(csp).toMatch(/img-src [^;]*https:\/\/static-map-tiles-api\.arcgis\.com/);
+    // No routing or weather API in the browser any more (OSRM removed, MET Norway via the server).
+    expect(csp).not.toMatch(/osrm|open-meteo|api\.met\.no|arcgisonline/);
     expect(csp).toContain("object-src 'none'");
     expect(csp).toMatch(/frame-ancestors 'self' [^;]*lovable/);
   });

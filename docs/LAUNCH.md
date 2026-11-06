@@ -200,3 +200,25 @@ bun scripts/qa/prelaunch.ts
 Corre tsc, lint, Vitest, build, confirma o registo dos testes de BD (menos de 24 h, todos PASS),
 hidratação, larguras, idioma, contraste, CSP, as 3 jornadas (admin com TOTP), os módulos novos e o
 Lighthouse. Resultado final numa linha: `PRELAUNCH: PASS` ou `FAIL`.
+
+## 7. Mapas: chave ArcGIS (recomendada antes de crescer)
+
+Sem chave, os mapas usam os mosaicos do OpenStreetMap. A política do OSM não proíbe uso comercial,
+mas não dá garantias. Com a chave, a app passa para a Esri: são 2 milhões de mosaicos grátis por mês,
+a licença permite uso comercial e o satélite volta ao mapa dos roteiros. Fonte:
+<https://location.arcgis.com/pricing/>.
+
+1. Criar conta grátis em <https://location.arcgis.com> (**ArcGIS Location Platform**).
+2. **Developer credentials → New developer credentials → API key credentials**.
+3. **Privileges:** marcar só **Location services → Basemaps** (mosaicos estáticos e imagens).
+   Nada mais.
+4. **Referrers** (restrição de origem): `https://exploreekaya.com`, `https://www.exploreekaya.com` e
+   o URL `https://<projeto>.lovable.app`.
+5. Prazo de validade: o máximo que o painel deixar (1 ano). Pôr um lembrete para a renovar.
+6. Copiar a chave para o `.env.test.local` como `VITE_ARCGIS_API_KEY=…` e dizer-me "chave ArcGIS
+   no .env.test.local". **Não a colar no chat.**
+   - É uma chave de browser, pública por natureza e limitada aos referrers acima, como a chave
+     publicável da Supabase.
+   - Eu passo-a para o `.env` num PR, meço o Lighthouse do mapa e confirmo a atribuição
+     "Powered by Esri" com os dados que a Esri publica para o estilo `arcgis/streets`.
+7. No painel da Location Platform, confirmar todos os meses o consumo de mosaicos (aviso a 80 %).

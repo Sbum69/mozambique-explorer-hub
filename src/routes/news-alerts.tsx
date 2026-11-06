@@ -51,7 +51,12 @@ import { toast } from "sonner";
 import { TRAVEL_TIPS } from "@/data/news-extra";
 import { getLiveNews } from "@/lib/news.functions";
 import { getDestinationWeather } from "@/lib/weather.functions";
-import { WEATHER_LABEL, type WeatherKind } from "@/lib/weather";
+import {
+  WEATHER_LABEL,
+  WEATHER_LICENSE_URL,
+  WEATHER_SOURCE_URL,
+  type WeatherKind,
+} from "@/lib/weather";
 import { cn } from "@/lib/utils";
 import { useBackTarget } from "@/lib/nav";
 
@@ -492,7 +497,7 @@ function NewsTab({ lang }: { lang: "pt" | "en" }) {
   );
 }
 
-/* ---------- Weather tab (Open-Meteo, real destination coordinates) ---------- */
+/* ---------- Weather tab (MET Norway, real destination coordinates) ---------- */
 const WEATHER_ICON: Record<WeatherKind, { icon: typeof Sun; color: string }> = {
   clear: { icon: Sun, color: "text-primary" },
   cloud: { icon: Cloud, color: "text-muted-foreground" },
@@ -533,8 +538,8 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
         <p className="font-semibold">{pt ? "Meteorologia indisponível" : "Weather unavailable"}</p>
         <p className="text-sm text-muted-foreground mt-1">
           {pt
-            ? "Não foi possível obter os dados da Open-Meteo agora. Tenta mais tarde."
-            : "Could not get Open-Meteo data right now. Please try again later."}
+            ? "Não foi possível obter os dados da MET Norway agora. Tenta mais tarde."
+            : "Could not get MET Norway data right now. Please try again later."}
         </p>
       </div>
     );
@@ -543,9 +548,9 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
   return (
     <div>
       <p className="text-xs text-muted-foreground mb-4">
-        {pt ? "Fonte: " : "Source: "}
+        {pt ? "Dados da " : "Data from "}
         <a
-          href="https://open-meteo.com/"
+          href={WEATHER_SOURCE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:text-foreground"
@@ -554,7 +559,7 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
         </a>
         {" ("}
         <a
-          href="https://creativecommons.org/licenses/by/4.0/"
+          href={WEATHER_LICENSE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:text-foreground"

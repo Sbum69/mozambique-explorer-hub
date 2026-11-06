@@ -1,11 +1,24 @@
 /**
- * Live weather from Open-Meteo (free, no key) for the real coordinates of the destinations.
- * Pure helpers here; the network call lives in weather.functions.ts. Malformed data is rejected,
- * never filled in: the UI then shows "unavailable" instead of invented numbers.
+ * Live weather from MET Norway (api.met.no, Locationforecast 2.0 "compact") for the real
+ * coordinates of the destinations. Free, commercial use allowed under CC BY 4.0 / NLOD 2.0 with
+ * attribution ("Data from MET Norway"). Terms: identify the app in the User-Agent, coordinates with
+ * at most 4 decimals, never repeat a request before its Expires time, stay far below 20 requests/s
+ * (https://api.met.no/doc/TermsOfService). Only the server calls it (weather.functions.ts), with a
+ * cache, so visitors' IP addresses never reach MET Norway.
+ * Pure helpers here. Malformed data is rejected, never filled in: the UI then shows "unavailable".
  */
+import { APP_VERSION, CANONICAL_ORIGIN } from "@/lib/app-info";
 
-export const WEATHER_SOURCE = "Open-Meteo";
+export const WEATHER_SOURCE = "MET Norway";
+export const WEATHER_SOURCE_URL = "https://www.met.no/en";
+export const WEATHER_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/";
+/** Minimum time between two reports; MET Norway's Expires header can make it longer. */
 export const WEATHER_CACHE_MS = 60 * 60 * 1000;
+/** Requests in flight at the same time (one per destination). */
+const PARALLEL = 3;
+/** Africa/Maputo is UTC+2 all year (no daylight saving). */
+const MAPUTO_OFFSET_MS = 2 * 60 * 60 * 1000;
+export const MET_USER_AGENT = `EkayaExplore/${APP_VERSION} ${CANONICAL_ORIGIN}`;
 
 export type WeatherKind = "clear" | "cloud" | "fog" | "rain" | "storm";
 
@@ -37,12 +50,13 @@ export type WeatherReport =
   | { status: "ok"; fetchedAt: string; source: string; cities: WeatherCity[] }
   | { status: "unavailable"; source: string };
 
-/** WMO weather interpretation codes (Open-Meteo docs) grouped into the icons the app shows. */
-export function weatherKind(code: number): WeatherKind {
-  if (code === 0 || code === 1) return "clear";
-  if (code === 2 || code === 3) return "cloud";
-  if (code === 45 || code === 48) return "fog";
-  if (code >= 95) return "storm";
+/** MET Norway symbol codes (e.g. "partlycloudy_day", "lightrainshowers_night") → app icons. */
+export function metKind(symbol: string): WeatherKind {
+  const s = symbol.replace(/_(day|night|polartwilight)$/, "");
+  if (s.includes("thunder")) return "storm";
+  if (s === "clearsky" || s === "fair") return "clear";
+  if (s === "partlycloudy" || s === "cloudy") return "cloud";
+  if (s === "fog") return "fog";
   return "rain";
 }
 
@@ -54,91 +68,143 @@ export const WEATHER_LABEL: Record<WeatherKind, { pt: string; en: string }> = {
   storm: { pt: "Trovoada", en: "Thunderstorm" },
 };
 
-export function openMeteoUrl(places: WeatherPlace[]): string {
-  const p = new URLSearchParams({
-    latitude: places.map((x) => x.lat).join(","),
-    longitude: places.map((x) => x.lng).join(","),
-    current: "temperature_2m,weather_code,wind_speed_10m",
-    daily: "weather_code,temperature_2m_max,temperature_2m_min",
-    timezone: "Africa/Maputo",
-    forecast_days: "4",
-  });
-  return `https://api.open-meteo.com/v1/forecast?${p.toString()}`;
+/** Coordinates truncated to 4 decimals, as the terms require (more decimals get 403). */
+export function metUrl(place: WeatherPlace): string {
+  const t = (n: number) => (Math.trunc(n * 1e4) / 1e4).toString();
+  return `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${t(place.lat)}&lon=${t(place.lng)}`;
 }
 
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const symbolOf = (v: unknown): string | null =>
+  typeof v === "string" && /^[a-z_]+$/.test(v) ? v : null;
 
-interface OpenMeteoLocation {
-  current?: {
-    time?: unknown;
-    temperature_2m?: unknown;
-    weather_code?: unknown;
-    wind_speed_10m?: unknown;
-  };
-  daily?: {
-    time?: unknown;
-    weather_code?: unknown;
-    temperature_2m_max?: unknown;
-    temperature_2m_min?: unknown;
+interface MetStep {
+  time?: unknown;
+  data?: {
+    instant?: { details?: { air_temperature?: unknown; wind_speed?: unknown } };
+    next_1_hours?: { summary?: { symbol_code?: unknown } };
+    next_6_hours?: { summary?: { symbol_code?: unknown } };
   };
 }
 
-/** Maps an Open-Meteo response (one object, or an array for several coordinates) onto the places. */
-export function parseOpenMeteo(json: unknown, places: WeatherPlace[]): WeatherCity[] {
-  const list = (Array.isArray(json) ? json : [json]) as OpenMeteoLocation[];
-  if (list.length !== places.length) throw new Error("WEATHER_SHAPE");
-  return places.map((place, i) => {
-    const { current: c, daily: d } = list[i] ?? {};
-    if (
-      !c ||
-      !isNum(c.temperature_2m) ||
-      !isNum(c.weather_code) ||
-      !isNum(c.wind_speed_10m) ||
-      typeof c.time !== "string"
-    ) {
-      throw new Error("WEATHER_SHAPE");
+/** Local calendar day (Maputo) of an ISO instant. */
+const maputoDay = (iso: string) =>
+  new Date(Date.parse(iso) + MAPUTO_OFFSET_MS).toISOString().slice(0, 10);
+const maputoHour = (iso: string) => new Date(Date.parse(iso) + MAPUTO_OFFSET_MS).getUTCHours();
+
+/** One Locationforecast "compact" response → current conditions and up to 4 local days. */
+export function parseMet(json: unknown, place: WeatherPlace): WeatherCity {
+  const steps = ((json as { properties?: { timeseries?: unknown } })?.properties?.timeseries ??
+    []) as MetStep[];
+  if (!Array.isArray(steps) || !steps.length) throw new Error("WEATHER_SHAPE");
+  const first = steps[0];
+  const temp = first.data?.instant?.details?.air_temperature;
+  const wind = first.data?.instant?.details?.wind_speed;
+  const symbol =
+    symbolOf(first.data?.next_1_hours?.summary?.symbol_code) ??
+    symbolOf(first.data?.next_6_hours?.summary?.symbol_code);
+  if (typeof first.time !== "string" || !isNum(temp) || !isNum(wind) || !symbol)
+    throw new Error("WEATHER_SHAPE");
+
+  // Daily max/min from the hourly (then 6-hourly) temperatures of each local day; the icon is the
+  // 6-hour symbol closest to midday.
+  const byDay = new Map<string, { temps: number[]; symbol: string | null; dist: number }>();
+  for (const s of steps) {
+    const t = s.data?.instant?.details?.air_temperature;
+    if (typeof s.time !== "string" || !isNum(t)) continue;
+    const day = maputoDay(s.time);
+    const entry = byDay.get(day) ?? { temps: [], symbol: null, dist: 99 };
+    entry.temps.push(t);
+    const six = symbolOf(s.data?.next_6_hours?.summary?.symbol_code);
+    const dist = Math.abs(maputoHour(s.time) - 12);
+    if (six && dist < entry.dist) {
+      entry.symbol = six;
+      entry.dist = dist;
     }
-    const times = Array.isArray(d?.time) ? (d.time as unknown[]) : [];
-    const codes = (d?.weather_code ?? []) as unknown[];
-    const max = (d?.temperature_2m_max ?? []) as unknown[];
-    const min = (d?.temperature_2m_min ?? []) as unknown[];
-    const days: WeatherDay[] = [];
-    times.forEach((t, k) => {
-      if (typeof t === "string" && isNum(codes[k]) && isNum(max[k]) && isNum(min[k])) {
-        days.push({
-          date: t,
-          kind: weatherKind(codes[k] as number),
-          maxC: Math.round(max[k] as number),
-          minC: Math.round(min[k] as number),
-        });
-      }
-    });
-    return {
-      slug: place.slug,
-      name: place.name,
-      tempC: Math.round(c.temperature_2m),
-      windKmh: Math.round(c.wind_speed_10m),
-      kind: weatherKind(c.weather_code),
-      observedAt: c.time,
-      days,
-    };
-  });
+    byDay.set(day, entry);
+  }
+  const days: WeatherDay[] = [...byDay.entries()]
+    .filter(([, e]) => e.symbol && e.temps.length >= 2)
+    .slice(0, 4)
+    .map(([date, e]) => ({
+      date,
+      kind: metKind(e.symbol as string),
+      maxC: Math.round(Math.max(...e.temps)),
+      minC: Math.round(Math.min(...e.temps)),
+    }));
+
+  return {
+    slug: place.slug,
+    name: place.name,
+    tempC: Math.round(temp),
+    windKmh: Math.round(wind * 3.6),
+    kind: metKind(symbol),
+    observedAt: first.time,
+    days,
+  };
 }
 
-/** Fetches and validates the report; any failure (network, HTTP, malformed body) becomes "unavailable". */
+/** Expires header as a timestamp, or null. */
+export function expiresAt(res: Response): number | null {
+  const v = Date.parse(res.headers.get("expires") ?? "");
+  return Number.isFinite(v) ? v : null;
+}
+
+export interface WeatherFetchResult {
+  report: WeatherReport;
+  /** Do not ask MET Norway again before this time (latest Expires of the responses). */
+  notBefore: number;
+}
+
+/**
+ * Fetches every destination (a few at a time) and validates each answer. A destination that fails
+ * is left out; if none answers, the report is "unavailable".
+ */
 export async function fetchWeatherReport(
   places: WeatherPlace[],
   fetchImpl: typeof fetch = fetch,
   now: () => Date = () => new Date(),
-): Promise<WeatherReport> {
-  if (!places.length) return { status: "unavailable", source: WEATHER_SOURCE };
-  try {
-    const res = await fetchImpl(openMeteoUrl(places), { signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const cities = parseOpenMeteo(await res.json(), places);
-    return { status: "ok", fetchedAt: now().toISOString(), source: WEATHER_SOURCE, cities };
-  } catch (e) {
-    console.error("[weather] unavailable:", e instanceof Error ? e.message : e);
-    return { status: "unavailable", source: WEATHER_SOURCE };
-  }
+): Promise<WeatherFetchResult> {
+  const start = now().getTime();
+  const unavailable = (): WeatherFetchResult => ({
+    report: { status: "unavailable", source: WEATHER_SOURCE },
+    notBefore: start,
+  });
+  if (!places.length) return unavailable();
+  const cities: (WeatherCity | null)[] = new Array(places.length).fill(null);
+  let notBefore = start + WEATHER_CACHE_MS;
+  let next = 0;
+  const worker = async () => {
+    while (next < places.length) {
+      const i = next++;
+      try {
+        const res = await fetchImpl(metUrl(places[i]), {
+          headers: { "User-Agent": MET_USER_AGENT, Accept: "application/json" },
+          signal: AbortSignal.timeout(10_000),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const exp = expiresAt(res);
+        if (exp && exp > notBefore) notBefore = exp;
+        cities[i] = parseMet(await res.json(), places[i]);
+      } catch (e) {
+        console.error(
+          "[weather] unavailable:",
+          places[i].slug,
+          e instanceof Error ? e.message : String(e),
+        );
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(PARALLEL, places.length) }, worker));
+  const ok = cities.filter((c): c is WeatherCity => c !== null);
+  if (!ok.length) return unavailable();
+  return {
+    report: {
+      status: "ok",
+      fetchedAt: now().toISOString(),
+      source: WEATHER_SOURCE,
+      cities: ok,
+    },
+    notBefore,
+  };
 }
