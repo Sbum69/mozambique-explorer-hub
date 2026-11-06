@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { LegalAcceptanceGate } from "@/components/LegalAcceptanceGate";
 import { MfaChallengeGate } from "@/components/MfaChallengeGate";
 import { AssistantLauncher } from "@/components/AssistantLauncher";
+import { StorageNoticeGate } from "@/components/StorageNoticeGate";
 import { installErrorLogger } from "@/lib/launch";
 
 function NotFoundComponent() {
@@ -112,6 +113,7 @@ function RootComponent() {
                   <LegalAcceptanceGate />
                   <MfaChallengeGate />
                   <AssistantLauncher />
+                  <StorageNoticeGate />
                   <ThemedToaster />
                 </FavoritesProvider>
               </NotificationsProvider>

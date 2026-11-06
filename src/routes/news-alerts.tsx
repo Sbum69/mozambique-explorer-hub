@@ -552,6 +552,16 @@ function WeatherTab({ lang }: { lang: "pt" | "en" }) {
         >
           {report.source}
         </a>
+        {" ("}
+        <a
+          href="https://creativecommons.org/licenses/by/4.0/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:text-foreground"
+        >
+          CC BY 4.0
+        </a>
+        {")"}
         {" · "}
         {pt ? "atualizado " : "updated "}
         {new Date(report.fetchedAt).toLocaleString(locale, {

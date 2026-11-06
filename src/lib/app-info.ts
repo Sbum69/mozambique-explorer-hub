@@ -15,4 +15,6 @@ export const LEGAL_ENTITY = {
   responsible: "Sheldon Jasse" as string | null,
   nuit: null as string | null,
   phone: null as string | null,
+  /** Country where EKAYA operates and is being incorporated. */
+  country: { pt: "Moçambique", en: "Mozambique" },
 };

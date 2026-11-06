@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LEGAL_ENTITY, SUPPORT_EMAIL } from "@/lib/app-info";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { formatCents } from "@/lib/commission";
-import { SPONSORED_TXT } from "@/lib/page-texts";
+import { LEGAL_TXT, SPONSORED_TXT } from "@/lib/page-texts";
 import { formatDay, hasReceipt, placementFromRow } from "@/lib/sponsored";
 
 export const Route = createFileRoute("/recibo/$id")({
@@ -127,6 +127,11 @@ function ReceiptPage() {
         </dl>
         <p className="border-t border-border pt-3 text-xs text-muted-foreground">
           {t.notFiscalNote}
+        </p>
+        <p className="text-xs print:hidden">
+          <Link to="/precos-e-reembolsos" className="text-primary underline underline-offset-4">
+            {LEGAL_TXT[lang].pricing}
+          </Link>
         </p>
       </Card>
     </main>

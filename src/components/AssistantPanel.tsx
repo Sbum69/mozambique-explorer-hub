@@ -15,6 +15,7 @@ import {
   logUnanswered,
   rateAnswer,
 } from "@/lib/assistant/faq";
+import { ASSISTANT_LLM_ENABLED } from "@/lib/assistant/provider";
 import { ASSISTANT_TXT } from "@/lib/page-texts";
 import { formatPrice } from "@/lib/price";
 
@@ -86,6 +87,7 @@ export function AssistantPanel({ onClose }: { onClose: () => void }) {
             {t.title}
           </h2>
           <p className="text-xs text-muted-foreground">{t.intro}</p>
+          <p className="mt-1 text-xs font-medium">{ASSISTANT_LLM_ENABLED ? t.modeAi : t.mode}</p>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} aria-label={t.close}>
           <X className="size-5" />

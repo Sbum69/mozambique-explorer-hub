@@ -33,6 +33,7 @@ import { Route as MapRouteImport } from './routes/map'
 import { Route as NewsAlertsRouteImport } from './routes/news-alerts'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ParaNegociosRouteImport } from './routes/para-negocios'
+import { Route as PrecosEReembolsosRouteImport } from './routes/precos-e-reembolsos'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -171,6 +172,11 @@ const ParaNegociosRoute = ParaNegociosRouteImport.update({
   path: '/para-negocios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrecosEReembolsosRoute = PrecosEReembolsosRouteImport.update({
+  id: '/precos-e-reembolsos',
+  path: '/precos-e-reembolsos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreferencesRoute = PreferencesRouteImport.update({
   id: '/preferences',
   path: '/preferences',
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/para-negocios': typeof ParaNegociosRoute
+  '/precos-e-reembolsos': typeof PrecosEReembolsosRoute
   '/preferences': typeof PreferencesRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/para-negocios': typeof ParaNegociosRoute
+  '/precos-e-reembolsos': typeof PrecosEReembolsosRoute
   '/preferences': typeof PreferencesRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/news-alerts': typeof NewsAlertsRoute
   '/onboarding': typeof OnboardingRoute
   '/para-negocios': typeof ParaNegociosRoute
+  '/precos-e-reembolsos': typeof PrecosEReembolsosRoute
   '/preferences': typeof PreferencesRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -414,6 +423,7 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/para-negocios'
+    | '/precos-e-reembolsos'
     | '/preferences'
     | '/privacy'
     | '/reset-password'
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/para-negocios'
+    | '/precos-e-reembolsos'
     | '/preferences'
     | '/privacy'
     | '/reset-password'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/news-alerts'
     | '/onboarding'
     | '/para-negocios'
+    | '/precos-e-reembolsos'
     | '/preferences'
     | '/privacy'
     | '/reset-password'
@@ -544,6 +556,7 @@ export interface RootRouteChildren {
   NewsAlertsRoute: typeof NewsAlertsRoute
   OnboardingRoute: typeof OnboardingRoute
   ParaNegociosRoute: typeof ParaNegociosRoute
+  PrecosEReembolsosRoute: typeof PrecosEReembolsosRoute
   PreferencesRoute: typeof PreferencesRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -732,6 +745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParaNegociosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/precos-e-reembolsos': {
+      id: '/precos-e-reembolsos'
+      path: '/precos-e-reembolsos'
+      fullPath: '/precos-e-reembolsos'
+      preLoaderRoute: typeof PrecosEReembolsosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/preferences': {
       id: '/preferences'
       path: '/preferences'
@@ -891,6 +911,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsAlertsRoute: NewsAlertsRoute,
   OnboardingRoute: OnboardingRoute,
   ParaNegociosRoute: ParaNegociosRoute,
+  PrecosEReembolsosRoute: PrecosEReembolsosRoute,
   PreferencesRoute: PreferencesRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,

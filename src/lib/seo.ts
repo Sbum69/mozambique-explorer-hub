@@ -5,6 +5,7 @@
 export const PUBLIC_SITEMAP_PATHS = [
   "/home",
   "/para-negocios",
+  "/precos-e-reembolsos",
   "/experiences",
   "/businesses",
   "/map",

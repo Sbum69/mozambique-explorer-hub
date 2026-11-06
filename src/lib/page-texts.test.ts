@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import * as texts from "./page-texts";
+import * as pageTexts from "./page-texts";
+import * as pricingTexts from "./pricing-texts";
+import { OPEN_SOURCE_TXT } from "../components/OpenSourceCredits";
+import { STORAGE_NOTICE_TXT } from "../components/StorageNotice";
+
+const texts = { ...pageTexts, ...pricingTexts, STORAGE_NOTICE_TXT, OPEN_SOURCE_TXT };
 
 type Dict = Record<string, unknown>;
 
@@ -30,11 +35,14 @@ describe("ADM-2B page texts exist in PT and EN", () => {
         "LAUNCH_TXT",
         "LEGAL_TXT",
         "MFA_TXT",
+        "OPEN_SOURCE_TXT",
         "PHOTOS_TXT",
+        "PRICING_TXT",
         "RESET_TXT",
         "SETTINGS_TXT",
         "SIGNUP_TXT",
         "SPONSORED_TXT",
+        "STORAGE_NOTICE_TXT",
         "TREASURE_TXT",
       ].sort(),
     );
