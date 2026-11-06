@@ -56,8 +56,10 @@ for (const lang of ["pt", "en"] as const) {
     `${lang} pricing: draft notice`,
   );
   rep.line(
-    /M-Pesa/.test(body) && /\[DECIDIR\]/.test(body),
-    `${lang} pricing: M-Pesa and [DECIDIR]`,
+    /M-Pesa/.test(body) &&
+      !/\[DECIDIR\]/.test(body) &&
+      (pt ? /a confirmar com o jurista/ : /to be confirmed with our lawyer/).test(body),
+    `${lang} pricing: M-Pesa, refund rule decided, deadline pending legal review`,
   );
   rep.line(
     (pt ? /Condições em vigor: versão \d+/ : /Terms in force: version \d+/).test(body),

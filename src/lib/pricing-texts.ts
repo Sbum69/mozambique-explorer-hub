@@ -37,16 +37,13 @@ export const PRICING_TXT = {
     refundTitle: "Cancelamento e reembolso dos destaques",
     refundBefore:
       "Antes de o destaque ficar ativo: podes cancelar o pedido no painel do negócio. Se já tiveres pago, recebes o reembolso total.",
-    refundAfter: "Depois de o destaque estar ativo:",
-    refundDecide: "[DECIDIR] Escolher uma das opções antes do lançamento:",
-    refundOptionA:
-      "Opção A — reembolso proporcional aos dias que faltam, contados a partir do dia seguinte ao pedido.",
-    refundOptionB: "Opção B — sem reembolso depois de ativo.",
+    refundAfter:
+      "Depois de o destaque estar ativo: não há reembolso, mesmo que o canceles antes do fim do período.",
     refundAdmin:
       "Se o EKAYA cancelar um destaque (por exemplo, por violar as regras), o motivo fica registado e o reembolso segue a regra acima.",
     deadlineTitle: "Prazo e como pedir",
     deadlineBody: (email: string) =>
-      `Pede o reembolso por email para ${email}, com a referência do destaque. [DECIDIR] Prazo: o reembolso é feito por M-Pesa em até 14 dias depois de aprovado.`,
+      `Pede o reembolso por email para ${email}, com a referência do destaque. Prazo (a confirmar com o jurista): o reembolso é feito por M-Pesa em até 14 dias depois de aprovado.`,
     termsNote: "Estas regras fazem parte dos Termos de Utilização.",
     readTerms: "Ler os Termos de Utilização",
     forBusiness: "Para negócios",
@@ -84,16 +81,13 @@ export const PRICING_TXT = {
     refundTitle: "Cancelling and refunding highlights",
     refundBefore:
       "Before the highlight goes live: you can cancel the request in the business dashboard. If you have already paid, you get a full refund.",
-    refundAfter: "After the highlight is live:",
-    refundDecide: "[DECIDIR] Choose one option before launch:",
-    refundOptionA:
-      "Option A — refund in proportion to the days left, counted from the day after the request.",
-    refundOptionB: "Option B — no refund once live.",
+    refundAfter:
+      "After the highlight is live: there is no refund, even if you cancel it before the end of the period.",
     refundAdmin:
       "If EKAYA cancels a highlight (for example, because it breaks the rules), the reason is recorded and the refund follows the rule above.",
     deadlineTitle: "Deadline and how to ask",
     deadlineBody: (email: string) =>
-      `Ask for the refund by email at ${email}, with the highlight reference. [DECIDIR] Deadline: the refund is paid by M-Pesa within 14 days of approval.`,
+      `Ask for the refund by email at ${email}, with the highlight reference. Deadline (to be confirmed with our lawyer): the refund is paid by M-Pesa within 14 days of approval.`,
     termsNote: "These rules are part of the Terms of Use.",
     readTerms: "Read the Terms of Use",
     forBusiness: "For businesses",

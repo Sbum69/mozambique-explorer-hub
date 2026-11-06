@@ -435,6 +435,13 @@
       "when": 1795100000000,
       "tag": "0061_legal_versions_2026_11_06",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1795200000000,
+      "tag": "0062_terms_version_2026_11_07",
+      "breakpoints": true
     }
   ]
 }
