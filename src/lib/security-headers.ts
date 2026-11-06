@@ -11,7 +11,6 @@ export const CSP_SOURCES = {
     "https://tile.openstreetmap.org",
     "https://server.arcgisonline.com",
   ],
-  images: ["https://images.unsplash.com"],
   apis: ["https://router.project-osrm.org", "https://api.open-meteo.com"],
   /** The Lovable editor shows the app inside its own page (preview) and brokers the session. */
   lovable: ["https://lovable.dev", "https://*.lovable.dev", "https://*.lovable.app"],
@@ -32,9 +31,10 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
     ["default-src", ["'self'"]],
     // Hydration data and the theme script are inline.
     ["script-src", ["'self'", "'unsafe-inline'"]],
-    ["style-src", ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"]],
-    ["font-src", ["'self'", "data:", "https://fonts.gstatic.com"]],
-    ["img-src", ["'self'", "data:", "blob:", ...supabase.slice(0, 1), ...s.tiles, ...s.images]],
+    // Fonts are self-hosted (public/fonts): no Google Fonts origin.
+    ["style-src", ["'self'", "'unsafe-inline'"]],
+    ["font-src", ["'self'", "data:"]],
+    ["img-src", ["'self'", "data:", "blob:", ...supabase.slice(0, 1), ...s.tiles]],
     ["connect-src", ["'self'", ...supabase, ...s.apis, ...s.lovable]],
     ["frame-src", ["'self'", ...s.lovable]],
     ["frame-ancestors", ["'self'", ...s.lovable]],

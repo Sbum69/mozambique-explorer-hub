@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
@@ -8,6 +9,11 @@ import { UserMenu } from "@/components/UserMenu";
 import { useLang } from "@/contexts/LanguageContext";
 import { PHOTOS_TXT } from "@/lib/page-texts";
 import { ALL_PHOTOS, licenseLabel } from "@/lib/photo-credits";
+
+// Attributions and the licence list load after the photos, in their own chunk.
+const OpenSourceCredits = lazy(() =>
+  import("@/components/OpenSourceCredits").then((m) => ({ default: m.OpenSourceCredits })),
+);
 
 export const Route = createFileRoute("/creditos")({
   head: () => ({
@@ -96,6 +102,9 @@ function CreditsPage() {
           ))}
         </ul>
         <p className="max-w-prose text-sm text-muted-foreground">{t.noPhoto}</p>
+        <Suspense fallback={null}>
+          <OpenSourceCredits />
+        </Suspense>
       </main>
     </div>
   );

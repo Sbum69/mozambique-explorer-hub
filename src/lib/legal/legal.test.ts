@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { privacyDoc } from "./privacy";
 import { termsDoc } from "./terms";
 import { LEGAL_VERSIONS } from "./versions";
-import type { LegalDoc } from "./doc";
+import { blockTexts, type LegalDoc } from "./doc";
 
 const docs: [string, (lang: "pt" | "en") => LegalDoc][] = [
   ["terms", termsDoc],
@@ -13,13 +13,15 @@ const docs: [string, (lang: "pt" | "en") => LegalDoc][] = [
 ];
 
 const shape = (d: LegalDoc) =>
-  d.sections.map((s) => [s.id, s.blocks.map((b) => (Array.isArray(b) ? b.length : "p"))]);
+  d.sections.map((s) => [
+    s.id,
+    s.blocks.map((b) =>
+      typeof b === "string" ? "p" : Array.isArray(b) ? b.length : b.table.map((r) => r.length),
+    ),
+  ]);
 const allText = (d: LegalDoc) => [
   d.title,
-  ...d.sections.flatMap((s) => [
-    s.heading,
-    ...s.blocks.flatMap((b) => (Array.isArray(b) ? b : [b])),
-  ]),
+  ...d.sections.flatMap((s) => [s.heading, ...s.blocks.flatMap(blockTexts)]),
 ];
 
 describe("LEGAL-1 legal texts", () => {

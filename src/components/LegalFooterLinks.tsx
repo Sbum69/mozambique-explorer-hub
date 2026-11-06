@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 
 import { useLang } from "@/contexts/LanguageContext";
-import { APP_VERSION } from "@/lib/app-info";
+import { APP_VERSION, LEGAL_ENTITY, SUPPORT_EMAIL } from "@/lib/app-info";
 import { FOR_BUSINESS_TXT, LEGAL_TXT } from "@/lib/page-texts";
 import { cn } from "@/lib/utils";
 
-/** Footer: For businesses, Terms, Privacy, Credits and the app version. */
+/** Footer: For businesses, prices, Terms, Privacy, Credits, version and who provides the service. */
 export function LegalFooterLinks({
   className,
   onNavigate,
@@ -25,6 +25,11 @@ export function LegalFooterLinks({
           </Link>
         </li>
         <li>
+          <Link to="/precos-e-reembolsos" className={link} onClick={onNavigate}>
+            {t.pricing}
+          </Link>
+        </li>
+        <li>
           <Link to="/terms" className={link} onClick={onNavigate}>
             {t.terms}
           </Link>
@@ -41,6 +46,16 @@ export function LegalFooterLinks({
         </li>
         <li>v{APP_VERSION}</li>
       </ul>
+      {/* Who provides the service (from app-info.ts). */}
+      <p className="mt-1">
+        {LEGAL_ENTITY.name}
+        {LEGAL_ENTITY.incorporated ? "" : ` (${t.incorporating})`} · {LEGAL_ENTITY.country[lang]} ·{" "}
+        {LEGAL_ENTITY.nuit ? `NUIT ${LEGAL_ENTITY.nuit}` : t.nuitPending}
+        {LEGAL_ENTITY.responsible ? ` · ${LEGAL_ENTITY.responsible}` : ""} ·{" "}
+        <a href={`mailto:${SUPPORT_EMAIL}`} className={link}>
+          {SUPPORT_EMAIL}
+        </a>
+      </p>
     </nav>
   );
 }

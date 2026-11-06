@@ -50,6 +50,7 @@ export const PAGES: QaPage[] = [
   { name: "terms", path: "/terms" },
   { name: "privacy", path: "/privacy" },
   { name: "creditos", path: "/creditos" },
+  { name: "precos", path: "/precos-e-reembolsos" },
   { name: "b-dashboard", path: "/business-dashboard", role: "business" },
   { name: "a-admin", path: "/admin", role: "admin" },
 ];

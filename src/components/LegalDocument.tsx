@@ -82,7 +82,38 @@ export function LegalDocument({ kind }: { kind: "terms" | "privacy" }) {
               {s.heading}
             </h2>
             {s.blocks.map((b, i) =>
-              Array.isArray(b) ? (
+              typeof b === "object" && "table" in b ? (
+                <div key={i} className="overflow-x-auto rounded-[10px] border border-border">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-muted">
+                      <tr>
+                        {b.table[0].map((h) => (
+                          <th key={h} scope="col" className="p-2 font-semibold">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {b.table.slice(1).map((row) => (
+                        <tr key={row[0]} className="border-t border-border align-top">
+                          {row.map((cell, j) =>
+                            j === 0 ? (
+                              <th key={j} scope="row" className="p-2 font-medium">
+                                {cell}
+                              </th>
+                            ) : (
+                              <td key={j} className="p-2">
+                                {cell}
+                              </td>
+                            ),
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : Array.isArray(b) ? (
                 <ul key={i} className="list-disc pl-5 space-y-1.5 text-sm leading-relaxed">
                   {b.map((item) => (
                     <li key={item}>{item}</li>

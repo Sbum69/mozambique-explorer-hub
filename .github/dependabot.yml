@@ -1,0 +1,18 @@
+# Weekly update PRs for dependencies (bun.lock) and GitHub Actions. Each PR runs CI and is reviewed
+# before merge, like any other (docs/security/REVISAO.md). Never merged automatically.
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"

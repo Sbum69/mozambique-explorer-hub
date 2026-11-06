@@ -582,6 +582,10 @@ export const LEGAL_TXT = {
     privacy: "Privacidade",
     credits: "Créditos",
     footerLabel: "Informação legal",
+    pricing: "Preços e reembolsos",
+    provider: "Fornecedor",
+    nuitPending: "NUIT em processo",
+    incorporating: "em constituição",
     promptTitle: "Atualizámos os nossos documentos",
     promptBody:
       "Para continuares a usar o EKAYA, lê e aceita os Termos de Utilização e a Política de Privacidade.",
@@ -606,6 +610,10 @@ export const LEGAL_TXT = {
     privacy: "Privacy",
     credits: "Credits",
     footerLabel: "Legal information",
+    pricing: "Prices and refunds",
+    provider: "Provider",
+    nuitPending: "NUIT being registered",
+    incorporating: "being incorporated",
     promptTitle: "We have updated our documents",
     promptBody:
       "To keep using EKAYA, please read and accept the Terms of Use and the Privacy Policy.",
@@ -1555,6 +1563,8 @@ export const ASSISTANT_TXT = {
     title: "Assistente EKAYA",
     intro:
       "Respondo a dúvidas sobre o EKAYA a partir das perguntas frequentes. Não faço reservas nem pagamentos.",
+    mode: "Respostas automáticas a partir da ajuda do EKAYA (sem IA generativa).",
+    modeAi: "Assistente com IA, pode errar. Confirma as informações importantes.",
     close: "Fechar o assistente",
     placeholder: "Escreve a tua pergunta",
     inputLabel: "Pergunta",
@@ -1621,6 +1631,8 @@ export const ASSISTANT_TXT = {
     title: "EKAYA assistant",
     intro:
       "I answer questions about EKAYA from the frequently asked questions. I do not make bookings or payments.",
+    mode: "Automatic answers from the EKAYA help pages (no generative AI).",
+    modeAi: "AI assistant, it can make mistakes. Check important information.",
     close: "Close the assistant",
     placeholder: "Type your question",
     inputLabel: "Question",

@@ -17,7 +17,7 @@ import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 import { SUPPORT_EMAIL } from "@/lib/app-info";
 import { fetchCurrentConfig, formatBp, formatCents } from "@/lib/commission";
 import { fetchFounderPlacesLeft, leadProblems, submitLead, type LeadProblem } from "@/lib/leads";
-import { FOR_BUSINESS_TXT } from "@/lib/page-texts";
+import { FOR_BUSINESS_TXT, LEGAL_TXT } from "@/lib/page-texts";
 
 const PT = FOR_BUSINESS_TXT.pt;
 const EN = FOR_BUSINESS_TXT.en;
@@ -90,6 +90,9 @@ function ForBusinessPage() {
             </Button>
             <Button asChild variant="outline">
               <Link to="/business-register">{t.ctaRegister}</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link to="/precos-e-reembolsos">{LEGAL_TXT[lang].pricing}</Link>
             </Button>
           </div>
         </section>

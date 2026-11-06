@@ -27,6 +27,14 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [ ] Dia D: SQL das contas de teste (aprovado), Storage, apagar `.env.test.local`, publicar
 - [ ] Confirmar os números de emergência (119, 117, 198) com fontes oficiais
 - [ ] Juntar os branches à `main` pela ordem indicada e confirmar o CI verde
+- [ ] Conformidade (compliance/40-requisitos): decidir o reembolso de destaques depois de ativos (opção A proporcional / B sem reembolso) e o prazo de 14 dias em `/precos-e-reembolsos`
+- [ ] Serviços externos com uso comercial (`docs/legal/SUBCONTRATANTES.md`): Open-Meteo (API comercial), OSRM (servidor próprio ou serviço pago), mosaicos OSM e Esri (fornecedor comercial ou conta ArcGIS)
+- [ ] DPA: Lovable (plano Business/Enterprise ou confirmação escrita) e Cloudflare, se a conta for própria
+- [ ] Painel Auth: token endpoint 150→90 / 5 min, palavra-passe mínima 8, SMTP próprio (`docs/security/RATE-LIMITS.md`)
+- [ ] Backups: confirmar retenção e PITR no painel; backup manual semanal da BD e do Storage (`docs/security/BACKUPS.md`)
+- [ ] Jurista: notificação de incidentes em Moçambique, transferências internacionais, DPO, representante na UE
+- [ ] [FUTURO] Alerta por email acima de 50 erros/hora (precisa de fornecedor de email); teste de restauro trimestral
+- [ ] react-leaflet usa a licença Hippocratic-2.1 (não OSI): confirmar com o jurista que serve para uso comercial
 
 ## Concluído (22–30/10)
 - [x] 2B — Correções de frontend (sem alterações à base de dados) + CLAUDE.md + auditoria

@@ -40,10 +40,10 @@ import { useProvinces } from "@/hooks/useProvinces";
 import { INTERESTS } from "@/data/destinations";
 import { supabase } from "@/integrations/supabase/client";
 import { exportMyData } from "@/lib/account.functions";
-import { APP_VERSION, SUPPORT_EMAIL } from "@/lib/app-info";
+import { APP_VERSION, LEGAL_ENTITY, SUPPORT_EMAIL } from "@/lib/app-info";
 import { getAuthCallbackUrl } from "@/lib/app-url";
 import { requireAuthenticatedUser } from "@/lib/auth";
-import { MFA_TXT, PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
+import { LEGAL_TXT, MFA_TXT, PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
 import { MfaSettings } from "@/components/MfaSettings";
 import type { ThemePreference } from "@/lib/theme";
 
@@ -179,6 +179,14 @@ function SettingsPage() {
         )}
         <Section id="about" icon={Info} title={t.sectionAbout}>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-muted-foreground">{LEGAL_TXT[lang].provider}</dt>
+            <dd className="min-w-0 break-words">
+              {LEGAL_ENTITY.name}
+              {LEGAL_ENTITY.incorporated ? "" : ` (${LEGAL_TXT[lang].incorporating})`}
+              {LEGAL_ENTITY.responsible ? ` · ${LEGAL_ENTITY.responsible}` : ""} ·{" "}
+              {LEGAL_ENTITY.country[lang]} ·{" "}
+              {LEGAL_ENTITY.nuit ? `NUIT ${LEGAL_ENTITY.nuit}` : LEGAL_TXT[lang].nuitPending}
+            </dd>
             <dt className="text-muted-foreground">{t.version}</dt>
             <dd>{APP_VERSION}</dd>
             <dt className="text-muted-foreground">{t.terms}</dt>
@@ -201,6 +209,15 @@ function SettingsPage() {
               >
                 {SUPPORT_EMAIL}
               </a>
+            </dd>
+            <dt className="text-muted-foreground">{LEGAL_TXT[lang].pricing}</dt>
+            <dd>
+              <Link
+                to="/precos-e-reembolsos"
+                className="text-primary underline-offset-4 hover:underline"
+              >
+                {LEGAL_TXT[lang].pricing}
+              </Link>
             </dd>
             <dt className="text-muted-foreground">{PHOTOS_TXT[lang].credits}</dt>
             <dd>
