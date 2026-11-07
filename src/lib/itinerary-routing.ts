@@ -1,5 +1,8 @@
-/** The public OSRM demo is car routing only; do not relabel its estimates. */
-export const SUPPORTED_ROUTING_MODES = ["driving"] as const;
+/**
+ * Itinerary directions. The app no longer calculates routes: the OSRM demo server it used is not
+ * meant for production or commercial use. The map draws the stop order (dashed line, not a road
+ * route) and hands directions to Google Maps or OpenStreetMap with the real stop coordinates.
+ */
 
 export function validMapCoordinate(point: [number, number]): boolean {
   return (
@@ -10,7 +13,18 @@ export function validMapCoordinate(point: [number, number]): boolean {
   );
 }
 
-export function carRouteUrl(points: [number, number][]): string | null {
-  if (points.length < 2 || points.some((point) => !validMapCoordinate(point))) return null;
-  return `https://router.project-osrm.org/route/v1/driving/${points.map(([lat, lng]) => `${lng},${lat}`).join(";")}?overview=full&geometries=geojson`;
+const usable = (points: [number, number][]) =>
+  points.length > 0 && points.every((p) => validMapCoordinate(p));
+
+/** Google Maps directions through every stop, in visiting order. */
+export function googleDirectionsUrl(points: [number, number][]): string | null {
+  if (!usable(points)) return null;
+  return `https://www.google.com/maps/dir/${points.map(([lat, lng]) => `${lat},${lng}`).join("/")}`;
+}
+
+/** OpenStreetMap directions from the first to the last stop (the site takes two points only). */
+export function osmDirectionsUrl(points: [number, number][]): string | null {
+  if (points.length < 2 || !usable(points)) return null;
+  const [a, b] = [points[0], points[points.length - 1]];
+  return `https://www.openstreetmap.org/directions?route=${a[0]},${a[1]};${b[0]},${b[1]}`;
 }

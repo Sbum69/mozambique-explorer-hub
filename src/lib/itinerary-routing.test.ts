@@ -1,31 +1,38 @@
 import { describe, expect, it } from "vitest";
-import { carRouteUrl, SUPPORTED_ROUTING_MODES, validMapCoordinate } from "./itinerary-routing";
+import { googleDirectionsUrl, osmDirectionsUrl, validMapCoordinate } from "./itinerary-routing";
 
-describe("itinerary routing", () => {
-  it("only offers estimates for the car profile supported by the service", () => {
-    expect(SUPPORTED_ROUTING_MODES).toEqual(["driving"]);
-  });
-  it("does not invent a route for missing coordinates", () => {
-    expect(carRouteUrl([])).toBeNull();
-    expect(carRouteUrl([[-25.96, 32.58]])).toBeNull();
+describe("itinerary directions (no route calculation)", () => {
+  it("does not invent directions for missing coordinates", () => {
+    expect(googleDirectionsUrl([])).toBeNull();
+    expect(osmDirectionsUrl([[-25.96, 32.58]])).toBeNull();
   });
   it("rejects invalid geographic coordinates", () => {
     expect(validMapCoordinate([91, 32])).toBe(false);
     expect(validMapCoordinate([-25, 181])).toBe(false);
     expect(validMapCoordinate([NaN, 32])).toBe(false);
     expect(
-      carRouteUrl([
+      googleDirectionsUrl([
         [91, 32],
         [-25, 33],
       ]),
     ).toBeNull();
   });
-  it("keeps visiting order and sends longitude before latitude", () => {
+  it("Google Maps gets every stop in visiting order, latitude first", () => {
     expect(
-      carRouteUrl([
+      googleDirectionsUrl([
         [-25.96, 32.58],
+        [-24.5, 33.1],
         [-23.85, 35.54],
       ]),
-    ).toContain("/driving/32.58,-25.96;35.54,-23.85?");
+    ).toBe("https://www.google.com/maps/dir/-25.96,32.58/-24.5,33.1/-23.85,35.54");
+  });
+  it("OpenStreetMap gets the first and the last stop", () => {
+    expect(
+      osmDirectionsUrl([
+        [-25.96, 32.58],
+        [-24.5, 33.1],
+        [-23.85, 35.54],
+      ]),
+    ).toBe("https://www.openstreetmap.org/directions?route=-25.96,32.58;-23.85,35.54");
   });
 });
