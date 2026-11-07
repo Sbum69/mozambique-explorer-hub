@@ -49,22 +49,53 @@ Precisa de um plano pago da Lovable (domínios próprios não estão no plano gr
    curl -sI https://exploreekaya.com/home | grep -i strict-transport-security
    ```
 
-## 2. Email (envio de emails de conta)
+## 2. Email: enviar (confirmação de conta, recuperação, notificações)
 
-1. Escolher o fornecedor de email transacional `<fornecedor SMTP>` e criar a conta (só tu podes).
-2. No DNS do domínio, criar os registos que o fornecedor indicar:
+**Opção recomendada: os Emails da própria Lovable Cloud.** Não é preciso conta noutro fornecedor nem
+chave SMTP. Está incluída no plano pago:
 
-   | Tipo      | Nome                   | Valor                                                                                                   |
-   | --------- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
-   | TXT       | `@`                    | SPF: `v=spf1 include:<fornecedor> ~all` (um só registo SPF por domínio)                                 |
-   | TXT/CNAME | `<seletor>._domainkey` | DKIM: o valor do fornecedor                                                                             |
-   | TXT       | `_dmarc`               | `v=DMARC1; p=none; rua=mailto:dmarc@<domínio>` (passar a `quarantine` depois de 2–4 semanas sem falhas) |
+- 50 000 emails de transação por mês;
+- no plano Pro, até 500 emails de autenticação por hora e 100 emails da app por hora;
+- SPF, DKIM e DMARC configurados pela Lovable;
+- resolve o limite atual de 2 emails por hora.
 
-3. Lovable Cloud → **Users / Authentication → Emails → SMTP settings** **[CONFIRMAR]**: host,
-   porta, utilizador, palavra-passe do SMTP (ficam no servidor, nunca no código), remetente
-   `EKAYA <nao-responder@<domínio>>`.
-4. Confirmar: criar uma conta de teste com um email teu e ver que o email de confirmação chega
-   (e não vai para spam). Apagar essa conta depois.
+Fonte: <https://docs.lovable.dev/features/custom-emails>.
+
+1. Lovable → projeto EKAYA → **More → Emails → Get started**.
+2. **Email domain:** `exploreekaya.com` → **Continue**.
+3. Mudar o prefixo do remetente para `nao-responder` e ligar **Show as sent from
+   @exploreekaya.com**. O remetente fica `nao-responder@exploreekaya.com`. Nome a mostrar: `EKAYA`.
+   **[CONFIRMAR]** onde fica o campo do nome. → **Set up domain**.
+4. **Go to our manual setup** e copiar para o DNS os registos que a janela mostrar:
+
+   | Tipo | Nome                        | Valor                                                        |
+   | ---- | --------------------------- | ------------------------------------------------------------ |
+   | TXT  | o nome que a janela mostrar | o valor de verificação                                       |
+   | NS   | `notify`                    | cada um dos nameservers da Lovable (um registo NS por valor) |
+   | TXT  | `_dmarc`                    | o valor que a janela mostrar                                 |
+
+   Os registos NS são **só para o subdomínio `notify`**. **Não mudar** os nameservers do domínio
+   principal no registrador por causa disto. O SPF e o DKIM ficam no subdomínio e são geridos pela
+   Lovable, por isso não há registos SPF ou DKIM a criar à mão para o envio.
+
+5. Esperar o estado **Active** (algumas horas; até 72 h).
+6. **More → Emails → Auth emails → Customize auth emails** e aplicar os textos de
+   `docs/email-templates.md`. Os modelos só entram em vigor depois de **Publish**.
+7. Lovable → **Cloud → Users → Auth settings → Rate limits** **[CONFIRMAR]**: "Rate limit for
+   sending emails" para **60 por hora**. O máximo do Pro são 500; 60 chega para o piloto e trava
+   abusos.
+8. Diz-me **"SMTP configurado"**. Eu testo o registo, a recuperação, a entrada na caixa de entrada
+   (cabeçalhos SPF, DKIM e DMARC) e vários envios seguidos.
+
+**Alternativa**, se os Emails da Lovable não estiverem disponíveis no teu plano: Resend como SMTP.
+
+- Plano grátis: 3 000 emails por mês e 100 por dia; tem relay SMTP. Fonte:
+  <https://resend.com/pricing>.
+- Se 100 por dia não chegar: Brevo, com 300 por dia no plano grátis. Fonte:
+  <https://www.brevo.com/free-smtp-server/>.
+- Os registos SPF, DKIM e DMARC vêm do painel do fornecedor.
+- O SMTP põe-se no Auth: Cloud → Users → Auth settings → SMTP **[CONFIRMAR]**.
+- A chave fica só no painel, nunca no código nem no chat.
 
 ## 3. Autenticação: URLs de retorno
 
@@ -83,14 +114,49 @@ pode mudar):
 - Confirmar: em `https://exploreekaya.com/forgot-password`, pedir o email. O link abre
   `https://exploreekaya.com/auth/callback` e leva a `/reset-password`.
 
-## 4. Contacto oficial
+## 4. Email: receber em apoio@exploreekaya.com
 
-1. Criar a caixa `apoio@<domínio>`.
-2. Mudar `SUPPORT_EMAIL` em `src/lib/app-info.ts` para `apoio@<domínio>` (aparece nos Termos, na
-   Privacidade, no assistente e em Para negócios), num PR próprio.
-3. Atualizar `docs/sales/*` e as respostas da FAQ que citam o email (Admin → Assistente; o texto
-   usa `{SUPPORT}`, por isso basta o passo 2).
-4. Se o NUIT já existir: preencher `LEGAL_ENTITY.nuit` e `incorporated` em `app-info.ts`.
+**Opção recomendada: Cloudflare Email Routing (grátis).** Reencaminha `apoio@exploreekaya.com` para
+o teu Gmail. Exige que o DNS do domínio esteja no Cloudflare (plano grátis). Fonte:
+<https://developers.cloudflare.com/email-routing/>.
+
+1. Criar conta em <https://dash.cloudflare.com> (plano **Free**) → **Add a domain** →
+   `exploreekaya.com`. O Cloudflare copia os registos DNS que já existem.
+2. Conferir que estão lá os registos da Lovable (§1 e §2): os dois A em **DNS only**, o TXT
+   `_lovable`, os NS do `notify` e o `_dmarc`. Acrescentar os que faltarem.
+3. No registrador do domínio, trocar os **nameservers** pelos dois que o Cloudflare mostrar. A
+   propagação demora de minutos a 24 h.
+4. Cloudflare → `exploreekaya.com` → **Email → Email Routing → Onboard Domain / Get started**. O
+   Cloudflare cria sozinho:
+   - os registos **MX** (`route1/2/3.mx.cloudflare.net`);
+   - o **SPF** da raiz (`v=spf1 include:_spf.mx.cloudflare.net ~all`);
+   - o **DKIM** do reencaminhamento.
+
+   Aceitar.
+
+5. **Destination addresses** → adicionar o teu Gmail → abrir o email de verificação do Cloudflare e
+   confirmar.
+6. **Routing rules → Create routing rule**: `apoio` @exploreekaya.com → **Send to an email** → o teu
+   Gmail → **Save**.
+7. Testar: de outra conta, enviar um email para `apoio@exploreekaya.com` e confirmar que chega ao
+   Gmail (ver também o spam).
+
+Para **responder como apoio@** a partir do Gmail ("Enviar como"), é preciso um SMTP. Fica para depois
+do piloto **[FUTURO]**. Até lá, as respostas saem do teu Gmail.
+
+**Alternativa:** se o teu registrador tiver reencaminhamento de email grátis (muitos têm), serve o
+mesmo. Basta criar `apoio` → teu Gmail no painel do registrador, sem mudar os nameservers.
+
+**Depois de o email funcionar** (passo 7), eu ligo `DOMAIN_EMAIL_LIVE` em `app-info.ts` num PR.
+Isso muda o contacto nos Termos, na Política e na página Preços:
+
+- a página Preços não exige nova aceitação;
+- os Termos e a Política exigem: sobe-se a versão (`LEGAL_VERSIONS` + migração de
+  `current_legal_versions()`, com a tua aprovação) e todas as contas aceitam outra vez.
+
+Atualizar também `docs/sales/*`. As respostas da FAQ usam `{SUPPORT}` e mudam sozinhas.
+
+Se o NUIT já existir, preencher `LEGAL_ENTITY.nuit` e `incorporated` em `app-info.ts`.
 
 ## 5. Antes / durante / depois
 
