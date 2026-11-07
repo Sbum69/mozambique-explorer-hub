@@ -4,7 +4,8 @@
  * the new password on the recovery session.
  */
 
-export const MIN_PASSWORD_LENGTH = 6;
+/** Same minimum as the Auth panel (Cloud → Users → Auth settings → Password), see docs/LAUNCH.md §8. */
+export const MIN_PASSWORD_LENGTH = 8;
 /** Set when a reset is requested in this browser; tells the callback that a ?code= link is a recovery. */
 export const RECOVERY_FLAG = "ekaya.recovery";
 

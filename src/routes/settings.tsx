@@ -46,6 +46,7 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 import { LEGAL_TXT, MFA_TXT, PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
 import { MfaSettings } from "@/components/MfaSettings";
 import type { ThemePreference } from "@/lib/theme";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password-reset";
 
 export const Route = createFileRoute("/settings")({
   ssr: false,
@@ -408,7 +409,7 @@ function AccountSection({ t }: { t: Txt }) {
   };
 
   const changePassword = async () => {
-    if (pw.next.length < 6) return toast.error(t.passwordShort);
+    if (pw.next.length < MIN_PASSWORD_LENGTH) return toast.error(t.passwordShort);
     if (pw.next !== pw.confirm) return toast.error(t.passwordMismatch);
     setPwBusy(true);
     try {
