@@ -9,6 +9,7 @@ describe("security headers", () => {
     const h = securityHeaders(SUPA);
     expect(h["X-Content-Type-Options"]).toBe("nosniff");
     expect(h["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
+    expect(h["Strict-Transport-Security"]).toBe("max-age=31536000; includeSubDomains");
     expect(h["Permissions-Policy"]).toContain("geolocation=(self)");
     expect(h["Permissions-Policy"]).toContain("camera=(self)");
     expect(h["Permissions-Policy"]).toContain("microphone=()");
