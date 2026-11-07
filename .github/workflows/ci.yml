@@ -40,13 +40,15 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Generated route tree and licence list are up to date
-        run: git diff --exit-code -- src/routeTree.gen.ts public/licenses.json
+      # public/licenses.json is not checked: the prebuild step regenerates it on every build, so the
+      # published list is always right, and checking it would fail every dependency update PR.
+      - name: Generated route tree is up to date
+        run: git diff --exit-code -- src/routeTree.gen.ts
 
-      # Warning mode: bun audit has no production-only option, and today every high advisory is in
-      # build tooling (miniflare, wrangler, devtools, the route generator), not in the code that is
-      # published. Failing CI on those would block every PR for packages we cannot upgrade alone.
-      # The step shows as failed in the run summary but does not fail the job. See docs/security/REVISAO.md.
+      # Warning mode: bun audit has no production-only option. Since zod 4 (chore/deps-pre-launch) the
+      # remaining high advisories are in build tooling (miniflare, wrangler, devtools, the route
+      # generator's own zod 3), not in the code that is published. A high advisory in a package of
+      # "dependencies" that reaches the browser or the Worker is fixed before merge. See docs/security/REVISAO.md.
       - name: Dependency audit (high and above, warning mode)
         continue-on-error: true
         run: bun audit --audit-level=high

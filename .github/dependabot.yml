@@ -8,9 +8,34 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    # Until after launch: no major versions, and TanStack and Vite in their own groups (they move
+    # together and their "minor" releases have changed APIs, e.g. inputValidator in Start 1.169).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
+      tanstack:
+        patterns: ["@tanstack/*"]
+      vite:
+        patterns:
+          [
+            "vite",
+            "@vitejs/*",
+            "@cloudflare/vite-plugin",
+            "@lovable.dev/vite-tanstack-config",
+            "vitest",
+          ]
       minor-and-patch:
         update-types: ["minor", "patch"]
+        exclude-patterns:
+          [
+            "@tanstack/*",
+            "vite",
+            "@vitejs/*",
+            "@cloudflare/vite-plugin",
+            "@lovable.dev/vite-tanstack-config",
+            "vitest",
+          ]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

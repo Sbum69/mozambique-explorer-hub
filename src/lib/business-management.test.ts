@@ -1,5 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { activitySchema, availabilitySchema, profileSchema } from "./business-management";
+import {
+  activitySchema,
+  availabilitySchema,
+  profileSchema,
+  slotAcceptsSchema,
+} from "./business-management";
 const id = "11111111-1111-4111-8111-111111111111";
 const activity = {
   businessId: id,
@@ -64,5 +69,45 @@ describe("8E.2 management rules", () => {
     });
     expect("status" in parsed).toBe(false);
     expect("verified" in parsed).toBe(false);
+  });
+});
+
+describe("size limits on server function input (zod 4)", () => {
+  const profile = {
+    id,
+    name: "Negócio",
+    description: "",
+    categoryCode: "tour",
+    provinceId: id,
+    address: "Rua",
+    phone: "",
+    email: "",
+    website: "",
+  };
+  test("oversized email, website and texts are rejected", () => {
+    expect(profileSchema.safeParse(profile).success).toBe(true);
+    const long = "a".repeat(300);
+    expect(profileSchema.safeParse({ ...profile, email: `${long}@x.mz` }).success).toBe(false);
+    expect(
+      profileSchema.safeParse({ ...profile, website: `https://x.mz/${"a".repeat(2100)}` }).success,
+    ).toBe(false);
+    expect(profileSchema.safeParse({ ...profile, name: "a".repeat(501) }).success).toBe(false);
+    expect(activitySchema.safeParse({ ...activity, descriptionPt: "a".repeat(5001) }).success).toBe(
+      false,
+    );
+  });
+  test("numbers have a ceiling", () => {
+    expect(activitySchema.safeParse({ ...activity, priceMzn: 1e12 }).success).toBe(false);
+    expect(activitySchema.safeParse({ ...activity, durationHours: 10_000 }).success).toBe(false);
+  });
+  test("slot toggle takes only UUIDs and a boolean", () => {
+    expect(slotAcceptsSchema.safeParse({ id, experienceId: id, accepts: true }).success).toBe(true);
+    expect(
+      slotAcceptsSchema.safeParse({ id: "x".repeat(10_000), experienceId: id, accepts: true })
+        .success,
+    ).toBe(false);
+    expect(slotAcceptsSchema.safeParse({ id, experienceId: id, accepts: "yes" }).success).toBe(
+      false,
+    );
   });
 });
