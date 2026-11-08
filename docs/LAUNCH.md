@@ -50,7 +50,7 @@ Precisa de um plano pago da Lovable (domínios próprios não estão no plano gr
    curl -sI https://exploreekaya.com/home | grep -i strict-transport-security
    ```
 
-8. **www com 301** (a Lovable só faz 302 entre domínios e não deixa mudar). O redirect do `www` passa
+8. **www com 301 — depois do lançamento** (decidido a 08/11/2026: o 302 fica por agora; o canonical aponta para a raiz). A Lovable só faz 302 entre domínios e não deixa mudar. O redirect do `www` passa
    para o Cloudflare, onde está o DNS; a raiz continua igual (DNS only, servida pela Lovable, que já
    responde `http://exploreekaya.com` → 301 → `https://exploreekaya.com`). Por esta ordem:
    1. Cloudflare → `exploreekaya.com` → **Rules → Redirect Rules → Create rule** (ou o modelo

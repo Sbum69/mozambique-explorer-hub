@@ -80,6 +80,7 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [ ] `admin_set_user_role` não escreve no `admin_audit`: registar as mudanças de papel na própria RPC.
 
 **Outros**
+- [ ] `www.exploreekaya.com` com 301 em vez de 302: Redirect Rule no Cloudflare + `A www` em Proxied + HSTS no Cloudflare (passos em `docs/LAUNCH.md` §1.8). Hoje o 302 é da Lovable (não configurável); impacto mínimo porque o canonical aponta para a raiz (medido a 08/11/2026: raiz 301 http→https com HSTS)
 - [ ] Limpeza periódica de ficheiros de provas de contas apagadas (storage)
 - [ ] Negócios de exemplo suspensos (8): reativar quando um dono real os reclamar
 - [ ] Histórias da home (`src/data/itineraries.ts`): validar as lendas antes de as voltar a mostrar (`SHOW_STORY_STOPS`)
