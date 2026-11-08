@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { BookingStatus } from "@/lib/bookings";
+import { rpcNull } from "@/lib/rpc-null";
 
 /**
  * Admin actions. Every one is enforced on the server: SECURITY DEFINER RPCs that check has_role
@@ -214,7 +215,7 @@ export function broadcastProblems(input: BroadcastInput): BroadcastProblem[] {
 export async function sendBroadcast(input: BroadcastInput): Promise<number> {
   const { data, error } = await supabase.rpc("admin_send_notification", {
     _audience: input.audience,
-    _user_id: input.audience === "user" ? input.userId : null,
+    _user_id: rpcNull(input.audience === "user" ? input.userId : null),
     _title_pt: input.titlePt.trim(),
     _title_en: input.titleEn.trim(),
     _body_pt: input.bodyPt.trim(),

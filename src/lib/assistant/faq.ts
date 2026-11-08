@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import type { CatalogueItem, FaqEntry, FaqKind, FaqLink, Slot } from "@/lib/assistant/engine";
+import { rpcNull } from "@/lib/rpc-null";
 
 /** Assistant FAQ data (0056): public read of active entries, admin edits with versions. */
 
@@ -130,7 +131,7 @@ export interface FaqDraft {
 
 export async function saveFaq(id: string | null, d: FaqDraft, reason: string): Promise<string> {
   const { data, error } = await supabase.rpc("admin_save_faq_entry", {
-    _id: id,
+    _id: rpcNull(id),
     _entry: {
       slug: d.slug,
       topic: d.topic,
