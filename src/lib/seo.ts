@@ -5,7 +5,7 @@ import { CANONICAL_ORIGIN } from "@/lib/app-info";
  * Private pages also need a session, so they never show content to crawlers.
  */
 export const PUBLIC_SITEMAP_PATHS = [
-  "/home",
+  "/",
   "/para-negocios",
   "/precos-e-reembolsos",
   "/experiences",
@@ -41,22 +41,14 @@ export const PRIVATE_PATH_PREFIXES = [
   "/voucher/",
 ] as const;
 
-/** True on exploreekaya.com itself; *.lovable.app and other hosts are copies kept out of search. */
-export function isCanonicalOrigin(origin: string): boolean {
-  try {
-    return new URL(origin).origin === CANONICAL_ORIGIN;
-  } catch {
-    return false;
-  }
-}
-
 /** Canonical URL of a public page on exploreekaya.com, or null for private pages. */
 export function canonicalUrl(pathname: string): string | null {
   const path = pathname.split(/[?#]/)[0] || "/";
   const clean = path.length > 1 ? path.replace(/\/+$/, "") : path;
   if (PRIVATE_PATH_PREFIXES.some((p) => clean === p.replace(/\/$/, "") || clean.startsWith(p)))
     return null;
-  return CANONICAL_ORIGIN + clean;
+  // "/home" is the same page as "/": one address for search engines.
+  return CANONICAL_ORIGIN + (clean === "/home" ? "/" : clean);
 }
 
 const xmlEscape = (s: string) =>
@@ -71,9 +63,12 @@ export function sitemapXml(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-/** Canonical domain: normal rules. Any other host (*.lovable.app preview, copies): nothing. */
-export function robotsTxt(origin: string): string {
-  if (!isCanonicalOrigin(origin)) return ["User-agent: *", "Disallow: /", ""].join("\n");
+/**
+ * Contents of public/robots.txt (a static file, the same on every host; seo.test keeps them equal).
+ * Other hosts (*.lovable.app preview, copies) stay out of search through X-Robots-Tag: noindex
+ * (robots-middleware.ts): a crawler blocked by robots.txt would never see that header.
+ */
+export function robotsTxt(): string {
   const base = CANONICAL_ORIGIN;
   return [
     "User-agent: *",

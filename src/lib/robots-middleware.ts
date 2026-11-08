@@ -9,8 +9,9 @@ export function noindexHost(hostname: string): boolean {
 
 /**
  * Every response served on another host (*.lovable.app preview, www before its redirect, local)
- * gets X-Robots-Tag: noindex, so search engines only index exploreekaya.com. robots.txt on those
- * hosts also disallows everything (seo.ts); canonical links always point to exploreekaya.com.
+ * gets X-Robots-Tag: noindex, so search engines only index exploreekaya.com. robots.txt is the same
+ * everywhere (public/robots.txt), so crawlers can see this header; canonical links point to
+ * exploreekaya.com.
  */
 export const noindexOffCanonical = createMiddleware({ type: "request" }).server(
   async ({ request, next }) => {
