@@ -7,17 +7,17 @@ home e do painel a 390 e 1280 px: ver o link no relatório do bloco.
 
 Contagens no código atual (`src/routes`, `src/components`, sem `components/ui`):
 
-| O que dá o aspeto genérico                                   | Ocorrências | Onde mais pesa                                    |
-| ------------------------------------------------------------ | ----------- | ------------------------------------------------- |
-| Emojis como ícones (categorias, interesses, títulos)         | 102 linhas  | `lib/routes.ts`, `useful-info`, `games`, `home`   |
-| Gradientes escritos à mão roxo/azul/rosa/ciano/esmeralda     | 117         | hero de "Informações úteis", admin, barra lateral |
-| `bg-gradient-*` em geral                                     | 103         | cabeçalhos, ícones de módulo, botões              |
-| Sombra igual em todos os cartões (`--shadow-soft/elegant`)   | 98          | todos os cartões                                  |
-| `rounded-2xl` / `rounded-3xl` em tudo                        | 50          | cartões, ícones, botões                           |
-| Títulos e blocos centrados (`text-center`)                   | 79          | heros, estados vazios                             |
-| Animações de entrada (`motion.*`)                            | 87          | quase todas as listas                             |
-| Fonte do sistema (sem identidade tipográfica)                | —           | tudo                                              |
-| Cartões dentro de cartões; ícone decorativo em cada secção   | —           | painel, home, "Informações úteis"                 |
+| O que dá o aspeto genérico                                 | Ocorrências | Onde mais pesa                                    |
+| ---------------------------------------------------------- | ----------- | ------------------------------------------------- |
+| Emojis como ícones (categorias, interesses, títulos)       | 102 linhas  | `lib/routes.ts`, `useful-info`, `games`, `home`   |
+| Gradientes escritos à mão roxo/azul/rosa/ciano/esmeralda   | 117         | hero de "Informações úteis", admin, barra lateral |
+| `bg-gradient-*` em geral                                   | 103         | cabeçalhos, ícones de módulo, botões              |
+| Sombra igual em todos os cartões (`--shadow-soft/elegant`) | 98          | todos os cartões                                  |
+| `rounded-2xl` / `rounded-3xl` em tudo                      | 50          | cartões, ícones, botões                           |
+| Títulos e blocos centrados (`text-center`)                 | 79          | heros, estados vazios                             |
+| Animações de entrada (`motion.*`)                          | 87          | quase todas as listas                             |
+| Fonte do sistema (sem identidade tipográfica)              | —           | tudo                                              |
+| Cartões dentro de cartões; ícone decorativo em cada secção | —           | painel, home, "Informações úteis"                 |
 
 ## 2. Direção
 
@@ -34,28 +34,28 @@ Moçambique visto pelo Índico e pela capulana, sem folclore:
 
 ### Cor (claro / escuro)
 
-| Token            | Claro     | Escuro    | Uso                                                       |
-| ---------------- | --------- | --------- | --------------------------------------------------------- |
-| `--background`   | `#F5F7F6` | `#0D1615` | fundo da página                                           |
-| `--card`         | `#FFFFFF` | `#15201F` | superfícies                                               |
-| `--foreground`   | `#15211F` | `#E7EEEC` | texto                                                     |
-| `--muted-fg`     | `#4E5D59` | `#9DB0AB` | texto secundário (≥ 4,5:1 em `--card`)                    |
-| `--border`       | `#D3DCD9` | `#2A3836` | contornos (contornos de controlos usam `--border-strong`) |
-| `--border-strong`| `#7F908B` | `#5E716C` | contornos de inputs e estados (≥ 3:1)                     |
-| `--primary`      | `#0A6670` | `#4FB9C2` | Índico — botões, links, foco                              |
-| `--primary-fg`   | `#FFFFFF` | `#062326` | texto sobre `--primary`                                   |
-| `--ochre`        | `#E2A12B` | `#F0B44A` | capulana — destaques, badges (texto escuro por cima)      |
-| `--mangrove`     | `#2C6A43` | `#6CC08A` | sucesso, confirmado                                       |
-| `--capulana-red` | `#B3372B` | `#F07A6C` | erro, cancelar, apagar                                    |
+| Token             | Claro     | Escuro    | Uso                                                       |
+| ----------------- | --------- | --------- | --------------------------------------------------------- |
+| `--background`    | `#F5F7F6` | `#0D1615` | fundo da página                                           |
+| `--card`          | `#FFFFFF` | `#15201F` | superfícies                                               |
+| `--foreground`    | `#15211F` | `#E7EEEC` | texto                                                     |
+| `--muted-fg`      | `#4E5D59` | `#9DB0AB` | texto secundário (≥ 4,5:1 em `--card`)                    |
+| `--border`        | `#D3DCD9` | `#2A3836` | contornos (contornos de controlos usam `--border-strong`) |
+| `--border-strong` | `#7F908B` | `#5E716C` | contornos de inputs e estados (≥ 3:1)                     |
+| `--primary`       | `#0A6670` | `#4FB9C2` | Índico — botões, links, foco                              |
+| `--primary-fg`    | `#FFFFFF` | `#062326` | texto sobre `--primary`                                   |
+| `--ochre`         | `#E2A12B` | `#F0B44A` | capulana — destaques, badges (texto escuro por cima)      |
+| `--mangrove`      | `#2C6A43` | `#6CC08A` | sucesso, confirmado                                       |
+| `--capulana-red`  | `#B3372B` | `#F07A6C` | erro, cancelar, apagar                                    |
 
 Os estados nunca são só cor: cada badge tem texto e ícone.
 
 ### Tipografia
 
-| Papel    | Família               | Uso                                       |
-| -------- | --------------------- | ----------------------------------------- |
-| Display  | Bricolage Grotesque   | títulos (600–700), nunca em texto corrido |
-| Texto    | Atkinson Hyperlegible | texto, formulários, botões, números       |
+| Papel   | Família               | Uso                                       |
+| ------- | --------------------- | ----------------------------------------- |
+| Display | Bricolage Grotesque   | títulos (600–700), nunca em texto corrido |
+| Texto   | Atkinson Hyperlegible | texto, formulários, botões, números       |
 
 Escala (rem): 0,8125 · 0,875 · 1 · 1,125 · 1,375 · 1,75 · 2,25 · 3 (hero). Títulos alinhados à
 esquerda com `text-wrap: balance`; texto até ~65 caracteres por linha. Fontes servidas pelo próprio
