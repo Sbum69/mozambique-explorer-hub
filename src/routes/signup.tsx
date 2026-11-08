@@ -12,6 +12,7 @@ import {
   EyeOff,
   ArrowLeft,
 } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -175,8 +176,8 @@ function SignupPage() {
             ) : (
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div className="text-center mb-6">
-                  <div className="mx-auto size-14 rounded-[10px] bg-primary text-primary-foreground flex items-center justify-center shadow-[var(--shadow-soft)]">
-                    <UserPlus className="size-7" />
+                  <div className="flex h-14 items-center justify-center">
+                    <BrandLogo className="h-9" />
                   </div>
                   <h1 className="mt-4 text-2xl font-bold tracking-tight">{t.title}</h1>
                   <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>

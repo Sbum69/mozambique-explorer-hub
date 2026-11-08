@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -174,9 +174,9 @@ function DashboardPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1">
               <AppSidebar />
-              <Link to="/home" className="flex min-w-0 items-center gap-2 font-bold text-lg ml-1">
-                <BrandMark />
-                <span className="sr-only min-[375px]:not-sr-only truncate">Ekaya</span>
+              <Link to="/home" className="flex min-w-0 items-center ml-1 h-8">
+                <BrandLogo mark className="h-8 min-[375px]:hidden" />
+                <BrandLogo className="hidden h-5 min-[375px]:block" />
               </Link>
             </div>
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -222,9 +222,9 @@ function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
             <AppSidebar />
-            <Link to="/home" className="flex min-w-0 items-center gap-2 font-bold text-lg ml-1">
-              <BrandMark />
-              <span className="sr-only min-[375px]:not-sr-only truncate">Ekaya</span>
+            <Link to="/home" className="flex min-w-0 items-center ml-1 h-8">
+              <BrandLogo mark className="h-8 min-[375px]:hidden" />
+              <BrandLogo className="hidden h-5 min-[375px]:block" />
             </Link>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">

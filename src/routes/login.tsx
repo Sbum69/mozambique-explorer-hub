@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate, Link, redirect } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Lock, ShieldCheck, Mail, Store, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Store, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandLogo } from "@/components/BrandLogo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,9 +88,8 @@ function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-black/45 via-black/35 to-black/70" />
         <PhotoCredit photo={HERO_PHOTO} />
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
-          <div className="flex items-center gap-2 font-bold text-2xl">
-            <BrandMark className="size-9" />
-            Ekaya Explore
+          <div className="flex h-9 items-center">
+            <BrandLogo onDark className="h-8" />
           </div>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -103,7 +102,7 @@ function LoginPage() {
             <p className="mt-4 text-lg text-white/90 max-w-md">{t("heroSub")}</p>
           </motion.div>
           <div className="text-sm text-white/70">
-            🇲🇿 {lang === "pt" ? "Moçambique" : "Mozambique"} · {new Date().getFullYear()}
+            {lang === "pt" ? "Moçambique" : "Mozambique"} · {new Date().getFullYear()}
           </div>
         </div>
       </div>
@@ -117,14 +116,9 @@ function LoginPage() {
         {/* Largest element of the page: shown at once (no entrance fade) so it paints with the first render. */}
         <motion.div initial={false} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.1 }}
-              className="inline-flex size-16 rounded-[10px] bg-primary text-primary-foreground items-center justify-center shadow-[var(--shadow-elegant)]"
-            >
-              <ShieldCheck className="size-8" />
-            </motion.div>
+            <div className="flex h-16 items-center justify-center">
+              <BrandLogo className="h-10" />
+            </div>
             <h2 className="mt-4 text-3xl font-bold tracking-tight">{t("welcomeBack")}</h2>
             <p className="text-muted-foreground text-sm mt-1">{t("loginSubtitle")}</p>
           </div>
