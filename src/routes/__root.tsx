@@ -20,6 +20,9 @@ import { MfaChallengeGate } from "@/components/MfaChallengeGate";
 import { AssistantLauncher } from "@/components/AssistantLauncher";
 import { StorageNoticeGate } from "@/components/StorageNoticeGate";
 import { installErrorLogger } from "@/lib/launch";
+import { CANONICAL_ORIGIN } from "@/lib/app-info";
+
+const OG_IMAGE = `${CANONICAL_ORIGIN}/og-image.png`;
 
 function NotFoundComponent() {
   const { lang } = useLang();
@@ -73,11 +76,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           content: "Hub de turismo comunitário inteligente para Moçambique.",
         },
         { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "EKAYA" },
+        { property: "og:image", content: OG_IMAGE },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: "EKAYA — Descobre Moçambique" },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: OG_IMAGE },
+        // Deep green of the logo (BRAND_COLORS.deep), literal so brand.ts stays out of the main chunk.
+        { name: "theme-color", content: "#0E4B3B" },
         ...(canonical ? [{ property: "og:url", content: canonical }] : []),
       ],
       links: [
         { rel: "stylesheet", href: appCss },
+        // Icons from the "Coração do Índico" logo (public/); none of them blocks the first paint.
+        { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+        { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+        { rel: "manifest", href: "/site.webmanifest" },
         ...(canonical ? [{ rel: "canonical", href: canonical }] : []),
       ],
       // Applies the saved (or system) theme before the first paint: no white flash in dark mode.

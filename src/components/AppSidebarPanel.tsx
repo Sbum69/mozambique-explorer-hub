@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import { LegalFooterLinks } from "@/components/LegalFooterLinks";
 import {
   X,
@@ -157,9 +158,7 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
                 {isAdmin ? <Shield className="size-5" /> : <Map className="size-5" />}
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Ekaya Explore
-                </p>
+                <BrandLogo className="h-4" />
                 <h2 className="font-bold leading-tight">
                   {lang === "pt" ? "Moçambique" : "Mozambique"}
                 </h2>

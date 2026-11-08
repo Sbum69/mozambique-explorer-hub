@@ -36,7 +36,11 @@ Requisitos da Lovable: plano pago, domínio próprio com acesso ao DNS (registos
 sans-serif`), 16 px.
 - Um só botão, cor de ação `#0a6670` com texto `#ffffff`, raio de 6 px. Por baixo do botão, a
   mesma ligação em texto, para quem não vê botões.
-- Sem logótipo em imagem, sem emojis, sem gradientes. O nome "EKAYA" em texto no topo.
+- No topo, o logótipo "Coração do Índico" em PNG (os clientes de email não mostram SVG), servido
+  pelo próprio domínio, com texto alternativo para quem bloqueia imagens:
+  `<img src="https://exploreekaya.com/email-logo.png" width="160" height="39" alt="EKAYA" style="display:block;border:0">`.
+  O ficheiro (`public/email-logo.png`, 2,5 KB) é a versão clara: o fundo do email é sempre branco.
+- Sem emojis, sem gradientes.
 - Rodapé: `EKAYA · Moçambique · apoio@exploreekaya.com` e, em EN, `EKAYA · Mozambique ·
 apoio@exploreekaya.com`.
 

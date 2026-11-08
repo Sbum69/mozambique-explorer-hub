@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createInvite, importContent } from "@/lib/content";
+import { rpcNull } from "@/lib/rpc-null";
 
 /**
  * M9 — interest requests from the "Para negócios" page (0055). Visitors send them through
@@ -46,7 +47,7 @@ export async function submitLead(v: LeadInput): Promise<void> {
     _contact_name: v.contactName.trim(),
     _contact: v.contact.trim(),
     _accepts_bookings: v.acceptsBookings,
-    _message: v.message.trim() || null,
+    _message: rpcNull(v.message.trim() || null),
     _lang: v.lang,
     _website: v.website,
   });

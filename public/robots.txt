@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /auth/
+Disallow: /bookings
+Disallow: /business-dashboard
+Disallow: /business-register
+Disallow: /convite/
+Disallow: /dashboard
+Disallow: /favorites
+Disallow: /forgot-password
+Disallow: /gamification
+Disallow: /onboarding
+Disallow: /preferences
+Disallow: /recibo/
+Disallow: /reset-password
+Disallow: /settings
+Disallow: /voucher/
+
+Sitemap: https://exploreekaya.com/sitemap.xml

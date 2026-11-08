@@ -1,32 +1,32 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
+import { HomePage } from "@/components/HomePage";
 import { getAuthenticatedUser, postAuthTarget } from "@/lib/auth";
+import { homeHead } from "@/lib/home-head";
 
+/**
+ * The public Home, rendered on the server: visitors and crawlers get the full page (with its <h1>)
+ * in the HTML. A signed-in user who has not finished onboarding is still sent there, in the browser.
+ */
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Ekaya Explore — Turismo Comunitário em Moçambique" },
-      {
-        name: "description",
-        content:
-          "Descobre destinos, experiências e roteiros comunitários autênticos em Moçambique.",
-      },
-      { property: "og:title", content: "Ekaya Explore — Turismo Comunitário em Moçambique" },
-      {
-        property: "og:description",
-        content:
-          "Descobre destinos, experiências e roteiros comunitários autênticos em Moçambique.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  ssr: false,
-  beforeLoad: async () => {
-    const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: await postAuthTarget(user.id) });
-    // Visitors without an account explore the public Home directly (demo/share links); no onboarding.
-    throw redirect({ to: "/home" });
-  },
-  component: () => null,
+  head: homeHead,
+  component: IndexPage,
 });
+
+function IndexPage() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const user = await getAuthenticatedUser();
+      if (!user || !alive) return;
+      const target = await postAuthTarget(user.id);
+      if (alive && target !== "/home") void navigate({ to: target, replace: true });
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [navigate]);
+  return <HomePage />;
+}

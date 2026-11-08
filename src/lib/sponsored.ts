@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { rpcNull } from "@/lib/rpc-null";
 
 /**
  * M6 — highlights and campaigns ("Patrocinado"), paid manually by M-Pesa for now. The rules live
@@ -194,17 +195,17 @@ export async function requestPlacement(r: PlacementRequest): Promise<Placement> 
   const { data, error } = await supabase.rpc("request_sponsored_placement", {
     _business_id: r.businessId,
     _kind: r.kind,
-    _campaign_type: r.kind === "campaign" ? r.campaignType : null,
+    _campaign_type: rpcNull(r.kind === "campaign" ? r.campaignType : null),
     _scope: r.scope,
-    _province_id: r.scope === "province" ? r.provinceId : null,
-    _category_code: r.scope === "category" ? r.categoryCode : null,
+    _province_id: rpcNull(r.scope === "province" ? r.provinceId : null),
+    _category_code: rpcNull(r.scope === "category" ? r.categoryCode : null),
     _duration: r.duration,
     _starts_on: r.startsOn,
-    _experience_id: r.experienceId,
-    _title_pt: r.titlePt.trim() || null,
-    _title_en: r.titleEn.trim() || null,
-    _body_pt: r.bodyPt.trim() || null,
-    _body_en: r.bodyEn.trim() || null,
+    _experience_id: rpcNull(r.experienceId),
+    _title_pt: rpcNull(r.titlePt.trim() || null),
+    _title_en: rpcNull(r.titleEn.trim() || null),
+    _body_pt: rpcNull(r.bodyPt.trim() || null),
+    _body_en: rpcNull(r.bodyEn.trim() || null),
   });
   if (error) throw new Error(error.message);
   return placementFromRow(data as unknown as PlacementRow);
