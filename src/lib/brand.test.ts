@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { BRAND_COLORS, logoSvg } from "./brand";
+import { BRAND_COLORS, faviconSvg, logoSvg } from "./brand";
 
 const pub = (f: string) => new URL(`../../public/${f}`, import.meta.url);
 
@@ -11,7 +11,7 @@ describe("brand: logo files and icons", () => {
     expect(readFileSync(pub("logo.svg"), "utf8").trim()).toBe(logoSvg({ attrs }));
     expect(readFileSync(pub("logo-dark.svg"), "utf8").trim()).toBe(logoSvg({ dark: true, attrs }));
     expect(readFileSync(pub("logo-mark.svg"), "utf8").trim()).toBe(logoSvg({ mark: true, attrs }));
-    expect(readFileSync(pub("favicon.svg"), "utf8").trim()).toBe(logoSvg({ mark: true }));
+    expect(readFileSync(pub("favicon.svg"), "utf8").trim()).toBe(faviconSvg());
   });
 
   it("light logo in deep green, dark logo in sand with a white outline on the heart", () => {
@@ -23,6 +23,14 @@ describe("brand: logo files and icons", () => {
     expect(dark).toContain('stroke="#fff"');
     for (const c of [BRAND_COLORS.green, BRAND_COLORS.yellow, BRAND_COLORS.red])
       expect(light).toContain(c);
+  });
+
+  it("favicon.svg turns sand (with the heart outline) on dark browser chrome", () => {
+    const svg = faviconSvg();
+    expect(svg).toContain(`.a{fill:${BRAND_COLORS.deep}}`);
+    expect(svg).toContain(
+      `@media (prefers-color-scheme:dark){.a{fill:${BRAND_COLORS.sand}}.o{display:inline}}`,
+    );
   });
 
   it("16 px favicon uses a solid red heart", () => {

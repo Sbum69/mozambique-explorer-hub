@@ -77,3 +77,19 @@ export function logoSvg({
     `</svg>`
   );
 }
+
+/**
+ * favicon.svg: deep green A on light browser chrome; on dark tab bars the green almost disappears
+ * (below 3:1), so the browser's dark theme switches it to sand with the white outline on the heart.
+ */
+export function faviconSvg(): string {
+  const c = BRAND_COLORS;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MARK_VIEWBOX}">` +
+    `<style>.a{fill:${c.deep}}.o{display:none}@media (prefers-color-scheme:dark){.a{fill:${c.sand}}.o{display:inline}}</style>` +
+    `<path class="a" d="${LOGO_LAST_A}"/>` +
+    `<path class="o" d="${LOGO_HEART}" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>` +
+    heartSvg() +
+    `</svg>`
+  );
+}
