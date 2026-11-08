@@ -85,6 +85,12 @@ produção e sem dependências novas.
 - Formulários: rótulo por cima, ajuda por baixo, erro em vermelho com ícone e texto.
 - Cabeçalho: fundo `--card`, faixa de capulana de 4 px no fundo; barra lateral com a mesma faixa no
   topo e secções com títulos em maiúsculas pequenas.
+- Logótipo "Coração do Índico" (`BrandLogo`, desenho em `src/lib/brand.ts`, ficheiros em `public/`):
+  EKAYA em formas, o último A sem barra com um coração verde `#009739`, amarelo `#FCD116` e vermelho
+  `#D21034`. Letras verde profundo `#0E4B3B` em fundo claro e areia `#F4EEE2` em fundo escuro, com
+  contorno branco fino no coração. Estas cores são só do logótipo e dos ícones; a paleta da app não
+  muda. Sem bandeira nem emblema. Em espaços estreitos, só o A com o coração (`mark`). Para mudar o
+  desenho: editar `brand.ts` e voltar a gerar os ficheiros (o `brand.test.ts` confirma que coincidem).
 
 ## 5. Ordem de aplicação (depois de aprovado)
 

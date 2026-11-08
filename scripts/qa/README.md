@@ -38,6 +38,7 @@ Desliga outros servidores (por exemplo `bun run dev`) antes do Lighthouse.
 | `bun scripts/qa/lang.ts`         | idioma pelo cookie no servidor, migração do localStorage, texto PT nas páginas em EN | todos PASS                                       |
 | `bun scripts/qa/lighthouse.ts`   | Lighthouse mobile, mediana de 3                                                      | comparar com a tabela do último bloco            |
 | `bun scripts/qa/shots.ts`        | capturas claro/escuro, 1280 e 390 px                                                 | revisão visual                                   |
+| `bun scripts/qa/brand-assets.ts` | volta a gerar logótipos, ícones, manifest e imagem de partilha em `public/`          | `brand.test.ts` PASS, `git diff` só o esperado   |
 
 Opções comuns: `--pages=home,map` (nomes em `lib.ts`), `--widths=320,390` (widths),
 `--runs=5` e `--devtools` (lighthouse), `--lang=en` e `--full` (shots).
