@@ -41,13 +41,42 @@ Precisa de um plano pago da Lovable (domínios próprios não estão no plano gr
    - `https://exploreekaya.com` abre com o cadeado;
    - `https://www.exploreekaya.com` redireciona para a raiz;
    - `https://exploreekaya.com/robots.txt` tem `Sitemap: https://exploreekaya.com/sitemap.xml`;
-   - o URL `*.lovable.app` responde com `X-Robots-Tag: noindex` e o seu `robots.txt` é `Disallow: /`.
+   - o URL `*.lovable.app` redireciona para o domínio (302 da Lovable, não configurável); se algum
+     pedido lá chegar à app, leva `X-Robots-Tag: noindex`. O `robots.txt` é o mesmo em todo o lado.
 7. **HSTS**: a app envia `Strict-Transport-Security: max-age=31536000; includeSubDomains` em cada
    página. Confirmar no domínio real:
 
    ```sh
    curl -sI https://exploreekaya.com/home | grep -i strict-transport-security
    ```
+
+8. **www com 301** (a Lovable só faz 302 entre domínios e não deixa mudar). O redirect do `www` passa
+   para o Cloudflare, onde está o DNS; a raiz continua igual (DNS only, servida pela Lovable, que já
+   responde `http://exploreekaya.com` → 301 → `https://exploreekaya.com`). Por esta ordem:
+   1. Cloudflare → `exploreekaya.com` → **Rules → Redirect Rules → Create rule** (ou o modelo
+      "Redirect from WWW to root"):
+      - Nome: `www para a raiz (301)`;
+      - **Custom filter expression** → Field `Hostname`, Operator `equals`, Value
+        `www.exploreekaya.com`;
+      - Then: **Dynamic**, expressão `concat("https://exploreekaya.com", http.request.uri.path)`,
+        Status code **301**, **Preserve query string** ligado → **Deploy**.
+   2. **SSL/TLS → Edge Certificates**: confirmar que o certificado universal cobre
+      `*.exploreekaya.com` (estado Active). Ligar **HTTP Strict Transport Security (HSTS)**:
+      Max Age `12 months`, **Apply HSTS policy to subdomains** ligado, **Preload** desligado,
+      No-Sniff ligado. Só afeta os registos com a nuvem laranja (o `www`); a raiz já envia HSTS.
+   3. **DNS → Records** → registo `A www` → **Edit** → mudar para **Proxied** (nuvem laranja) →
+      Save. Não mexer no registo `A @` (fica DNS only).
+   4. Lovable → **Domains**: desligar o redirect do `www` (ou remover o domínio `www`), para a
+      Lovable não o dar como erro: o pedido já não lhe chega.
+   5. Confirmar (em 1–5 minutos):
+
+      ```sh
+      curl -sI http://www.exploreekaya.com/x?a=1   # 301, Location: https://exploreekaya.com/x?a=1
+      curl -sI https://www.exploreekaya.com/       # 301, Location: https://exploreekaya.com/
+      curl -sI http://exploreekaya.com/            # 301, Location: https://exploreekaya.com/
+      ```
+
+   Para voltar atrás: pôr o `A www` outra vez em DNS only e ligar o redirect do `www` na Lovable.
 
 ## 2. Email: enviar (confirmação de conta, recuperação, notificações)
 
