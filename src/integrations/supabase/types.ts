@@ -14,6 +14,364 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          entity: string
+          entity_id: string | null
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity: string
+          entity_id?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
+      admin_broadcasts: {
+        Row: {
+          audience: string
+          body_en: string
+          body_pt: string
+          created_at: string
+          id: string
+          link: string | null
+          recipients: number
+          sent_by: string | null
+          target_user: string | null
+          title_en: string
+          title_pt: string
+        }
+        Insert: {
+          audience: string
+          body_en: string
+          body_pt: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          recipients?: number
+          sent_by?: string | null
+          target_user?: string | null
+          title_en: string
+          title_pt: string
+        }
+        Update: {
+          audience?: string
+          body_en?: string
+          body_pt?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          recipients?: number
+          sent_by?: string | null
+          target_user?: string | null
+          title_en?: string
+          title_pt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_broadcasts_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_broadcasts_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_broadcasts_target_user_fkey"
+            columns: ["target_user"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_broadcasts_target_user_fkey"
+            columns: ["target_user"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_errors: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          release: string | null
+          route: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          release?: string | null
+          route: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          release?: string | null
+          route?: string
+        }
+        Relationships: []
+      }
+      assistant_faq_entries: {
+        Row: {
+          active: boolean
+          answer_en: string
+          answer_pt: string
+          created_at: string
+          id: string
+          keywords_en: string[]
+          keywords_pt: string[]
+          kind: string
+          links: Json
+          needs_validation: boolean
+          question_en: string
+          question_pt: string
+          slug: string
+          topic: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          answer_en: string
+          answer_pt: string
+          created_at?: string
+          id?: string
+          keywords_en?: string[]
+          keywords_pt?: string[]
+          kind?: string
+          links?: Json
+          needs_validation?: boolean
+          question_en: string
+          question_pt: string
+          slug: string
+          topic: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          active?: boolean
+          answer_en?: string
+          answer_pt?: string
+          created_at?: string
+          id?: string
+          keywords_en?: string[]
+          keywords_pt?: string[]
+          kind?: string
+          links?: Json
+          needs_validation?: boolean
+          question_en?: string
+          question_pt?: string
+          slug?: string
+          topic?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      assistant_faq_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entry_id: string
+          id: string
+          reason: string | null
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entry_id: string
+          id?: string
+          reason?: string | null
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entry_id?: string
+          id?: string
+          reason?: string | null
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_faq_versions_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_faq_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_feedback: {
+        Row: {
+          created_at: string
+          entry_slug: string
+          helpful: boolean
+          id: string
+          lang: string
+        }
+        Insert: {
+          created_at?: string
+          entry_slug: string
+          helpful: boolean
+          id?: string
+          lang: string
+        }
+        Update: {
+          created_at?: string
+          entry_slug?: string
+          helpful?: boolean
+          id?: string
+          lang?: string
+        }
+        Relationships: []
+      }
+      assistant_llm_usage: {
+        Row: {
+          calls: number
+          day: string
+          neurons: number
+          updated_at: string
+        }
+        Insert: {
+          calls?: number
+          day: string
+          neurons?: number
+          updated_at?: string
+        }
+        Update: {
+          calls?: number
+          day?: string
+          neurons?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      assistant_unanswered: {
+        Row: {
+          created_at: string
+          handled: boolean
+          id: string
+          lang: string
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          handled?: boolean
+          id?: string
+          lang: string
+          question: string
+        }
+        Update: {
+          created_at?: string
+          handled?: boolean
+          id?: string
+          lang?: string
+          question?: string
+        }
+        Relationships: []
+      }
+      booking_commission_snapshots: {
+        Row: {
+          booking_id: string
+          business_id: string
+          commission_bp: number
+          commission_cents: number
+          config_version: number
+          created_at: string
+          founder: boolean
+          gross_cents: number
+          net_cents: number
+          provider_fee_bp: number
+          provider_fee_cents: number
+        }
+        Insert: {
+          booking_id: string
+          business_id: string
+          commission_bp: number
+          commission_cents: number
+          config_version: number
+          created_at?: string
+          founder: boolean
+          gross_cents: number
+          net_cents: number
+          provider_fee_bp: number
+          provider_fee_cents: number
+        }
+        Update: {
+          booking_id?: string
+          business_id?: string
+          commission_bp?: number
+          commission_cents?: number
+          config_version?: number
+          created_at?: string
+          founder?: boolean
+          gross_cents?: number
+          net_cents?: number
+          provider_fee_bp?: number
+          provider_fee_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_commission_snapshots_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commission_snapshots_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           business_id: string
@@ -130,6 +488,158 @@ export type Database = {
         }
         Relationships: []
       }
+      business_commercial_terms: {
+        Row: {
+          business_id: string
+          founder_since: string | null
+          founder_until: string | null
+          free_highlights_used: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          founder_since?: string | null
+          founder_until?: string | null
+          free_highlights_used?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          founder_since?: string | null
+          founder_until?: string | null
+          free_highlights_used?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_commercial_terms_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_invites: {
+        Row: {
+          business_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          revoked_at: string | null
+          token_hash: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          revoked_at?: string | null
+          token_hash: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          revoked_at?: string | null
+          token_hash?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_invites_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_leads: {
+        Row: {
+          accepts_bookings: boolean
+          admin_note: string | null
+          business_id: string | null
+          business_name: string
+          category_code: string
+          contact: string
+          contact_name: string
+          created_at: string
+          id: string
+          ip_day_hash: string
+          lang: string
+          message: string | null
+          province_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepts_bookings: boolean
+          admin_note?: string | null
+          business_id?: string | null
+          business_name: string
+          category_code: string
+          contact: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          ip_day_hash: string
+          lang?: string
+          message?: string | null
+          province_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepts_bookings?: boolean
+          admin_note?: string | null
+          business_id?: string | null
+          business_name?: string
+          category_code?: string
+          contact?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          ip_day_hash?: string
+          lang?: string
+          message?: string | null
+          province_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_leads_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_leads_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "business_leads_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           category: string | null
@@ -241,6 +751,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      commercial_configs: {
+        Row: {
+          commission_bp: number
+          created_at: string
+          created_by: string | null
+          founder_cap: number
+          founder_commission_bp: number
+          founder_free_highlights: number
+          founder_months: number
+          highlight_month_cents: number
+          highlight_week_cents: number
+          id: string
+          note: string | null
+          plan_month_cents: number
+          provider_fee_bp: number
+          sponsored_per_page: number
+          sponsored_slots_per_scope: number
+          version: number
+        }
+        Insert: {
+          commission_bp: number
+          created_at?: string
+          created_by?: string | null
+          founder_cap: number
+          founder_commission_bp: number
+          founder_free_highlights?: number
+          founder_months: number
+          highlight_month_cents: number
+          highlight_week_cents: number
+          id?: string
+          note?: string | null
+          plan_month_cents: number
+          provider_fee_bp?: number
+          sponsored_per_page?: number
+          sponsored_slots_per_scope?: number
+          version?: never
+        }
+        Update: {
+          commission_bp?: number
+          created_at?: string
+          created_by?: string | null
+          founder_cap?: number
+          founder_commission_bp?: number
+          founder_free_highlights?: number
+          founder_months?: number
+          highlight_month_cents?: number
+          highlight_week_cents?: number
+          id?: string
+          note?: string | null
+          plan_month_cents?: number
+          provider_fee_bp?: number
+          sponsored_per_page?: number
+          sponsored_slots_per_scope?: number
+          version?: never
+        }
+        Relationships: []
       }
       community_categories: {
         Row: {
@@ -605,63 +1172,6 @@ export type Database = {
           },
         ]
       }
-      commercial_configs: {
-        Row: {
-          commission_bp: number
-          created_at: string
-          created_by: string | null
-          founder_cap: number
-          founder_commission_bp: number
-          founder_free_highlights: number
-          founder_months: number
-          highlight_month_cents: number
-          highlight_week_cents: number
-          id: string
-          note: string | null
-          plan_month_cents: number
-          provider_fee_bp: number
-          sponsored_per_page: number
-          sponsored_slots_per_scope: number
-          version: number
-        }
-        Insert: {
-          commission_bp: number
-          created_at?: string
-          created_by?: string | null
-          founder_cap: number
-          founder_commission_bp: number
-          founder_free_highlights?: number
-          founder_months: number
-          highlight_month_cents: number
-          highlight_week_cents: number
-          id?: string
-          note?: string | null
-          plan_month_cents: number
-          provider_fee_bp?: number
-          sponsored_per_page?: number
-          sponsored_slots_per_scope?: number
-          version?: number
-        }
-        Update: {
-          commission_bp?: number
-          created_at?: string
-          created_by?: string | null
-          founder_cap?: number
-          founder_commission_bp?: number
-          founder_free_highlights?: number
-          founder_months?: number
-          highlight_month_cents?: number
-          highlight_week_cents?: number
-          id?: string
-          note?: string | null
-          plan_month_cents?: number
-          provider_fee_bp?: number
-          sponsored_per_page?: number
-          sponsored_slots_per_scope?: number
-          version?: number
-        }
-        Relationships: []
-      }
       destination_visits: {
         Row: {
           destination_id: string
@@ -812,6 +1322,27 @@ export type Database = {
           },
         ]
       }
+      exchange_rate_requests: {
+        Row: {
+          applied_at: string | null
+          outcome: string | null
+          request_id: number
+          requested_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          outcome?: string | null
+          request_id: number
+          requested_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          outcome?: string | null
+          request_id?: number
+          requested_at?: string
+        }
+        Relationships: []
+      }
       exchange_rates: {
         Row: {
           currency: string
@@ -833,30 +1364,6 @@ export type Database = {
           per_usd?: number
           rate_date?: string
           source?: string
-        }
-        Relationships: []
-      }
-      favorites: {
-        Row: {
-          created_at: string
-          id: string
-          item_id: string
-          item_type: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          item_id: string
-          item_type: string
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          item_id?: string
-          item_type?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -987,6 +1494,45 @@ export type Database = {
             columns: ["destination_id"]
             isOneToOne: false
             referencedRelation: "destinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1221,406 +1767,6 @@ export type Database = {
           },
         ]
       }
-      app_errors: {
-        Row: {
-          created_at: string
-          id: string
-          kind: string
-          message: string
-          release: string | null
-          route: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          kind: string
-          message: string
-          release?: string | null
-          route: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          kind?: string
-          message?: string
-          release?: string | null
-          route?: string
-        }
-        Relationships: []
-      }
-      assistant_faq_entries: {
-        Row: {
-          active: boolean
-          answer_en: string
-          answer_pt: string
-          created_at: string
-          id: string
-          keywords_en: string[]
-          keywords_pt: string[]
-          kind: string
-          links: Json
-          needs_validation: boolean
-          question_en: string
-          question_pt: string
-          slug: string
-          topic: string
-          updated_at: string
-          updated_by: string | null
-          version: number
-        }
-        Insert: {
-          active?: boolean
-          answer_en: string
-          answer_pt: string
-          created_at?: string
-          id?: string
-          keywords_en?: string[]
-          keywords_pt?: string[]
-          kind?: string
-          links?: Json
-          needs_validation?: boolean
-          question_en: string
-          question_pt: string
-          slug: string
-          topic: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Update: {
-          active?: boolean
-          answer_en?: string
-          answer_pt?: string
-          created_at?: string
-          id?: string
-          keywords_en?: string[]
-          keywords_pt?: string[]
-          kind?: string
-          links?: Json
-          needs_validation?: boolean
-          question_en?: string
-          question_pt?: string
-          slug?: string
-          topic?: string
-          updated_at?: string
-          updated_by?: string | null
-          version?: number
-        }
-        Relationships: []
-      }
-      assistant_feedback: {
-        Row: {
-          created_at: string
-          entry_slug: string
-          helpful: boolean
-          id: string
-          lang: string
-        }
-        Insert: {
-          created_at?: string
-          entry_slug: string
-          helpful: boolean
-          id?: string
-          lang: string
-        }
-        Update: {
-          created_at?: string
-          entry_slug?: string
-          helpful?: boolean
-          id?: string
-          lang?: string
-        }
-        Relationships: []
-      }
-      assistant_faq_versions: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          entry_id: string
-          id: string
-          reason: string | null
-          snapshot: Json
-          version: number
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          entry_id: string
-          id?: string
-          reason?: string | null
-          snapshot: Json
-          version: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          entry_id?: string
-          id?: string
-          reason?: string | null
-          snapshot?: Json
-          version?: number
-        }
-        Relationships: []
-      }
-      assistant_llm_usage: {
-        Row: {
-          calls: number
-          day: string
-          neurons: number
-          updated_at: string
-        }
-        Insert: {
-          calls?: number
-          day: string
-          neurons?: number
-          updated_at?: string
-        }
-        Update: {
-          calls?: number
-          day?: string
-          neurons?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      assistant_unanswered: {
-        Row: {
-          created_at: string
-          handled: boolean
-          id: string
-          lang: string
-          question: string
-        }
-        Insert: {
-          created_at?: string
-          handled?: boolean
-          id?: string
-          lang: string
-          question: string
-        }
-        Update: {
-          created_at?: string
-          handled?: boolean
-          id?: string
-          lang?: string
-          question?: string
-        }
-        Relationships: []
-      }
-      admin_audit: {
-        Row: {
-          action: string
-          actor_id: string | null
-          after: Json | null
-          before: Json | null
-          created_at: string
-          entity: string
-          entity_id: string | null
-          id: string
-          reason: string | null
-        }
-        Insert: {
-          action: string
-          actor_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          created_at?: string
-          entity: string
-          entity_id?: string | null
-          id?: string
-          reason?: string | null
-        }
-        Update: {
-          action?: string
-          actor_id?: string | null
-          after?: Json | null
-          before?: Json | null
-          created_at?: string
-          entity?: string
-          entity_id?: string | null
-          id?: string
-          reason?: string | null
-        }
-        Relationships: []
-      }
-      booking_commission_snapshots: {
-        Row: {
-          booking_id: string
-          business_id: string
-          commission_bp: number
-          commission_cents: number
-          config_version: number
-          created_at: string
-          founder: boolean
-          gross_cents: number
-          net_cents: number
-          provider_fee_bp: number
-          provider_fee_cents: number
-        }
-        Insert: {
-          booking_id: string
-          business_id: string
-          commission_bp: number
-          commission_cents: number
-          config_version: number
-          created_at?: string
-          founder: boolean
-          gross_cents: number
-          net_cents: number
-          provider_fee_bp: number
-          provider_fee_cents: number
-        }
-        Update: {
-          booking_id?: string
-          business_id?: string
-          commission_bp?: number
-          commission_cents?: number
-          config_version?: number
-          created_at?: string
-          founder?: boolean
-          gross_cents?: number
-          net_cents?: number
-          provider_fee_bp?: number
-          provider_fee_cents?: number
-        }
-        Relationships: []
-      }
-      business_commercial_terms: {
-        Row: {
-          business_id: string
-          founder_since: string | null
-          founder_until: string | null
-          free_highlights_used: number
-          updated_at: string
-        }
-        Insert: {
-          business_id: string
-          founder_since?: string | null
-          founder_until?: string | null
-          free_highlights_used?: number
-          updated_at?: string
-        }
-        Update: {
-          business_id?: string
-          founder_since?: string | null
-          founder_until?: string | null
-          free_highlights_used?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      business_leads: {
-        Row: {
-          accepts_bookings: boolean
-          admin_note: string | null
-          business_id: string | null
-          business_name: string
-          category_code: string
-          contact: string
-          contact_name: string
-          created_at: string
-          id: string
-          ip_day_hash: string
-          lang: string
-          message: string | null
-          province_id: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          accepts_bookings: boolean
-          admin_note?: string | null
-          business_id?: string | null
-          business_name: string
-          category_code: string
-          contact: string
-          contact_name: string
-          created_at?: string
-          id?: string
-          ip_day_hash: string
-          lang?: string
-          message?: string | null
-          province_id: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          accepts_bookings?: boolean
-          admin_note?: string | null
-          business_id?: string | null
-          business_name?: string
-          category_code?: string
-          contact?: string
-          contact_name?: string
-          created_at?: string
-          id?: string
-          ip_day_hash?: string
-          lang?: string
-          message?: string | null
-          province_id?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_leads_province_id_fkey"
-            columns: ["province_id"]
-            isOneToOne: false
-            referencedRelation: "provinces"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "business_leads_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "businesses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "business_leads_category_code_fkey"
-            columns: ["category_code"]
-            isOneToOne: false
-            referencedRelation: "business_categories"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
-      business_invites: {
-        Row: {
-          business_id: string
-          created_at: string
-          created_by: string
-          expires_at: string
-          id: string
-          revoked_at: string | null
-          token_hash: string
-          used_at: string | null
-          used_by: string | null
-        }
-        Insert: {
-          business_id: string
-          created_at?: string
-          created_by: string
-          expires_at: string
-          id?: string
-          revoked_at?: string | null
-          token_hash: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Update: {
-          business_id?: string
-          created_at?: string
-          created_by?: string
-          expires_at?: string
-          id?: string
-          revoked_at?: string | null
-          token_hash?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Relationships: []
-      }
       legal_acceptances: {
         Row: {
           accepted_at: string
@@ -1645,6 +1791,39 @@ export type Database = {
           source?: string
           user_id?: string
           version?: string
+        }
+        Relationships: []
+      }
+      manual_payment_configs: {
+        Row: {
+          account_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          instructions_en: string
+          instructions_pt: string
+          mpesa_number: string
+          version: number
+        }
+        Insert: {
+          account_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions_en: string
+          instructions_pt: string
+          mpesa_number: string
+          version?: never
+        }
+        Update: {
+          account_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          instructions_en?: string
+          instructions_pt?: string
+          mpesa_number?: string
+          version?: never
         }
         Relationships: []
       }
@@ -1684,44 +1863,11 @@ export type Database = {
           },
         ]
       }
-      manual_payment_configs: {
-        Row: {
-          account_name: string
-          created_at: string
-          created_by: string | null
-          id: string
-          instructions_en: string
-          instructions_pt: string
-          mpesa_number: string
-          version: number
-        }
-        Insert: {
-          account_name: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          instructions_en: string
-          instructions_pt: string
-          mpesa_number: string
-          version?: number
-        }
-        Update: {
-          account_name?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          instructions_en?: string
-          instructions_pt?: string
-          mpesa_number?: string
-          version?: number
-        }
-        Relationships: []
-      }
       notifications: {
         Row: {
           body_en: string | null
-          broadcast_id: string | null
           body_pt: string
+          broadcast_id: string | null
           created_at: string
           id: string
           link: string | null
@@ -1733,8 +1879,8 @@ export type Database = {
         }
         Insert: {
           body_en?: string | null
-          broadcast_id?: string | null
           body_pt: string
+          broadcast_id?: string | null
           created_at?: string
           id?: string
           link?: string | null
@@ -1746,8 +1892,8 @@ export type Database = {
         }
         Update: {
           body_en?: string | null
-          broadcast_id?: string | null
           body_pt?: string
+          broadcast_id?: string | null
           created_at?: string
           id?: string
           link?: string | null
@@ -1758,6 +1904,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_broadcast_id_fkey"
+            columns: ["broadcast_id"]
+            isOneToOne: false
+            referencedRelation: "admin_broadcasts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
@@ -1986,6 +2139,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reward_redemptions_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reward_redemptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -2199,6 +2366,20 @@ export type Database = {
             columns: ["progress_id"]
             isOneToOne: false
             referencedRelation: "route_progress"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stop_progress_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "community_post_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_stop_progress_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2547,6 +2728,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sponsored_placements_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["code"]
+          },
+          {
             foreignKeyName: "sponsored_placements_experience_id_fkey"
             columns: ["experience_id"]
             isOneToOne: false
@@ -2624,10 +2812,100 @@ export type Database = {
         Args: { _privacy_version: string; _terms_version: string }
         Returns: undefined
       }
-      admin_platform_summary: { Args: never; Returns: Json }
-      admin_set_internal: {
-        Args: { _internal: boolean; _user_id: string }
+      active_sponsored: {
+        Args: { _category_code?: string; _province_id?: string; _scope: string }
+        Returns: {
+          body_en: string
+          body_pt: string
+          business_id: string
+          business_name: string
+          campaign_type: string
+          ends_on: string
+          experience_id: string
+          id: string
+          kind: string
+          title_en: string
+          title_pt: string
+        }[]
+      }
+      admin_assign_business_owner: {
+        Args: { _business_id: string; _email: string }
+        Returns: Json
+      }
+      admin_business_owner_emails: {
+        Args: never
+        Returns: {
+          business_id: string
+          email: string
+        }[]
+      }
+      admin_create_business_invite: {
+        Args: { _business_id: string; _days?: number }
+        Returns: string
+      }
+      admin_decide_business: {
+        Args: {
+          _business_id: string
+          _decision: Database["public"]["Enums"]["business_status"]
+          _reason?: string
+        }
         Returns: undefined
+      }
+      admin_decide_placement: {
+        Args: {
+          _decision: string
+          _id: string
+          _payment_note?: string
+          _reason?: string
+        }
+        Returns: Json
+      }
+      admin_import_content: {
+        Args: { _dry_run?: boolean; _rows: Json }
+        Returns: Json
+      }
+      admin_launch_status: { Args: never; Returns: Json }
+      admin_list_broadcasts: {
+        Args: { _limit?: number }
+        Returns: {
+          audience: string
+          body_en: string
+          body_pt: string
+          created_at: string
+          id: string
+          link: string
+          recipients: number
+          sender: string
+          target: string
+          title_en: string
+          title_pt: string
+        }[]
+      }
+      admin_mark_unanswered: { Args: { _id: string }; Returns: undefined }
+      admin_platform_summary: { Args: never; Returns: Json }
+      admin_save_faq_entry: {
+        Args: { _entry: Json; _id: string; _reason: string }
+        Returns: string
+      }
+      admin_send_notification: {
+        Args: {
+          _audience: string
+          _body_en: string
+          _body_pt: string
+          _link?: string
+          _title_en: string
+          _title_pt: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      admin_set_business_status: {
+        Args: {
+          _business_id: string
+          _reason?: string
+          _status: Database["public"]["Enums"]["business_status"]
+        }
+        Returns: Json
       }
       admin_set_commercial_config: {
         Args: {
@@ -2644,9 +2922,22 @@ export type Database = {
         }
         Returns: number
       }
-      admin_decide_placement: {
-        Args: { _decision: string; _id: string; _payment_note?: string; _reason?: string }
+      admin_set_founder: {
+        Args: { _business_id: string; _founder: boolean; _reason: string }
         Returns: Json
+      }
+      admin_set_internal: {
+        Args: { _internal: boolean; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_lead_status: {
+        Args: {
+          _business_id?: string
+          _id: string
+          _note?: string
+          _status: string
+        }
+        Returns: undefined
       }
       admin_set_manual_payment: {
         Args: {
@@ -2662,139 +2953,6 @@ export type Database = {
         Args: { _per_page: number; _reason: string; _slots_per_scope: number }
         Returns: number
       }
-      active_sponsored: {
-        Args: { _category_code?: string; _province_id?: string; _scope: string }
-        Returns: {
-          body_en: string | null
-          body_pt: string | null
-          business_id: string
-          business_name: string
-          campaign_type: string | null
-          ends_on: string
-          experience_id: string | null
-          id: string
-          kind: string
-          title_en: string | null
-          title_pt: string | null
-        }[]
-      }
-      cancel_my_placement: {
-        Args: { _id: string; _reason: string }
-        Returns: undefined
-      }
-      request_sponsored_placement: {
-        Args: {
-          _body_en: string | null
-          _body_pt: string | null
-          _business_id: string
-          _campaign_type: string | null
-          _category_code: string | null
-          _duration: string
-          _experience_id: string | null
-          _kind: string
-          _province_id: string | null
-          _scope: string
-          _starts_on: string
-          _title_en: string | null
-          _title_pt: string | null
-        }
-        Returns: Json
-      }
-      admin_set_lead_status: {
-        Args: { _business_id?: string; _id: string; _note?: string; _status: string }
-        Returns: undefined
-      }
-      founder_places_left: { Args: never; Returns: number }
-      submit_business_lead: {
-        Args: {
-          _accepts_bookings: boolean
-          _business_name: string
-          _category_code: string
-          _contact: string
-          _contact_name: string
-          _lang: string
-          _message: string | null
-          _province_id: string
-          _website?: string
-        }
-        Returns: string
-      }
-      admin_mark_unanswered: { Args: { _id: string }; Returns: undefined }
-      admin_save_faq_entry: { Args: { _entry: Json; _id: string | null; _reason: string }; Returns: string }
-      assistant_log_unanswered: { Args: { _lang: string; _question: string }; Returns: undefined }
-      assistant_rate_answer: { Args: { _helpful: boolean; _lang: string; _slug: string }; Returns: undefined }
-      admin_launch_status: { Args: never; Returns: Json }
-      log_app_error: {
-        Args: { _kind: string; _message: string; _release: string; _route: string }
-        Returns: undefined
-      }
-      admin_set_founder: {
-        Args: { _business_id: string; _founder: boolean; _reason: string }
-        Returns: Json
-      }
-      admin_create_business_invite: {
-        Args: { _business_id: string; _days?: number }
-        Returns: string
-      }
-      admin_import_content: {
-        Args: { _dry_run?: boolean; _rows: Json }
-        Returns: Json
-      }
-      admin_assign_business_owner: {
-        Args: { _business_id: string; _email: string }
-        Returns: Json
-      }
-      admin_business_owner_emails: {
-        Args: never
-        Returns: {
-          business_id: string
-          email: string
-        }[]
-      }
-      admin_decide_business: {
-        Args: {
-          _business_id: string
-          _decision: Database["public"]["Enums"]["business_status"]
-          _reason?: string
-        }
-        Returns: undefined
-      }
-      admin_set_business_status: {
-        Args: {
-          _business_id: string
-          _reason?: string
-          _status: Database["public"]["Enums"]["business_status"]
-        }
-        Returns: Json
-      }
-      admin_list_broadcasts: {
-        Args: { _limit?: number }
-        Returns: {
-          audience: string
-          body_en: string
-          body_pt: string
-          created_at: string
-          id: string
-          link: string | null
-          recipients: number
-          sender: string | null
-          target: string | null
-          title_en: string
-          title_pt: string
-        }[]
-      }
-      admin_send_notification: {
-        Args: {
-          _audience: string
-          _body_en: string
-          _body_pt: string
-          _link?: string
-          _title_en: string
-          _title_pt: string
-          _user_id: string | null
-        }
-        Returns: Json
-      }
       admin_set_user_role: {
         Args: {
           _grant: boolean
@@ -2807,11 +2965,21 @@ export type Database = {
         Args: { _attempt_id: string; _choice: number; _question_id: string }
         Returns: Json
       }
+      app_errors_purge: { Args: never; Returns: number }
+      apply_exchange_rates: { Args: never; Returns: number }
+      assistant_log_unanswered: {
+        Args: { _lang: string; _question: string }
+        Returns: undefined
+      }
+      assistant_purge_old: { Args: never; Returns: number }
+      assistant_rate_answer: {
+        Args: { _helpful: boolean; _lang: string; _slug: string }
+        Returns: undefined
+      }
       booked_people: {
         Args: { _date: string; _experience_id: string; _time: string }
         Returns: number
       }
-      business_invite_preview: { Args: { _token: string }; Returns: Json }
       business_decide_booking: {
         Args: {
           _booking_id: string
@@ -2820,21 +2988,70 @@ export type Database = {
         }
         Returns: undefined
       }
+      business_invite_preview: { Args: { _token: string }; Returns: Json }
+      business_missing: {
+        Args: { b: Database["public"]["Tables"]["businesses"]["Row"] }
+        Returns: string[]
+      }
       can_edit_route: { Args: { _route_id: string }; Returns: boolean }
       can_view_route: { Args: { _route_id: string }; Returns: boolean }
       cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
-      claim_business_invite: { Args: { _token: string }; Returns: string }
-      commission_quote: {
-        Args: { _business_id: string | null; _gross_cents: number }
-        Returns: Json
+      cancel_my_placement: {
+        Args: { _id: string; _reason: string }
+        Returns: undefined
       }
-      content_readiness: { Args: { _business_id: string }; Returns: Json }
-      current_legal_versions: { Args: never; Returns: Json }
+      claim_business_invite: { Args: { _token: string }; Returns: string }
       commercial_activity_public: {
         Args: { _business_id: string }
         Returns: boolean
       }
+      commission_quote: {
+        Args: { _business_id: string; _gross_cents: number }
+        Returns: Json
+      }
+      commission_split: {
+        Args: { _commission_bp: number; _fee_bp: number; _gross_cents: number }
+        Returns: {
+          commission_cents: number
+          net_cents: number
+          provider_fee_cents: number
+        }[]
+      }
+      content_readiness: { Args: { _business_id: string }; Returns: Json }
+      content_slug: { Args: { _name: string }; Returns: string }
+      current_commercial_config: {
+        Args: never
+        Returns: {
+          commission_bp: number
+          created_at: string
+          created_by: string | null
+          founder_cap: number
+          founder_commission_bp: number
+          founder_free_highlights: number
+          founder_months: number
+          highlight_month_cents: number
+          highlight_week_cents: number
+          id: string
+          note: string | null
+          plan_month_cents: number
+          provider_fee_bp: number
+          sponsored_per_page: number
+          sponsored_slots_per_scope: number
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "commercial_configs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      current_legal_versions: { Args: never; Returns: Json }
       delete_my_account: { Args: { _confirm: string }; Returns: string }
+      distance_m: {
+        Args: { _lat1: number; _lat2: number; _lng1: number; _lng2: number }
+        Returns: number
+      }
       event_participant_counts: {
         Args: { _keys: string[] }
         Returns: {
@@ -2842,7 +3059,13 @@ export type Database = {
           participants: number
         }[]
       }
+      experience_missing: {
+        Args: { e: Database["public"]["Tables"]["experiences"]["Row"] }
+        Returns: string[]
+      }
+      expire_stale_bookings: { Args: never; Returns: number }
       finish_game_quiz: { Args: { _attempt_id: string }; Returns: Json }
+      founder_places_left: { Args: never; Returns: number }
       game_assert_playable: {
         Args: { _game_key: string }
         Returns: {
@@ -2883,9 +3106,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_founder: {
+        Args: { _at?: string; _business_id: string }
+        Returns: boolean
+      }
+      is_internal_user: { Args: { _user_id: string }; Returns: boolean }
+      log_app_error: {
+        Args: {
+          _kind: string
+          _message: string
+          _release: string
+          _route: string
+        }
+        Returns: undefined
+      }
       my_points_summary: { Args: never; Returns: Json }
       my_points_total: { Args: never; Returns: number }
-      is_internal_user: { Args: { _user_id: string }; Returns: boolean }
       news_like_counts: {
         Args: { _keys: string[] }
         Returns: {
@@ -2906,9 +3142,59 @@ export type Database = {
         }[]
       }
       points_value: { Args: { _reason: string }; Returns: number }
+      proof_location_check: {
+        Args: {
+          _accuracy_m: number
+          _lat: number
+          _lng: number
+          _target_lat: number
+          _target_lng: number
+        }
+        Returns: Record<string, unknown>
+      }
       redeem_reward: {
         Args: { _request_id: string; _reward_id: string }
         Returns: Json
+      }
+      request_exchange_rates: { Args: never; Returns: number }
+      request_ip: { Args: never; Returns: string }
+      request_sponsored_placement: {
+        Args: {
+          _body_en: string
+          _body_pt: string
+          _business_id: string
+          _campaign_type: string
+          _category_code: string
+          _duration: string
+          _experience_id: string
+          _kind: string
+          _province_id: string
+          _scope: string
+          _starts_on: string
+          _title_en: string
+          _title_pt: string
+        }
+        Returns: Json
+      }
+      reset_my_route_progress: {
+        Args: { _progress_id: string }
+        Returns: undefined
+      }
+      review_stop_proof: {
+        Args: {
+          _approve: boolean
+          _progress_id: string
+          _route_stop_id: string
+        }
+        Returns: string
+      }
+      route_progress_fully_proven: {
+        Args: { _progress_id: string }
+        Returns: boolean
+      }
+      route_stop_coords: {
+        Args: { _stop_id: string }
+        Returns: Record<string, unknown>
       }
       save_my_preferences: {
         Args: {
@@ -2919,23 +3205,33 @@ export type Database = {
         }
         Returns: undefined
       }
-      reset_my_route_progress: {
-        Args: { _progress_id: string }
-        Returns: undefined
-      }
-      route_progress_fully_proven: {
-        Args: { _progress_id: string }
-        Returns: boolean
-      }
       save_route_plan: {
         Args: { _curated?: boolean; _input: Json; _route_id: string }
         Returns: string
       }
-      review_stop_proof: {
-        Args: { _approve: boolean; _progress_id: string; _route_stop_id: string }
+      sponsored_notify: {
+        Args: {
+          _p: Database["public"]["Tables"]["sponsored_placements"]["Row"]
+          _to_admins: boolean
+        }
+        Returns: undefined
+      }
+      sponsored_placements_tick: { Args: never; Returns: number }
+      start_game_quiz: { Args: { _game_key: string }; Returns: Json }
+      submit_business_lead: {
+        Args: {
+          _accepts_bookings: boolean
+          _business_name: string
+          _category_code: string
+          _contact: string
+          _contact_name: string
+          _lang: string
+          _message: string
+          _province_id: string
+          _website?: string
+        }
         Returns: string
       }
-      start_game_quiz: { Args: { _game_key: string }; Returns: Json }
       submit_game_step: {
         Args: {
           _accuracy_m?: number
