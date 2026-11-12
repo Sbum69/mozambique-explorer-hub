@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Destino EKAYA</title>
+<link rel="stylesheet" href="mockup.css">
+<style>
+/* Destination: the place name is the hero (big display type on the real photo), then only facts
+   with a source or counts from the database, the itineraries that pass here, and the neighbours. */
+.hero { position: relative; height: 520px; color: #fff; overflow: hidden; }
+.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero .v { position: absolute; inset: 0; background: linear-gradient(rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.15) 40%, rgb(0 0 0 / 0.7)); }
+.hero .wrap { position: relative; height: 100%; display: flex; flex-direction: column; }
+.hero .back { color: #fff; text-decoration: none; display: inline-flex; gap: 8px; align-items: center; height: 44px; }
+.hero h1 { margin-top: auto; font-size: clamp(48px, 9vw, 112px); line-height: 0.95; max-width: 9ch; }
+.hero .where { margin: 14px 0 40px; font-size: 17px; }
+.grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; margin-top: 40px; }
+.lead { font-size: 20px; line-height: 1.5; margin: 0; max-width: 34ch; }
+.facts { border-left: 2px solid var(--ochre); padding-left: 20px; display: grid; gap: 16px; }
+.facts dt { font-family: var(--display); font-size: 22px; }
+.facts dd { margin: 2px 0 0; }
+h2 { font-size: 26px; }
+.routes { display: grid; gap: 12px; margin-top: 16px; }
+.route { display: grid; grid-template-columns: 120px 1fr auto; gap: 16px; align-items: center; padding: 12px; }
+.route img { width: 120px; height: 84px; object-fit: cover; border-radius: 6px; }
+.empty { border: 1px dashed var(--input); border-radius: 10px; padding: 18px; margin-top: 16px; }
+.next { display: flex; justify-content: space-between; gap: 16px; margin-top: 56px; border-top: 1px solid var(--border); padding-top: 20px; }
+.next a { text-decoration: none; }
+.next small { display: block; color: var(--muted); }
+.next strong { font-family: var(--display); font-size: 22px; color: var(--fg); }
+@media (max-width: 640px) {
+  .hero { height: 460px; }
+  .grid { grid-template-columns: 1fr; gap: 28px; }
+  .route { grid-template-columns: 88px 1fr; }
+  .route img { width: 88px; height: 72px; }
+  .route .btn { grid-column: 1 / -1; justify-content: center; }
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <img src="../../../src/assets/dest-ilha.webp" alt="Casario da Ilha de Moçambique visto do mar">
+  <span class="v"></span>
+  <div class="wrap">
+    <div class="top"><a class="back" href="home.html">← Voltar</a><img class="logo" src="../../../public/logo-dark.svg" alt="EKAYA"></div>
+    <h1>Ilha de Moçambique</h1>
+    <p class="where">Norte · Província de Nampula</p>
+  </div>
+  <span class="credit">© autor · licença (photo-credits.ts)</span>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <div>
+      <p class="lead">Património Mundial UNESCO, alma da costa swahili.</p>
+      <p class="src">Texto da BD (destinations.description_pt).</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px">
+        <span class="tag">Palácio de São Paulo</span><span class="tag">Cidade de Pedra e Cal</span>
+      </div>
+      <p class="src">Destaques da BD; "Stone Town" (nome de Zanzibar) por validar.</p>
+    </div>
+    <dl class="facts">
+      <div><dt>Património Mundial desde 1991</dt><dd class="src">Fonte: UNESCO, whc.unesco.org/en/list/599</dd></div>
+      <div><dt>Fortaleza de São Sebastião, iniciada em 1558</dt><dd class="src">Fonte: UNESCO, descrição do sítio 599</dd></div>
+      <div><dt>3 roteiros públicos</dt><dd class="src">Contagem da BD (província de Nampula)</dd></div>
+    </dl>
+  </div>
+
+  <section style="margin-top:56px">
+    <h2>Roteiros que passam aqui</h2>
+    <div class="routes">
+      <div class="card route"><img src="../../../src/assets/dest-ilha-thumb.webp" alt=""><div><strong>Ilha de Moçambique: Património UNESCO</strong><div class="muted">3 dias · história, património, cultura, praia</div></div><a class="btn btn-ghost" href="#">Ver roteiro</a></div>
+      <div class="card route"><img src="../../../src/assets/dest-ilha-thumb.webp" alt=""><div><strong>Nacala e Baía de Memba</strong><div class="muted">3 dias · praia, natureza, vida local</div></div><a class="btn btn-ghost" href="#">Ver roteiro</a></div>
+      <div class="card route"><img src="../../../src/assets/dest-ilha-thumb.webp" alt=""><div><strong>Nampula: Cultura e Museus</strong><div class="muted">2 dias · cultura, história, vida local</div></div><a class="btn btn-ghost" href="#">Ver roteiro</a></div>
+    </div>
+  </section>
+
+  <section style="margin-top:48px">
+    <h2>Atividades com reserva</h2>
+    <div class="empty"><strong>Ainda não há atividades com reserva aqui.</strong><br><span class="muted">Conheces um guia ou uma cooperativa na Ilha? <a href="#">Indica-nos o negócio</a>.</span></div>
+  </section>
+
+  <nav class="next" aria-label="Outros destinos">
+    <a href="#"><small>Anterior</small><strong>Pemba</strong></a>
+    <a href="#" style="text-align:right"><small>Seguinte</small><strong>Gorongosa</strong></a>
+  </nav>
+</main>
+
+<footer class="brand"><div class="wrap"><img src="../../../public/logo-dark.svg" alt="EKAYA" style="height:28px"><span>Turismo comunitário em Moçambique.</span></div></footer>
+</body>
+</html>
