@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { PreciseLocation } from "@/lib/geo";
 import { maputoToday } from "@/lib/rewards";
+import type { ItineraryRoute } from "@/lib/routes";
 
 /**
  * Games ↔ achievements bridge. The database is the only authority:
@@ -17,6 +18,8 @@ export interface CatalogGame {
   total: number;
   verification: "quiz" | "photo" | "record";
   unlockAfter: string | null;
+  /** Province games (passports, province quizzes); null for the others. */
+  provinceId: string | null;
 }
 
 export interface GameState {
@@ -37,7 +40,7 @@ export async function fetchGameState(): Promise<GameState> {
   const [cat, steps, comps, quiz] = await Promise.all([
     supabase
       .from("game_catalog")
-      .select("key, category, xp, total, verification, unlock_after")
+      .select("key, category, xp, total, verification, unlock_after, province_id")
       .order("sort_order"),
     supabase
       .from("game_steps")
@@ -64,6 +67,7 @@ export async function fetchGameState(): Promise<GameState> {
       total: g.total,
       verification: g.verification as CatalogGame["verification"],
       unlockAfter: g.unlock_after,
+      provinceId: g.province_id,
     })),
     progress,
     completed,
@@ -131,8 +135,12 @@ export interface QuizQuestion {
   question: string;
   options: string[];
 }
-export async function startQuiz(gameKey: string) {
-  const { data, error } = await supabase.rpc("start_game_quiz", { _game_key: gameKey });
+/** Questions come in the chosen language, shuffled on the server (option order included). */
+export async function startQuiz(gameKey: string, lang: "pt" | "en" = "pt") {
+  const { data, error } = await supabase.rpc("start_game_quiz", {
+    _game_key: gameKey,
+    _lang: lang,
+  });
   if (error) throw new Error(error.message);
   return data as unknown as { attempt_id: string; questions: QuizQuestion[] };
 }
@@ -143,12 +151,65 @@ export async function answerQuiz(attemptId: string, questionId: string, choice: 
     _choice: choice,
   });
   if (error) throw new Error(error.message);
-  return data as unknown as { correct: boolean; correct_index: number; explanation: string };
+  return data as unknown as {
+    correct: boolean;
+    correct_index: number;
+    explanation: string;
+    /** Where the answer comes from (every active question has one). */
+    source_url: string | null;
+  };
 }
 export async function finishQuiz(attemptId: string) {
   const { data, error } = await supabase.rpc("finish_game_quiz", { _attempt_id: attemptId });
   if (error) throw new Error(error.message);
   return data as unknown as { correct: number; total: number; passed: boolean; xp_awarded: number };
+}
+
+// ---------- Province games (0066): awarded only by the server, from a fully proven route ----------
+export const PASSPORT_PREFIX = "pp-";
+export const GRAND_TOUR_KEY = "gv";
+
+/** Mozambique's three regions, by province code. */
+export const PROVINCE_REGIONS = {
+  south: ["maputo-cidade", "maputo", "gaza", "inhambane"],
+  centre: ["sofala", "manica", "tete", "zambezia"],
+  north: ["nampula", "cabo-delgado", "niassa"],
+} as const;
+export const ALL_PROVINCES = [
+  ...PROVINCE_REGIONS.south,
+  ...PROVINCE_REGIONS.centre,
+  ...PROVINCE_REGIONS.north,
+];
+export const passportKey = (provinceCode: string) => PASSPORT_PREFIX + provinceCode;
+
+/**
+ * After a curated route is finished with every photo approved: the server gives that province's
+ * passport (or the Grande Viagem for 2+ provinces). Safe to call again: it never awards twice.
+ */
+export async function claimRouteGames(progressId: string) {
+  const { data, error } = await supabase.rpc("claim_route_games", { _progress_id: progressId });
+  if (error) throw new Error(error.message);
+  return data as unknown as { game_key: string; awarded: string[] };
+}
+
+/** The route qualifies for a province game on the server (claim_route_games, 0066). */
+export function routeGivesPassport(route: ItineraryRoute) {
+  return (
+    route.isCurated &&
+    route.isPublic &&
+    route.reviewStatus === "approved" &&
+    route.status === "active"
+  );
+}
+
+/** Asks the server for the route's game. Errors come back as user text; never awards twice. */
+export async function claimPassport(progressId: string, pt: boolean) {
+  try {
+    const r = await claimRouteGames(progressId);
+    return { ok: true as const, awarded: r.awarded.length > 0 };
+  } catch (e) {
+    return { ok: false as const, message: gameErrorText((e as Error).message, pt) };
+  }
 }
 
 /** Same rule as finish_game_quiz: pass at 70%. */
@@ -172,6 +233,18 @@ export function gameErrorText(msg: string, pt: boolean): string {
     out_of_stock: ["Recompensa esgotada.", "Reward out of stock."],
     reward_unavailable: ["Recompensa indisponível.", "Reward unavailable."],
     reward_expired: ["Esta recompensa já expirou.", "This reward has expired."],
+    route_not_proven: [
+      "O passaporte fica disponível quando todas as fotografias do roteiro forem aprovadas.",
+      "The passport unlocks once every photo of the itinerary is approved.",
+    ],
+    route_not_eligible: [
+      "Só os roteiros oficiais publicados dão passaportes.",
+      "Only published official itineraries give passports.",
+    ],
+    use_route_claim: [
+      "Este jogo ganha-se ao concluir um roteiro oficial.",
+      "This game is won by completing an official itinerary.",
+    ],
     own_reward: [
       "Não podes resgatar uma recompensa do teu próprio negócio.",
       "You can't redeem a reward from your own business.",
@@ -255,6 +328,42 @@ export const BADGES: BadgeDef[] = [
     name: { pt: "Madrugador", en: "Early Bird" },
     requirement: { pt: "Concluir «Do Nascer ao Pôr-do-Sol»", en: "Complete “Sunrise to Sunset”" },
     progress: (i) => [done(i, "g17"), 1],
+  },
+  {
+    id: "s9",
+    name: { pt: "Sul Completo", en: "South Complete" },
+    requirement: {
+      pt: "Passaportes de Maputo Cidade, Maputo, Gaza e Inhambane",
+      en: "Passports of Maputo City, Maputo, Gaza and Inhambane",
+    },
+    progress: (i) => [done(i, ...PROVINCE_REGIONS.south.map(passportKey)), 4],
+  },
+  {
+    id: "s10",
+    name: { pt: "Centro Completo", en: "Centre Complete" },
+    requirement: {
+      pt: "Passaportes de Sofala, Manica, Tete e Zambézia",
+      en: "Passports of Sofala, Manica, Tete and Zambézia",
+    },
+    progress: (i) => [done(i, ...PROVINCE_REGIONS.centre.map(passportKey)), 4],
+  },
+  {
+    id: "s11",
+    name: { pt: "Norte Completo", en: "North Complete" },
+    requirement: {
+      pt: "Passaportes de Nampula, Cabo Delgado e Niassa",
+      en: "Passports of Nampula, Cabo Delgado and Niassa",
+    },
+    progress: (i) => [done(i, ...PROVINCE_REGIONS.north.map(passportKey)), 3],
+  },
+  {
+    id: "s12",
+    name: { pt: "11 Províncias", en: "11 Provinces" },
+    requirement: {
+      pt: "O passaporte das 11 províncias",
+      en: "The passport of all 11 provinces",
+    },
+    progress: (i) => [done(i, ...ALL_PROVINCES.map(passportKey)), 11],
   },
 ];
 

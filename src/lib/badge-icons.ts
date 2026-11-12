@@ -8,6 +8,10 @@ import {
   Sunrise,
   Waves,
   Award,
+  Compass,
+  Mountain,
+  Palmtree,
+  Stamp,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,6 +25,10 @@ const BADGE_ICONS: Record<string, LucideIcon> = {
   s6: Map,
   s7: PenLine,
   s8: Sunrise,
+  s9: Palmtree,
+  s10: Mountain,
+  s11: Compass,
+  s12: Stamp,
 };
 
 export function badgeIcon(id: string): LucideIcon {

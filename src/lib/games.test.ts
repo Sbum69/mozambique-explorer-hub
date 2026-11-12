@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { BADGES, badgeStatus, isUnlocked, quizPassed, type BadgeInput } from "./games";
+import {
+  ALL_PROVINCES,
+  BADGES,
+  PROVINCE_REGIONS,
+  badgeStatus,
+  isUnlocked,
+  passportKey,
+  quizPassed,
+  type BadgeInput,
+} from "./games";
 
 const empty: BadgeInput = {
   completed: {},
@@ -23,6 +32,7 @@ describe("games rules", () => {
       total: 4,
       verification: "photo" as const,
       unlockAfter: "g3",
+      provinceId: null,
     };
     expect(isUnlocked(g, {})).toBe(false);
     expect(isUnlocked(g, { g3: "2026-01-01" })).toBe(true);
@@ -36,5 +46,22 @@ describe("games rules", () => {
   });
   it("Community Friend needs 3 completed bookings", () => {
     expect(badgeStatus(badge("s2"), { ...empty, bookingsCompleted: 3 }).earned).toBe(true);
+  });
+  it("region badges need every passport of the region, and only passports", () => {
+    const south = Object.fromEntries(
+      PROVINCE_REGIONS.south.map((p) => [passportKey(p), "2026-11-12"]),
+    );
+    expect(badgeStatus(badge("s9"), { ...empty, completed: south }).earned).toBe(true);
+    const { [passportKey("gaza")]: _gaza, ...missingGaza } = south;
+    void _gaza;
+    expect(badgeStatus(badge("s9"), { ...empty, completed: missingGaza }).earned).toBe(false);
+    expect(badgeStatus(badge("s10"), { ...empty, completed: south }).earned).toBe(false);
+    expect(badgeStatus(badge("s9"), { ...empty, completed: { gv: "2026-11-12" } }).have).toBe(0);
+  });
+  it("the 11 provinces are the three regions, with no repeats", () => {
+    expect(ALL_PROVINCES).toHaveLength(11);
+    expect(new Set(ALL_PROVINCES).size).toBe(11);
+    const all = Object.fromEntries(ALL_PROVINCES.map((p) => [passportKey(p), "2026-11-12"]));
+    expect(badgeStatus(badge("s12"), { ...empty, completed: all }).earned).toBe(true);
   });
 });
