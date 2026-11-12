@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Home EKAYA</title>
+<link rel="stylesheet" href="mockup.css">
+<style>
+/* Home: the approved scroll story opens the page (first frame shown static here), then one
+   sentence to plan, the destinations rail from the database, and the brand footer. */
+.story { position: relative; height: 640px; overflow: hidden; color: #fff; }
+.story .half { position: absolute; top: 0; bottom: 0; width: 50%; background: url("../../../src/assets/hero-vilankulo-1296.webp") center / cover; }
+.story .half.l { left: 0; background-position: 30% 50%; }
+.story .half.r { right: 0; background-position: 70% 50%; transform: translateX(6%); }
+.story .reveal { position: absolute; inset: 0; background: url("../../../src/assets/dest-ilha.webp") center / cover; }
+.story .veil { position: absolute; inset: 0; background: rgb(0 0 0 / 0.45); }
+.story .wrap { position: relative; height: 100%; display: flex; flex-direction: column; }
+.story h1 { font-size: clamp(40px, 6.4vw, 76px); line-height: 1.02; max-width: 12ch; margin-top: auto; }
+.story p { max-width: 46ch; font-size: 18px; color: rgb(255 255 255 / 0.9); margin: 16px 0 0; }
+.story .hint { margin: 28px 0 44px; font-size: 14px; color: rgb(255 255 255 / 0.85); display: flex; gap: 10px; align-items: center; }
+.story .hint i { width: 1px; height: 28px; background: #fff; display: inline-block; }
+.plan { margin-top: -36px; position: relative; }
+.plan .card { padding: 22px 24px; box-shadow: 0 12px 32px -8px rgb(13 22 21 / 0.25); }
+.sentence { font-family: var(--display); font-size: clamp(22px, 2.6vw, 30px); line-height: 1.5; }
+.sentence .pick { display: inline-flex; align-items: center; gap: 6px; border-bottom: 2px solid var(--primary); color: var(--primary); padding: 0 2px; }
+.plan .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+.plan .row .btn { margin-left: auto; }
+section.rail { margin-top: 56px; }
+.rail-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.rail-head h2 { font-size: 30px; }
+.rail-track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(240px, 1fr); gap: 16px; overflow-x: auto; margin-top: 18px; padding-bottom: 6px; }
+.dest { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 3 / 4; color: #fff; }
+.dest img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.dest .v { position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgb(0 0 0 / 0.72)); }
+.dest .t { position: absolute; left: 14px; right: 14px; bottom: 14px; }
+.dest h3 { font-size: 24px; }
+.dest p { margin: 4px 0 0; font-size: 14px; color: rgb(255 255 255 / 0.9); }
+.how { margin-top: 64px; display: grid; grid-template-columns: 1fr 2fr; gap: 32px; }
+.how ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; counter-reset: s; }
+.how li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 12px; }
+.how li::before { content: counter(s); font-family: var(--display); font-size: 28px; color: var(--primary); }
+.biz { margin-top: 64px; border-top: 1px solid var(--border); padding-top: 32px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
+@media (max-width: 640px) {
+  .story { height: 560px; }
+  .plan .row .btn { margin-left: 0; width: 100%; justify-content: center; }
+  .how { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="reveal"></div>
+  <div class="half l"></div><div class="half r"></div>
+  <div class="veil"></div>
+  <div class="wrap">
+    <div class="top"><img class="logo" src="../../../public/logo-dark.svg" alt="EKAYA">
+      <span style="display:flex;gap:8px"><a class="btn btn-light" href="#">Entrar</a><a class="btn hide-sm" style="color:#fff" href="#">Criar conta</a></span></div>
+    <h1>Explora Moçambique para além da superfície.</h1>
+    <p>Roteiros, atividades e negócios locais de turismo comunitário, com quem vive lá.</p>
+    <div class="hint"><i></i> Desce para abrir a costa até à Ilha de Moçambique</div>
+  </div>
+  <span class="credit">© Brian Dell · Domínio público</span>
+</div>
+
+<div class="wrap plan">
+  <div class="card">
+    <div class="sentence">Vou a <span class="pick">qualquer destino ▾</span> durante <span class="pick">quantos dias? ▾</span> e procuro…</div>
+    <div class="row">
+      <span class="chip">Praias e natureza</span><span class="chip">Cultura e história</span><span class="chip">Experiências comunitárias</span>
+      <span class="chip">Gastronomia</span><span class="chip">Vida selvagem</span><span class="chip">Aventura</span>
+      <a class="btn btn-primary" href="recomendacoes.html">Ver sugestões</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <section class="rail">
+    <div class="rail-head"><h2>Destinos</h2><a href="destino.html">Ver todos no mapa</a></div>
+    <div class="rail-track">
+      <a class="dest" href="destino.html"><img src="../../../src/assets/dest-ilha.webp" alt=""><span class="v"></span><span class="t"><h3>Ilha de Moçambique</h3><p>Nampula · 3 roteiros</p></span></a>
+      <a class="dest" href="#"><img src="../../../src/assets/dest-inhambane.webp" alt=""><span class="v"></span><span class="t"><h3>Inhambane</h3><p>Inhambane · 6 roteiros</p></span></a>
+      <a class="dest" href="#"><img src="../../../src/assets/dest-gorongosa.webp" alt=""><span class="v"></span><span class="t"><h3>Gorongosa</h3><p>Sofala · 2 roteiros</p></span></a>
+      <a class="dest" href="#"><img src="../../../src/assets/dest-maputo.webp" alt=""><span class="v"></span><span class="t"><h3>Maputo</h3><p>Cidade de Maputo · 4 roteiros</p></span></a>
+      <a class="dest" href="#"><img src="../../../src/assets/dest-pemba.webp" alt=""><span class="v"></span><span class="t"><h3>Pemba</h3><p>Cabo Delgado · 1 roteiro</p></span></a>
+    </div>
+    <p class="src">Contagens lidas da BD (roteiros públicos aprovados por província).</p>
+  </section>
+
+  <section class="how">
+    <h2>Como funciona</h2>
+    <ol>
+      <li><div><strong>Diz para onde e quanto tempo.</strong><br><span class="muted">Ou deixa em aberto e descobre.</span></div></li>
+      <li><div><strong>Escolhe roteiros e atividades locais.</strong><br><span class="muted">Guiados por quem vive no sítio.</span></div></li>
+      <li><div><strong>Guarda na tua conta e vai.</strong><br><span class="muted">Roteiros, favoritos e progresso em qualquer dispositivo.</span></div></li>
+    </ol>
+  </section>
+
+  <section class="biz">
+    <div><h2 style="font-size:24px">Tens um negócio local?</h2><p class="muted" style="margin:6px 0 0">Alojamento, guia, restaurante ou cooperativa: aparece para quem visita.</p></div>
+    <a class="btn btn-ghost" href="#">Para negócios</a>
+  </section>
+</main>
+
+<footer class="brand"><div class="wrap">
+  <div><img src="../../../public/logo-dark.svg" alt="EKAYA" style="height:28px"><p style="margin:12px 0 0;max-width:36ch">Turismo comunitário em Moçambique.</p></div>
+  <div style="display:grid;gap:6px"><a href="#">Termos</a><a href="#">Privacidade</a><a href="#">Preços e reembolsos</a><a href="#">Créditos</a></div>
+</div></footer>
+</body>
+</html>
