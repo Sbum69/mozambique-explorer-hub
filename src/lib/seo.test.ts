@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { homeHead } from "./home-head";
+
 import {
   PRIVATE_PATH_PREFIXES,
   PUBLIC_SITEMAP_PATHS,
@@ -62,8 +64,7 @@ describe("SEO: lastmod, detail pages and structured data", () => {
     );
   });
 
-  it("home carries Organization and WebSite JSON-LD with the EKAYA name", async () => {
-    const { homeHead } = await import("./home-head");
+  it("home carries Organization and WebSite JSON-LD with the EKAYA name", () => {
     const ld = JSON.parse(homeHead().scripts[0].children) as {
       "@type": string;
       name: string;
