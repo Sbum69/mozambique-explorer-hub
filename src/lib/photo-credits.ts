@@ -16,16 +16,22 @@ import provNiassa from "@/assets/prov-niassa.webp";
 import provNiassaThumb from "@/assets/prov-niassa-thumb.webp";
 import destMaputo from "@/assets/dest-maputo.webp";
 import destMaputoThumb from "@/assets/dest-maputo-thumb.webp";
+import destMaputoCard from "@/assets/dest-maputo-card.webp";
 import destIlha from "@/assets/dest-ilha.webp";
 import destIlhaThumb from "@/assets/dest-ilha-thumb.webp";
+import destIlhaCard from "@/assets/dest-ilha-card.webp";
 import destInhambane from "@/assets/dest-inhambane.webp";
 import destInhambaneThumb from "@/assets/dest-inhambane-thumb.webp";
+import destInhambaneCard from "@/assets/dest-inhambane-card.webp";
 import destVilankulo from "@/assets/dest-vilankulo.webp";
 import destVilankuloThumb from "@/assets/dest-vilankulo-thumb.webp";
+import destVilankuloCard from "@/assets/dest-vilankulo-card.webp";
 import destPemba from "@/assets/dest-pemba.webp";
 import destPembaThumb from "@/assets/dest-pemba-thumb.webp";
+import destPembaCard from "@/assets/dest-pemba-card.webp";
 import destGorongosa from "@/assets/dest-gorongosa.webp";
 import destGorongosaThumb from "@/assets/dest-gorongosa-thumb.webp";
+import destGorongosaCard from "@/assets/dest-gorongosa-card.webp";
 import cultIndependencia from "@/assets/cult-independencia.webp";
 import cultSamora from "@/assets/cult-samora.webp";
 import cultFrelimo from "@/assets/cult-frelimo.webp";
@@ -37,6 +43,8 @@ export interface PhotoCredit {
   src: string;
   /** Small version for lists, when there is one. */
   thumb?: string;
+  /** Portrait 3:4 crop (450×600) for the Home destination cards, when there is one. */
+  card?: string;
   shows: { pt: string; en: string };
   author: string;
   /** Licence name, or "public-domain" (shown translated). */
@@ -115,6 +123,7 @@ export const PHOTOS = {
     id: "dest-maputo",
     src: destMaputo,
     thumb: destMaputoThumb,
+    card: destMaputoCard,
     shows: { pt: "Maputo vista da baía", en: "Maputo seen from the bay" },
     author: "Andrew Moir",
     license: "CC BY 2.0",
@@ -126,6 +135,7 @@ export const PHOTOS = {
     id: "dest-ilha",
     src: destIlha,
     thumb: destIlhaThumb,
+    card: destIlhaCard,
     shows: {
       pt: "Fortaleza de São Sebastião, Ilha de Moçambique",
       en: "Fort of São Sebastião, Island of Mozambique",
@@ -139,6 +149,7 @@ export const PHOTOS = {
     id: "dest-inhambane",
     src: destInhambane,
     thumb: destInhambaneThumb,
+    card: destInhambaneCard,
     shows: { pt: "Praia de Guinjata, Inhambane", en: "Guinjata Beach, Inhambane" },
     author: "Bento Guirrugo",
     license: "CC BY-SA 4.0",
@@ -149,6 +160,7 @@ export const PHOTOS = {
     id: "dest-vilankulo",
     src: destVilankulo,
     thumb: destVilankuloThumb,
+    card: destVilankuloCard,
     shows: {
       pt: "Amanhecer em Vilankulo, com o arquipélago de Bazaruto",
       en: "Dawn in Vilankulo, with the Bazaruto Archipelago",
@@ -162,6 +174,7 @@ export const PHOTOS = {
     id: "dest-pemba",
     src: destPemba,
     thumb: destPembaThumb,
+    card: destPembaCard,
     shows: { pt: "Embondeiro na baía de Pemba", en: "Baobab on Pemba Bay" },
     author: "Ton Rulkens",
     license: "CC BY-SA 2.0",
@@ -173,6 +186,7 @@ export const PHOTOS = {
     id: "dest-gorongosa",
     src: destGorongosa,
     thumb: destGorongosaThumb,
+    card: destGorongosaCard,
     shows: {
       pt: "Monte Gorongosa, Parque Nacional da Gorongosa",
       en: "Mount Gorongosa, Gorongosa National Park",
@@ -253,7 +267,9 @@ export function provincePhoto(code: string | null | undefined): PhotoCredit | un
 /** Credit of a bundled photo from its URL (main or thumbnail), so any image can show its "©". */
 export function creditFor(src: string | null | undefined): PhotoCredit | undefined {
   if (!src) return undefined;
-  return Object.values(PHOTOS).find((p) => p.src === src || ("thumb" in p && p.thumb === src));
+  return Object.values(PHOTOS).find(
+    (p) => p.src === src || ("thumb" in p && p.thumb === src) || ("card" in p && p.card === src),
+  );
 }
 
 export function licenseLabel(license: string, lang: "pt" | "en"): string {
