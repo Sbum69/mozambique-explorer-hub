@@ -16,12 +16,13 @@ export interface TravelPreferences {
  * This map keeps the relation explicit instead of guessing at runtime.
  */
 const INTEREST_TO_CATEGORIES: Record<string, string[]> = {
-  beach: ["beach"],
-  culture: ["culture", "heritage"],
+  // Itineraries use a wider vocabulary (history, wildlife, diving…): mapped here, never guessed.
+  beach: ["beach", "diving", "relax"],
+  culture: ["culture", "heritage", "history", "art", "music"],
   food: ["food"],
-  nature: ["nature"],
-  community: ["community"],
-  heritage: ["heritage", "culture"],
+  nature: ["nature", "wildlife", "hiking"],
+  community: ["community", "local_life"],
+  heritage: ["heritage", "culture", "history"],
   festival: ["culture"],
   adventure: ["adventure"],
 };

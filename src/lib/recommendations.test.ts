@@ -101,3 +101,18 @@ describe("recommendations: one logic for the Home and the dashboard", () => {
     expect(r.routes[0]).toBe("r-sof-3d");
   });
 });
+
+describe("recommendations: itinerary interest vocabulary", () => {
+  it("wildlife, history and diving routes match the Home interests", () => {
+    const routes = [
+      route("gorongosa", "SOF", 4, ["wildlife"]),
+      route("ilha", "NPL", 3, ["history"]),
+      route("tofo", "INH", 3, ["diving"]),
+    ];
+    expect(recommendRoutes(routes, { interests: ["nature"] }, null, 1)[0].item.id).toBe(
+      "gorongosa",
+    );
+    expect(recommendRoutes(routes, { interests: ["culture"] }, null, 1)[0].item.id).toBe("ilha");
+    expect(recommendRoutes(routes, { interests: ["beach"] }, null, 1)[0].item.id).toBe("tofo");
+  });
+});
