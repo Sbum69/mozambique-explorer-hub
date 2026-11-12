@@ -1541,6 +1541,7 @@ export type Database = {
         Row: {
           category: string
           key: string
+          province_id: string | null
           sort_order: number
           total: number
           unlock_after: string | null
@@ -1550,6 +1551,7 @@ export type Database = {
         Insert: {
           category: string
           key: string
+          province_id?: string | null
           sort_order?: number
           total: number
           unlock_after?: string | null
@@ -1559,6 +1561,7 @@ export type Database = {
         Update: {
           category?: string
           key?: string
+          province_id?: string | null
           sort_order?: number
           total?: number
           unlock_after?: string | null
@@ -1625,6 +1628,8 @@ export type Database = {
           finished_at: string | null
           game_key: string
           id: string
+          lang: string
+          option_orders: Json
           passed: boolean | null
           question_ids: string[]
           started_at: string
@@ -1636,6 +1641,8 @@ export type Database = {
           finished_at?: string | null
           game_key: string
           id?: string
+          lang?: string
+          option_orders?: Json
           passed?: boolean | null
           question_ids: string[]
           started_at?: string
@@ -1647,6 +1654,8 @@ export type Database = {
           finished_at?: string | null
           game_key?: string
           id?: string
+          lang?: string
+          option_orders?: Json
           passed?: boolean | null
           question_ids?: string[]
           started_at?: string
@@ -1680,29 +1689,47 @@ export type Database = {
         Row: {
           active: boolean
           correct_index: number
+          difficulty: string
+          explanation_en: string
           explanation_pt: string
           id: string
+          options_en: string[]
           options_pt: string[]
           position: number
+          province_id: string | null
+          question_en: string
           question_pt: string
+          source_url: string
         }
         Insert: {
           active?: boolean
           correct_index: number
+          difficulty?: string
+          explanation_en: string
           explanation_pt: string
           id?: string
+          options_en: string[]
           options_pt: string[]
           position: number
+          province_id?: string | null
+          question_en: string
           question_pt: string
+          source_url: string
         }
         Update: {
           active?: boolean
           correct_index?: number
+          difficulty?: string
+          explanation_en?: string
           explanation_pt?: string
           id?: string
+          options_en?: string[]
           options_pt?: string[]
           position?: number
+          province_id?: string | null
+          question_en?: string
           question_pt?: string
+          source_url?: string
         }
         Relationships: []
       }
@@ -2391,6 +2418,39 @@ export type Database = {
           },
         ]
       }
+      route_provinces: {
+        Row: {
+          position: number
+          province_id: string
+          route_id: string
+        }
+        Insert: {
+          position: number
+          province_id: string
+          route_id: string
+        }
+        Update: {
+          position?: number
+          province_id?: string
+          route_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_provinces_province_id_fkey"
+            columns: ["province_id"]
+            isOneToOne: false
+            referencedRelation: "provinces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "route_provinces_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       route_stops: {
         Row: {
           community_candidate: boolean
@@ -2411,8 +2471,11 @@ export type Database = {
           location: string | null
           notes: string | null
           route_day_id: string
+          source_label: string | null
+          source_url: string | null
           stop_order: number
           stop_type: string | null
+          travel_minutes: number | null
           validation_status: string
         }
         Insert: {
@@ -2434,8 +2497,11 @@ export type Database = {
           location?: string | null
           notes?: string | null
           route_day_id: string
+          source_label?: string | null
+          source_url?: string | null
           stop_order: number
           stop_type?: string | null
+          travel_minutes?: number | null
           validation_status?: string
         }
         Update: {
@@ -2457,8 +2523,11 @@ export type Database = {
           location?: string | null
           notes?: string | null
           route_day_id?: string
+          source_label?: string | null
+          source_url?: string | null
           stop_order?: number
           stop_type?: string | null
+          travel_minutes?: number | null
           validation_status?: string
         }
         Relationships: [
@@ -2494,6 +2563,8 @@ export type Database = {
       }
       routes: {
         Row: {
+          best_season_en: string | null
+          best_season_pt: string | null
           catalog_notes_en: string | null
           catalog_notes_pt: string | null
           community_candidates: Json
@@ -2510,7 +2581,7 @@ export type Database = {
           is_curated: boolean
           is_public: boolean
           owner_id: string | null
-          province_id: string | null
+          province_id: string
           rejection_reason: string | null
           requires_validation: boolean
           review_status: string
@@ -2525,6 +2596,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          best_season_en?: string | null
+          best_season_pt?: string | null
           catalog_notes_en?: string | null
           catalog_notes_pt?: string | null
           community_candidates?: Json
@@ -2541,7 +2614,7 @@ export type Database = {
           is_curated?: boolean
           is_public?: boolean
           owner_id?: string | null
-          province_id?: string | null
+          province_id: string
           rejection_reason?: string | null
           requires_validation?: boolean
           review_status?: string
@@ -2556,6 +2629,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          best_season_en?: string | null
+          best_season_pt?: string | null
           catalog_notes_en?: string | null
           catalog_notes_pt?: string | null
           community_candidates?: Json
@@ -2572,7 +2647,7 @@ export type Database = {
           is_curated?: boolean
           is_public?: boolean
           owner_id?: string | null
-          province_id?: string | null
+          province_id?: string
           rejection_reason?: string | null
           requires_validation?: boolean
           review_status?: string
@@ -3046,6 +3121,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      claim_route_games: { Args: { _progress_id: string }; Returns: Json }
       current_legal_versions: { Args: never; Returns: Json }
       delete_my_account: { Args: { _confirm: string }; Returns: string }
       distance_m: {
@@ -3217,7 +3293,10 @@ export type Database = {
         Returns: undefined
       }
       sponsored_placements_tick: { Args: never; Returns: number }
-      start_game_quiz: { Args: { _game_key: string }; Returns: Json }
+      start_game_quiz: {
+        Args: { _game_key: string; _lang?: string }
+        Returns: Json
+      }
       submit_business_lead: {
         Args: {
           _accepts_bookings: boolean
