@@ -157,7 +157,7 @@ export function recommendDestinations(
 ): Scored<Destination>[] {
   return destinations
     .map((destination) => scoreDestination(destination, prefs, experiences))
-    .sort((a, b) => b.score - a.score || b.item.visitorsK - a.item.visitorsK)
+    .sort((a, b) => b.score - a.score || a.item.name.localeCompare(b.item.name))
     .slice(0, limit);
 }
 

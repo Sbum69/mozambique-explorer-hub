@@ -13,8 +13,6 @@ import vilankuloThumb from "@/assets/dest-vilankulo-thumb.webp";
 import pembaThumb from "@/assets/dest-pemba-thumb.webp";
 import gorongosaThumb from "@/assets/dest-gorongosa-thumb.webp";
 
-export type DestinationBadge = "most-visited" | "most-recommended";
-
 export interface Destination {
   /** Real database identifier (uuid). Canonical reference from now on. */
   id: string;
@@ -28,8 +26,7 @@ export interface Destination {
   image: string;
   /** Small square version (288 px) for lists; same artwork as image. */
   thumbnail: string;
-  visitorsK: number;
-  badges: DestinationBadge[];
+  // No visitor counts or "most visited" badges: the database values had no source (removed 11/2026).
   highlights: { pt: string; en: string }[];
   coords: [number, number]; // [lat, lng]
 }
@@ -54,8 +51,6 @@ const THUMB_BY_SLUG: Record<string, string> = {
   gorongosa: gorongosaThumb,
 };
 
-const BADGES: DestinationBadge[] = ["most-visited", "most-recommended"];
-
 interface DestinationRow {
   id: string;
   slug: string;
@@ -68,8 +63,6 @@ interface DestinationRow {
   description_en: string | null;
   region_pt: string | null;
   region_en: string | null;
-  visitors_k: number | null;
-  badges: string[] | null;
   highlights: unknown;
   images: string[] | null;
 }
@@ -100,10 +93,6 @@ export function mapDestination(row: DestinationRow): Destination {
     description: { pt: descriptionPt, en: descriptionEn },
     image: IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
     thumbnail: THUMB_BY_SLUG[row.slug] ?? IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
-    visitorsK: row.visitors_k ?? 0,
-    badges: (row.badges ?? []).filter((badge): badge is DestinationBadge =>
-      (BADGES as string[]).includes(badge),
-    ),
     coords: [Number(row.lat ?? 0), Number(row.lng ?? 0)],
     highlights: toHighlights(row.highlights),
   };
@@ -114,7 +103,7 @@ export async function fetchDestinations(): Promise<Destination[]> {
   const { data, error } = await supabase
     .from("destinations")
     .select(
-      "id, slug, name, province, category, lat, lng, description_pt, description_en, region_pt, region_en, visitors_k, badges, highlights, images",
+      "id, slug, name, province, category, lat, lng, description_pt, description_en, region_pt, region_en, highlights, images",
     )
     .order("created_at", { ascending: true });
 

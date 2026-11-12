@@ -8,8 +8,8 @@ import {
   MapPin,
   Calendar,
   Compass,
-  Download,
-  WifiOff,
+  Bookmark,
+  Signal,
   Heart,
   Star,
   Clock,
@@ -571,12 +571,12 @@ export function HomePage() {
                     : "Tell us what you want to experience and for how long.",
               },
               {
-                icon: Download,
-                title: lang === "pt" ? "Descarrega os roteiros" : "Download your routes",
+                icon: Bookmark,
+                title: lang === "pt" ? "Guarda na tua conta" : "Save it to your account",
                 desc:
                   lang === "pt"
-                    ? "Guarda mapas, histórias e dicas no telefone."
-                    : "Save maps, stories and tips on your phone.",
+                    ? "Roteiros, favoritos e progresso ficam na tua conta, em qualquer dispositivo."
+                    : "Routes, favourites and progress stay in your account, on any device.",
               },
               {
                 icon: Sparkles,
@@ -632,15 +632,15 @@ export function HomePage() {
         <Card>
           <CardContent className="p-6">
             <div className="size-11 rounded-xl bg-secondary text-secondary-foreground grid place-content-center">
-              <WifiOff className="size-5" />
+              <Signal className="size-5" />
             </div>
             <h3 className="mt-4 text-xl font-semibold">
-              {lang === "pt" ? "Porquê offline-first?" : "Why offline-first?"}
+              {lang === "pt" ? "Pensada para redes fracas" : "Built for weak networks"}
             </h3>
             <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
               {lang === "pt"
-                ? "Muitos destinos em Moçambique têm internet limitada. O EKAYA foi pensado para funcionar sem rede — mapas, roteiros, histórias e dicas continuam acessíveis quando mais precisas."
-                : "Many destinations in Mozambique have limited internet. EKAYA is built to work offline — maps, routes, stories and tips stay available whenever you need them."}
+                ? "Muitos destinos em Moçambique têm internet limitada. As páginas do EKAYA são leves e as imagens comprimidas, para abrirem mesmo com pouca rede. A app ainda precisa de ligação à internet."
+                : "Many destinations in Mozambique have limited internet. EKAYA pages are light and images compressed, so they open even on a weak connection. The app still needs an internet connection."}
             </p>
           </CardContent>
         </Card>

@@ -1,4 +1,4 @@
-import { Check, Users, Navigation } from "lucide-react";
+import { Check, Navigation } from "lucide-react";
 import { useEffect } from "react";
 import {
   MapContainer,
@@ -167,14 +167,6 @@ export function InteractiveMap({
                   {lang === "pt" ? "Visitado" : "Visited"}
                 </p>
               )}
-              <p style={{ fontSize: 11, color: "#888", margin: "0 0 8px" }}>
-                <Users
-                  size={12}
-                  aria-hidden="true"
-                  style={{ display: "inline", verticalAlign: "-2px" }}
-                />{" "}
-                {d.visitorsK}k {lang === "pt" ? "visitantes/ano" : "visitors/year"}
-              </p>
               {onSelect && (
                 <button
                   onClick={() => onSelect(d)}

@@ -226,9 +226,6 @@ const dict = {
   next: { pt: "Continuar", en: "Continue" },
   confirm: { pt: "Confirmar e explorar", en: "Confirm and explore" },
   skip: { pt: "Pular por agora", en: "Skip for now" },
-  mostVisited: { pt: "Mais visitado", en: "Most visited" },
-  mostRecommended: { pt: "Mais recomendado", en: "Most recommended" },
-  visitorsYear: { pt: "visitantes/ano", en: "visitors/year" },
   // home
   exploreProto: { pt: "Explorar a plataforma", en: "Explore the platform" },
   heroTitle: {
