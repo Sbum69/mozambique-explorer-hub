@@ -80,6 +80,7 @@ import {
   routeDescription,
   routePriceMzn,
   routeStopCount,
+  routeAllStops,
   routeInProvince,
   routeTitle,
   stopTitle,
@@ -470,8 +471,7 @@ function ItinerariesPage() {
             </div>
 
             <div className="space-y-1.5 mb-4">
-              {route.days
-                .flatMap((d) => d.stops)
+              {routeAllStops(route)
                 .slice(0, 3)
                 .map((s) => (
                   <div key={s.id} className="flex items-center gap-2 text-sm">
