@@ -59,7 +59,7 @@ const INLAND = new Set([
   "Jardim Tunduru",
 ]);
 
-const splitPlace =(n: string) => {
+const splitPlace = (n: string) => {
   const m = n.match(/^(.*?) (?:em|—) ((?:Parque|Reserva|Jardim)[^,]*)$/);
   return m ? { act: m[1], place: m[2] } : { act: n, place: "(cidade)" };
 };
@@ -71,20 +71,39 @@ function decide(prov: string, place: string, act: string): [string, string] {
     return ["rejeitar", "atividade de costa num local do interior"];
   if (place === "Jardim Tunduru" && /safari|leões|leopardos|elefantes|savana/i.test(act))
     return ["rejeitar", "não existe num jardim urbano"];
-  if (/Jogos Escolares|eventos do (IAM|INCM|INICC)|capacitação|agrotecnia|maneio integrado/i.test(act))
+  if (
+    /Jogos Escolares|eventos do (IAM|INCM|INICC)|capacitação|agrotecnia|maneio integrado/i.test(act)
+  )
     return ["rejeitar", "evento ou ação institucional sem data nem ligação verificável ao local"];
   if (/^Particip(ar|ação) (em|no)/i.test(act))
     return ["rejeitar", "evento genérico sem data, organizador nem local verificáveis"];
   if (/leões|leopardos|elefantes/i.test(act))
-    return ["por verificar", "fauna específica: precisa de fonte do parque (ANAC/gestor) a confirmar a presença"];
+    return [
+      "por verificar",
+      "fauna específica: precisa de fonte do parque (ANAC/gestor) a confirmar a presença",
+    ];
   if (/projetos|comunidades/i.test(act))
-    return ["por verificar", "projeto ou comunidade concretos não identificados; só com parceiro real"];
+    return [
+      "por verificar",
+      "projeto ou comunidade concretos não identificados; só com parceiro real",
+    ];
   if (/^Provar /i.test(act))
-    return ["sugestão", "prato a provar: sugestão dentro de um dia de roteiro, não é destino nem reserva"];
+    return [
+      "sugestão",
+      "prato a provar: sugestão dentro de um dia de roteiro, não é destino nem reserva",
+    ];
   return ["sugestão", "atividade genérica: sugestão dentro de um dia de roteiro, não é destino"];
 }
 
-type Out = { prov: string; place: string; act: string; cat: string; n: number; dec: string; why: string };
+type Out = {
+  prov: string;
+  place: string;
+  act: string;
+  cat: string;
+  n: number;
+  dec: string;
+  why: string;
+};
 const groups = new Map<string, Out>();
 const perProv: Record<string, Record<string, number>> = {};
 const bump = (p: string, k: string, by = 1) => {
@@ -99,12 +118,22 @@ for (const r of rows) {
   const g = groups.get(key);
   if (g) {
     g.n++;
-    bump(r.prov, g.dec === "rejeitar" ? "rejeitadas" : g.dec === "por verificar" ? "por verificar" : "juntadas");
+    bump(
+      r.prov,
+      g.dec === "rejeitar"
+        ? "rejeitadas"
+        : g.dec === "por verificar"
+          ? "por verificar"
+          : "juntadas",
+    );
     continue;
   }
   const [dec, why] = decide(r.prov, place, act);
   groups.set(key, { prov: r.prov, place, act, cat: r.cat, n: 1, dec, why });
-  bump(r.prov, dec === "rejeitar" ? "rejeitadas" : dec === "por verificar" ? "por verificar" : "ficaram");
+  bump(
+    r.prov,
+    dec === "rejeitar" ? "rejeitadas" : dec === "por verificar" ? "por verificar" : "ficaram",
+  );
 }
 
 const csv = (s: string | number) => `"${String(s).replace(/"/g, '""')}"`;
