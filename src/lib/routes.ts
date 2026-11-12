@@ -178,10 +178,12 @@ interface RouteRow {
     | null;
 }
 
+// routes reach provinces twice since 0064 (province_id and route_provinces): name the FK, or
+// PostgREST refuses the embed as ambiguous (PGRST201) and no route loads.
 const SELECT = `id, owner_id, title, title_en, subtitle_pt, subtitle_en, description, description_en, interests, intensity,
   review_status, rejection_reason, submitted_at, source_route_id, province_id, unique_code, duration_days, cover_image,
   is_public, is_curated, status, created_at, requires_validation, catalog_notes_pt, catalog_notes_en, community_candidates,
-  provinces(code, name_pt, name_en),
+  provinces!routes_province_id_fkey(code, name_pt, name_en),
   route_days(id, day_number, title, title_en, description, is_unassigned,
     route_stops(id, stop_order, notes, estimated_duration_minutes, destination_id, experience_id, community_experience_id,
       stop_type, custom_title_pt, custom_title_en, description_pt, description_en, location, lat, lng, is_free, validation_status, community_candidate,
