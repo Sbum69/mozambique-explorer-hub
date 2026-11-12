@@ -35,8 +35,17 @@ function categoriesFor(interests: string[]): string[] {
   return [...new Set(interests.flatMap((id) => INTEREST_TO_CATEGORIES[id] ?? [id]))];
 }
 
+/**
+ * Something real to personalise with: a destination or provinces, interests or a trip length.
+ * Without any of them the UI shows a general "Discover" list and never says "for you".
+ */
 export function hasPreferences(prefs: TravelPreferences | undefined): boolean {
-  return !!prefs?.province || (prefs?.provinces?.length ?? 0) > 0;
+  return (
+    !!prefs?.province ||
+    (prefs?.provinces?.length ?? 0) > 0 ||
+    (prefs?.interests?.length ?? 0) > 0 ||
+    !!prefs?.durationDays
+  );
 }
 
 /** Province codes the tourist cares about (several provinces are allowed). */
@@ -145,7 +154,7 @@ export function recommendExperiences(
 ): Scored<Experience>[] {
   return experiences
     .map((experience) => scoreExperience(experience, prefs, ctx))
-    .sort((a, b) => b.score - a.score || b.item.rating - a.item.rating)
+    .sort((a, b) => b.score - a.score || a.item.title.pt.localeCompare(b.item.title.pt))
     .slice(0, limit);
 }
 
@@ -192,5 +201,47 @@ export function recommendCommunity<T extends { provinceCode: string; category: s
       };
     })
     .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+/** The parts of an itinerary the recommendation needs (ItineraryRoute has them all). */
+interface RouteLike {
+  durationDays: number;
+  interests: string[];
+  province: { code: string } | null;
+  isCurated: boolean;
+}
+
+/**
+ * Itineraries use the same rules as everything else: never longer than the trip (one day of
+ * tolerance), +4 when the province matches, +3 per shared interest; curated ones win ties.
+ */
+export function recommendRoutes<T extends RouteLike>(
+  routes: T[],
+  prefs: TravelPreferences,
+  preferred?: Destination | null,
+  limit = 4,
+): Scored<T>[] {
+  const provinceCodes = preferredProvinceCodes(prefs, preferred);
+  const interests = prefs.interests ?? [];
+  const maxDays = prefs.durationDays;
+  return routes
+    .filter((route) => !maxDays || route.durationDays <= maxDays + 1)
+    .map((item) => {
+      const matchesProvince = !!item.province && provinceCodes.includes(item.province.code);
+      const reasons = interests.filter((id) =>
+        item.interests.some(
+          (routeInterest) =>
+            routeInterest === id || (INTEREST_TO_CATEGORIES[id] ?? []).includes(routeInterest),
+        ),
+      );
+      return {
+        item,
+        reasons,
+        matchesProvince,
+        score: (matchesProvince ? 4 : 0) + reasons.length * 3,
+      };
+    })
+    .sort((a, b) => b.score - a.score || Number(b.item.isCurated) - Number(a.item.isCurated))
     .slice(0, limit);
 }

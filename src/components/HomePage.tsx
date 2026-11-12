@@ -38,6 +38,8 @@ import { useDestinations } from "@/hooks/useDestinations";
 import { type ExperienceCategory } from "@/lib/experiences";
 import { useExperiences } from "@/hooks/useExperiences";
 import { useRecommendations } from "@/hooks/useRecommendations";
+import { recommendRoutes, type TravelPreferences } from "@/lib/recommendations";
+import { clearVisitorChoice, readVisitorChoice, saveVisitorChoice } from "@/lib/visitor-choice";
 import {
   CommunityExperienceCard,
   CommunityExperienceDialog,
@@ -71,7 +73,7 @@ const OnboardingModal = lazy(() =>
 );
 
 // ---- Filter model ----
-type DayBucket = "1" | "2-3" | "4-7" | "7+";
+type DayBucket = "any" | "1" | "2-3" | "4-7" | "7+";
 type Interest = ExperienceCategory | "heritage";
 
 const INTEREST_OPTIONS: { id: Interest; label: { pt: string; en: string } }[] = [
@@ -87,19 +89,24 @@ const INTEREST_OPTIONS: { id: Interest; label: { pt: string; en: string } }[] = 
 ];
 
 const DAY_OPTIONS: { id: DayBucket; label: { pt: string; en: string } }[] = [
+  { id: "any", label: { pt: "Qualquer duração", en: "Any length" } },
   { id: "1", label: { pt: "1 dia", en: "1 day" } },
   { id: "2-3", label: { pt: "2 a 3 dias", en: "2–3 days" } },
   { id: "4-7", label: { pt: "4 a 7 dias", en: "4–7 days" } },
   { id: "7+", label: { pt: "Mais de 7 dias", en: "7+ days" } },
 ];
 
-// Itinerary duration -> max days
-function itineraryDays(it: { duration: string }): number {
-  const m = it.duration.match(/(\d+)/);
-  return m ? parseInt(m[1], 10) : 1;
+/** Days saved on a profile → the selector bucket that contains them. */
+function bucketFor(days: number | undefined): DayBucket {
+  if (!days) return "any";
+  if (days <= 1) return "1";
+  if (days <= 3) return "2-3";
+  if (days <= 7) return "4-7";
+  return "7+";
 }
 
-function bucketMax(b: DayBucket): number {
+function bucketMax(b: DayBucket): number | undefined {
+  if (b === "any") return undefined;
   if (b === "1") return 1;
   if (b === "2-3") return 3;
   if (b === "4-7") return 7;
@@ -125,7 +132,7 @@ const STORY_STOPS = SAMPLE_ITINERARIES.flatMap((it) =>
 export function HomePage() {
   const { user, needsOnboarding, isGuest: guestRole, isAuthenticated } = useAuth();
   const isGuest = guestRole || !isAuthenticated;
-  const { t, lang } = useLang();
+  const { lang } = useLang();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   // Loaded only for accounts that still need it; kept mounted once opened so it can animate closed.
@@ -140,14 +147,20 @@ export function HomePage() {
   } = useDestinations();
   const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
   const { publicRoutes } = useRouteCatalogue(null);
+  // Nothing is pre-selected: recommendations only say "for you" when there is a real choice.
   const [destId, setDestId] = useState<string>("any");
-  const [days, setDays] = useState<DayBucket>("2-3");
-  const [interests, setInterests] = useState<Interest[]>(["beach", "community"]);
-  const [applied, setApplied] = useState({
-    destId: "any",
-    days: "2-3" as DayBucket,
-    interests: ["beach", "community"] as Interest[],
-  });
+  const [days, setDays] = useState<DayBucket>("any");
+  const [interests, setInterests] = useState<Interest[]>([]);
+  const [applied, setApplied] = useState<TravelPreferences | undefined>(undefined);
+
+  // An account with saved preferences starts from them (same data the dashboard uses).
+  const saved = user?.preferences;
+  useEffect(() => {
+    if (!saved || applied) return;
+    if (saved.province) setDestId(saved.province);
+    setDays(bucketFor(saved.durationDays));
+    if (saved.interests?.length) setInterests(saved.interests as Interest[]);
+  }, [saved, applied]);
 
   useEffect(() => {
     if (needsOnboarding) setShowOnboarding(true);
@@ -158,27 +171,34 @@ export function HomePage() {
   }
 
   function applyFilters() {
-    setApplied({ destId, days, interests });
+    const choice: TravelPreferences = {
+      province: destId === "any" ? undefined : destId,
+      durationDays: bucketMax(days),
+      interests,
+    };
+    setApplied(choice);
+    // A visitor's choice is carried into the onboarding after sign-up (then saved on the profile).
+    if (isGuest) saveVisitorChoice(choice);
     const el = document.getElementById("reco");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // ---- Filtered recommendations ----
-  const maxDays = bucketMax(applied.days);
-
-  const recoItineraries = useMemo(() => {
-    return publicRoutes.filter((r) => r.durationDays <= maxDays + 1).slice(0, 4);
-  }, [maxDays, publicRoutes]);
-
-  const recoExperiences = useMemo(() => {
-    const pool = experiences.filter((e) => {
-      const matchDest = applied.destId === "any" || e.destinationId === applied.destId;
-      const matchInt =
-        applied.interests.length === 0 || applied.interests.includes(e.category as Interest);
-      return matchDest && matchInt;
-    });
-    return (pool.length ? pool : experiences).slice(0, 4);
-  }, [applied, experiences]);
+  // ---- Recommendations: the shared rules of lib/recommendations (same as the dashboard) ----
+  const reco = useRecommendations(4, applied);
+  const personalised = reco.personalised;
+  const recoItineraries = useMemo(
+    () =>
+      personalised
+        ? recommendRoutes(publicRoutes, reco.preferences, reco.preferredDestination, 4).map(
+            (r) => r.item,
+          )
+        : publicRoutes.slice(0, 4),
+    [personalised, publicRoutes, reco.preferences, reco.preferredDestination],
+  );
+  const recoExperiences = useMemo(
+    () => (personalised ? reco.recommendedExperiences.map((r) => r.item) : experiences.slice(0, 4)),
+    [personalised, reco.recommendedExperiences, experiences],
+  );
 
   const recoStories = STORY_STOPS.slice(0, 3);
 
@@ -229,20 +249,7 @@ export function HomePage() {
                   <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
                 </Button>
               </>
-            ) : (
-              <>
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
-                >
-                  <Link to="/dashboard">
-                    <LayoutDashboard className="size-4" />
-                    <span className="sr-only sm:not-sr-only">{t("dashboard")}</span>
-                  </Link>
-                </Button>
-              </>
-            )}
+            ) : null}
           </div>
         </nav>
 
@@ -266,15 +273,22 @@ export function HomePage() {
                 ? "Escolhe o destino, os dias e o tipo de experiência. Nós tratamos do resto."
                 : "Pick a destination, your days and the kind of experience you want. We handle the rest."}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="gap-2 shadow-[var(--shadow-soft)]">
-                <Link to="/dashboard">
-                  <LayoutDashboard className="size-5" />
-                  {lang === "pt" ? "Abrir o meu Painel" : "Open my Dashboard"}
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
+            {!isGuest && (
+              <div className="mt-6 flex flex-wrap gap-3">
+                {/* On the dark photo: light solid button (like "Entrar"), the one way to the dashboard. */}
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 gap-2 bg-card px-6 text-base font-semibold text-foreground hover:bg-card/90"
+                >
+                  <Link to="/dashboard">
+                    <LayoutDashboard className="size-5" />
+                    {lang === "pt" ? "Abrir o meu painel" : "Open my dashboard"}
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
           </motion.div>
 
           {/* Quick selector card */}
@@ -370,26 +384,44 @@ export function HomePage() {
       </Suspense>
 
       {/* ============ PERSONALISED (from saved preferences) ============ */}
-      <PersonalSection lang={lang as Lang} />
+      <PersonalSection lang={lang as Lang} chosen={applied} />
 
       {/* ============ RECOMMENDATIONS ============ */}
       <section id="reco" className="px-6 sm:px-10 py-16 max-w-6xl mx-auto">
         <div className="flex items-end justify-between flex-wrap gap-4">
           <div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              {lang === "pt" ? "Sugestões para a tua viagem" : "Suggestions for your trip"}
+              {personalised
+                ? lang === "pt"
+                  ? "Sugestões para a tua viagem"
+                  : "Suggestions for your trip"
+                : lang === "pt"
+                  ? "Descobrir"
+                  : "Discover"}
             </h2>
             <p className="mt-2 text-muted-foreground">
-              {lang === "pt"
-                ? "Roteiros, atividades e locais imperdíveis com base nas tuas escolhas."
-                : "Itineraries, activities and unmissable places based on your choices."}
+              {personalised
+                ? lang === "pt"
+                  ? "Roteiros e atividades com base nas tuas escolhas."
+                  : "Itineraries and activities based on your choices."
+                : lang === "pt"
+                  ? "Escolhe destino, dias ou interesses acima para veres sugestões à tua medida."
+                  : "Pick a destination, days or interests above to see suggestions that fit you."}
             </p>
           </div>
         </div>
 
         {/* Itineraries */}
         <RecoRow
-          title={lang === "pt" ? "Roteiros recomendados" : "Recommended itineraries"}
+          title={
+            personalised
+              ? lang === "pt"
+                ? "Roteiros recomendados"
+                : "Recommended itineraries"
+              : lang === "pt"
+                ? "Roteiros"
+                : "Itineraries"
+          }
           link={{ to: "/itineraries", label: lang === "pt" ? "Ver todos" : "View all" }}
         >
           {recoItineraries.map((it, i) => (
@@ -448,7 +480,15 @@ export function HomePage() {
 
         {/* Experiences */}
         <RecoRow
-          title={lang === "pt" ? "Atividades em destaque" : "Featured activities"}
+          title={
+            personalised
+              ? lang === "pt"
+                ? "Atividades para ti"
+                : "Activities for you"
+              : lang === "pt"
+                ? "Atividades"
+                : "Activities"
+          }
           link={{ to: "/experiences", label: lang === "pt" ? "Ver todas" : "View all" }}
         >
           {recoExperiences.map((e, i) => (
@@ -672,7 +712,14 @@ export function HomePage() {
 
       {onboardingMounted && (
         <Suspense fallback={null}>
-          <OnboardingModal open={showOnboarding} onComplete={() => setShowOnboarding(false)} />
+          <OnboardingModal
+            open={showOnboarding}
+            initial={readVisitorChoice()}
+            onComplete={() => {
+              clearVisitorChoice();
+              setShowOnboarding(false);
+            }}
+          />
         </Suspense>
       )}
     </div>
@@ -708,7 +755,7 @@ function RecoRow({
 }
 
 // ---- Personalised recommendations, built from the saved profile preferences ----
-function PersonalSection({ lang }: { lang: Lang }) {
+function PersonalSection({ lang, chosen }: { lang: Lang; chosen?: TravelPreferences }) {
   const {
     personalised,
     preferences,
@@ -718,7 +765,7 @@ function PersonalSection({ lang }: { lang: Lang }) {
     recommendedCommunity,
     loading,
     error,
-  } = useRecommendations(4);
+  } = useRecommendations(4, chosen);
   const [openCommunity, setOpenCommunity] = useState<CommunityExperience | null>(null);
 
   const interestLabel = (id: string) =>

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { OnboardingModal } from "@/components/OnboardingModal";
+import { clearVisitorChoice, readVisitorChoice } from "@/lib/visitor-choice";
 import { requireAuthenticatedUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/onboarding")({
@@ -36,7 +37,10 @@ function OnboardingPage() {
     <div className="min-h-screen bg-muted">
       <OnboardingModal
         open
+        // What the visitor picked on the Home before signing up (destination, days, interests).
+        initial={readVisitorChoice()}
         onComplete={() => {
+          clearVisitorChoice();
           void navigate({ to: "/home", replace: true });
         }}
       />
