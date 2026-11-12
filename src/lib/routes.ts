@@ -403,6 +403,16 @@ export function routeAllStops(route: ItineraryRoute) {
   return route.days.flatMap((day) => day.stops).filter((s) => s.kind !== "travel");
 }
 
+/** The route qualifies for a province game on the server (claim_route_games, 0066). */
+export function routeGivesPassport(route: ItineraryRoute) {
+  return (
+    route.isCurated &&
+    route.isPublic &&
+    route.reviewStatus === "approved" &&
+    route.status === "active"
+  );
+}
+
 /** The route passes through this province (main province or any listed one). */
 export function routeInProvince(route: ItineraryRoute, provinceCode: string) {
   return route.provinces.some((p) => p.code === provinceCode);

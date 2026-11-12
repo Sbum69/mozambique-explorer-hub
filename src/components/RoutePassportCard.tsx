@@ -5,8 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { claimPassport, routeGivesPassport } from "@/lib/games";
-import type { ItineraryRoute, RouteProgress } from "@/lib/routes";
+import { routeGivesPassport, type ItineraryRoute, type RouteProgress } from "@/lib/routes";
 
 /**
  * Route → game: an official itinerary gives its province's passport (or the Grande Viagem when it
@@ -41,6 +40,8 @@ export function RoutePassportCard({
   const claim = async () => {
     if (!progress) return;
     setBusy(true);
+    // lib/games only loads when claiming (keeps it out of the itinerary page's first load).
+    const { claimPassport } = await import("@/lib/games");
     const r = await claimPassport(progress.id, pt);
     setBusy(false);
     if (!r.ok) {

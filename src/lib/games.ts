@@ -1,7 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { PreciseLocation } from "@/lib/geo";
 import { maputoToday } from "@/lib/rewards";
-import type { ItineraryRoute } from "@/lib/routes";
 
 /**
  * Games ↔ achievements bridge. The database is the only authority:
@@ -190,16 +189,6 @@ export async function claimRouteGames(progressId: string) {
   const { data, error } = await supabase.rpc("claim_route_games", { _progress_id: progressId });
   if (error) throw new Error(error.message);
   return data as unknown as { game_key: string; awarded: string[] };
-}
-
-/** The route qualifies for a province game on the server (claim_route_games, 0066). */
-export function routeGivesPassport(route: ItineraryRoute) {
-  return (
-    route.isCurated &&
-    route.isPublic &&
-    route.reviewStatus === "approved" &&
-    route.status === "active"
-  );
 }
 
 /** Asks the server for the route's game. Errors come back as user text; never awards twice. */
