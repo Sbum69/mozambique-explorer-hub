@@ -9,6 +9,69 @@ import { supabase } from "@/integrations/supabase/client";
 export interface PageMeta {
   title: string;
   description: string | null;
+  /** schema.org JSON-LD (already serialised), built only from the row's own data. */
+  jsonLd?: string;
+}
+
+const ORIGIN = "https://exploreekaya.com";
+
+interface TripStopRow {
+  stop_order: number;
+  stop_type: string | null;
+  custom_title_pt: string | null;
+  lat: number | string | null;
+  lng: number | string | null;
+  destinations: { name: string; lat: number | string | null; lng: number | string | null } | null;
+}
+
+/** TouristTrip for a public route: its places in order, with coordinates when the row has them. */
+export function routeJsonLd(
+  id: string,
+  row: {
+    title: string;
+    description: string | null;
+    duration_days: number;
+    route_days?: { day_number: number; route_stops: TripStopRow[] | null }[] | null;
+  },
+): string {
+  const places = (row.route_days ?? [])
+    .slice()
+    .sort((a, b) => a.day_number - b.day_number)
+    .flatMap((d) => (d.route_stops ?? []).slice().sort((a, b) => a.stop_order - b.stop_order))
+    .filter((s) => s.stop_type !== "travel")
+    .flatMap((s) => {
+      const name = s.destinations?.name ?? s.custom_title_pt;
+      if (!name) return [];
+      const lat = Number(s.destinations ? s.destinations.lat : s.lat);
+      const lng = Number(s.destinations ? s.destinations.lng : s.lng);
+      const geo =
+        Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)
+          ? { geo: { "@type": "GeoCoordinates", latitude: lat, longitude: lng } }
+          : {};
+      return [{ "@type": "Place", name, ...geo }];
+    });
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: row.title,
+    ...(row.description ? { description: clip(row.description, 300) } : {}),
+    url: `${ORIGIN}/itinerary/${id}`,
+    inLanguage: ["pt", "en"],
+    provider: { "@type": "Organization", "@id": `${ORIGIN}/#organization`, name: "EKAYA" },
+    ...(places.length
+      ? {
+          itinerary: {
+            "@type": "ItemList",
+            numberOfItems: places.length,
+            itemListElement: places.map((item, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              item,
+            })),
+          },
+        }
+      : {}),
+  }).replace(/</g, "\\u003c"); // never closes the <script> tag, whatever the text
 }
 
 /** A place as text: the column is plain text on some tables and {address} JSON on others. */
@@ -64,11 +127,20 @@ export async function routeMeta(id: string): Promise<PageMeta | null> {
   try {
     const { data, error } = await supabase
       .from("routes")
-      .select("title, description")
+      .select(
+        `title, description, duration_days, is_public, review_status, status,
+        route_days(day_number, route_stops(stop_order, stop_type, custom_title_pt, lat, lng,
+          destinations(name, lat, lng)))`,
+      )
       .eq("id", id)
       .maybeSingle();
     if (error || !data) return null;
-    return { title: data.title, description: clip(data.description) };
+    const listed = data.is_public && data.review_status === "approved" && data.status === "active";
+    return {
+      title: data.title,
+      description: clip(data.description),
+      ...(listed ? { jsonLd: routeJsonLd(id, data) } : {}),
+    };
   } catch {
     return null;
   }
@@ -83,6 +155,7 @@ export function detailHead(
   const title = meta ? `${meta.title} — EKAYA` : generic.title;
   const description = meta?.description ?? generic.description;
   return {
+    ...(meta?.jsonLd ? { scripts: [{ type: "application/ld+json", children: meta.jsonLd }] } : {}),
     meta: [
       { title },
       { name: "description", content: description },

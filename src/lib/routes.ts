@@ -7,12 +7,13 @@ import type { Json } from "@/integrations/supabase/types";
 
 /**
  * Itineraries ("roteiros") live in the database: routes -> route_days -> route_stops.
- * Every stop references a real destinations.id or experiences.id row — there is no
- * free-text place, so nothing shown here can be invented.
+ * A stop references a real destinations / experiences / community_experiences row, or is a curated
+ * place with OpenStreetMap coordinates and its source link (custom), or a travel leg between two
+ * places (travel: no proof, no points, time "a confirmar" unless it has a source).
  */
 
 /** "experience" = business activity (public.experiences); "community" = public.community_experiences. */
-export type RouteStopKind = "destination" | "experience" | "community" | "custom";
+export type RouteStopKind = "destination" | "experience" | "community" | "custom" | "travel";
 
 export const ROUTE_PROOFS_BUCKET = "route-proofs";
 
@@ -41,6 +42,10 @@ export interface RouteStop {
   pendingValidation: boolean;
   /** Potential community articulation only — never a confirmed community experience. */
   communityCandidate: boolean;
+  /** Where the place or its coordinates come from (curated places: the OpenStreetMap object). */
+  source: { url: string; label: string | null } | null;
+  /** Travel legs only: minutes, only when sourced; null = "a confirmar". */
+  travelMinutes: number | null;
 }
 
 export interface RouteDay {
@@ -71,6 +76,10 @@ export interface ItineraryRoute {
   sourceRouteId: string | null;
   provinceId: string | null;
   province: { code: string; name: { pt: string; en: string } } | null;
+  /** Every province the route crosses, in order (just the main one for single-province routes). */
+  provinces: { code: string; name: { pt: string; en: string } }[];
+  /** Recommended season; null = "a confirmar" (no source yet). */
+  bestSeason: { pt: string | null; en: string | null };
   code: string;
   durationDays: number;
   coverImage: string | null;
@@ -103,6 +112,9 @@ interface StopRow {
   is_free: boolean | null;
   validation_status?: string | null;
   community_candidate?: boolean | null;
+  source_url?: string | null;
+  source_label?: string | null;
+  travel_minutes?: number | null;
   community_experiences: {
     id: string;
     title_pt: string;
@@ -164,6 +176,14 @@ interface RouteRow {
   status: string;
   created_at: string;
   provinces: { code: string; name_pt: string; name_en: string } | null;
+  best_season_pt?: string | null;
+  best_season_en?: string | null;
+  route_provinces?:
+    | {
+        position: number;
+        provinces: { code: string; name_pt: string; name_en: string } | null;
+      }[]
+    | null;
   profiles?: { display_name: string | null } | null;
   route_days:
     | {
@@ -183,10 +203,13 @@ interface RouteRow {
 const SELECT = `id, owner_id, title, title_en, subtitle_pt, subtitle_en, description, description_en, interests, intensity,
   review_status, rejection_reason, submitted_at, source_route_id, province_id, unique_code, duration_days, cover_image,
   is_public, is_curated, status, created_at, requires_validation, catalog_notes_pt, catalog_notes_en, community_candidates,
+  best_season_pt, best_season_en,
   provinces!routes_province_id_fkey(code, name_pt, name_en),
+  route_provinces(position, provinces(code, name_pt, name_en)),
   route_days(id, day_number, title, title_en, description, is_unassigned,
     route_stops(id, stop_order, notes, estimated_duration_minutes, destination_id, experience_id, community_experience_id,
       stop_type, custom_title_pt, custom_title_en, description_pt, description_en, location, lat, lng, is_free, validation_status, community_candidate,
+      source_url, source_label, travel_minutes,
       community_experiences(id, title_pt, title_en, description_pt, description_en, location, lat, lng),
       destinations(id, slug, name, lat, lng),
       experiences(id, slug, title_pt, title_en, price_mzn, duration_hours, destinations(slug, name, lat, lng))))`;
@@ -210,7 +233,25 @@ function mapStop(row: StopRow): RouteStop | null {
     isFree: row.is_free,
     pendingValidation: row.validation_status === "pending_validation",
     communityCandidate: !!row.community_candidate,
+    source: row.source_url ? { url: row.source_url, label: row.source_label ?? null } : null,
+    travelMinutes: row.travel_minutes ?? null,
   };
+  if (row.stop_type === "travel") {
+    if (!row.custom_title_pt) return null;
+    return {
+      ...base,
+      kind: "travel",
+      refId: row.id,
+      title: row.custom_title_pt,
+      titleEn: row.custom_title_en,
+      slug: null,
+      coords: null,
+      image: "",
+      priceMzn: null,
+      durationHours: null,
+      destinationName: null,
+    };
+  }
   if (row.stop_type === "community_experience") {
     const c = row.community_experiences;
     if (!c) return null; // not approved/readable: never invent a link
@@ -305,6 +346,15 @@ function mapRoute(row: RouteRow): ItineraryRoute {
         .filter((s): s is RouteStop => s !== null),
     }));
 
+  const name = (p: { code: string; name_pt: string; name_en: string }) => ({
+    code: p.code,
+    name: { pt: p.name_pt, en: p.name_en },
+  });
+  const listed = (row.route_provinces ?? [])
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .flatMap((rp) => (rp.provinces ? [name(rp.provinces)] : []));
+
   return {
     id: row.id,
     ownerId: row.owner_id,
@@ -324,6 +374,8 @@ function mapRoute(row: RouteRow): ItineraryRoute {
     province: row.provinces
       ? { code: row.provinces.code, name: { pt: row.provinces.name_pt, en: row.provinces.name_en } }
       : null,
+    provinces: listed.length ? listed : row.provinces ? [name(row.provinces)] : [],
+    bestSeason: { pt: row.best_season_pt ?? null, en: row.best_season_en ?? null },
     code: row.unique_code,
     durationDays: row.duration_days,
     coverImage: row.cover_image,
@@ -342,12 +394,18 @@ function mapRoute(row: RouteRow): ItineraryRoute {
   };
 }
 
+/** Stops to visit (with a photo proof). Travel legs are not stops: no proof, no points. */
 export function routeStopCount(route: ItineraryRoute) {
-  return route.days.reduce((total, day) => total + day.stops.length, 0);
+  return routeAllStops(route).length;
 }
 
 export function routeAllStops(route: ItineraryRoute) {
-  return route.days.flatMap((day) => day.stops);
+  return route.days.flatMap((day) => day.stops).filter((s) => s.kind !== "travel");
+}
+
+/** The route passes through this province (main province or any listed one). */
+export function routeInProvince(route: ItineraryRoute, provinceCode: string) {
+  return route.provinces.some((p) => p.code === provinceCode);
 }
 
 /** Cover: the province photo (credited, FOTOS-1); without a province, the first destination's photo. */
@@ -436,6 +494,9 @@ export interface RouteStopInput {
   estimatedDurationMinutes?: number | null;
   pendingValidation?: boolean;
   communityCandidate?: boolean;
+  sourceUrl?: string | null;
+  sourceLabel?: string | null;
+  travelMinutes?: number | null;
 }
 
 export interface RouteDayInput {
@@ -463,6 +524,9 @@ export function stopToInput(stop: RouteStop): RouteStopInput {
     estimatedDurationMinutes: stop.estimatedDurationMinutes,
     pendingValidation: stop.pendingValidation,
     communityCandidate: stop.communityCandidate,
+    sourceUrl: stop.source?.url ?? null,
+    sourceLabel: stop.source?.label ?? null,
+    travelMinutes: stop.travelMinutes,
   };
 }
 
@@ -834,7 +898,7 @@ export function recommendRoutes(
   if (!provs.length && !prefs.durationDays && !interests.length) return [];
   return routes
     .filter((r) => r.isPublic && r.status === "active" && r.reviewStatus === "approved")
-    .filter((r) => !provs.length || (r.province && provs.includes(r.province.code)))
+    .filter((r) => !provs.length || provs.some((p) => routeInProvince(r, p)))
     .map((r) => {
       let score = provs.length ? 5 : 0;
       if (prefs.durationDays) {
@@ -907,7 +971,7 @@ export function personalizeRoutes(
   const diff = (r: ItineraryRoute) => (days ? Math.abs(r.durationDays - days) : 0);
   const byFit = (a: ItineraryRoute, b: ItineraryRoute) =>
     score(b) - score(a) || diff(a) - diff(b) || a.title.localeCompare(b.title);
-  const inProv = visible.filter((r) => r.province && prefs.provinces.includes(r.province.code));
+  const inProv = visible.filter((r) => prefs.provinces.some((p) => routeInProvince(r, p)));
   const matching = inProv.filter((r) => !prefs.interests.length || score(r) > 0);
   const res: PersonalizedRoutes = {
     exact: matching.filter((r) => !days || r.durationDays === days).sort(byFit),
