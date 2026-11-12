@@ -1,4 +1,5 @@
 import { HERO_AVIF_SRCSET } from "@/components/HeroImage";
+import { MOTION_INIT_SCRIPT } from "@/lib/home-story-motion-gate";
 
 /**
  * Head of the public Home, shared by "/" (canonical) and "/home". Kept apart from the page
@@ -39,7 +40,11 @@ const JSON_LD = JSON.stringify([
 
 export function homeHead() {
   return {
-    scripts: [{ type: "application/ld+json", children: JSON_LD }],
+    scripts: [
+      // Before the first paint: weak devices and reduced motion get the static story (no shift).
+      { children: MOTION_INIT_SCRIPT },
+      { type: "application/ld+json", children: JSON_LD },
+    ],
     meta: [
       { title: TITLE },
       { name: "description", content: DESCRIPTION },

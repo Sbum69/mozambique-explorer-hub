@@ -58,7 +58,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
-import { HERO_PHOTO, HeroImage } from "@/components/HeroImage";
+import { HomeStory } from "@/components/home/HomeStory";
+import { DestinationsRail } from "@/components/home/DestinationsRail";
 import { formatPrice } from "@/lib/price";
 
 const SponsoredStrip = lazy(() =>
@@ -204,65 +205,51 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* ============ HERO ============ */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <HeroImage alt="" className="size-full object-cover" priority />
-          {/* Fixed dark overlay (not a theme token) so the white hero text always reads, in both themes. */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-background" />
-          <PhotoCredit photo={HERO_PHOTO} />
-        </div>
-
-        {/* Nav */}
-        <nav className="relative z-10 flex items-center justify-between gap-2 px-4 sm:px-10 py-5 text-white">
-          <div className="flex min-w-0 items-center gap-1">
-            <div className="text-white">
-              <AppSidebar />
+      {/* ============ STORY (approved motion; first frame = hero, server HTML) ============ */}
+      <HomeStory
+        lang={lang as Lang}
+        nav={
+          <nav className="relative z-10 flex items-center justify-between gap-2 px-4 sm:px-10 py-5 text-white">
+            <div className="flex min-w-0 items-center gap-1">
+              <div className="text-white">
+                <AppSidebar />
+              </div>
+              <div className="flex min-w-0 items-center ml-1 h-9">
+                {/* Below 390px only the A with the heart, as before (the name used to hide there). */}
+                <BrandLogo onDark mark className="h-8 min-[390px]:hidden" />
+                <BrandLogo onDark className="hidden h-6 min-[390px]:block" />
+              </div>
             </div>
-            <div className="flex min-w-0 items-center ml-1 h-9">
-              {/* Below 390px only the A with the heart, as before (the name used to hide there). */}
-              <BrandLogo onDark mark className="h-8 min-[390px]:hidden" />
-              <BrandLogo onDark className="hidden h-6 min-[390px]:block" />
+            {/* Phones: tighter spacing, logo without the wordmark below 390px; the second action stays in the side menu. */}
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              <NotificationsBell variant="onDark" />
+              <ThemeToggle className={ON_HERO} />
+              <LanguageToggle className={ON_HERO} />
+              <UserMenu />
+              {isGuest ? (
+                <>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
+                  >
+                    <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
+                  >
+                    <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
+                  </Button>
+                </>
+              ) : null}
             </div>
-          </div>
-          {/* Phones: tighter spacing, logo without the wordmark below 390px; the second action stays in the side menu. */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <NotificationsBell variant="onDark" />
-            <ThemeToggle className={ON_HERO} />
-            <LanguageToggle className={ON_HERO} />
-            <UserMenu />
-            {isGuest ? (
-              <>
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-card text-foreground hover:bg-card/90 font-semibold shadow-[var(--shadow-soft)] gap-1.5"
-                >
-                  <Link to="/login">{lang === "pt" ? "Entrar" : "Sign in"}</Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="hidden sm:inline-flex text-white hover:bg-white/10 hover:text-white"
-                >
-                  <Link to="/signup">{lang === "pt" ? "Criar conta" : "Create account"}</Link>
-                </Button>
-              </>
-            ) : null}
-          </div>
-        </nav>
-
-        {/* Hero copy + selector */}
-        <section className="relative z-10 px-6 sm:px-10 pt-8 pb-20 max-w-6xl mx-auto text-white">
-          {/* Largest element of the page: shown at once (no entrance fade) so it paints with the first render. */}
-          <motion.div initial={false} animate={{ opacity: 1, y: 0 }}>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-4 py-1.5 text-sm">
-              <Sparkles className="size-3.5" />
-              {lang === "pt"
-                ? `Olá, ${user?.displayName ?? "Convidado"}`
-                : `Hi, ${user?.displayName ?? "Guest"}`}
-            </div>
+          </nav>
+        }
+        intro={
+          <div className="max-w-6xl">
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight max-w-3xl leading-[1.05]">
               {lang === "pt"
                 ? "Explora Moçambique para além da superfície."
@@ -289,95 +276,102 @@ export function HomePage() {
                 </Button>
               </div>
             )}
-          </motion.div>
+          </div>
+        }
+      />
 
-          {/* Quick selector card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mt-8 rounded-[10px] bg-card text-card-foreground border border-border shadow-[var(--shadow-overlay)] p-5 sm:p-6"
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_auto] lg:items-end">
-              {/* Destination */}
-              <div>
-                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                  <MapPin className="size-3.5" />
-                  {lang === "pt" ? "Destino" : "Destination"}
-                </label>
-                <LazyChoiceSelect
-                  value={destId}
-                  onValueChange={setDestId}
-                  className="h-11"
-                  options={[
-                    { value: "any", label: lang === "pt" ? "Qualquer destino" : "Any destination" },
-                    ...destinations.map((d) => ({ value: d.slug, label: d.name })),
-                  ]}
-                />
-                {loadingDestinations && (
-                  <p className="mt-1.5 text-[11px] text-muted-foreground">
-                    {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
-                  </p>
-                )}
-                {destinationsError && (
-                  <p className="mt-1.5 text-[11px] text-muted-foreground">
-                    {lang === "pt"
-                      ? "Não foi possível carregar os destinos. Tenta novamente mais tarde."
-                      : "We couldn't load the destinations. Please try again later."}
-                  </p>
-                )}
-              </div>
-
-              {/* Days */}
-              <div>
-                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                  <Calendar className="size-3.5" />
-                  {lang === "pt" ? "Quantos dias?" : "How many days?"}
-                </label>
-                <LazyChoiceSelect
-                  value={days}
-                  onValueChange={(v) => setDays(v as DayBucket)}
-                  className="h-11"
-                  options={DAY_OPTIONS.map((d) => ({ value: d.id, label: d.label[lang as Lang] }))}
-                />
-              </div>
-
-              <Button size="lg" onClick={applyFilters} className="h-11 gap-2">
-                {lang === "pt" ? "Ver recomendações" : "Show recommendations"}
-                <ArrowRight className="size-4" />
-              </Button>
+      {/* ============ PLAN: destination, days, interests ============ */}
+      <section className="px-4 sm:px-10 pt-10 max-w-6xl mx-auto">
+        <div className="rounded-[10px] bg-card text-card-foreground border border-border p-5 sm:p-6">
+          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+            {lang === "pt" ? "Para onde vais?" : "Where are you going?"}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_auto] lg:items-end">
+            {/* Destination */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                <MapPin className="size-3.5" />
+                {lang === "pt" ? "Destino" : "Destination"}
+              </label>
+              <LazyChoiceSelect
+                value={destId}
+                onValueChange={setDestId}
+                className="h-11"
+                options={[
+                  { value: "any", label: lang === "pt" ? "Qualquer destino" : "Any destination" },
+                  ...destinations.map((d) => ({ value: d.slug, label: d.name })),
+                ]}
+              />
+              {loadingDestinations && (
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  {lang === "pt" ? "A carregar destinos..." : "Loading destinations..."}
+                </p>
+              )}
+              {destinationsError && (
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  {lang === "pt"
+                    ? "Não foi possível carregar os destinos. Tenta novamente mais tarde."
+                    : "We couldn't load the destinations. Please try again later."}
+                </p>
+              )}
             </div>
 
-            {/* Interests pills */}
-            <div className="mt-5">
-              <p className="text-xs font-medium text-muted-foreground mb-2">
-                {lang === "pt" ? "O que procuras?" : "What are you looking for?"}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {INTEREST_OPTIONS.map((opt) => {
-                  const active = interests.includes(opt.id);
-                  const InterestIcon = interestIcon(opt.id);
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => toggleInterest(opt.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm border transition-colors ${
-                        active
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-card text-foreground border-input hover:bg-accent"
-                      }`}
-                    >
-                      <InterestIcon className="size-4" aria-hidden="true" />
-                      {opt.label[lang as Lang]}
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Days */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                <Calendar className="size-3.5" />
+                {lang === "pt" ? "Quantos dias?" : "How many days?"}
+              </label>
+              <LazyChoiceSelect
+                value={days}
+                onValueChange={(v) => setDays(v as DayBucket)}
+                className="h-11"
+                options={DAY_OPTIONS.map((d) => ({ value: d.id, label: d.label[lang as Lang] }))}
+              />
             </div>
-          </motion.div>
-        </section>
-      </div>
+
+            <Button size="lg" onClick={applyFilters} className="h-11 gap-2">
+              {lang === "pt" ? "Ver recomendações" : "Show recommendations"}
+              <ArrowRight className="size-4" />
+            </Button>
+          </div>
+
+          {/* Interests pills */}
+          <div className="mt-5">
+            <p className="text-xs font-medium text-muted-foreground mb-2">
+              {lang === "pt" ? "O que procuras?" : "What are you looking for?"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {INTEREST_OPTIONS.map((opt) => {
+                const active = interests.includes(opt.id);
+                const InterestIcon = interestIcon(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => toggleInterest(opt.id)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm border transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground border-input hover:bg-accent"
+                    }`}
+                  >
+                    <InterestIcon className="size-4" aria-hidden="true" />
+                    {opt.label[lang as Lang]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <DestinationsRail
+        lang={lang as Lang}
+        destinations={destinations}
+        routes={publicRoutes}
+        loading={loadingDestinations}
+      />
 
       <Suspense fallback={null}>
         <SponsoredStrip scope="home" className="px-6 sm:px-10 pt-12 max-w-6xl mx-auto" />

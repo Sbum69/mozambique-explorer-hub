@@ -65,7 +65,7 @@ describe("SEO: lastmod, detail pages and structured data", () => {
   });
 
   it("home carries Organization and WebSite JSON-LD with the EKAYA name", () => {
-    const ld = JSON.parse(homeHead().scripts[0].children) as {
+    const ld = JSON.parse(homeHead().scripts[1].children) as {
       "@type": string;
       name: string;
       alternateName: string[];
