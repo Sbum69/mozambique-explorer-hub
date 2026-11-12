@@ -470,6 +470,13 @@
       "when": 1795600000000,
       "tag": "0066_province_games",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1795700000000,
+      "tag": "0067_route_plan_travel_sources",
+      "breakpoints": true
     }
   ]
 }
