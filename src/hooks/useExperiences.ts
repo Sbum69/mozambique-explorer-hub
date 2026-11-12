@@ -16,8 +16,11 @@ export function invalidateExperiencesCatalogue() {
   if (typeof window !== "undefined") window.dispatchEvent(new Event("ekaya:experiences-changed"));
 }
 
-/** Shared access point for the experiences catalogue: one query, cached for the session. */
-export function useExperiences() {
+/**
+ * Shared access point for the experiences catalogue: one query, cached for the session.
+ * enabled: false waits (e.g. a section still far below the fold).
+ */
+export function useExperiences({ enabled = true } = {}) {
   const [experiences, setExperiences] = useState<Experience[]>(cache ?? []);
   const [loading, setLoading] = useState(cache === null);
   const [error, setError] = useState<string | null>(null);
@@ -39,13 +42,14 @@ export function useExperiences() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) return;
     if (cache) {
       setExperiences(cache);
       setLoading(false);
       return;
     }
     void load();
-  }, [load]);
+  }, [load, enabled]);
 
   useEffect(() => {
     const refresh = () => void load();
