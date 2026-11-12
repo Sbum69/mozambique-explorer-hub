@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { experienceMeta, detailHead } from "@/lib/page-meta";
 import { useEffect, useState } from "react";
 import { Compass, Clock, MapPin, Star, Store, Users, Map as MapIcon } from "lucide-react";
 
@@ -15,23 +16,14 @@ import { formatPrice } from "@/lib/price";
 import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/experience/$id")({
-  head: () => ({
-    meta: [
-      { title: "Experiência — EKAYA" },
-      {
-        name: "description",
-        content: "Detalhes de uma atividade comercial em Moçambique e reserva.",
-      },
-      { property: "og:title", content: "Experiência — EKAYA" },
-      {
-        property: "og:description",
-        content: "Detalhes de uma atividade comercial em Moçambique e reserva.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  ssr: false,
+  // Name and description read on the server (the page itself still renders in the browser).
+  ssr: "data-only",
+  loader: ({ params }) => experienceMeta(params.id),
+  head: ({ loaderData }) =>
+    detailHead(loaderData, {
+      title: "Experiência — EKAYA",
+      description: "Detalhes de uma atividade comercial em Moçambique e reserva.",
+    }),
   component: ExperienceDetailPage,
 });
 

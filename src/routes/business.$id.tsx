@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { businessMeta, detailHead } from "@/lib/page-meta";
 import { useEffect, useState } from "react";
 import {
   Store,
@@ -29,23 +30,14 @@ import { formatPrice } from "@/lib/price";
 import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/business/$id")({
-  head: () => ({
-    meta: [
-      { title: "Negócio local — EKAYA" },
-      {
-        name: "description",
-        content: "Detalhes de um negócio local no EKAYA e as experiências que oferece.",
-      },
-      { property: "og:title", content: "Negócio local — EKAYA" },
-      {
-        property: "og:description",
-        content: "Detalhes de um negócio local no EKAYA e as experiências que oferece.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  ssr: false,
+  // Name and description read on the server (the page itself still renders in the browser).
+  ssr: "data-only",
+  loader: ({ params }) => businessMeta(params.id),
+  head: ({ loaderData }) =>
+    detailHead(loaderData, {
+      title: "Negócio local — EKAYA",
+      description: "Detalhes de um negócio local no EKAYA e as experiências que oferece.",
+    }),
   component: BusinessDetailPage,
 });
 

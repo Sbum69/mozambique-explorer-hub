@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { routeMeta, detailHead } from "@/lib/page-meta";
 import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
@@ -74,21 +75,16 @@ import {
 import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/itinerary/$id")({
-  head: () => {
-    const title = "Roteiro — EKAYA";
-    const description =
-      "Segue o roteiro dia a dia com destinos e experiências reais de Moçambique.";
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  loader: ({ params }) => routeMeta(params.id),
+  head: ({ loaderData }) =>
+    detailHead(
+      loaderData,
+      {
+        title: "Roteiro — EKAYA",
+        description: "Segue o roteiro dia a dia com destinos e experiências reais de Moçambique.",
+      },
+      "article",
+    ),
   component: ItineraryDetailPage,
 });
 
