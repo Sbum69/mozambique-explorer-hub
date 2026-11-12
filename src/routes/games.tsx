@@ -1,5 +1,5 @@
 import { requireAuthenticatedUser } from "@/lib/auth";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Suspense, lazy, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,7 +27,6 @@ import {
 } from "@/lib/games";
 import { badgeIcon } from "@/lib/badge-icons";
 import {
-  ArrowLeft,
   Zap,
   Lock,
   CheckCircle,
@@ -51,6 +50,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { getGameTask } from "@/data/game-tasks";
 import { LOCATION_PROMPT_TEXT, requestPreciseLocation } from "@/lib/geo";
+import { BackButton } from "@/components/BackButton";
 
 // Challenge fields only show inside the challenge dialog, after a tap: loaded on demand.
 const loadTaskFields = () => import("@/components/GameTaskFields");
@@ -426,7 +426,6 @@ function applyState(base: GameBase[], state: GameState | undefined): GameBase[] 
 }
 
 function GamesPage() {
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const { authUser } = useAuth();
   const { lang, t } = useLang();
@@ -470,13 +469,7 @@ function GamesPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
-          <button
-            onClick={() => navigate({ to: "/dashboard" })}
-            className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="size-4" />{" "}
-            <span className="sr-only sm:not-sr-only">{pt ? "Voltar" : "Back"}</span>
-          </button>
+          <BackButton fallback="/dashboard" showLabel />
           <h1 className="min-w-0 truncate font-bold text-sm sm:text-base">
             {pt ? "Jogos & Desafios" : "Games & Challenges"}
           </h1>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileWarning, RefreshCw } from "lucide-react";
+import { FileWarning, RefreshCw } from "lucide-react";
 
 import { CommissionCard } from "@/components/CommissionCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -13,6 +13,7 @@ import { useLang } from "@/contexts/LanguageContext";
 import { SUPPORT_EMAIL } from "@/lib/app-info";
 import { fetchCurrentConfig, formatBp, formatCents } from "@/lib/commission";
 import { PRICING_TXT } from "@/lib/pricing-texts";
+import { BackButton } from "@/components/BackButton";
 
 // The head stays in the first-load bundle, so it uses literals instead of PRICING_TXT (which then
 // only loads with the page). Same texts as PRICING_TXT.pt.metaTitle / metaDescription.
@@ -58,11 +59,7 @@ function PricingPage() {
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
-            <Button asChild variant="ghost" size="icon" aria-label={t.forBusiness}>
-              <Link to="/para-negocios">
-                <ArrowLeft className="size-5" />
-              </Link>
-            </Button>
+            <BackButton fallback="/para-negocios" />
             <h1 className="min-w-0 truncate font-bold text-base sm:text-lg ml-1">{t.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">

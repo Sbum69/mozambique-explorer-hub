@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Search, Users, RefreshCw } from "lucide-react";
+import { Search, Users, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { InterestIcon } from "@/components/InterestIcon";
@@ -19,7 +19,6 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useBackTarget } from "@/lib/nav";
 import { useProvinces } from "@/hooks/useProvinces";
 import {
   COMMUNITY_CATEGORIES,
@@ -38,6 +37,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Plus, Map as MapIcon } from "lucide-react";
 import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
 import { communityInterestMatches } from "@/lib/recommendations";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/community-experiences")({
   head: () => ({
@@ -70,7 +70,6 @@ const ALL = "all";
 function CommunityExperiencesPage() {
   const { lang } = useLang();
   const pt = lang === "pt";
-  const back = useBackTarget();
   const { provinces } = useProvinces();
   const [provinceId, setProvinceId] = useState(ALL);
   const [category, setCategory] = useState<CommunityCategory | "all">("all");
@@ -166,11 +165,7 @@ function CommunityExperiencesPage() {
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
           <AppSidebar />
-          <Button variant="ghost" size="icon" asChild aria-label={pt ? "Voltar" : "Back"}>
-            <Link to={back}>
-              <ArrowLeft className="size-5" />
-            </Link>
-          </Button>
+          <BackButton fallback="auto" showLabel />
           <h1 className="font-bold text-lg flex items-center gap-2 flex-1 truncate">
             <Users className="size-5 text-primary" />
             {pt ? "Experiências Comunitárias" : "Community Experiences"}

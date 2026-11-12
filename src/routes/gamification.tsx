@@ -1,15 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Gamepad2,
-  Camera,
-  CalendarCheck,
-  Map as MapIcon,
-  Trophy,
-  Info,
-} from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Gamepad2, Camera, CalendarCheck, Map as MapIcon, Trophy, Info } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLang } from "@/contexts/LanguageContext";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -24,6 +15,7 @@ import {
 } from "@/components/AchievementsSections";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { POINT_VALUES } from "@/lib/points";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/gamification")({
   head: () => ({
@@ -86,12 +78,7 @@ function GamificationPage() {
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <Button asChild variant="ghost" size="sm" className="gap-1">
-              <Link to="/dashboard">
-                <ArrowLeft className="size-4" />
-                {pt ? "Perfil" : "Profile"}
-              </Link>
-            </Button>
+            <BackButton fallback="/dashboard" />
           </div>
           <ThemeToggle />
           <LanguageToggle />

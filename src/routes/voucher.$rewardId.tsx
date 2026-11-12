@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Gift, Copy } from "lucide-react";
+import { Gift, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/voucher/$rewardId")({
   ssr: false,
@@ -70,12 +71,7 @@ function VoucherPage() {
     <div className="min-h-screen bg-background">
       <main className="max-w-lg mx-auto px-4 py-8 space-y-4">
         <div className="flex items-center justify-between">
-          <Button asChild variant="ghost" size="sm" className="gap-1">
-            <Link to="/gamification">
-              <ArrowLeft className="size-4" />
-              {pt ? "Conquistas" : "Achievements"}
-            </Link>
-          </Button>
+          <BackButton fallback="/gamification" />
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <LanguageToggle />

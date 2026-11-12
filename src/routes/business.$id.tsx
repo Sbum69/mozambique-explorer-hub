@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft,
   Store,
   MapPin,
   Phone,
@@ -27,6 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapExperience, type Experience } from "@/lib/experiences";
 import { BusinessFreeActivities } from "@/components/BusinessFreeActivities";
 import { formatPrice } from "@/lib/price";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/business/$id")({
   head: () => ({
@@ -109,11 +109,7 @@ function BusinessDetailPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild aria-label={pt ? "Voltar" : "Back"}>
-            <Link to="/businesses">
-              <ArrowLeft className="size-5" />
-            </Link>
-          </Button>
+          <BackButton fallback="/businesses" />
           <span className="font-bold flex-1 truncate">
             {pt ? "Negócios Locais" : "Local Businesses"}
           </span>

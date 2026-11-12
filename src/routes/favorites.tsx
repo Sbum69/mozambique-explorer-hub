@@ -3,7 +3,6 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft,
   Bookmark,
   MapPin,
   Heart,
@@ -31,6 +30,7 @@ import { useFavorites, type FavoriteItem, type FavoriteType } from "@/contexts/F
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/price";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/favorites")({
   head: () => ({
@@ -136,13 +136,7 @@ function FavoritesPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: "/dashboard" })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-              aria-label={lang === "pt" ? "Voltar" : "Back"}
-            >
-              <ArrowLeft className="size-4" />
-            </button>
+            <BackButton fallback="/dashboard" />
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
                 <Bookmark className="size-5 sm:size-6 text-rose-600 dark:text-rose-400" />

@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft,
   Compass,
   Clock,
   Star,
@@ -56,7 +55,6 @@ import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
 import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
 import { useProvinces } from "@/hooks/useProvinces";
 import { firstOffered, inPreferredProvinces } from "@/lib/pref-filters";
-import { useBackTarget } from "@/lib/nav";
 import { formatPrice } from "@/lib/price";
 import {
   createBooking,
@@ -64,6 +62,7 @@ import {
   translateBookingError,
   type Booking,
 } from "@/lib/bookings";
+import { BackButton } from "@/components/BackButton";
 
 const SponsoredStrip = lazy(() =>
   import("@/components/SponsoredStrip").then((m) => ({ default: m.SponsoredStrip })),
@@ -126,7 +125,6 @@ function ExperiencesPage() {
   const { user } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
-  const backTarget = useBackTarget();
   // Filters start from the saved preferences (provinces and first matching interest); changing
   // them never changes the preferences.
   const personalPrefs = usePersonalPrefs();
@@ -298,12 +296,7 @@ function ExperiencesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: backTarget })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
-            >
-              <ArrowLeft className="size-4" /> {t("backToDashboard")}
-            </button>
+            <BackButton fallback="auto" showLabel />
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />

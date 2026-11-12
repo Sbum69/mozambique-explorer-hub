@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BackButton } from "@/components/BackButton";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -230,6 +231,7 @@ function CommunityPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
+            <BackButton fallback="auto" />
             <div className="min-w-0">
               <h1 className="font-bold text-base sm:text-lg truncate">{t("communityTitle")}</h1>
               <p className="text-xs text-muted-foreground truncate">{t("communitySubtitle")}</p>

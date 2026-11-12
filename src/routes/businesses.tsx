@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useState } from "react";
-import { ArrowLeft, Store, Search, MapPin, Compass, BadgeCheck, RefreshCw } from "lucide-react";
+import { Store, Search, MapPin, Compass, BadgeCheck, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { BusinessMark } from "@/components/BusinessMark";
@@ -21,13 +21,13 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useBackTarget } from "@/lib/nav";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
 import { usePrefilledFilters } from "@/hooks/usePrefilledFilters";
 import { ResetPrefsButton } from "@/components/ResetPrefsButton";
 import { preferredProvinceId } from "@/lib/pref-filters";
 import { fetchPublicBusinesses, type PublicBusiness } from "@/lib/local-businesses";
+import { BackButton } from "@/components/BackButton";
 
 const SponsoredStrip = lazy(() =>
   import("@/components/SponsoredStrip").then((m) => ({ default: m.SponsoredStrip })),
@@ -60,7 +60,6 @@ const ALL = "all";
 function BusinessesPage() {
   const { lang } = useLang();
   const pt = lang === "pt";
-  const back = useBackTarget();
   const { provinces } = useProvinces();
   const { categories } = useBusinessCategories();
   // Starts on the first saved province; changing it never changes the preferences.
@@ -106,11 +105,7 @@ function BusinessesPage() {
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
           <AppSidebar />
-          <Button variant="ghost" size="icon" asChild aria-label={pt ? "Voltar" : "Back"}>
-            <Link to={back}>
-              <ArrowLeft className="size-5" />
-            </Link>
-          </Button>
+          <BackButton fallback="auto" showLabel />
           <h1 className="font-bold text-lg flex items-center gap-2 flex-1">
             <Store className="size-5 text-primary" />
             {pt ? "Negócios Locais" : "Local Businesses"}

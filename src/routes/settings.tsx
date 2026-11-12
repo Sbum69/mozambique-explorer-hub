@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  ArrowLeft,
   Bell,
   Download,
   Info,
@@ -47,6 +46,7 @@ import { LEGAL_TXT, MFA_TXT, PHOTOS_TXT, SETTINGS_TXT } from "@/lib/page-texts";
 import { MfaSettings } from "@/components/MfaSettings";
 import type { ThemePreference } from "@/lib/theme";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-reset";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/settings")({
   ssr: false,
@@ -129,11 +129,7 @@ function SettingsPage() {
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
             <AppSidebar />
-            <Button asChild variant="ghost" size="icon" aria-label={t.back}>
-              <Link to="/home">
-                <ArrowLeft className="size-5" />
-              </Link>
-            </Button>
+            <BackButton fallback="/dashboard" />
             <h1 className="min-w-0 truncate font-bold text-base sm:text-lg ml-1">{t.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">

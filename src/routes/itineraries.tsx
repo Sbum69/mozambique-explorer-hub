@@ -14,7 +14,6 @@ import {
   Trash2,
   Sparkles,
   Store,
-  ArrowLeft,
   Pencil,
   MessageCircle,
   Facebook,
@@ -98,11 +97,11 @@ import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
 import { PersonalSections } from "@/components/PersonalRoutes";
 import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
@@ -133,7 +132,6 @@ function ItinerariesPage() {
   const { lang } = useLang();
   const [askConfirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
-  const backTarget = useBackTarget();
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
@@ -534,13 +532,7 @@ function ItinerariesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: backTarget })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
-            >
-              <ArrowLeft className="size-4" />{" "}
-              {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}
-            </button>
+            <BackButton fallback="auto" showLabel />
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />

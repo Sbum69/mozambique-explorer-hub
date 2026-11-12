@@ -1,15 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  Compass,
-  Clock,
-  MapPin,
-  Star,
-  Store,
-  Users,
-  Map as MapIcon,
-} from "lucide-react";
+import { Compass, Clock, MapPin, Star, Store, Users, Map as MapIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PhotoCredit } from "@/components/PhotoCredit";
@@ -21,6 +12,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchExperienceById, type Experience } from "@/lib/experiences";
 import { formatPrice } from "@/lib/price";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/experience/$id")({
   head: () => ({
@@ -71,14 +63,7 @@ function ExperienceDetailPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={pt ? "Voltar" : "Back"}
-            onClick={() => router.history.back()}
-          >
-            <ArrowLeft className="size-5" />
-          </Button>
+          <BackButton fallback="/experiences" showLabel />
           <span className="font-bold flex-1 truncate">{pt ? "Experiência" : "Experience"}</span>
           <ThemeToggle />
           <LanguageToggle />
