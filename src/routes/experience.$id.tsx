@@ -122,12 +122,6 @@ function ExperienceDetailPage() {
                     {exp.capacity}
                   </span>
                 )}
-                {exp.reviews > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Star className="size-4" />
-                    {exp.rating.toFixed(1)} ({exp.reviews})
-                  </span>
-                )}
               </div>
               {exp.host && (
                 <Link to="/business/$id" params={{ id: exp.businessId }}>

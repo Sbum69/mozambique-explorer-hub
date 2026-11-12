@@ -422,12 +422,6 @@ function ExperiencesPage() {
                       decoding="async"
                     />
                     <PhotoCredit src={exp.image} />
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-background/95 text-foreground backdrop-blur">
-                        <Star className="size-3 mr-1 fill-warning text-warning" />
-                        {exp.rating.toFixed(1)} · {exp.reviews}
-                      </Badge>
-                    </div>
                     <div className="absolute top-3 right-3 flex items-center gap-2">
                       <Badge className="bg-primary text-primary-foreground border-0">
                         <InterestIcon id={exp.category} className="mr-1" />

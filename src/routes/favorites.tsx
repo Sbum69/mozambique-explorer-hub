@@ -10,7 +10,6 @@ import {
   Search,
   Grid,
   List,
-  Star,
   Trash2,
   Share2,
   Clock,
@@ -433,12 +432,6 @@ function FavoriteCard({
           </p>
         )}
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
-          {typeof d.rating === "number" && (
-            <span className="flex items-center gap-1">
-              <Star className="size-3 fill-yellow-500 text-yellow-700 dark:text-yellow-300" />
-              {d.rating.toFixed(1)}
-            </span>
-          )}
           {duration && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />
