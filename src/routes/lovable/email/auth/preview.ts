@@ -9,7 +9,7 @@ import { EmailChangeEmail } from "@/lib/email-templates/email-change";
 import { ReauthenticationEmail } from "@/lib/email-templates/reauthentication";
 
 // Configuration
-const SITE_NAME = "Mozambique Explorer Hub";
+const SITE_NAME = "EKAYA";
 const ROOT_DOMAIN = "exploreekaya.com";
 
 // Sample data for preview mode ONLY (not used in actual email sending).

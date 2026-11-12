@@ -36,16 +36,16 @@ const SponsoredStrip = lazy(() =>
 export const Route = createFileRoute("/businesses")({
   head: () => ({
     meta: [
-      { title: "Negócios Locais — Ekaya Explore" },
+      { title: "Negócios Locais — EKAYA" },
       {
         name: "description",
         content:
-          "Descobre negócios locais registados no Ekaya em todas as províncias de Moçambique.",
+          "Descobre negócios locais registados no EKAYA em todas as províncias de Moçambique.",
       },
-      { property: "og:title", content: "Negócios Locais — Ekaya Explore" },
+      { property: "og:title", content: "Negócios Locais — EKAYA" },
       {
         property: "og:description",
-        content: "Descobre negócios locais registados no Ekaya em Moçambique.",
+        content: "Descobre negócios locais registados no EKAYA em Moçambique.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -124,8 +124,8 @@ function BusinessesPage() {
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         <p className="text-muted-foreground">
           {pt
-            ? "Descobre os negócios comunitários registados no Ekaya e as experiências que oferecem."
-            : "Discover the community businesses registered on Ekaya and the experiences they offer."}
+            ? "Descobre os negócios comunitários registados no EKAYA e as experiências que oferecem."
+            : "Discover the community businesses registered on EKAYA and the experiences they offer."}
         </p>
 
         <div className="grid gap-3 sm:grid-cols-3">

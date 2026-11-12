@@ -35,12 +35,12 @@ import { formatPrice } from "@/lib/price";
 export const Route = createFileRoute("/favorites")({
   head: () => ({
     meta: [
-      { title: "Meus Favoritos — Ekaya Explore" },
+      { title: "Meus Favoritos — EKAYA" },
       {
         name: "description",
         content: "Tudo o que guardaste para explorar depois em Moçambique.",
       },
-      { property: "og:title", content: "Meus Favoritos — Ekaya Explore" },
+      { property: "og:title", content: "Meus Favoritos — EKAYA" },
       {
         property: "og:description",
         content: "Tudo o que guardaste para explorar depois em Moçambique.",

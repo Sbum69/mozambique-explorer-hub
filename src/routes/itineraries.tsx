@@ -107,12 +107,12 @@ import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/commu
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
     meta: [
-      { title: "Roteiros — Ekaya Explore" },
+      { title: "Roteiros — EKAYA" },
       {
         name: "description",
         content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique.",
       },
-      { property: "og:title", content: "Roteiros — Ekaya Explore" },
+      { property: "og:title", content: "Roteiros — EKAYA" },
       {
         property: "og:description",
         content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique.",
@@ -324,7 +324,7 @@ function ItinerariesPage() {
       ? `${window.location.origin}/itinerary/${selectedRoute.id}`
       : "";
   const shareText = selectedRoute
-    ? `${selectedRoute.title} — ${lang === "pt" ? "Código" : "Code"}: ${selectedRoute.code} · Ekaya Explore`
+    ? `${selectedRoute.title} — ${lang === "pt" ? "Código" : "Code"}: ${selectedRoute.code} · EKAYA`
     : "";
 
   const nativeShare = async () => {
@@ -1108,8 +1108,8 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           </DialogTitle>
           <DialogDescription>
             {lang === "pt"
-              ? "As paragens são escolhidas entre os destinos e experiências que existem no Ekaya."
-              : "Stops are picked from the destinations and experiences that exist in Ekaya."}
+              ? "As paragens são escolhidas entre os destinos e experiências que existem no EKAYA."
+              : "Stops are picked from the destinations and experiences that exist in EKAYA."}
           </DialogDescription>
         </DialogHeader>
 

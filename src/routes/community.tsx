@@ -59,15 +59,15 @@ const ReportDialog = lazy(() =>
 export const Route = createFileRoute("/community")({
   head: () => ({
     meta: [
-      { title: "Comunidade — Ekaya Explore" },
+      { title: "Comunidade — EKAYA" },
       {
         name: "description",
-        content: "Partilha a tua experiência em Moçambique com a comunidade Ekaya.",
+        content: "Partilha a tua experiência em Moçambique com a comunidade EKAYA.",
       },
-      { property: "og:title", content: "Comunidade — Ekaya Explore" },
+      { property: "og:title", content: "Comunidade — EKAYA" },
       {
         property: "og:description",
-        content: "Partilha a tua experiência em Moçambique com a comunidade Ekaya.",
+        content: "Partilha a tua experiência em Moçambique com a comunidade EKAYA.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -18,10 +18,10 @@ const OpenSourceCredits = lazy(() =>
 export const Route = createFileRoute("/creditos")({
   head: () => ({
     meta: [
-      { title: "Créditos das fotografias — Ekaya Explore" },
+      { title: "Créditos das fotografias — EKAYA" },
       {
         name: "description",
-        content: "Autor, licença e origem de todas as fotografias usadas no Ekaya Explore.",
+        content: "Autor, licença e origem de todas as fotografias usadas no EKAYA.",
       },
     ],
   }),

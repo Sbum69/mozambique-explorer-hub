@@ -53,12 +53,12 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 export const Route = createFileRoute("/bookings")({
   head: () => ({
     meta: [
-      { title: "As Minhas Reservas — Ekaya Explore" },
+      { title: "As Minhas Reservas — EKAYA" },
       {
         name: "description",
         content: "Acompanha as tuas reservas de experiências comunitárias em Moçambique.",
       },
-      { property: "og:title", content: "As Minhas Reservas — Ekaya Explore" },
+      { property: "og:title", content: "As Minhas Reservas — EKAYA" },
       {
         property: "og:description",
         content: "Acompanha as tuas reservas de experiências comunitárias em Moçambique.",

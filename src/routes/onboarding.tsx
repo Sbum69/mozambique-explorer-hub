@@ -10,13 +10,13 @@ export const Route = createFileRoute("/onboarding")({
   },
   head: () => ({
     meta: [
-      { title: "Personaliza a tua viagem — Ekaya Explore" },
+      { title: "Personaliza a tua viagem — EKAYA" },
       {
         name: "description",
         content:
           "Escolhe a província, os dias disponíveis e os teus interesses para receber roteiros comunitários à tua medida.",
       },
-      { property: "og:title", content: "Personaliza a tua viagem — Ekaya Explore" },
+      { property: "og:title", content: "Personaliza a tua viagem — EKAYA" },
       {
         property: "og:description",
         content:

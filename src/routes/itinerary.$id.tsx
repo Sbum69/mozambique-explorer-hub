@@ -75,7 +75,7 @@ import {
 
 export const Route = createFileRoute("/itinerary/$id")({
   head: () => {
-    const title = "Roteiro — Ekaya Explore";
+    const title = "Roteiro — EKAYA";
     const description =
       "Segue o roteiro dia a dia com destinos e experiências reais de Moçambique.";
     return {

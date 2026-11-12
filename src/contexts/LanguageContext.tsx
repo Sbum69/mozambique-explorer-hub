@@ -177,7 +177,7 @@ const dict = {
     pt: "Escreve a tua nota para um lugar visitado.",
     en: "Write your note for a place you visited.",
   },
-  gameTitle_g21: { pt: "Embaixador Ekaya", en: "Ekaya Ambassador" },
+  gameTitle_g21: { pt: "Embaixador EKAYA", en: "EKAYA Ambassador" },
   gameDesc_g21: { pt: "Partilha 2 conquistas.", en: "Share 2 achievements." },
   gameBadge_g21: { pt: "Embaixador", en: "Ambassador" },
   gameDetail_g21: {
@@ -185,7 +185,7 @@ const dict = {
     en: "Share achievements and help other travellers.",
   },
   // generic
-  appName: { pt: "Ekaya Explore", en: "Ekaya Explore" },
+  appName: { pt: "EKAYA", en: "EKAYA" },
   tagline: {
     pt: "Turismo comunitário inteligente em Moçambique",
     en: "Smart community tourism in Mozambique",
@@ -366,7 +366,7 @@ const dict = {
     en: "You will receive details via email (simulated).",
   },
   // community
-  communityTitle: { pt: "Comunidade Ekaya", en: "Ekaya Community" },
+  communityTitle: { pt: "Comunidade EKAYA", en: "EKAYA Community" },
   communitySubtitle: { pt: "Partilha a tua experiência", en: "Share your experience" },
   yourVoiceMatters: { pt: "A Sua Voz Importa", en: "Your Voice Matters" },
   yourVoiceSub: {

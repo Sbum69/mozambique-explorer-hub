@@ -16,7 +16,7 @@ export const Route = createFileRoute("/recibo/$id")({
   ssr: false,
   beforeLoad: requireAuthenticatedUser,
   head: () => ({
-    meta: [{ title: "Recibo — Ekaya Explore" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Recibo — EKAYA" }, { name: "robots", content: "noindex" }],
   }),
   component: ReceiptPage,
 });

@@ -32,13 +32,13 @@ import { deriveImpactView, impactStatsQuery, type ImpactStats } from "@/lib/impa
 export const Route = createFileRoute("/impact")({
   head: () => ({
     meta: [
-      { title: "Impacto Social — Ekaya Explore" },
+      { title: "Impacto Social — EKAYA" },
       {
         name: "description",
         content:
           "Métricas reais da plataforma e impacto verificado do turismo comunitário em Moçambique.",
       },
-      { property: "og:title", content: "Impacto Social — Ekaya Explore" },
+      { property: "og:title", content: "Impacto Social — EKAYA" },
       {
         property: "og:description",
         content:
@@ -242,8 +242,8 @@ function Stats() {
     <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
       <Database className="size-3.5" />
       {lang === "pt"
-        ? `Dados de ${when} · Base de dados Ekaya, contagem em tempo real`
-        : `Data as of ${when} · Ekaya database, live count`}
+        ? `Dados de ${when} · Base de dados EKAYA, contagem em tempo real`
+        : `Data as of ${when} · EKAYA database, live count`}
     </p>
   );
 

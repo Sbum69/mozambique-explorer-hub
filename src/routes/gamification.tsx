@@ -28,12 +28,12 @@ import { POINT_VALUES } from "@/lib/points";
 export const Route = createFileRoute("/gamification")({
   head: () => ({
     meta: [
-      { title: "Pontos e níveis — Ekaya Explore" },
+      { title: "Pontos e níveis — EKAYA" },
       {
         name: "description",
         content: "Ganha pontos por atividades concluídas e roteiros comprovados em Moçambique.",
       },
-      { property: "og:title", content: "Pontos e níveis — Ekaya Explore" },
+      { property: "og:title", content: "Pontos e níveis — EKAYA" },
       {
         property: "og:description",
         content: "Ganha pontos por atividades concluídas e roteiros comprovados em Moçambique.",

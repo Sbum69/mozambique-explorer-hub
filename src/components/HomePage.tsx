@@ -639,8 +639,8 @@ export function HomePage() {
             </h3>
             <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
               {lang === "pt"
-                ? "Muitos destinos em Moçambique têm internet limitada. O Ekaya foi pensado para funcionar sem rede — mapas, roteiros, histórias e dicas continuam acessíveis quando mais precisas."
-                : "Many destinations in Mozambique have limited internet. Ekaya is built to work offline — maps, routes, stories and tips stay available whenever you need them."}
+                ? "Muitos destinos em Moçambique têm internet limitada. O EKAYA foi pensado para funcionar sem rede — mapas, roteiros, histórias e dicas continuam acessíveis quando mais precisas."
+                : "Many destinations in Mozambique have limited internet. EKAYA is built to work offline — maps, routes, stories and tips stay available whenever you need them."}
             </p>
           </CardContent>
         </Card>

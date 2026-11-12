@@ -25,12 +25,12 @@ import { formatPrice } from "@/lib/price";
 export const Route = createFileRoute("/experience/$id")({
   head: () => ({
     meta: [
-      { title: "Experiência — Ekaya Explore" },
+      { title: "Experiência — EKAYA" },
       {
         name: "description",
         content: "Detalhes de uma atividade comercial em Moçambique e reserva.",
       },
-      { property: "og:title", content: "Experiência — Ekaya Explore" },
+      { property: "og:title", content: "Experiência — EKAYA" },
       {
         property: "og:description",
         content: "Detalhes de uma atividade comercial em Moçambique e reserva.",

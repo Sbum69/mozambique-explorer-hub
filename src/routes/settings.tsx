@@ -54,7 +54,7 @@ export const Route = createFileRoute("/settings")({
     search.mfa === "required" ? { mfa: "required" } : {},
   beforeLoad: requireAuthenticatedUser,
   head: () => ({
-    meta: [{ title: "Definições — Ekaya Explore" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Definições — EKAYA" }, { name: "robots", content: "noindex" }],
   }),
   component: SettingsPage,
 });

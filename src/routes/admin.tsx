@@ -113,15 +113,15 @@ export const Route = createFileRoute("/admin")({
   beforeLoad: () => requireAdmin(),
   head: () => ({
     meta: [
-      { title: "Painel de Administração — Ekaya Explore" },
+      { title: "Painel de Administração — EKAYA" },
       {
         name: "description",
-        content: "Gestão de utilizadores, negócios e métricas globais da plataforma Ekaya Explore.",
+        content: "Gestão de utilizadores, negócios e métricas globais da plataforma EKAYA.",
       },
-      { property: "og:title", content: "Painel de Administração — Ekaya Explore" },
+      { property: "og:title", content: "Painel de Administração — EKAYA" },
       {
         property: "og:description",
-        content: "Gestão de utilizadores, negócios e métricas globais da plataforma Ekaya Explore.",
+        content: "Gestão de utilizadores, negócios e métricas globais da plataforma EKAYA.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -276,7 +276,7 @@ function AdminPage() {
               <h1 className="truncate text-base sm:text-lg font-bold">
                 {pt ? "Painel de Administração" : "Administration"}
               </h1>
-              <p className="text-xs text-muted-foreground">Ekaya Explore</p>
+              <p className="text-xs text-muted-foreground">EKAYA</p>
             </div>
           </div>
           {/* Phones: icon-only actions (names kept for screen readers). */}

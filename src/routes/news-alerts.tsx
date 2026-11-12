@@ -63,12 +63,12 @@ import { useBackTarget } from "@/lib/nav";
 export const Route = createFileRoute("/news-alerts")({
   head: () => ({
     meta: [
-      { title: "Notícias & Avisos — Ekaya Explore" },
+      { title: "Notícias & Avisos — EKAYA" },
       {
         name: "description",
         content: "Notícias, meteorologia e dicas para viajar em Moçambique.",
       },
-      { property: "og:title", content: "Notícias & Avisos — Ekaya Explore" },
+      { property: "og:title", content: "Notícias & Avisos — EKAYA" },
       {
         property: "og:description",
         content: "Notícias, meteorologia e dicas para viajar em Moçambique.",

@@ -42,13 +42,13 @@ import { communityInterestMatches } from "@/lib/recommendations";
 export const Route = createFileRoute("/community-experiences")({
   head: () => ({
     meta: [
-      { title: "Experiências Comunitárias gratuitas — Ekaya Explore" },
+      { title: "Experiências Comunitárias gratuitas — EKAYA" },
       {
         name: "description",
         content:
           "Atividades gratuitas e sem reserva em todas as províncias de Moçambique: praias, cultura, mercados, natureza e comunidades.",
       },
-      { property: "og:title", content: "Experiências Comunitárias gratuitas — Ekaya Explore" },
+      { property: "og:title", content: "Experiências Comunitárias gratuitas — EKAYA" },
       {
         property: "og:description",
         content: "Atividades de lazer gratuitas, organizadas por província, em Moçambique.",

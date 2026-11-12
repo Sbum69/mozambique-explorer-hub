@@ -4,9 +4,9 @@ import { HERO_AVIF_SRCSET } from "@/components/HeroImage";
  * Head of the public Home, shared by "/" (canonical) and "/home". Kept apart from the page
  * component so the route's critical chunk stays small.
  */
-const TITLE = "Ekaya — Explora Moçambique para além da superfície";
+const TITLE = "EKAYA — Explora Moçambique para além da superfície";
 const DESCRIPTION =
-  "Escolhe destino, dias e tipo de experiência. Ekaya recomenda roteiros, atividades e locais únicos em Moçambique.";
+  "Escolhe destino, dias e tipo de experiência. EKAYA recomenda roteiros, atividades e locais únicos em Moçambique.";
 
 export function homeHead() {
   return {

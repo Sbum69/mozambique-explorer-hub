@@ -96,7 +96,7 @@ describe("community post mapping", () => {
 
   it("falls back to a neutral author and zero reactions", () => {
     const post = mapPost(raw(), undefined, undefined, null);
-    expect(post.authorName).toBe("Ekaya");
+    expect(post.authorName).toBe("EKAYA");
     expect(post.authorAvatar).toBeNull();
     expect([post.likes, post.dislikes, post.myReaction]).toEqual([0, 0, null]);
     expect(post.categoryName).toBeNull();

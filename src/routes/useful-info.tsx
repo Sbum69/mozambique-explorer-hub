@@ -32,9 +32,9 @@ import { CurrencyConverter } from "@/components/CurrencyConverter";
 export const Route = createFileRoute("/useful-info")({
   head: () => ({
     meta: [
-      { title: "Informações Úteis — Ekaya Explore" },
+      { title: "Informações Úteis — EKAYA" },
       { name: "description", content: "Guia completo para visitar Moçambique." },
-      { property: "og:title", content: "Informações Úteis — Ekaya Explore" },
+      { property: "og:title", content: "Informações Úteis — EKAYA" },
       { property: "og:description", content: "Guia completo para visitar Moçambique." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

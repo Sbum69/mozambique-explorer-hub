@@ -16,7 +16,7 @@ import { PRICING_TXT } from "@/lib/pricing-texts";
 
 // The head stays in the first-load bundle, so it uses literals instead of PRICING_TXT (which then
 // only loads with the page). Same texts as PRICING_TXT.pt.metaTitle / metaDescription.
-const META_TITLE = "Preços e reembolsos — Ekaya Explore";
+const META_TITLE = "Preços e reembolsos — EKAYA";
 const META_DESCRIPTION =
   "Comissão, destaques, Parceiro Fundador, pagamento por M-Pesa, cancelamento e reembolso.";
 

@@ -16,10 +16,10 @@ export const Route = createFileRoute("/auth/callback")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Confirmar email — Ekaya Explore" },
-      { name: "description", content: "Confirmação da tua conta Ekaya Explore." },
-      { property: "og:title", content: "Confirmar email — Ekaya Explore" },
-      { property: "og:description", content: "Confirmação da tua conta Ekaya Explore." },
+      { title: "Confirmar email — EKAYA" },
+      { name: "description", content: "Confirmação da tua conta EKAYA." },
+      { property: "og:title", content: "Confirmar email — EKAYA" },
+      { property: "og:description", content: "Confirmação da tua conta EKAYA." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

@@ -31,15 +31,15 @@ import { formatPrice } from "@/lib/price";
 export const Route = createFileRoute("/business/$id")({
   head: () => ({
     meta: [
-      { title: "Negócio local — Ekaya Explore" },
+      { title: "Negócio local — EKAYA" },
       {
         name: "description",
-        content: "Detalhes de um negócio local no Ekaya e as experiências que oferece.",
+        content: "Detalhes de um negócio local no EKAYA e as experiências que oferece.",
       },
-      { property: "og:title", content: "Negócio local — Ekaya Explore" },
+      { property: "og:title", content: "Negócio local — EKAYA" },
       {
         property: "og:description",
-        content: "Detalhes de um negócio local no Ekaya e as experiências que oferece.",
+        content: "Detalhes de um negócio local no EKAYA e as experiências que oferece.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

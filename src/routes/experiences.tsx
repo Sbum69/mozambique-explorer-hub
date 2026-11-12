@@ -82,12 +82,12 @@ const WEEKDAY_LABEL: { pt: string; en: string }[] = [
 export const Route = createFileRoute("/experiences")({
   head: () => ({
     meta: [
-      { title: "Experiências — Ekaya Explore" },
+      { title: "Experiências — EKAYA" },
       {
         name: "description",
         content: "Reserva experiências comunitárias autênticas em Moçambique.",
       },
-      { property: "og:title", content: "Experiências — Ekaya Explore" },
+      { property: "og:title", content: "Experiências — EKAYA" },
       {
         property: "og:description",
         content: "Reserva experiências comunitárias autênticas em Moçambique.",

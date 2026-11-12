@@ -42,12 +42,12 @@ export const Route = createFileRoute("/business-dashboard")({
   beforeLoad: () => requireRole(["business_small", "business_large"]),
   head: () => ({
     meta: [
-      { title: "Painel do Negócio — Ekaya Explore" },
+      { title: "Painel do Negócio — EKAYA" },
       {
         name: "description",
         content: "Gere reservas, perfil e desempenho do teu negócio turístico em Moçambique.",
       },
-      { property: "og:title", content: "Painel do Negócio — Ekaya Explore" },
+      { property: "og:title", content: "Painel do Negócio — EKAYA" },
       {
         property: "og:description",
         content: "Gere reservas, perfil e desempenho do teu negócio turístico em Moçambique.",

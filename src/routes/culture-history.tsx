@@ -27,9 +27,9 @@ import { useLang, type Lang } from "@/contexts/LanguageContext";
 export const Route = createFileRoute("/culture-history")({
   head: () => ({
     meta: [
-      { title: "Cultura e História — Ekaya Explore" },
+      { title: "Cultura e História — EKAYA" },
       { name: "description", content: "Descubra a rica história e cultura de Moçambique." },
-      { property: "og:title", content: "Cultura e História — Ekaya Explore" },
+      { property: "og:title", content: "Cultura e História — EKAYA" },
       { property: "og:description", content: "Descubra a rica história e cultura de Moçambique." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

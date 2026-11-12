@@ -19,12 +19,12 @@ export const Route = createFileRoute("/voucher/$rewardId")({
   beforeLoad: requireAuthenticatedUser,
   head: () => ({
     meta: [
-      { title: "Resgate — Ekaya Explore" },
-      { name: "description", content: "Detalhe de uma recompensa resgatada com pontos Ekaya." },
-      { property: "og:title", content: "Resgate — Ekaya Explore" },
+      { title: "Resgate — EKAYA" },
+      { name: "description", content: "Detalhe de uma recompensa resgatada com pontos EKAYA." },
+      { property: "og:title", content: "Resgate — EKAYA" },
       {
         property: "og:description",
-        content: "Detalhe de uma recompensa resgatada com pontos Ekaya.",
+        content: "Detalhe de uma recompensa resgatada com pontos EKAYA.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

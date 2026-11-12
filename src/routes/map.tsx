@@ -52,12 +52,12 @@ const InteractiveMap = lazy(() =>
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Mapa Interativo — Ekaya Explore" },
+      { title: "Mapa Interativo — EKAYA" },
       {
         name: "description",
         content: "Mapa interativo de Moçambique com destinos comunitários autênticos.",
       },
-      { property: "og:title", content: "Mapa Interativo — Ekaya Explore" },
+      { property: "og:title", content: "Mapa Interativo — EKAYA" },
       {
         property: "og:description",
         content: "Mapa interativo de Moçambique com destinos comunitários autênticos.",

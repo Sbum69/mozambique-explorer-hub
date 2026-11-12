@@ -58,7 +58,7 @@ export const LEVELS: LevelDef[] = [
     level: 5,
     minPoints: 1500,
 
-    name: { pt: "Embaixador Ekaya", en: "Ekaya Ambassador" },
+    name: { pt: "Embaixador EKAYA", en: "EKAYA Ambassador" },
   },
 ];
 

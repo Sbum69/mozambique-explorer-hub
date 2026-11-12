@@ -34,15 +34,15 @@ export const Route = createFileRoute("/community/$postId")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Publicação da Comunidade — Ekaya Explore" },
+      { title: "Publicação da Comunidade — EKAYA" },
       {
         name: "description",
-        content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique.",
+        content: "Histórias, dicas e perguntas partilhadas pela comunidade EKAYA em Moçambique.",
       },
-      { property: "og:title", content: "Publicação da Comunidade — Ekaya Explore" },
+      { property: "og:title", content: "Publicação da Comunidade — EKAYA" },
       {
         property: "og:description",
-        content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique.",
+        content: "Histórias, dicas e perguntas partilhadas pela comunidade EKAYA em Moçambique.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },

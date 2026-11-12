@@ -70,12 +70,12 @@ const PhotoChallengeCapture = lazy(() =>
 export const Route = createFileRoute("/games")({
   head: () => ({
     meta: [
-      { title: "Jogos & Desafios — Ekaya Explore" },
+      { title: "Jogos & Desafios — EKAYA" },
       {
         name: "description",
         content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique.",
       },
-      { property: "og:title", content: "Jogos & Desafios — Ekaya Explore" },
+      { property: "og:title", content: "Jogos & Desafios — EKAYA" },
       {
         property: "og:description",
         content: "Joga, ganha pontos e desbloqueia selos pela tua viagem em Moçambique.",
@@ -1012,7 +1012,7 @@ function GameDetailModal({
               {task.share && (
                 <ShareTask
                   title={game.title}
-                  text={`Estou a fazer o desafio "${game.title}" na Ekaya Explore!`}
+                  text={`Estou a fazer o desafio "${game.title}" na EKAYA!`}
                   done={shared}
                   onDone={() => setShared(true)}
                 />

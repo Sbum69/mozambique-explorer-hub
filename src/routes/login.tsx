@@ -28,12 +28,12 @@ export const Route = createFileRoute("/login")({
   },
   head: () => ({
     meta: [
-      { title: "Entrar — Ekaya Explore" },
-      { name: "description", content: "Acede à tua conta Ekaya Explore e descobre Moçambique." },
-      { property: "og:title", content: "Entrar — Ekaya Explore" },
+      { title: "Entrar — EKAYA" },
+      { name: "description", content: "Acede à tua conta EKAYA e descobre Moçambique." },
+      { property: "og:title", content: "Entrar — EKAYA" },
       {
         property: "og:description",
-        content: "Acede à tua conta Ekaya Explore e descobre Moçambique.",
+        content: "Acede à tua conta EKAYA e descobre Moçambique.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -222,7 +222,7 @@ export const BADGES: BadgeDef[] = [
   },
   {
     id: "s4",
-    name: { pt: "Ekaya Master", en: "Ekaya Master" },
+    name: { pt: "EKAYA Master", en: "EKAYA Master" },
     requirement: {
       pt: "1 roteiro concluído com todas as provas",
       en: "1 route completed with every proof",
