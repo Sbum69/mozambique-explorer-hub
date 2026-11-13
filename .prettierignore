@@ -15,6 +15,10 @@ drizzle/migrations/
 # Migrations of the original project: must not be changed
 supabase/migrations/
 
+# Lovable integration endpoints (email webhook/preview): Lovable rewrites them from its own servers,
+# where no local hook runs. ESLint rules still apply there; only the formatting is not enforced.
+src/routes/lovable/
+
 # Lovable plans (platform history) and the roadmap (updated at the end of each sequence)
 .lovable/
 roadmap.md
