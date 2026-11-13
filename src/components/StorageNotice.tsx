@@ -42,7 +42,7 @@ export function StorageNotice({ onClose }: { onClose: () => void }) {
   return (
     <aside
       aria-label={t.label}
-      className="fixed inset-x-2 bottom-[4.5rem] z-40 mx-auto flex max-w-xl flex-wrap items-center gap-3 rounded-[10px] border border-border bg-card p-3 text-sm text-card-foreground print:hidden"
+      className="ekaya-float fixed inset-x-2 bottom-[4.5rem] z-40 mx-auto flex max-w-xl flex-wrap items-center gap-3 rounded-[10px] border border-border bg-card p-3 text-sm text-card-foreground print:hidden"
     >
       <Info className="size-4 shrink-0 text-primary" aria-hidden="true" />
       <p className="min-w-0 flex-1">
