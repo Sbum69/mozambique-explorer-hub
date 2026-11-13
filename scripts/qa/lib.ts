@@ -9,7 +9,12 @@ import { join, resolve } from "node:path";
 
 export const REPO = resolve(import.meta.dir, "../..");
 export const BASE = (process.env.QA_BASE ?? "http://127.0.0.1:4173").replace(/\/$/, "");
-export const EDGE = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+/** System Edge; QA_BROWSER points elsewhere (e.g. Playwright's Chromium while Edge has an update pending). */
+export const EDGE =
+  process.env.QA_BROWSER ?? "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+export const BROWSER = process.env.QA_BROWSER
+  ? { executablePath: process.env.QA_BROWSER }
+  : { channel: "msedge" as const };
 
 export type Role = "tourist" | "business" | "admin";
 export type Lang = "pt" | "en";
@@ -151,7 +156,7 @@ export async function sessionFor(role: Role, raise = true): Promise<string | nul
 }
 
 export async function launch(): Promise<Browser> {
-  return chromium.launch({ channel: "msedge" });
+  return chromium.launch(BROWSER);
 }
 
 export interface ContextOptions {

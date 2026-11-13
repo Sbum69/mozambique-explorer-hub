@@ -64,13 +64,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "Ekaya Explore — Turismo comunitário em Moçambique" },
+        { title: "EKAYA — Turismo comunitário em Moçambique" },
         {
           name: "description",
           content:
             "Descobre Moçambique de forma autêntica. Conecta-te a comunidades locais, cria roteiros personalizados e gera impacto positivo em cada viagem.",
         },
-        { property: "og:title", content: "Ekaya Explore" },
+        { property: "og:title", content: "EKAYA" },
         {
           property: "og:description",
           content: "Hub de turismo comunitário inteligente para Moçambique.",

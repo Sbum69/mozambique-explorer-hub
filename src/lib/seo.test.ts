@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { homeHead } from "./home-head";
+
 import {
   PRIVATE_PATH_PREFIXES,
   PUBLIC_SITEMAP_PATHS,
@@ -50,5 +52,28 @@ describe("SEO: sitemap and robots", () => {
       f.replace(/\.tsx?$/, ""),
     );
     for (const p of PUBLIC_SITEMAP_PATHS) expect(files).toContain(p === "/" ? "index" : p.slice(1));
+  });
+});
+
+describe("SEO: lastmod, detail pages and structured data", () => {
+  it("adds lastmod to static pages and lists public detail pages", () => {
+    const xml = sitemapXml([{ path: "/itinerary/abc", lastmod: "2026-11-10T12:00:00Z" }]);
+    expect(xml).toContain("<loc>https://exploreekaya.com/</loc><lastmod>2026-11-12</lastmod>");
+    expect(xml).toContain(
+      "<loc>https://exploreekaya.com/itinerary/abc</loc><lastmod>2026-11-10</lastmod>",
+    );
+  });
+
+  it("home carries Organization and WebSite JSON-LD with the EKAYA name", () => {
+    const ld = JSON.parse(homeHead().scripts[0].children) as {
+      "@type": string;
+      name: string;
+      alternateName: string[];
+    }[];
+    expect(ld.map((x) => x["@type"])).toEqual(["Organization", "WebSite"]);
+    expect(ld.every((x) => x.name === "EKAYA")).toBe(true);
+    expect(ld[1].alternateName).toEqual(
+      expect.arrayContaining(["exploreekaya", "Explore Ekaya", "Ekaya Moçambique"]),
+    );
   });
 });

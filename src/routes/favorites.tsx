@@ -3,7 +3,6 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft,
   Bookmark,
   MapPin,
   Heart,
@@ -11,7 +10,6 @@ import {
   Search,
   Grid,
   List,
-  Star,
   Trash2,
   Share2,
   Clock,
@@ -31,16 +29,17 @@ import { useFavorites, type FavoriteItem, type FavoriteType } from "@/contexts/F
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/price";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/favorites")({
   head: () => ({
     meta: [
-      { title: "Meus Favoritos — Ekaya Explore" },
+      { title: "Meus Favoritos — EKAYA" },
       {
         name: "description",
         content: "Tudo o que guardaste para explorar depois em Moçambique.",
       },
-      { property: "og:title", content: "Meus Favoritos — Ekaya Explore" },
+      { property: "og:title", content: "Meus Favoritos — EKAYA" },
       {
         property: "og:description",
         content: "Tudo o que guardaste para explorar depois em Moçambique.",
@@ -136,13 +135,7 @@ function FavoritesPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: "/dashboard" })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-              aria-label={lang === "pt" ? "Voltar" : "Back"}
-            >
-              <ArrowLeft className="size-4" />
-            </button>
+            <BackButton fallback="/dashboard" />
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
                 <Bookmark className="size-5 sm:size-6 text-rose-600 dark:text-rose-400" />
@@ -439,12 +432,6 @@ function FavoriteCard({
           </p>
         )}
         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
-          {typeof d.rating === "number" && (
-            <span className="flex items-center gap-1">
-              <Star className="size-3 fill-yellow-500 text-yellow-700 dark:text-yellow-300" />
-              {d.rating.toFixed(1)}
-            </span>
-          )}
           {duration && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />

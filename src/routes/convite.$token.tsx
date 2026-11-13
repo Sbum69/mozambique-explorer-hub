@@ -16,7 +16,7 @@ import { CONTENT_TXT, LEGAL_TXT, SIGNUP_TXT } from "@/lib/page-texts";
 export const Route = createFileRoute("/convite/$token")({
   ssr: false,
   head: () => ({
-    meta: [{ title: "Convite — Ekaya Explore" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Convite — EKAYA" }, { name: "robots", content: "noindex" }],
   }),
   component: InvitePage,
 });

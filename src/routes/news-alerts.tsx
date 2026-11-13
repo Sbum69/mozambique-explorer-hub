@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   Newspaper,
   Thermometer,
   AlertTriangle,
@@ -58,17 +57,17 @@ import {
   type WeatherKind,
 } from "@/lib/weather";
 import { cn } from "@/lib/utils";
-import { useBackTarget } from "@/lib/nav";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/news-alerts")({
   head: () => ({
     meta: [
-      { title: "Notícias & Avisos — Ekaya Explore" },
+      { title: "Notícias & Avisos — EKAYA" },
       {
         name: "description",
         content: "Notícias, meteorologia e dicas para viajar em Moçambique.",
       },
-      { property: "og:title", content: "Notícias & Avisos — Ekaya Explore" },
+      { property: "og:title", content: "Notícias & Avisos — EKAYA" },
       {
         property: "og:description",
         content: "Notícias, meteorologia e dicas para viajar em Moçambique.",
@@ -102,8 +101,6 @@ const TABS: { id: Tab; pt: string; en: string; icon: typeof Newspaper }[] = [
 
 function NewsAlertsPage() {
   const { lang } = useLang();
-  const navigate = useNavigate();
-  const backTarget = useBackTarget();
   const [tab, setTab] = useState<Tab>("news");
 
   return (
@@ -113,13 +110,7 @@ function NewsAlertsPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: backTarget })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-              aria-label="Back"
-            >
-              <ArrowLeft className="size-4" />
-            </button>
+            <BackButton fallback="auto" />
             <div className="min-w-0">
               <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 truncate">
                 <Newspaper className="size-5 sm:size-6 text-destructive" />

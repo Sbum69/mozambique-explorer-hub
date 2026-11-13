@@ -14,7 +14,6 @@ import {
   Trash2,
   Sparkles,
   Store,
-  ArrowLeft,
   Pencil,
   MessageCircle,
   Facebook,
@@ -98,21 +97,21 @@ import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { AppSidebar } from "@/components/AppSidebar";
-import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ShareButton } from "@/components/ShareButton";
 import { PersonalSections } from "@/components/PersonalRoutes";
 import { fetchCommunityExperiences, type CommunityExperience } from "@/lib/community-experiences";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/itineraries")({
   head: () => ({
     meta: [
-      { title: "Roteiros — Ekaya Explore" },
+      { title: "Roteiros — EKAYA" },
       {
         name: "description",
         content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique.",
       },
-      { property: "og:title", content: "Roteiros — Ekaya Explore" },
+      { property: "og:title", content: "Roteiros — EKAYA" },
       {
         property: "og:description",
         content: "Explora, cria, partilha e importa roteiros de viagem por Moçambique.",
@@ -133,7 +132,6 @@ function ItinerariesPage() {
   const { lang } = useLang();
   const [askConfirm, confirmDialog] = useConfirm();
   const navigate = useNavigate();
-  const backTarget = useBackTarget();
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
@@ -324,7 +322,7 @@ function ItinerariesPage() {
       ? `${window.location.origin}/itinerary/${selectedRoute.id}`
       : "";
   const shareText = selectedRoute
-    ? `${selectedRoute.title} — ${lang === "pt" ? "Código" : "Code"}: ${selectedRoute.code} · Ekaya Explore`
+    ? `${selectedRoute.title} — ${lang === "pt" ? "Código" : "Code"}: ${selectedRoute.code} · EKAYA`
     : "";
 
   const nativeShare = async () => {
@@ -534,13 +532,7 @@ function ItinerariesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: backTarget })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
-            >
-              <ArrowLeft className="size-4" />{" "}
-              {lang === "pt" ? "Voltar ao painel" : "Back to dashboard"}
-            </button>
+            <BackButton fallback="auto" showLabel />
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
@@ -1108,8 +1100,8 @@ function RouteFormModal({ open, editing, ownerId, onClose, onSaved }: FormProps)
           </DialogTitle>
           <DialogDescription>
             {lang === "pt"
-              ? "As paragens são escolhidas entre os destinos e experiências que existem no Ekaya."
-              : "Stops are picked from the destinations and experiences that exist in Ekaya."}
+              ? "As paragens são escolhidas entre os destinos e experiências que existem no EKAYA."
+              : "Stops are picked from the destinations and experiences that exist in EKAYA."}
           </DialogDescription>
         </DialogHeader>
 

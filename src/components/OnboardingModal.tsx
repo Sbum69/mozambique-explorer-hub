@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { INTERESTS } from "@/data/destinations";
 import { useDestinations } from "@/hooks/useDestinations";
 import { useProvinces } from "@/hooks/useProvinces";
-import { Check, ChevronLeft, ChevronRight, MapPin, Star, TrendingUp, Users } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OnboardingModalProps {
@@ -234,18 +234,6 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                          <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
-                            {d.badges.includes("most-recommended") && (
-                              <Badge className="bg-warning text-warning-foreground gap-1 border-0">
-                                <Star className="size-3 fill-current" /> {t("mostRecommended")}
-                              </Badge>
-                            )}
-                            {d.badges.includes("most-visited") && (
-                              <Badge className="bg-secondary text-secondary-foreground gap-1 border-0">
-                                <TrendingUp className="size-3" /> {t("mostVisited")}
-                              </Badge>
-                            )}
-                          </div>
                           {selected && (
                             <motion.div
                               initial={{ scale: 0 }}
@@ -264,11 +252,6 @@ export function OnboardingModal({ open, onComplete, initial }: OnboardingModalPr
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {d.description[lang]}
                           </p>
-                          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Users className="size-3" />
-                            <span className="font-semibold text-foreground">{d.visitorsK}k</span>
-                            <span>{t("visitorsYear")}</span>
-                          </div>
                         </div>
                       </motion.button>
                     );

@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { routeMeta, detailHead } from "@/lib/page-meta";
 import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft,
   Clock,
   Coins,
   Store,
@@ -72,23 +72,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/itinerary/$id")({
-  head: () => {
-    const title = "Roteiro — Ekaya Explore";
-    const description =
-      "Segue o roteiro dia a dia com destinos e experiências reais de Moçambique.";
-    return {
-      meta: [
-        { title },
-        { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-      ],
-    };
-  },
+  loader: ({ params }) => routeMeta(params.id),
+  head: ({ loaderData }) =>
+    detailHead(
+      loaderData,
+      {
+        title: "Roteiro — EKAYA",
+        description: "Segue o roteiro dia a dia com destinos e experiências reais de Moçambique.",
+      },
+      "article",
+    ),
   component: ItineraryDetailPage,
 });
 
@@ -414,12 +410,11 @@ function ItineraryDetailPage() {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <Link
-          to="/itineraries"
-          className="absolute top-6 left-6 inline-flex items-center gap-2 text-white bg-black/40 hover:bg-black/60 px-3 py-1.5 rounded-md text-sm backdrop-blur"
-        >
-          <ArrowLeft className="h-4 w-4" /> {lang === "pt" ? "Roteiros" : "Itineraries"}
-        </Link>
+        <BackButton
+          fallback="/itineraries"
+          showLabel
+          className="absolute top-6 left-6 h-9 bg-black/40 text-white backdrop-blur hover:bg-black/60 hover:text-white"
+        />
         <div className="absolute top-6 right-6 flex items-center gap-2">
           <div className="rounded-md bg-background/80 backdrop-blur">
             <ThemeToggle />

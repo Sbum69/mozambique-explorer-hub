@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { businessMeta, detailHead } from "@/lib/page-meta";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft,
   Store,
   MapPin,
   Phone,
@@ -27,25 +27,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { mapExperience, type Experience } from "@/lib/experiences";
 import { BusinessFreeActivities } from "@/components/BusinessFreeActivities";
 import { formatPrice } from "@/lib/price";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/business/$id")({
-  head: () => ({
-    meta: [
-      { title: "Negócio local — Ekaya Explore" },
-      {
-        name: "description",
-        content: "Detalhes de um negócio local no Ekaya e as experiências que oferece.",
-      },
-      { property: "og:title", content: "Negócio local — Ekaya Explore" },
-      {
-        property: "og:description",
-        content: "Detalhes de um negócio local no Ekaya e as experiências que oferece.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  ssr: false,
+  // Name and description read on the server (the page itself still renders in the browser).
+  ssr: "data-only",
+  loader: ({ params }) => businessMeta(params.id),
+  head: ({ loaderData }) =>
+    detailHead(loaderData, {
+      title: "Negócio local — EKAYA",
+      description: "Detalhes de um negócio local no EKAYA e as experiências que oferece.",
+    }),
   component: BusinessDetailPage,
 });
 
@@ -109,11 +101,7 @@ function BusinessDetailPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild aria-label={pt ? "Voltar" : "Back"}>
-            <Link to="/businesses">
-              <ArrowLeft className="size-5" />
-            </Link>
-          </Button>
+          <BackButton fallback="/businesses" />
           <span className="font-bold flex-1 truncate">
             {pt ? "Negócios Locais" : "Local Businesses"}
           </span>

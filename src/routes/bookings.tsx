@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   Calendar,
   CalendarCheck,
   Clock,
@@ -49,16 +48,17 @@ import {
   type BookingStatus,
 } from "@/lib/bookings";
 import { requireAuthenticatedUser } from "@/lib/auth";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/bookings")({
   head: () => ({
     meta: [
-      { title: "As Minhas Reservas — Ekaya Explore" },
+      { title: "As Minhas Reservas — EKAYA" },
       {
         name: "description",
         content: "Acompanha as tuas reservas de experiências comunitárias em Moçambique.",
       },
-      { property: "og:title", content: "As Minhas Reservas — Ekaya Explore" },
+      { property: "og:title", content: "As Minhas Reservas — EKAYA" },
       {
         property: "og:description",
         content: "Acompanha as tuas reservas de experiências comunitárias em Moçambique.",
@@ -180,12 +180,7 @@ function BookingsPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: "/dashboard" })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
-            >
-              <ArrowLeft className="size-4" /> {pt ? "Voltar ao painel" : "Back to dashboard"}
-            </button>
+            <BackButton fallback="/dashboard" showLabel />
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />

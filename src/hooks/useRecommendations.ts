@@ -22,7 +22,7 @@ let availabilityCache: Record<string, number> | null = null;
  * stored on the user's profile. Reuses the shared destination/experience hooks,
  * so no extra catalogue queries are made.
  */
-export function useRecommendations(limit = 6) {
+export function useRecommendations(limit = 6, chosen?: TravelPreferences) {
   const { user } = useAuth();
   const {
     destinations,
@@ -66,7 +66,7 @@ export function useRecommendations(limit = 6) {
     };
   }, []);
 
-  const preferences: TravelPreferences = useMemo(
+  const saved: TravelPreferences = useMemo(
     () => ({
       province: user?.preferences?.province,
       provinces: user?.preferences?.provinces ?? [],
@@ -80,6 +80,8 @@ export function useRecommendations(limit = 6) {
       user?.preferences?.interests,
     ],
   );
+  // What the person picked on the page (Home selector) wins over the saved profile.
+  const preferences = chosen ?? saved;
 
   const personalised = hasPreferences(preferences);
 

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/forgot-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Esqueci-me da palavra-passe — Ekaya Explore" },
+      { title: "Esqueci-me da palavra-passe — EKAYA" },
       { name: "description", content: "Pede uma ligação para definir uma nova palavra-passe." },
       { name: "robots", content: "noindex" },
     ],

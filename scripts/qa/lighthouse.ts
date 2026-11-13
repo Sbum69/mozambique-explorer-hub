@@ -19,6 +19,7 @@ import {
   AUTH_STORAGE_KEY,
   BASE,
   EDGE,
+  BROWSER,
   type QaPage,
 } from "./lib";
 
@@ -49,7 +50,7 @@ async function profileWithSession(p: QaPage): Promise<string> {
   const html = await (await fetch(BASE + "/login")).text();
   const css = html.match(/href="(\/assets\/[^"]+\.css)"/)?.[1] ?? "/";
   const ctx = await chromium.launchPersistentContext(profile, {
-    channel: "msedge",
+    ...BROWSER,
     headless: true,
   });
   const page = await ctx.newPage();

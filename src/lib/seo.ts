@@ -54,12 +54,33 @@ export function canonicalUrl(pathname: string): string | null {
 const xmlEscape = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** Always lists the canonical domain, whatever host serves the file. */
-export function sitemapXml(): string {
+/** A page in the sitemap: path on the canonical domain and, when known, its last change. */
+export interface SitemapEntry {
+  path: string;
+  lastmod?: string | null;
+}
+
+/** Last content change of the static public pages (update it when they change). */
+export const STATIC_PAGES_LASTMOD = "2026-11-12";
+
+const day = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : null);
+
+/**
+ * Always lists the canonical domain, whatever host serves the file. Static public pages first,
+ * then the public detail pages read from the database (sitemap-entries.ts).
+ */
+export function sitemapXml(details: SitemapEntry[] = []): string {
   const base = CANONICAL_ORIGIN;
-  const urls = PUBLIC_SITEMAP_PATHS.map(
-    (p) => `  <url><loc>${xmlEscape(base + p)}</loc></url>`,
-  ).join("\n");
+  const entries: SitemapEntry[] = [
+    ...PUBLIC_SITEMAP_PATHS.map((path) => ({ path, lastmod: STATIC_PAGES_LASTMOD })),
+    ...details,
+  ];
+  const urls = entries
+    .map(({ path, lastmod }) => {
+      const mod = day(lastmod);
+      return `  <url><loc>${xmlEscape(base + path)}</loc>${mod ? `<lastmod>${mod}</lastmod>` : ""}</url>`;
+    })
+    .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 

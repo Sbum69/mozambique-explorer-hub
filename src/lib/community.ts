@@ -132,7 +132,7 @@ async function fetchAuthors(
     .in("id", ids);
   for (const row of data ?? []) {
     if (!row.id) continue;
-    map.set(row.id, { name: row.display_name ?? "Ekaya", avatar: row.avatar_url ?? null });
+    map.set(row.id, { name: row.display_name ?? "EKAYA", avatar: row.avatar_url ?? null });
   }
   return map;
 }
@@ -183,7 +183,7 @@ export function mapPost(
   return {
     id: row.id,
     authorId: row.author_id,
-    authorName: author?.name ?? "Ekaya",
+    authorName: author?.name ?? "EKAYA",
     authorAvatar: author?.avatar ?? null,
     title: row.title,
     content: row.content,

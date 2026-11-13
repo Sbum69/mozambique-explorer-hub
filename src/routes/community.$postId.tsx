@@ -2,7 +2,6 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft,
   Flag,
   Loader2,
   MapPin,
@@ -29,20 +28,21 @@ import {
   type ReactionValue,
 } from "@/lib/community";
 import { ReportDialog } from "@/components/ReportDialog";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/community/$postId")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Publicação da Comunidade — Ekaya Explore" },
+      { title: "Publicação da Comunidade — EKAYA" },
       {
         name: "description",
-        content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique.",
+        content: "Histórias, dicas e perguntas partilhadas pela comunidade EKAYA em Moçambique.",
       },
-      { property: "og:title", content: "Publicação da Comunidade — Ekaya Explore" },
+      { property: "og:title", content: "Publicação da Comunidade — EKAYA" },
       {
         property: "og:description",
-        content: "Histórias, dicas e perguntas partilhadas pela comunidade Ekaya em Moçambique.",
+        content: "Histórias, dicas e perguntas partilhadas pela comunidade EKAYA em Moçambique.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -115,11 +115,7 @@ function CommunityPostPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        <Button asChild variant="ghost" className="gap-2">
-          <Link to="/community">
-            <ArrowLeft className="size-4" /> {t("communityBack")}
-          </Link>
-        </Button>
+        <BackButton fallback="/community" showLabel />
 
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">

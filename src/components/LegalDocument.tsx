@@ -1,7 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft, FileWarning } from "lucide-react";
+import { BackButton } from "@/components/BackButton";
+import { FileWarning } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -31,11 +30,7 @@ export function LegalDocument({ kind }: { kind: "terms" | "privacy" }) {
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
-            <Button asChild variant="ghost" size="icon" aria-label={t.back}>
-              <Link to="/home">
-                <ArrowLeft className="size-5" />
-              </Link>
-            </Button>
+            <BackButton fallback="auto" />
             <h1 className="min-w-0 truncate font-bold text-base sm:text-lg ml-1">{doc.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">

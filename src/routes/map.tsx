@@ -2,10 +2,7 @@ import { createFileRoute, useNavigate, ClientOnly } from "@tanstack/react-router
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import {
-  ArrowLeft,
   MapPin,
-  Users,
-  Award,
   Check,
   Navigation,
   X,
@@ -35,7 +32,6 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { type Destination } from "@/lib/destinations";
 import { loadDestinationsForRoute, useDestinations } from "@/hooks/useDestinations";
 import { useWhenVisible } from "@/hooks/useWhenVisible";
-import { useBackTarget } from "@/lib/nav";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import {
   COMMUNITY_CATEGORIES,
@@ -44,6 +40,7 @@ import {
   type CommunityExperience,
 } from "@/lib/community-experiences";
 import { addVisit, directionsUrls, fetchMyVisits, hasValidCoords, removeVisit } from "@/lib/visits";
+import { BackButton } from "@/components/BackButton";
 
 const InteractiveMap = lazy(() =>
   import("@/components/InteractiveMap").then((m) => ({ default: m.InteractiveMap })),
@@ -52,12 +49,12 @@ const InteractiveMap = lazy(() =>
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Mapa Interativo — Ekaya Explore" },
+      { title: "Mapa Interativo — EKAYA" },
       {
         name: "description",
         content: "Mapa interativo de Moçambique com destinos comunitários autênticos.",
       },
-      { property: "og:title", content: "Mapa Interativo — Ekaya Explore" },
+      { property: "og:title", content: "Mapa Interativo — EKAYA" },
       {
         property: "og:description",
         content: "Mapa interativo de Moçambique com destinos comunitários autênticos.",
@@ -87,7 +84,6 @@ function MapPage() {
   const { isAuthenticated, authUser } = useAuth();
   const { requireAccount } = useAuthGate();
   const navigate = useNavigate();
-  const backTarget = useBackTarget();
   const {
     destination: linkedSlug,
     community: linkedCommunity,
@@ -311,12 +307,7 @@ function MapPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <AppSidebar />
-            <button
-              onClick={() => navigate({ to: backTarget })}
-              className="hidden sm:flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors ml-2"
-            >
-              <ArrowLeft className="size-4" /> {t("backToDashboard")}
-            </button>
+            <BackButton fallback="auto" showLabel />
           </div>
           <div className="flex items-center gap-1">
             <NotificationsBell />
@@ -548,18 +539,6 @@ function MapPage() {
                             {pt ? "Visitado" : "Visited"}
                           </Badge>
                         )}
-                        {d.badges.includes("most-visited") && (
-                          <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
-                            <Users className="size-2.5 mr-1" />
-                            {t("mostVisited")}
-                          </Badge>
-                        )}
-                        {d.badges.includes("most-recommended") && (
-                          <Badge className="text-[9px] px-1.5 py-0 bg-success text-success-foreground">
-                            <Award className="size-2.5 mr-1" />
-                            {t("mostRecommended")}
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -597,12 +576,6 @@ function MapPage() {
                   </p>
                   <h2 className="text-2xl font-bold mt-1">{selected.name}</h2>
                   <p className="text-muted-foreground mt-2">{selected.description[lang]}</p>
-
-                  <div className="mt-4 flex items-center gap-2 text-sm">
-                    <Users className="size-4 text-primary" />
-                    <span className="font-semibold">{selected.visitorsK}k</span>
-                    <span className="text-muted-foreground">{t("visitorsYear")}</span>
-                  </div>
 
                   <div className="mt-4">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">

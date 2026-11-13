@@ -1,14 +1,14 @@
 import { Suspense, lazy } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { ExternalLink } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { useLang } from "@/contexts/LanguageContext";
 import { PHOTOS_TXT } from "@/lib/page-texts";
 import { ALL_PHOTOS, licenseLabel } from "@/lib/photo-credits";
+import { BackButton } from "@/components/BackButton";
 
 // Attributions and the licence list load after the photos, in their own chunk.
 const OpenSourceCredits = lazy(() =>
@@ -18,10 +18,10 @@ const OpenSourceCredits = lazy(() =>
 export const Route = createFileRoute("/creditos")({
   head: () => ({
     meta: [
-      { title: "Créditos das fotografias — Ekaya Explore" },
+      { title: "Créditos das fotografias — EKAYA" },
       {
         name: "description",
-        content: "Autor, licença e origem de todas as fotografias usadas no Ekaya Explore.",
+        content: "Autor, licença e origem de todas as fotografias usadas no EKAYA.",
       },
     ],
   }),
@@ -36,11 +36,7 @@ function CreditsPage() {
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
-            <Button asChild variant="ghost" size="icon" aria-label={t.back}>
-              <Link to="/home">
-                <ArrowLeft className="size-5" />
-              </Link>
-            </Button>
+            <BackButton fallback="auto" />
             <h1 className="min-w-0 truncate font-bold text-base sm:text-lg ml-1">
               {t.creditsTitle}
             </h1>

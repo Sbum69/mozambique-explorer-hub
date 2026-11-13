@@ -4,7 +4,7 @@ export const SIGNUP_TXT = {
   pt: {
     back: "Voltar",
     title: "Criar Conta Gratuita",
-    subtitle: "Junta-te à comunidade Ekaya Explore",
+    subtitle: "Junta-te à comunidade EKAYA",
     name: "Nome completo",
     namePh: "ex.: Ana Silva",
     username: "Nome de utilizador",
@@ -42,7 +42,7 @@ export const SIGNUP_TXT = {
   en: {
     back: "Back",
     title: "Create a Free Account",
-    subtitle: "Join the Ekaya Explore community",
+    subtitle: "Join the EKAYA community",
     name: "Full name",
     namePh: "e.g. Ana Silva",
     username: "Username",
@@ -1339,7 +1339,7 @@ export const SPONSORED_TXT = {
 /** M9 — "Para negócios" page, interest form and the admin list of requests. */
 export const FOR_BUSINESS_TXT = {
   pt: {
-    metaTitle: "Para negócios — Ekaya Explore",
+    metaTitle: "Para negócios — EKAYA",
     metaDescription:
       "Mostra o teu negócio a quem visita Moçambique. Perfil grátis, comissão só sobre reservas pagas e destaques opcionais.",
     nav: "Para negócios",
@@ -1447,7 +1447,7 @@ export const FOR_BUSINESS_TXT = {
     retry: "Tentar novamente",
   },
   en: {
-    metaTitle: "For businesses — Ekaya Explore",
+    metaTitle: "For businesses — EKAYA",
     metaDescription:
       "Show your business to people visiting Mozambique. Free profile, commission only on paid bookings and optional highlights.",
     nav: "For businesses",

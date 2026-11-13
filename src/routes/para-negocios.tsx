@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BadgeCheck, CheckCircle2, Loader2, Megaphone, Store } from "lucide-react";
+import { BadgeCheck, CheckCircle2, Loader2, Megaphone, Store } from "lucide-react";
 
 import { CommissionCard } from "@/components/CommissionCard";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -18,6 +18,7 @@ import { SUPPORT_EMAIL } from "@/lib/app-info";
 import { fetchCurrentConfig, formatBp, formatCents } from "@/lib/commission";
 import { fetchFounderPlacesLeft, leadProblems, submitLead, type LeadProblem } from "@/lib/leads";
 import { FOR_BUSINESS_TXT, LEGAL_TXT } from "@/lib/page-texts";
+import { BackButton } from "@/components/BackButton";
 
 const PT = FOR_BUSINESS_TXT.pt;
 const EN = FOR_BUSINESS_TXT.en;
@@ -61,16 +62,7 @@ function ForBusinessPage() {
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
-            <Button
-              asChild
-              variant="ghost"
-              size="icon"
-              aria-label={lang === "pt" ? "Início" : "Home"}
-            >
-              <Link to="/home">
-                <ArrowLeft className="size-5" />
-              </Link>
-            </Button>
+            <BackButton fallback="auto" />
             <span className="font-bold ml-1 truncate">{t.nav}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">

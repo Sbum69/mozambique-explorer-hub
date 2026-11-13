@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,12 +11,13 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 import { formatCents } from "@/lib/commission";
 import { LEGAL_TXT, SPONSORED_TXT } from "@/lib/page-texts";
 import { formatDay, hasReceipt, placementFromRow } from "@/lib/sponsored";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/recibo/$id")({
   ssr: false,
   beforeLoad: requireAuthenticatedUser,
   head: () => ({
-    meta: [{ title: "Recibo — Ekaya Explore" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Recibo — EKAYA" }, { name: "robots", content: "noindex" }],
   }),
   component: ReceiptPage,
 });
@@ -44,12 +45,7 @@ function ReceiptPage() {
     },
   });
 
-  const back = (
-    <Button variant="ghost" className="print:hidden" onClick={() => router.history.back()}>
-      <ArrowLeft className="size-4" aria-hidden="true" />
-      {t.back}
-    </Button>
-  );
+  const back = <BackButton fallback="/bookings" showLabel />;
   if (q.isLoading)
     return (
       <main className="mx-auto max-w-2xl px-4 py-8" aria-busy="true">

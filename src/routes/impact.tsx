@@ -1,8 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { Component, Suspense, type ReactNode } from "react";
 import {
-  ArrowLeft,
   MapPin,
   Store,
   Building2,
@@ -25,20 +24,20 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useBackTarget } from "@/lib/nav";
 import { useLang } from "@/contexts/LanguageContext";
 import { deriveImpactView, impactStatsQuery, type ImpactStats } from "@/lib/impact-stats";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/impact")({
   head: () => ({
     meta: [
-      { title: "Impacto Social — Ekaya Explore" },
+      { title: "Impacto Social — EKAYA" },
       {
         name: "description",
         content:
           "Métricas reais da plataforma e impacto verificado do turismo comunitário em Moçambique.",
       },
-      { property: "og:title", content: "Impacto Social — Ekaya Explore" },
+      { property: "og:title", content: "Impacto Social — EKAYA" },
       {
         property: "og:description",
         content:
@@ -54,23 +53,14 @@ export const Route = createFileRoute("/impact")({
 type L = { pt: string; en: string };
 
 function ImpactPage() {
-  const { t, lang } = useLang();
-  const navigate = useNavigate();
-  const backTarget = useBackTarget();
+  const { t } = useLang();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <AppSidebar />
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={lang === "pt" ? "Voltar" : "Back"}
-              onClick={() => navigate({ to: backTarget })}
-            >
-              <ArrowLeft className="size-5" />
-            </Button>
+            <BackButton fallback="auto" />
             <div className="min-w-0">
               <h1 className="font-bold text-base sm:text-lg truncate">{t("impactTitle")}</h1>
               <p className="text-xs text-muted-foreground truncate">{t("impactSubtitle")}</p>
@@ -242,8 +232,8 @@ function Stats() {
     <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
       <Database className="size-3.5" />
       {lang === "pt"
-        ? `Dados de ${when} · Base de dados Ekaya, contagem em tempo real`
-        : `Data as of ${when} · Ekaya database, live count`}
+        ? `Dados de ${when} · Base de dados EKAYA, contagem em tempo real`
+        : `Data as of ${when} · EKAYA database, live count`}
     </p>
   );
 

@@ -32,13 +32,13 @@ import { useBackTarget } from "@/lib/nav";
 export const Route = createFileRoute("/business-register")({
   head: () => ({
     meta: [
-      { title: "Registar negócio — Ekaya Explore" },
+      { title: "Registar negócio — EKAYA" },
       {
         name: "description",
         content:
           "Registra a tua banca, lodge ou serviço turístico e chega a viajantes em Moçambique.",
       },
-      { property: "og:title", content: "Registar negócio — Ekaya Explore" },
+      { property: "og:title", content: "Registar negócio — EKAYA" },
       {
         property: "og:description",
         content:

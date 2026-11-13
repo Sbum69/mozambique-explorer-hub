@@ -1,8 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
-  ArrowLeft,
   X,
   Flag,
   Users,
@@ -21,15 +20,15 @@ import { Badge } from "@/components/ui/badge";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useBackTarget } from "@/lib/nav";
 import { useLang, type Lang } from "@/contexts/LanguageContext";
+import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/culture-history")({
   head: () => ({
     meta: [
-      { title: "Cultura e História — Ekaya Explore" },
+      { title: "Cultura e História — EKAYA" },
       { name: "description", content: "Descubra a rica história e cultura de Moçambique." },
-      { property: "og:title", content: "Cultura e História — Ekaya Explore" },
+      { property: "og:title", content: "Cultura e História — EKAYA" },
       { property: "og:description", content: "Descubra a rica história e cultura de Moçambique." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -354,8 +353,6 @@ const TOPICS: Topic[] = [
 ];
 
 function CultureHistoryPage() {
-  const navigate = useNavigate();
-  const backTarget = useBackTarget();
   const { lang } = useLang();
   const [selected, setSelected] = useState<Topic | null>(null);
 
@@ -363,12 +360,7 @@ function CultureHistoryPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button
-            onClick={() => navigate({ to: backTarget })}
-            className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="size-4" /> {copy.back[lang]}
-          </button>
+          <BackButton fallback="auto" showLabel />
           <h1 className="font-bold text-sm sm:text-base truncate">🇲🇿 {copy.pageTitle[lang]}</h1>
           <ThemeToggle />
           <LanguageToggle />

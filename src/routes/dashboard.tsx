@@ -46,12 +46,12 @@ import { requireAuthenticatedUser } from "@/lib/auth";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Painel — Ekaya Explore" },
+      { title: "Painel — EKAYA" },
       {
         name: "description",
         content: "Hub central com mapa, roteiros, experiências, gamificação e impacto.",
       },
-      { property: "og:title", content: "Painel — Ekaya Explore" },
+      { property: "og:title", content: "Painel — EKAYA" },
       {
         property: "og:description",
         content: "Hub central com mapa, roteiros, experiências, gamificação e impacto.",

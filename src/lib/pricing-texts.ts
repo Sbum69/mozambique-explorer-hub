@@ -5,7 +5,7 @@
  */
 export const PRICING_TXT = {
   pt: {
-    metaTitle: "Preços e reembolsos — Ekaya Explore",
+    metaTitle: "Preços e reembolsos — EKAYA",
     metaDescription:
       "Comissão, destaques, Parceiro Fundador, pagamento por M-Pesa, cancelamento e reembolso.",
     title: "Preços e reembolsos",
@@ -49,7 +49,7 @@ export const PRICING_TXT = {
     forBusiness: "Para negócios",
   },
   en: {
-    metaTitle: "Prices and refunds — Ekaya Explore",
+    metaTitle: "Prices and refunds — EKAYA",
     metaDescription:
       "Commission, highlights, Founding Partner, payment by M-Pesa, cancellation and refunds.",
     title: "Prices and refunds",
