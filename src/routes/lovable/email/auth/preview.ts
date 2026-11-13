@@ -8,16 +8,6 @@ import { RecoveryEmail } from "@/lib/email-templates/recovery";
 import { EmailChangeEmail } from "@/lib/email-templates/email-change";
 import { ReauthenticationEmail } from "@/lib/email-templates/reauthentication";
 
-// Each template takes its own props; the sample data below matches them by key.
-const EMAIL_TEMPLATES = {
-  signup: SignupEmail,
-  invite: InviteEmail,
-  magiclink: MagicLinkEmail,
-  recovery: RecoveryEmail,
-  email_change: EmailChangeEmail,
-  reauthentication: ReauthenticationEmail,
-} as unknown as Record<string, React.ComponentType<object>>;
-
 // Configuration
 const SITE_NAME = "Mozambique Explorer Hub";
 const ROOT_DOMAIN = "exploreekaya.com";
@@ -29,7 +19,7 @@ const ROOT_DOMAIN = "exploreekaya.com";
 // even if the project's domain has changed since the template was scaffolded.
 const SAMPLE_PROJECT_URL = "https://explore-ekaya-hub.lovable.app";
 const SAMPLE_EMAIL = "user@example.test";
-const SAMPLE_DATA: Record<string, object> = {
+const SAMPLE_DATA = {
   signup: {
     siteName: SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
@@ -61,6 +51,16 @@ const SAMPLE_DATA: Record<string, object> = {
   },
 };
 
+// Each email type renders its own template with its own sample props (checked by TypeScript).
+const PREVIEWS: Record<string, () => React.ReactElement> = {
+  signup: () => React.createElement(SignupEmail, SAMPLE_DATA.signup),
+  invite: () => React.createElement(InviteEmail, SAMPLE_DATA.invite),
+  magiclink: () => React.createElement(MagicLinkEmail, SAMPLE_DATA.magiclink),
+  recovery: () => React.createElement(RecoveryEmail, SAMPLE_DATA.recovery),
+  email_change: () => React.createElement(EmailChangeEmail, SAMPLE_DATA.email_change),
+  reauthentication: () => React.createElement(ReauthenticationEmail, SAMPLE_DATA.reauthentication),
+};
+
 export const Route = createFileRoute("/lovable/email/auth/preview")({
   server: {
     handlers: {
@@ -85,14 +85,13 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
           return Response.json({ error: "Invalid JSON in request body" }, { status: 400 });
         }
 
-        const EmailTemplate = EMAIL_TEMPLATES[type];
+        const preview = Object.hasOwn(PREVIEWS, type) ? PREVIEWS[type] : undefined;
 
-        if (!EmailTemplate) {
+        if (!preview) {
           return Response.json({ error: `Unknown email type: ${type}` }, { status: 400 });
         }
 
-        const sampleData = SAMPLE_DATA[type] || {};
-        const html = await render(React.createElement(EmailTemplate, sampleData));
+        const html = await render(preview());
 
         return new Response(html, {
           status: 200,
