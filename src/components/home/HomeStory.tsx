@@ -183,6 +183,8 @@ const STORY_CSS = `
 .hs-panel a{color:#fff;font-size:.8rem;text-decoration:underline;pointer-events:auto}
 .hs-region{font-size:.95rem;margin:0;color:rgb(255 255 255/.85)}
 .hs-panel-photo{display:none}
+/* Phones: the Home action bar (HomeCta, ~72 px + safe area) sits at the bottom; keep the text clear of it. */
+@media (max-width:767px){.hs-intro{padding-bottom:calc(120px + env(safe-area-inset-bottom))}.hs-panel{top:calc(50% - 36px)}}
 @media (min-width:768px){.hs-intro{padding:0 40px 64px}.hs-panel{left:auto;right:8vw;margin:0}}
 @media (prefers-reduced-motion:reduce){.hs-scene,.hs-half,.hs-panel,.hs-intro{transition:none}}
 html[data-motion=off] .hs{height:auto;background:var(--background);color:var(--foreground)}

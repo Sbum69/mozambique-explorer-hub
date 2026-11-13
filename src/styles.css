@@ -236,3 +236,13 @@
     color: var(--color-foreground);
   }
 }
+
+/* Home action bar (HomeCta): the floating helpers (assistant, storage notice) move above it. */
+html[data-home-cta="on"] .ekaya-float {
+  translate: 0 calc(-1 * (72px + env(safe-area-inset-bottom)));
+}
+@media (min-width: 768px) {
+  html[data-home-cta="on"] .ekaya-float {
+    translate: 0 -80px;
+  }
+}
