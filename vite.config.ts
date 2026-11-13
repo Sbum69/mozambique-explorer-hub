@@ -25,8 +25,8 @@ export default defineConfig({
       alias: {
         // Pin entities to the hoisted v4.5.0 copy: a nested v7 copy breaks SSR
         // because v7 removed ./lib/decode.js.
-          "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
-          "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
+        "entities/lib/decode.js": path.resolve(__dirname, "node_modules/entities/lib/decode.js"),
+        "entities/lib/encode.js": path.resolve(__dirname, "node_modules/entities/lib/encode.js"),
       },
     },
     environments: {

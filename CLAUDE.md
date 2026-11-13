@@ -36,6 +36,9 @@ com a cópia local em LF o build já não o altera.
 `bun run lint` tem de passar com 0 erros no repositório todo (os 15 avisos `react-refresh` são
 conhecidos). O CI (`.github/workflows/ci.yml`) corre `tsc`, `vitest`, `lint` e `build` em cada PR
 e push para a `main`. Ficheiros gerados, migrações e `.lovable/` estão fora do ESLint e do Prettier.
+`bun run ci` corre localmente os mesmos passos do CI (tsc, vitest, lint em todo o repositório, build e
+route tree): só se escreve "lint PASS" depois de `bun run lint` ou `bun run ci`, nunca com o ESLint num
+ficheiro só. `src/routes/lovable/` está fora do Prettier (a Lovable reescreve-o), mas não do ESLint.
 
 ### Pastas
 
