@@ -11,7 +11,7 @@ import {
  * Itinerary catalogue: public routes plus, when signed in, the user's own routes
  * (including the private ones, which the public policy hides).
  */
-export function useRouteCatalogue(userId: string | null) {
+export function useRouteCatalogue(userId: string | null, { enabled = true } = {}) {
   const [publicRoutes, setPublicRoutes] = useState<ItineraryRoute[]>([]);
   const [myRoutes, setMyRoutes] = useState<ItineraryRoute[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,12 +43,13 @@ export function useRouteCatalogue(userId: string | null) {
   }, [userId]);
 
   useEffect(() => {
+    if (!enabled) return;
     setMyRoutes([]);
     void load();
     return () => {
       request.current += 1;
     };
-  }, [load]);
+  }, [load, enabled]);
 
   const owned = loadedFor === userId ? myRoutes : [];
   const mineIds = new Set(owned.map((r) => r.id));

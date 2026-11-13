@@ -50,7 +50,9 @@ export function DestinationsRail({
                     className="group relative block aspect-[3/4] overflow-hidden rounded-[10px] text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
                     <img
-                      src={d.image}
+                      src={d.card}
+                      width={450}
+                      height={600}
                       alt=""
                       loading="lazy"
                       decoding="async"

@@ -22,18 +22,26 @@ let availabilityCache: Record<string, number> | null = null;
  * stored on the user's profile. Reuses the shared destination/experience hooks,
  * so no extra catalogue queries are made.
  */
-export function useRecommendations(limit = 6, chosen?: TravelPreferences) {
+export function useRecommendations(
+  limit = 6,
+  chosen?: TravelPreferences,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
   const { user } = useAuth();
   const {
     destinations,
     loading: loadingDestinations,
     error: destinationsError,
-  } = useDestinations();
-  const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
+  } = useDestinations(undefined, { enabled });
+  const {
+    experiences,
+    loading: loadingExperiences,
+    error: experiencesError,
+  } = useExperiences({ enabled });
   const [availability, setAvailability] = useState<Record<string, number>>(availabilityCache ?? {});
 
   useEffect(() => {
-    if (availabilityCache) return;
+    if (availabilityCache || !enabled) return;
     let active = true;
     fetchAvailabilityCounts()
       .then((counts) => {
@@ -46,12 +54,12 @@ export function useRecommendations(limit = 6, chosen?: TravelPreferences) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   const { provinces } = useProvinces();
   const [community, setCommunity] = useState<CommunityExperience[]>(communityCache ?? []);
   useEffect(() => {
-    if (communityCache) return;
+    if (communityCache || !enabled) return;
     let active = true;
     fetchCommunityExperiences()
       .then((rows) => {
@@ -64,7 +72,7 @@ export function useRecommendations(limit = 6, chosen?: TravelPreferences) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [enabled]);
 
   const saved: TravelPreferences = useMemo(
     () => ({

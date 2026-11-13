@@ -12,6 +12,12 @@ import inhambaneThumb from "@/assets/dest-inhambane-thumb.webp";
 import vilankuloThumb from "@/assets/dest-vilankulo-thumb.webp";
 import pembaThumb from "@/assets/dest-pemba-thumb.webp";
 import gorongosaThumb from "@/assets/dest-gorongosa-thumb.webp";
+import maputoCard from "@/assets/dest-maputo-card.webp";
+import ilhaCard from "@/assets/dest-ilha-card.webp";
+import inhambaneCard from "@/assets/dest-inhambane-card.webp";
+import vilankuloCard from "@/assets/dest-vilankulo-card.webp";
+import pembaCard from "@/assets/dest-pemba-card.webp";
+import gorongosaCard from "@/assets/dest-gorongosa-card.webp";
 
 export interface Destination {
   /** Real database identifier (uuid). Canonical reference from now on. */
@@ -26,6 +32,8 @@ export interface Destination {
   image: string;
   /** Small square version (288 px) for lists; same artwork as image. */
   thumbnail: string;
+  /** Portrait 3:4 version (450×600) for cards; same artwork and framing as image. */
+  card: string;
   // No visitor counts or "most visited" badges: the database values had no source (removed 11/2026).
   highlights: { pt: string; en: string }[];
   coords: [number, number]; // [lat, lng]
@@ -49,6 +57,15 @@ const THUMB_BY_SLUG: Record<string, string> = {
   vilankulo: vilankuloThumb,
   pemba: pembaThumb,
   gorongosa: gorongosaThumb,
+};
+
+const CARD_BY_SLUG: Record<string, string> = {
+  maputo: maputoCard,
+  ilha: ilhaCard,
+  inhambane: inhambaneCard,
+  vilankulo: vilankuloCard,
+  pemba: pembaCard,
+  gorongosa: gorongosaCard,
 };
 
 interface DestinationRow {
@@ -93,6 +110,7 @@ export function mapDestination(row: DestinationRow): Destination {
     description: { pt: descriptionPt, en: descriptionEn },
     image: IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
     thumbnail: THUMB_BY_SLUG[row.slug] ?? IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
+    card: CARD_BY_SLUG[row.slug] ?? IMAGE_BY_SLUG[row.slug] ?? row.images?.[0] ?? "",
     coords: [Number(row.lat ?? 0), Number(row.lng ?? 0)],
     highlights: toHighlights(row.highlights),
   };

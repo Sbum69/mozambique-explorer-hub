@@ -1,7 +1,6 @@
 /** Public Home, shared by "/" (canonical) and "/home" so both arrive with full HTML from the server. */
 import { Link } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   Sparkles,
@@ -59,6 +58,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
 import { HomeStory } from "@/components/home/HomeStory";
+import { useNearViewport } from "@/hooks/useNearViewport";
 import { DestinationsRail } from "@/components/home/DestinationsRail";
 import { formatPrice } from "@/lib/price";
 
@@ -141,13 +141,20 @@ export function HomePage() {
   useEffect(() => {
     if (showOnboarding) setOnboardingMounted(true);
   }, [showOnboarding]);
+  // Everything below the story waits until the visitor gets near it: the first load is the story
+  // (server HTML) only, without the catalogue requests and their rendering.
+  const [belowFold, near] = useNearViewport<HTMLDivElement>();
   const {
     destinations,
     loading: loadingDestinations,
     error: destinationsError,
-  } = useDestinations();
-  const { experiences, loading: loadingExperiences, error: experiencesError } = useExperiences();
-  const { publicRoutes } = useRouteCatalogue(null);
+  } = useDestinations(undefined, { enabled: near });
+  const {
+    experiences,
+    loading: loadingExperiences,
+    error: experiencesError,
+  } = useExperiences({ enabled: near });
+  const { publicRoutes } = useRouteCatalogue(null, { enabled: near });
   // Nothing is pre-selected: recommendations only say "for you" when there is a real choice.
   const [destId, setDestId] = useState<string>("any");
   const [days, setDays] = useState<DayBucket>("any");
@@ -185,7 +192,7 @@ export function HomePage() {
   }
 
   // ---- Recommendations: the shared rules of lib/recommendations (same as the dashboard) ----
-  const reco = useRecommendations(4, applied);
+  const reco = useRecommendations(4, applied, { enabled: near });
   const personalised = reco.personalised;
   const recoItineraries = useMemo(
     () =>
@@ -279,6 +286,7 @@ export function HomePage() {
           </div>
         }
       />
+      <div ref={belowFold} aria-hidden="true" />
 
       {/* ============ PLAN: destination, days, interests ============ */}
       <section className="px-4 sm:px-10 pt-10 max-w-6xl mx-auto">
@@ -373,12 +381,14 @@ export function HomePage() {
         loading={loadingDestinations}
       />
 
-      <Suspense fallback={null}>
-        <SponsoredStrip scope="home" className="px-6 sm:px-10 pt-12 max-w-6xl mx-auto" />
-      </Suspense>
+      {near && (
+        <Suspense fallback={null}>
+          <SponsoredStrip scope="home" className="px-6 sm:px-10 pt-12 max-w-6xl mx-auto" />
+        </Suspense>
+      )}
 
       {/* ============ PERSONALISED (from saved preferences) ============ */}
-      <PersonalSection lang={lang as Lang} chosen={applied} />
+      <PersonalSection lang={lang as Lang} chosen={applied} enabled={near} />
 
       {/* ============ RECOMMENDATIONS ============ */}
       <section id="reco" className="px-6 sm:px-10 py-16 max-w-6xl mx-auto">
@@ -418,14 +428,8 @@ export function HomePage() {
           }
           link={{ to: "/itineraries", label: lang === "pt" ? "Ver todos" : "View all" }}
         >
-          {recoItineraries.map((it, i) => (
-            <motion.div
-              key={it.id}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-            >
+          {recoItineraries.map((it) => (
+            <div key={it.id}>
               <Card className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                 <div className="relative aspect-[16/10]">
                   <img
@@ -468,7 +472,7 @@ export function HomePage() {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </RecoRow>
 
@@ -485,14 +489,8 @@ export function HomePage() {
           }
           link={{ to: "/experiences", label: lang === "pt" ? "Ver todas" : "View all" }}
         >
-          {recoExperiences.map((e, i) => (
-            <motion.div
-              key={e.id}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-            >
+          {recoExperiences.map((e) => (
+            <div key={e.id}>
               <Card className="overflow-hidden h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                 <div className="relative aspect-[16/10]">
                   <img
@@ -528,7 +526,7 @@ export function HomePage() {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           ))}
           {loadingExperiences && <Card className="h-56 animate-pulse bg-muted/40" />}
           {experiencesError && (
@@ -550,14 +548,8 @@ export function HomePage() {
         {/* Story stops: hidden until the legends are validated (translations stay in src/data). */}
         {SHOW_STORY_STOPS && (
           <RecoRow title={lang === "pt" ? "Locais imperdíveis" : "Unmissable places"}>
-            {recoStories.map((s, i) => (
-              <motion.div
-                key={s.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-              >
+            {recoStories.map((s) => (
+              <div key={s.id}>
                 <Card className="h-full hover:shadow-[var(--shadow-elegant)] transition-shadow">
                   <CardContent className="p-5">
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-0.5 text-xs text-accent-foreground">
@@ -582,7 +574,7 @@ export function HomePage() {
                     )}
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             ))}
           </RecoRow>
         )}
@@ -658,7 +650,7 @@ export function HomePage() {
             </Link>
           </Button>
         </div>
-        <HomeLiveNews lang={lang} />
+        <HomeLiveNews lang={lang} enabled={near} />
       </section>
 
       {/* ============ OFFLINE + IMPACT ============ */}
@@ -749,7 +741,15 @@ function RecoRow({
 }
 
 // ---- Personalised recommendations, built from the saved profile preferences ----
-function PersonalSection({ lang, chosen }: { lang: Lang; chosen?: TravelPreferences }) {
+function PersonalSection({
+  lang,
+  chosen,
+  enabled,
+}: {
+  lang: Lang;
+  chosen?: TravelPreferences;
+  enabled: boolean;
+}) {
   const {
     personalised,
     preferences,
@@ -759,7 +759,7 @@ function PersonalSection({ lang, chosen }: { lang: Lang; chosen?: TravelPreferen
     recommendedCommunity,
     loading,
     error,
-  } = useRecommendations(4, chosen);
+  } = useRecommendations(4, chosen, { enabled });
   const [openCommunity, setOpenCommunity] = useState<CommunityExperience | null>(null);
 
   const interestLabel = (id: string) =>
@@ -943,13 +943,14 @@ function PersonalSection({ lang, chosen }: { lang: Lang; chosen?: TravelPreferen
 }
 
 /** The 3 latest headlines of the same live feed as /news-alerts (Google News RSS, cached on the server). */
-function HomeLiveNews({ lang }: { lang: Lang }) {
+function HomeLiveNews({ lang, enabled }: { lang: Lang; enabled: boolean }) {
   const pt = lang === "pt";
   const fetchNews = useServerFn(getLiveNews);
   const q = useQuery({
     queryKey: ["live-news", lang],
     queryFn: () => fetchNews({ data: { lang } }),
     staleTime: 10 * 60 * 1000,
+    enabled,
   });
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString(pt ? "pt-PT" : "en-GB", { day: "2-digit", month: "short" });
