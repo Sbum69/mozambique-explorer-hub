@@ -13,7 +13,6 @@ import {
   Star,
   Clock,
   Newspaper,
-  LayoutDashboard,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -58,6 +57,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getLiveNews } from "@/lib/news.functions";
 
 import { HomeStory } from "@/components/home/HomeStory";
+import { HOME_CTA_END_ID, HOME_PLAN_ID, HomeCta } from "@/components/home/HomeCta";
 import { useNearViewport } from "@/hooks/useNearViewport";
 import { DestinationsRail } from "@/components/home/DestinationsRail";
 import { formatPrice } from "@/lib/price";
@@ -174,6 +174,15 @@ export function HomePage() {
     if (needsOnboarding) setShowOnboarding(true);
   }, [needsOnboarding]);
 
+  // "Ver recomendações": the plan card, which feeds the shared recommendation logic.
+  function goToPlan() {
+    const el = document.getElementById(HOME_PLAN_ID);
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    document.getElementById("home-plan-title")?.focus({ preventScroll: true });
+  }
+
   function toggleInterest(id: Interest) {
     setInterests((curr) => (curr.includes(id) ? curr.filter((x) => x !== id) : [...curr, id]));
   }
@@ -267,31 +276,21 @@ export function HomePage() {
                 ? "Escolhe o destino, os dias e o tipo de experiência. Nós tratamos do resto."
                 : "Pick a destination, your days and the kind of experience you want. We handle the rest."}
             </p>
-            {!isGuest && (
-              <div className="mt-6 flex flex-wrap gap-3">
-                {/* On the dark photo: light solid button (like "Entrar"), the one way to the dashboard. */}
-                <Button
-                  asChild
-                  size="lg"
-                  className="h-12 gap-2 bg-card px-6 text-base font-semibold text-foreground hover:bg-card/90"
-                >
-                  <Link to="/dashboard">
-                    <LayoutDashboard className="size-5" />
-                    {lang === "pt" ? "Abrir o meu painel" : "Open my dashboard"}
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-              </div>
-            )}
           </div>
         }
       />
       <div ref={belowFold} aria-hidden="true" />
+      {/* The two Home actions (story + destinations); the dashboard link replaces the old hero one. */}
+      <HomeCta lang={lang as Lang} isGuest={isGuest} onRecommend={goToPlan} />
 
       {/* ============ PLAN: destination, days, interests ============ */}
-      <section className="px-4 sm:px-10 pt-10 max-w-6xl mx-auto">
+      <section id={HOME_PLAN_ID} className="px-4 sm:px-10 pt-10 max-w-6xl mx-auto scroll-mt-4">
         <div className="rounded-[10px] bg-card text-card-foreground border border-border p-5 sm:p-6">
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight mb-4">
+          <h2
+            id="home-plan-title"
+            tabIndex={-1}
+            className="font-display text-2xl sm:text-3xl font-bold tracking-tight mb-4 focus:outline-none"
+          >
             {lang === "pt" ? "Para onde vais?" : "Where are you going?"}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_auto] lg:items-end">
@@ -380,6 +379,7 @@ export function HomePage() {
         routes={publicRoutes}
         loading={loadingDestinations}
       />
+      <div id={HOME_CTA_END_ID} aria-hidden="true" />
 
       {near && (
         <Suspense fallback={null}>

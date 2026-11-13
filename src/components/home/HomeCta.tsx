@@ -32,16 +32,21 @@ export function HomeCta({
     if (typeof IntersectionObserver === "undefined") return;
     const plan = document.getElementById(HOME_PLAN_ID);
     const end = document.getElementById(HOME_CTA_END_ID);
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.target === plan) setPlanOnScreen(e.isIntersecting);
-        // Past the end once the marker has reached the viewport (or scrolled above it).
-        if (e.target === end) setPastEnd(e.isIntersecting || e.boundingClientRect.top < 0);
-      }
+    // The plan card counts only in the middle band of the screen (not while it just touches an edge).
+    const planIo = new IntersectionObserver(([e]) => setPlanOnScreen(e.isIntersecting), {
+      rootMargin: "-35% 0px -35% 0px",
     });
-    if (plan) io.observe(plan);
-    if (end) io.observe(end);
-    return () => io.disconnect();
+    // Past the end once the marker after the rail reaches the top 40% of the screen (or above it).
+    const endIo = new IntersectionObserver(
+      ([e]) => setPastEnd(e.isIntersecting || e.boundingClientRect.top < 0),
+      { rootMargin: "0px 0px -60% 0px" },
+    );
+    if (plan) planIo.observe(plan);
+    if (end) endIo.observe(end);
+    return () => {
+      planIo.disconnect();
+      endIo.disconnect();
+    };
   }, []);
 
   // Floating helpers (assistant, storage notice) move above the bar while it is shown.
@@ -88,7 +93,7 @@ export function HomeCta({
  * both themes. Entrance once; hiding uses the same two properties.
  */
 const CTA_CSS = `
-.home-cta{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1.2fr 1fr;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgb(10 14 16/.88);border-top:1px solid rgb(255 255 255/.18);transition:transform .2s ease-out,opacity .2s ease-out;animation:home-cta-in .4s ease-out .3s backwards}
+.home-cta{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1.2fr 1fr;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgb(10 14 16);border-top:1px solid rgb(255 255 255/.18);transition:transform .2s ease-out,opacity .2s ease-out;animation:home-cta-in .4s ease-out .3s backwards}
 .home-cta[data-hidden]{transform:translate3d(0,110%,0);opacity:0;pointer-events:none}
 .home-cta-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:6px 12px;border-radius:6px;font-weight:600;font-size:.9375rem;line-height:1.15;text-align:center;text-decoration:none}
 .home-cta-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
