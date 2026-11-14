@@ -29,16 +29,18 @@ Desliga outros servidores (por exemplo `bun run dev`) antes do Lighthouse.
 
 ## Scripts
 
-| Comando                          | O que verifica                                                                       | PASS                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| `bun scripts/qa/hydration.ts`    | erros de hidratação nas páginas com SSR (visitante/turista × PT/EN)                  | nenhum erro                                      |
-| `bun scripts/qa/widths.ts`       | nada cortado nem mais largo que o ecrã, 320–1440 px (telemóvel emulado < 768)        | sem scroll horizontal nem elementos fora do ecrã |
-| `bun scripts/qa/interactions.ts` | menu, notificações, tema, seletores, diálogos e editor abrem, cabem no ecrã e fecham | todos PASS                                       |
-| `bun scripts/qa/contrast.ts`     | contraste AA (axe) em claro e escuro                                                 | 0 violações                                      |
-| `bun scripts/qa/lang.ts`         | idioma pelo cookie no servidor, migração do localStorage, texto PT nas páginas em EN | todos PASS                                       |
-| `bun scripts/qa/lighthouse.ts`   | Lighthouse mobile, mediana de 3                                                      | comparar com a tabela do último bloco            |
-| `bun scripts/qa/shots.ts`        | capturas claro/escuro, 1280 e 390 px                                                 | revisão visual                                   |
-| `bun scripts/qa/brand-assets.ts` | volta a gerar logótipos, ícones, manifest e imagem de partilha em `public/`          | `brand.test.ts` PASS, `git diff` só o esperado   |
+| Comando                            | O que verifica                                                                                                                 | PASS                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `bun scripts/qa/hydration.ts`      | erros de hidratação nas páginas com SSR (visitante/turista × PT/EN)                                                            | nenhum erro                                      |
+| `bun scripts/qa/widths.ts`         | nada cortado nem mais largo que o ecrã, 320–1440 px (telemóvel emulado < 768)                                                  | sem scroll horizontal nem elementos fora do ecrã |
+| `bun scripts/qa/interactions.ts`   | menu, notificações, tema, seletores, diálogos e editor abrem, cabem no ecrã e fecham                                           | todos PASS                                       |
+| `bun scripts/qa/contrast.ts`       | contraste AA (axe) em claro e escuro                                                                                           | 0 violações                                      |
+| `bun scripts/qa/lang.ts`           | idioma pelo cookie no servidor, migração do localStorage, texto PT nas páginas em EN                                           | todos PASS                                       |
+| `bun scripts/qa/lighthouse.ts`     | Lighthouse mobile, mediana de 3                                                                                                | comparar com a tabela do último bloco            |
+| `bun scripts/qa/shots.ts`          | capturas claro/escuro, 1280 e 390 px                                                                                           | revisão visual                                   |
+| `bun scripts/qa/login-redirect.ts` | botão da home → login (→ 2FA) → painel do papel (turista, negócio, admin)                                                      | 12/12 PASS                                       |
+| `bun scripts/qa/guide.ts`          | guia do painel: abre na 1.ª entrada, "Não voltar a mostrar" grava, noutro browser não abre (grava 1 valor na conta de turista) | todos PASS                                       |
+| `bun scripts/qa/brand-assets.ts`   | volta a gerar logótipos, ícones, manifest e imagem de partilha em `public/`                                                    | `brand.test.ts` PASS, `git diff` só o esperado   |
 
 Opções comuns: `--pages=home,map` (nomes em `lib.ts`), `--widths=320,390` (widths),
 `--runs=5` e `--devtools` (lighthouse), `--lang=en` e `--full` (shots).
