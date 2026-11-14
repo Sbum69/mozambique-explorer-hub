@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bell,
@@ -50,9 +50,20 @@ import { BackButton } from "@/components/BackButton";
 
 export const Route = createFileRoute("/settings")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { mfa?: "required" } =>
-    search.mfa === "required" ? { mfa: "required" } : {},
-  beforeLoad: requireAuthenticatedUser,
+  // next=/admin: where an admin goes back after entering the code or turning 2FA on.
+  validateSearch: (search: Record<string, unknown>): { mfa?: "required"; next?: "/admin" } => ({
+    ...(search.mfa === "required" ? { mfa: "required" as const } : {}),
+    ...(search.next === "/admin" ? { next: "/admin" as const } : {}),
+  }),
+  beforeLoad: async (ctx) => {
+    const user = await requireAuthenticatedUser(ctx);
+    // Sent here by the admin guard, but the code was already accepted meanwhile: go back now.
+    if (ctx.search.next === "/admin") {
+      const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (data?.currentLevel === "aal2") throw redirect({ to: "/admin" });
+    }
+    return user;
+  },
   head: () => ({
     meta: [{ title: "Definições — EKAYA" }, { name: "robots", content: "noindex" }],
   }),

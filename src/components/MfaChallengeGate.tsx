@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyRound, Loader2 } from "lucide-react";
 
@@ -29,6 +29,7 @@ export function MfaChallengeGate() {
   const t = MFA_TXT[lang];
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -61,6 +62,11 @@ export function MfaChallengeGate() {
       queryClient.setQueryData(key, false);
       // Session is now aal2: refetch everything that depends on it (admin data, MFA state).
       await queryClient.invalidateQueries();
+      // Sent to Settings by the admin guard (next=/admin), possibly while the code was being
+      // checked: read where we are now, then go back to the admin panel.
+      const here = router.state.location;
+      if ((here.search as { next?: string }).next === "/admin")
+        void navigate({ to: "/admin", replace: true });
     } catch {
       setError(t.errWrong);
     } finally {

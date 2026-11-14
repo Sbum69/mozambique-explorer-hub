@@ -69,6 +69,19 @@ export async function requireAuthenticatedUser(ctx?: { location?: { pathname: st
   return user;
 }
 
+/**
+ * Guard of the traveller's panel (/dashboard): business and admin accounts have their own panel,
+ * decided by server-side user_roles rows (never by client state that may still be loading).
+ */
+export async function requireTravellerPanel(ctx?: { location?: { pathname: string } }) {
+  const user = await requireAuthenticatedUser(ctx);
+  const roles = await getAuthenticatedRoles(user.id);
+  if (roles.includes("admin")) throw redirect({ to: "/admin" });
+  if (roles.includes("business_small") || roles.includes("business_large"))
+    throw redirect({ to: "/business-dashboard", search: { status: "all" } });
+  return user;
+}
+
 export async function getAuthenticatedRoles(userId: string): Promise<AppRole[]> {
   const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
 
@@ -106,7 +119,12 @@ export async function requireAdmin() {
   const result = await requireRole(["admin"]);
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (data?.currentLevel !== "aal2") {
-    throw redirect({ to: "/settings", search: { mfa: "required" }, hash: "security" });
+    // After the code (MfaChallengeGate) or turning 2FA on, the admin comes back here.
+    throw redirect({
+      to: "/settings",
+      search: { mfa: "required", next: "/admin" },
+      hash: "security",
+    });
   }
   return result;
 }
@@ -116,13 +134,32 @@ export async function postAuthTarget(userId: string): Promise<"/onboarding" | "/
   return (await hasCompletedOnboarding(userId)) ? "/home" : "/onboarding";
 }
 
-/** Role-aware landing page, based only on server-side user_roles rows. */
-export async function roleLandingTarget(
-  userId: string,
-): Promise<"/admin" | "/business-dashboard" | "/onboarding" | "/home"> {
+export type PanelPath = "/admin" | "/business-dashboard" | "/onboarding" | "/dashboard";
+
+/**
+ * The panel of the account's role, from server-side user_roles rows only: admin, business, or the
+ * traveller's dashboard (onboarding first while the profile has no province).
+ */
+export async function roleLandingTarget(userId: string): Promise<PanelPath> {
   const roles = await getAuthenticatedRoles(userId);
   if (roles.includes("admin")) return "/admin";
   if (roles.includes("business_small") || roles.includes("business_large"))
     return "/business-dashboard";
-  return postAuthTarget(userId);
+  return (await hasCompletedOnboarding(userId)) ? "/dashboard" : "/onboarding";
+}
+
+/**
+ * Where to go after any sign-in (password, email confirmation, session already open).
+ * "/dashboard" (or nothing) means "my panel": the role's panel. Any other allow-listed page is kept.
+ * A new account with nothing requested goes back to where sign-up started (user_metadata.return_to).
+ */
+export async function signInLanding(
+  user: { id: string; user_metadata?: Record<string, unknown> | null },
+  requested?: AuthReturnPath,
+): Promise<AuthReturnPath | PanelPath> {
+  const panel = await roleLandingTarget(user.id);
+  const target =
+    requested ?? (panel === "/onboarding" ? postConfirmTarget(user.user_metadata) : undefined);
+  if (!target || target === "/dashboard") return panel;
+  return target;
 }

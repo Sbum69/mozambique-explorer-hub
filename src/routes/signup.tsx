@@ -21,7 +21,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLang } from "@/contexts/LanguageContext";
-import { getAuthenticatedUser, postAuthTarget, validateAuthReturnSearch } from "@/lib/auth";
+import { getAuthenticatedUser, signInLanding, validateAuthReturnSearch } from "@/lib/auth";
 import { SIGNUP_TXT } from "@/lib/page-texts";
 import { MIN_PASSWORD_LENGTH } from "@/lib/password-reset";
 
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/signup")({
   validateSearch: validateAuthReturnSearch,
   beforeLoad: async ({ search }) => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: search.redirect ?? (await postAuthTarget(user.id)) });
+    if (user) throw redirect({ to: await signInLanding(user, search.redirect) });
   },
   head: () => ({
     meta: [

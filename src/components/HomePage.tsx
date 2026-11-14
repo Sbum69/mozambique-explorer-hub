@@ -281,7 +281,18 @@ export function HomePage() {
       />
       <div ref={belowFold} aria-hidden="true" />
       {/* The two Home actions (story + destinations); the dashboard link replaces the old hero one. */}
-      <HomeCta lang={lang as Lang} isGuest={isGuest} onRecommend={goToPlan} />
+      <HomeCta
+        lang={lang as Lang}
+        isGuest={isGuest}
+        panel={
+          user?.role === "admin"
+            ? "/admin"
+            : user?.role === "business-small" || user?.role === "business-large"
+              ? "/business-dashboard"
+              : "/dashboard"
+        }
+        onRecommend={goToPlan}
+      />
 
       {/* ============ PLAN: destination, days, interests ============ */}
       <section id={HOME_PLAN_ID} className="px-4 sm:px-10 pt-10 max-w-6xl mx-auto scroll-mt-4">

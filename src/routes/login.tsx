@@ -17,14 +17,14 @@ import { ResendConfirmation } from "@/components/ResendConfirmation";
 import { HERO_PHOTO, HeroImage } from "@/components/HeroImage";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import { FORGOT_TXT } from "@/lib/page-texts";
-import { getAuthenticatedUser, roleLandingTarget, validateAuthReturnSearch } from "@/lib/auth";
+import { getAuthenticatedUser, signInLanding, validateAuthReturnSearch } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   ssr: false,
   validateSearch: validateAuthReturnSearch,
   beforeLoad: async ({ search }) => {
     const user = await getAuthenticatedUser();
-    if (user) throw redirect({ to: search.redirect ?? (await roleLandingTarget(user.id)) });
+    if (user) throw redirect({ to: await signInLanding(user, search.redirect) });
   },
   head: () => ({
     meta: [
@@ -66,8 +66,7 @@ function LoginPage() {
     setUnconfirmed(false);
     toast.success(t("welcomeBack"));
     const authenticated = await getAuthenticatedUser();
-    if (authenticated && returnTo) return navigate({ to: returnTo });
-    navigate({ to: authenticated ? await roleLandingTarget(authenticated.id) : "/home" });
+    navigate({ to: authenticated ? await signInLanding(authenticated, returnTo) : "/home" });
   };
 
   const handleGuest = () => {

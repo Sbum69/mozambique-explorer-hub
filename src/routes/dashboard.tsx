@@ -41,7 +41,7 @@ import { usePersonalPrefs } from "@/hooks/usePersonalPrefs";
 import { dayTitle, personalizeRoutes, routeTitle, stopTitle } from "@/lib/routes";
 import { fetchMyVisits } from "@/lib/visits";
 
-import { requireAuthenticatedUser } from "@/lib/auth";
+import { requireTravellerPanel } from "@/lib/auth";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -61,7 +61,7 @@ export const Route = createFileRoute("/dashboard")({
     ],
   }),
   ssr: false,
-  beforeLoad: requireAuthenticatedUser,
+  beforeLoad: requireTravellerPanel,
   component: DashboardPage,
 });
 
