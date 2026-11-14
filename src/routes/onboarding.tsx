@@ -41,7 +41,8 @@ function OnboardingPage() {
         initial={readVisitorChoice()}
         onComplete={() => {
           clearVisitorChoice();
-          void navigate({ to: "/home", replace: true });
+          // Sign-in always ends in the traveller's panel (onboarding is its first step).
+          void navigate({ to: "/dashboard", replace: true });
         }}
       />
     </div>

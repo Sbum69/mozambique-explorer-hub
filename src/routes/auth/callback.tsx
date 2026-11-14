@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ResendConfirmation } from "@/components/ResendConfirmation";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/contexts/LanguageContext";
-import { postConfirmTarget, roleLandingTarget } from "@/lib/auth";
+import { postConfirmTarget, signInLanding } from "@/lib/auth";
 import { RECOVERY_FLAG, isRecoveryReturn } from "@/lib/password-reset";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -141,7 +141,7 @@ function AuthCallbackPage() {
         setStatus("redirecting");
         // Back to where sign-up started (allow-listed), else the role-based landing page.
         navigate({
-          to: postConfirmTarget(user.user_metadata) ?? (await roleLandingTarget(user.id)),
+          to: await signInLanding(user, postConfirmTarget(user.user_metadata)),
           replace: true,
         });
         return;

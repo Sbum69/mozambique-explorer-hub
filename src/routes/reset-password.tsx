@@ -10,7 +10,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useLang } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { roleLandingTarget } from "@/lib/auth";
+import { signInLanding } from "@/lib/auth";
 import { RESET_TXT } from "@/lib/page-texts";
 import {
   RECOVERY_FLAG,
@@ -74,7 +74,7 @@ function ResetPasswordPage() {
       // ignore
     }
     setStatus("done");
-    if (data.user) navigate({ to: await roleLandingTarget(data.user.id), replace: true });
+    if (data.user) navigate({ to: await signInLanding(data.user), replace: true });
   };
 
   return (
