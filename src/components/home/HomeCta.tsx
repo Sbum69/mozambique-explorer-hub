@@ -17,10 +17,13 @@ export const HOME_CTA_END_ID = "home-cta-end";
 export function HomeCta({
   lang,
   isGuest,
+  panel,
   onRecommend,
 }: {
   lang: Lang;
   isGuest: boolean;
+  /** The signed-in account's panel (traveller, business or admin). */
+  panel: "/dashboard" | "/business-dashboard" | "/admin";
   onRecommend: () => void;
 }) {
   const pt = lang === "pt";
@@ -76,7 +79,8 @@ export function HomeCta({
         {pt ? "Ver recomendações" : "See recommendations"}
       </button>
       <Link
-        to={isGuest ? "/login" : "/dashboard"}
+        // Visitors sign in first; /login turns "/dashboard" into the panel of their role.
+        to={isGuest ? "/login" : panel}
         search={isGuest ? { redirect: "/dashboard" } : undefined}
         className="home-cta-btn home-cta-secondary"
       >
