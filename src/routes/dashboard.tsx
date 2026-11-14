@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Map,
@@ -42,6 +42,11 @@ import { dayTitle, personalizeRoutes, routeTitle, stopTitle } from "@/lib/routes
 import { fetchMyVisits } from "@/lib/visits";
 
 import { requireTravellerPanel } from "@/lib/auth";
+import { useGuide } from "@/hooks/useGuide";
+import { GUIDE_STEPS } from "@/lib/guide";
+
+// Loaded only when the guide opens.
+const OnboardingGuide = lazy(() => import("@/components/OnboardingGuide"));
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -149,9 +154,17 @@ const MODULES: ModuleDef[] = [
   },
 ];
 
+/** Modules the guide points at. */
+const GUIDE_TARGET_BY_MODULE: Record<string, string | undefined> = {
+  "/itineraries": "routes",
+  "/experiences": "book",
+};
+
 function DashboardPage() {
   const { user, authUser, needsOnboarding } = useAuth();
   const { t, lang } = useLang();
+  // First-entry guide: after the onboarding (preferences) is done.
+  const guide = useGuide("tourist", { enabled: !!user && !needsOnboarding, lang });
   const [showChangeDest, setShowChangeDest] = useState(false);
   const { destinations } = useDestinations();
   const { publicRoutes } = useRouteCatalogue(null);
@@ -259,6 +272,7 @@ function DashboardPage() {
                         : ""}
                     </p>
                     <button
+                      data-guide="prefs"
                       onClick={() => setShowChangeDest(true)}
                       className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary border border-input hover:bg-accent px-3 py-1.5 rounded-md transition-colors"
                     >
@@ -268,6 +282,7 @@ function DashboardPage() {
                   </>
                 ) : (
                   <button
+                    data-guide="prefs"
                     onClick={() => setShowChangeDest(true)}
                     className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-primary border border-input hover:bg-accent px-3 py-1.5 rounded-md transition-colors"
                   >
@@ -284,13 +299,16 @@ function DashboardPage() {
           </Card>
         </motion.div>
 
-        <div className="mt-8">
+        <div className="mt-8" data-guide="points">
           <PointsCard />
         </div>
 
         {/* Personalized itinerary */}
         {!recommendedItinerary && (
-          <Card className="mt-8 p-5 flex flex-wrap items-center justify-between gap-3 border-0 shadow-[var(--shadow-soft)]">
+          <Card
+            data-guide="reco"
+            className="mt-8 p-5 flex flex-wrap items-center justify-between gap-3 border-0 shadow-[var(--shadow-soft)]"
+          >
             <p className="text-sm text-muted-foreground">
               {!personalPrefs.hasPrefs
                 ? lang === "pt"
@@ -320,6 +338,7 @@ function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="mt-8"
+            data-guide="reco"
           >
             <div className="flex items-end justify-between mb-4 gap-3 flex-wrap">
               <div>
@@ -397,7 +416,7 @@ function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <Link to={m.to as never}>
+              <Link to={m.to as never} data-guide={GUIDE_TARGET_BY_MODULE[m.to]}>
                 <Card className="group relative overflow-hidden border-0 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-elegant)] transition-all duration-300 cursor-pointer h-full p-6 bg-card">
                   <div className="size-11 rounded-md bg-accent text-accent-foreground flex items-center justify-center">
                     <m.icon className="size-6" />
@@ -420,6 +439,11 @@ function DashboardPage() {
         open={showChangeDest || needsOnboarding}
         onComplete={() => setShowChangeDest(false)}
       />
+      {guide.open && (
+        <Suspense fallback={null}>
+          <OnboardingGuide steps={GUIDE_STEPS.tourist} lang={lang} onClose={guide.close} />
+        </Suspense>
+      )}
     </div>
   );
 }
