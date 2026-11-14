@@ -240,7 +240,7 @@ export function BusinessRewards() {
   return (
     <section className="space-y-6">
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3" data-guide="biz-rewards">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Gift className="size-5" />

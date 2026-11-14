@@ -449,6 +449,13 @@
       "when": 1795300000000,
       "tag": "0063_privacy_version_2026_11_07",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1795800000000,
+      "tag": "0068_onboarding_guides",
+      "breakpoints": true
     }
   ]
 }

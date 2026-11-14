@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Compass } from "lucide-react";
+import { ArrowRight, Compass, Map as MapIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import type { Lang } from "@/contexts/LanguageContext";
+import { HOME_CTA_TXT } from "@/lib/page-texts";
 
 /** Ids the bar watches: the plan card has its own "Ver recomendações", and the bar ends after the rail. */
 export const HOME_PLAN_ID = "home-plan";
@@ -26,7 +27,7 @@ export function HomeCta({
   panel: "/dashboard" | "/business-dashboard" | "/admin";
   onRecommend: () => void;
 }) {
-  const pt = lang === "pt";
+  const t = HOME_CTA_TXT[lang];
   const [planOnScreen, setPlanOnScreen] = useState(false);
   const [pastEnd, setPastEnd] = useState(false);
   const hidden = planOnScreen || pastEnd;
@@ -64,7 +65,7 @@ export function HomeCta({
 
   return (
     <nav
-      aria-label={pt ? "Ações principais" : "Main actions"}
+      aria-label={t.nav}
       className="home-cta dark"
       data-hidden={hidden ? "" : undefined}
       inert={hidden || undefined}
@@ -75,8 +76,13 @@ export function HomeCta({
         onClick={onRecommend}
         className="home-cta-btn bg-primary text-primary-foreground hover:bg-primary/90"
       >
-        <Compass className="size-5 shrink-0" aria-hidden="true" />
-        {pt ? "Ver recomendações" : "See recommendations"}
+        <span className="home-cta-tile home-cta-tile-primary" aria-hidden="true">
+          <Compass className="home-cta-ic home-cta-turn size-5" />
+        </span>
+        <span className="home-cta-text">
+          <span className="home-cta-label">{t.recommend}</span>
+          <span className="home-cta-sub">{t.recommendSub}</span>
+        </span>
       </button>
       <Link
         // Visitors sign in first; /login turns "/dashboard" into the panel of their role.
@@ -84,26 +90,56 @@ export function HomeCta({
         search={isGuest ? { redirect: "/dashboard" } : undefined}
         className="home-cta-btn home-cta-secondary"
       >
-        {pt ? "Explorar a app" : "Explore the app"}
-        <ArrowRight className="size-5 shrink-0" aria-hidden="true" />
+        <span className="home-cta-tile home-cta-wide" aria-hidden="true">
+          <MapIcon className="size-5" />
+        </span>
+        <span className="home-cta-text">
+          <span className="home-cta-label">{t.app}</span>
+          <span className="home-cta-sub">{t.appSub}</span>
+        </span>
+        <ArrowRight
+          className="home-cta-ic home-cta-nudge home-cta-narrow size-5"
+          aria-hidden="true"
+        />
       </Link>
     </nav>
   );
 }
 
 /*
- * Phones: a full-width bar with safe-area. Larger screens: a floating pill centred at the bottom.
- * Dark background (not the photo) behind both buttons, so their contrast holds on any scene and in
- * both themes. Entrance once; hiding uses the same two properties.
+ * Phones (< 768 px): a full-width bar with safe-area; each button is one line with its icon, and a
+ * press shrinks it a little (microinteraction). Larger screens: a floating pill with two cards
+ * (icon tile, title and subtitle) that lift 2 px on hover. Dark background (not the photo) behind
+ * both buttons, so their contrast holds on any scene and in both themes. Only transform and
+ * opacity move, and nothing moves with prefers-reduced-motion.
  */
 const CTA_CSS = `
 .home-cta{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1.2fr 1fr;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgb(10 14 16);border-top:1px solid rgb(255 255 255/.18);transition:transform .2s ease-out,opacity .2s ease-out;animation:home-cta-in .4s ease-out .3s backwards}
 .home-cta[data-hidden]{transform:translate3d(0,110%,0);opacity:0;pointer-events:none}
-.home-cta-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:6px 12px;border-radius:6px;font-weight:600;font-size:.9375rem;line-height:1.15;text-align:center;text-decoration:none}
+.home-cta-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:6px 10px;border-radius:6px;font-weight:600;font-size:.9375rem;line-height:1.15;text-align:center;text-decoration:none;white-space:nowrap;transition:transform .18s ease-out}
+.home-cta-btn:active{transform:scale(.97)}
 .home-cta-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .home-cta-secondary{color:#fff;border:1.5px solid rgb(255 255 255/.85)}
 .home-cta-secondary:hover{background:rgb(255 255 255/.12)}
-@media (min-width:768px){.home-cta{left:50%;right:auto;bottom:24px;display:flex;padding:8px;border:1px solid rgb(255 255 255/.18);border-radius:10px;translate:-50% 0}.home-cta-btn{padding:6px 20px;font-size:1rem}}
+.home-cta-ic{flex:none;transition:transform .2s ease-out}
+.home-cta-btn:hover .home-cta-turn{transform:rotate(-30deg)}
+.home-cta-btn:hover .home-cta-nudge{transform:translateX(4px)}
+.home-cta-tile{display:inline-flex;flex:none}
+.home-cta-text{display:grid}
+.home-cta-sub,.home-cta-wide{display:none}
+@media (min-width:768px){
+.home-cta{left:50%;right:auto;bottom:24px;display:flex;padding:8px;border:1px solid rgb(255 255 255/.18);border-radius:10px;translate:-50% 0}
+.home-cta-btn{justify-content:flex-start;gap:10px;min-width:250px;min-height:60px;padding:8px 16px 8px 10px;text-align:left}
+.home-cta-btn:hover{transform:translateY(-2px)}
+.home-cta-btn:active{transform:scale(.97)}
+.home-cta-tile{width:40px;height:40px;border-radius:6px;align-items:center;justify-content:center;background:rgb(255 255 255/.1)}
+.home-cta-tile-primary{background:rgb(0 0 0/.14)}
+.home-cta-text{gap:2px}
+.home-cta-label{font-size:1rem;font-weight:700}
+.home-cta-sub{display:block;font-weight:400;font-size:.8125rem;line-height:1.2}
+.home-cta-wide{display:inline-flex}
+.home-cta-narrow{display:none}
+}
 @keyframes home-cta-in{from{opacity:0;transform:translate3d(0,16px,0)}}
-@media (prefers-reduced-motion:reduce){.home-cta{animation:none;transition:none}}
+@media (prefers-reduced-motion:reduce){.home-cta,.home-cta-btn,.home-cta-ic{animation:none;transition:none}.home-cta-btn:hover,.home-cta-btn:active,.home-cta-btn:hover .home-cta-ic{transform:none}}
 `;
