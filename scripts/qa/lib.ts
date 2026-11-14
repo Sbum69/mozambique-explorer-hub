@@ -99,6 +99,17 @@ export function totp(secret: string, now = Date.now()): string {
   return String((h.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, "0");
 }
 
+/** Test account of a role from .env.test.local (never print it); null if it is not set up. */
+export function credentialsFor(
+  role: Role,
+): { email: string; password: string; totpSecret?: string } | null {
+  const k = `TEST_${role.toUpperCase()}`;
+  const email = test[`${k}_EMAIL`];
+  const password = test[`${k}_PASSWORD`];
+  if (!email || !password) return null;
+  return { email, password, totpSecret: test[`${k}_TOTP_SECRET`] || undefined };
+}
+
 /** True when .env.test.local has a TOTP secret for that account (TEST_ADMIN_TOTP_SECRET, …). */
 export function hasTotp(role: Role): boolean {
   return !!test[`TEST_${role.toUpperCase()}_TOTP_SECRET`];
