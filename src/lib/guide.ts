@@ -101,23 +101,21 @@ export async function fetchGuideOutcome(
   userId: string,
   role: GuideRole,
 ): Promise<GuideOutcome | null> {
-  const column = role === "tourist" ? "guide_tourist" : "guide_business";
   const { data, error } = await supabase
     .from("profiles")
-    .select(column)
+    .select("guide_tourist, guide_business")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return ((data as Record<string, GuideOutcome | null> | null)?.[column] ??
-    null) as GuideOutcome | null;
+  const value = role === "tourist" ? data?.guide_tourist : data?.guide_business;
+  return isGuideOutcome(value) ? value : null;
+}
+
+function isGuideOutcome(value: string | null | undefined): value is GuideOutcome {
+  return value === "completed" || value === "skipped" || value === "dismissed";
 }
 
 export async function saveGuideOutcome(role: GuideRole, outcome: GuideOutcome) {
-  // set_my_guide comes with migration 0068 (types.ts is updated once it is approved and applied).
-  const rpc = supabase.rpc.bind(supabase) as unknown as (
-    fn: "set_my_guide",
-    args: { _guide: GuideRole; _status: GuideOutcome },
-  ) => Promise<{ error: { message: string } | null }>;
-  const { error } = await rpc("set_my_guide", { _guide: role, _status: outcome });
+  const { error } = await supabase.rpc("set_my_guide", { _guide: role, _status: outcome });
   if (error) throw new Error(error.message);
 }

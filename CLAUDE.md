@@ -102,7 +102,8 @@ RPCs chamadas pelo cliente: `has_role`, `save_route_plan`, `reset_my_route_progr
 `admin_decide_business`, `admin_business_owner_emails`, `platform_impact_stats`,
 `my_points_summary`, `points_leaderboard`, `redeem_reward`, `start_game_quiz`, `answer_game_quiz`,
 `finish_game_quiz`, `submit_game_step`, `save_my_preferences`, `delete_my_account`,
-`admin_set_internal`, `admin_platform_summary`, `accept_legal_documents`, `current_legal_versions`.
+`admin_set_internal`, `admin_platform_summary`, `accept_legal_documents`, `current_legal_versions`,
+`set_my_guide` (guia da primeira entrada dos painéis, `profiles.guide_*`, 0068).
 
 Aceitação dos Termos e da Privacidade (`legal_acceptances`, 0049): o registo grava-a no servidor a
 partir dos metadados da conta; contas antigas ou versões novas aceitam pelo `LegalAcceptanceGate`.
