@@ -243,6 +243,6 @@ html[data-home-cta="on"] .ekaya-float {
 }
 @media (min-width: 768px) {
   html[data-home-cta="on"] .ekaya-float {
-    translate: 0 -80px;
+    translate: 0 -96px;
   }
 }
