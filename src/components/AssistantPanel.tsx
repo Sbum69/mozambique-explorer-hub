@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Mail, Send, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { Compass, Loader2, Mail, Send, ThumbsDown, ThumbsUp, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,12 +17,18 @@ import {
 } from "@/lib/assistant/faq";
 import { ASSISTANT_LLM_ENABLED } from "@/lib/assistant/provider";
 import { ASSISTANT_TXT } from "@/lib/page-texts";
+import { OPEN_GUIDE_EVENT } from "@/lib/guide";
 import { formatPrice } from "@/lib/price";
 
 type Turn = { id: number; question: string; reply: AssistantReply; rated?: boolean };
 
 /** Help panel: question → FAQ answer (or live price/schedule), with links, suggestions and rating. */
 export function AssistantPanel({ onClose }: { onClose: () => void }) {
+  // The panels (traveller, business) have a first-entry guide that can be shown again from here.
+  const onPanel = useRouterState({
+    select: (s) =>
+      s.location.pathname === "/dashboard" || s.location.pathname === "/business-dashboard",
+  });
   const { lang } = useLang();
   const t = ASSISTANT_TXT[lang];
   const faq = useQuery({ queryKey: ["assistant-faq"], queryFn: fetchFaq, staleTime: 10 * 60_000 });
@@ -93,6 +99,22 @@ export function AssistantPanel({ onClose }: { onClose: () => void }) {
           <X className="size-5" />
         </Button>
       </div>
+
+      {onPanel && (
+        <div className="border-b border-border px-4 py-2">
+          <Button
+            variant="outline"
+            className="h-11 w-full gap-2"
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new Event(OPEN_GUIDE_EVENT));
+            }}
+          >
+            <Compass className="size-4" aria-hidden="true" />
+            {t.guideAgain}
+          </Button>
+        </div>
+      )}
 
       <div ref={logRef} className="flex-1 space-y-4 overflow-y-auto p-4" aria-live="polite">
         {faq.isLoading && <p aria-busy="true">{t.thinking}</p>}

@@ -175,7 +175,7 @@ export function BusinessManagement() {
               {statusText(business.status, pt)}
             </Badge>
           </div>
-          <Button variant="outline" onClick={() => setProfile(true)}>
+          <Button variant="outline" data-guide="biz-profile" onClick={() => setProfile(true)}>
             <Edit className="size-4" />
             {pt ? "Editar perfil" : "Edit profile"}
           </Button>
@@ -296,7 +296,7 @@ export function BusinessManagement() {
       <section id="business-activities" className="space-y-4 scroll-mt-24">
         <div className="flex justify-between gap-3 flex-wrap items-center">
           <h2 className="text-xl font-bold">{pt ? "As Minhas Atividades" : "My Activities"}</h2>
-          <Button onClick={() => setEditor("new")}>
+          <Button data-guide="biz-create" onClick={() => setEditor("new")}>
             <Plus className="size-4" />
             {pt ? "Criar atividade" : "Create activity"}
           </Button>

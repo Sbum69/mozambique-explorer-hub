@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import {
   Calendar as CalendarIcon,
   ArrowLeft,
@@ -31,6 +31,11 @@ import { getOwnerBookings } from "@/lib/dashboard.functions";
 import { bookingMetrics, bookingHasStarted } from "@/lib/business-dashboard";
 import { BusinessRewards } from "@/components/BusinessRewards";
 import { requireRole } from "@/lib/auth";
+import { useGuide } from "@/hooks/useGuide";
+import { GUIDE_STEPS } from "@/lib/guide";
+
+// Loaded only when the guide opens.
+const OnboardingGuide = lazy(() => import("@/components/OnboardingGuide"));
 
 export const Route = createFileRoute("/business-dashboard")({
   ssr: false,
@@ -98,6 +103,7 @@ function BusinessDashboardPage() {
   const { logout, authUser, isLoading } = useAuth();
   const { lang } = useLang();
   const pt = lang === "pt";
+  const guide = useGuide("business", { enabled: !isLoading && !!authUser, lang });
   const fetchBookings = useServerFn(getOwnerBookings);
   const {
     data: bookings = [],
@@ -289,7 +295,10 @@ function BusinessDashboardPage() {
           </section>
         )}
         <section id="business-bookings" className="border-t pt-6 space-y-4 scroll-mt-24">
-          <div className="flex justify-between items-center gap-3 flex-wrap">
+          <div
+            className="flex justify-between items-center gap-3 flex-wrap"
+            data-guide="biz-bookings"
+          >
             <h2 className="text-xl font-bold">{pt ? "Reservas" : "Bookings"}</h2>
             <Button
               variant="ghost"
@@ -438,6 +447,11 @@ function BusinessDashboardPage() {
           )}
         </section>
         <BusinessRewards />
+        {guide.open && (
+          <Suspense fallback={null}>
+            <OnboardingGuide steps={GUIDE_STEPS.business} lang={lang} onClose={guide.close} />
+          </Suspense>
+        )}
       </main>
 
       <Dialog
