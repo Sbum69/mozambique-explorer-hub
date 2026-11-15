@@ -33,6 +33,9 @@ const DEFAULT_PAGES: QaPage[] = [
   { name: "map", path: "/map" },
   { name: "itineraries", path: "/itineraries" },
   { name: "itinerary", path: "/itinerary/11111111-1111-4111-8111-111111111111" },
+  // Province flow (Bloco A): a province's list and a real official itinerary (EK-NAM-005).
+  { name: "province", path: "/itineraries?province=nampula" },
+  { name: "route", path: "/itinerary/4fb7253e-f3cc-4576-9324-6edb7f4c9902" },
   { name: "experiences", path: "/experiences" },
   { name: "community", path: "/community" },
   { name: "games", path: "/games", role: "tourist" },

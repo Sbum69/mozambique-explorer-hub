@@ -80,6 +80,8 @@ import {
   routeDescription,
   routePriceMzn,
   routeStopCount,
+  routeAllStops,
+  routeInProvince,
   routeTitle,
   stopTitle,
   recommendRoutes,
@@ -120,10 +122,15 @@ export const Route = createFileRoute("/itineraries")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { personal?: boolean } =>
-    s.personal === true || s.personal === "true" || s.personal === 1 || s.personal === "1"
+  // ?province=<code> opens the list filtered by that province (links from the map and the games).
+  validateSearch: (s: Record<string, unknown>): { personal?: boolean; province?: string } => ({
+    ...(s.personal === true || s.personal === "true" || s.personal === 1 || s.personal === "1"
       ? { personal: true }
-      : {},
+      : {}),
+    ...(typeof s.province === "string" && /^[a-z-]{2,40}$/.test(s.province)
+      ? { province: s.province }
+      : {}),
+  }),
   component: ItinerariesPage,
 });
 
@@ -135,7 +142,7 @@ function ItinerariesPage() {
   const userId = authUser?.id ?? null;
   const isGuest = !user || user.role === "guest" || !userId;
   const { requireAccount } = useAuthGate();
-  const { personal } = Route.useSearch();
+  const { personal, province: provinceParam } = Route.useSearch();
   const personalMode = !!personal && !isGuest;
 
   const { all, loading, error, reload } = useRouteCatalogue(userId);
@@ -144,12 +151,17 @@ function ItinerariesPage() {
   const [search, setSearch] = useState("");
   // Filters start from the saved preferences; changing them never changes the preferences.
   const personalPrefs = usePersonalPrefs();
+  const urlProvinceId = provinceParam
+    ? (provinces.find((p) => p.code === provinceParam)?.id ?? null)
+    : null;
   const routeFilters = usePrefilledFilters<RouteFilters>(
-    routeFiltersFromPrefs(
-      personalPrefs.hasPrefs ? personalPrefs : null,
-      provinces,
-      ROUTE_INTERESTS,
-    ),
+    urlProvinceId
+      ? { ...NO_ROUTE_FILTERS, province: urlProvinceId }
+      : routeFiltersFromPrefs(
+          personalPrefs.hasPrefs ? personalPrefs : null,
+          provinces,
+          ROUTE_INTERESTS,
+        ),
     NO_ROUTE_FILTERS,
   );
   const {
@@ -178,7 +190,11 @@ function ItinerariesPage() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return all.filter((route) => {
-      if (provinceFilter !== "all" && route.provinceId !== provinceFilter) return false;
+      if (provinceFilter !== "all") {
+        const code = provinces.find((p) => p.id === provinceFilter)?.code;
+        if (code ? !routeInProvince(route, code) : route.provinceId !== provinceFilter)
+          return false;
+      }
       if (durationFilter === "short" && route.durationDays > 2) return false;
       if (durationFilter === "mid" && (route.durationDays < 3 || route.durationDays > 4))
         return false;
@@ -192,7 +208,7 @@ function ItinerariesPage() {
         (route.description ?? "").toLowerCase().includes(term)
       );
     });
-  }, [all, provinceFilter, search, durationFilter, interestFilter]);
+  }, [all, provinces, provinceFilter, search, durationFilter, interestFilter]);
 
   const recommended = useMemo(
     () =>
@@ -399,9 +415,9 @@ function ItinerariesPage() {
             </div>
             <div className="absolute bottom-3 left-3 right-3 text-white">
               <h3 className="text-xl font-bold">{routeTitle(route, lang)}</h3>
-              {route.province && (
+              {route.provinces.length > 0 && (
                 <p className="text-xs text-white/80">
-                  {lang === "pt" ? route.province.name.pt : route.province.name.en}
+                  {route.provinces.map((p) => p.name[lang]).join(" → ")}
                 </p>
               )}
             </div>
@@ -455,8 +471,7 @@ function ItinerariesPage() {
             </div>
 
             <div className="space-y-1.5 mb-4">
-              {route.days
-                .flatMap((d) => d.stops)
+              {routeAllStops(route)
                 .slice(0, 3)
                 .map((s) => (
                   <div key={s.id} className="flex items-center gap-2 text-sm">

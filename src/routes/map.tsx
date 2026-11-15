@@ -10,6 +10,7 @@ import {
   LocateFixed,
   Undo2,
   ExternalLink,
+  Route as RouteIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -618,6 +619,17 @@ function MapPage() {
                     <Button variant="outline" onClick={() => navigate({ to: "/experiences" })}>
                       {pt ? "Ver atividades" : "See activities"}
                     </Button>
+                    {selected.province && (
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          navigate({ to: "/itineraries", search: { province: selected.province } })
+                        }
+                      >
+                        <RouteIcon className="size-4" />{" "}
+                        {pt ? "Roteiros desta província" : "Itineraries in this province"}
+                      </Button>
+                    )}
                   </div>
 
                   {directionsOpen && hasValidCoords(selected.coords) && (

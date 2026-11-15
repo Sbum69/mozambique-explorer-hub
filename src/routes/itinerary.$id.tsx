@@ -19,6 +19,7 @@ import {
   Lock,
   RotateCcw,
   Flag,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { BackButton } from "@/components/BackButton";
+import { StopSourceLink, TravelLegCard } from "@/components/RouteStopExtras";
 
 export const Route = createFileRoute("/itinerary/$id")({
   loader: ({ params }) => routeMeta(params.id),
@@ -465,10 +467,18 @@ function ItineraryDetailPage() {
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" /> {route.durationDays} {lang === "pt" ? "dias" : "days"}
               </span>
-              {route.province && (
+              {route.provinces.length > 0 && (
                 <span className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />{" "}
-                  {lang === "pt" ? route.province.name.pt : route.province.name.en}
+                  {route.provinces.map((p) => p.name[lang]).join(" → ")}
+                </span>
+              )}
+              {route.isCurated && (
+                <span className="flex items-center gap-1">
+                  <CalendarDays className="h-4 w-4" />{" "}
+                  {lang === "pt" ? "Época recomendada: " : "Best season: "}
+                  {(lang === "en" ? route.bestSeason.en : route.bestSeason.pt) ??
+                    (lang === "pt" ? "a confirmar" : "to be confirmed")}
                 </span>
               )}
               {price > 0 && (
@@ -526,13 +536,17 @@ function ItineraryDetailPage() {
               </Card>
             )}
 
-            {route.requiresValidation &&
+            {(route.requiresValidation || route.isCurated) &&
               (route.catalogNotes.pt || route.communityCandidates.length > 0) && (
                 <div className="rounded-lg border border-dashed p-4 text-sm space-y-1">
                   <p className="font-semibold">
-                    {lang === "pt"
-                      ? "Catálogo-base — requer validação"
-                      : "Base catalogue — requires validation"}
+                    {route.requiresValidation
+                      ? lang === "pt"
+                        ? "Catálogo-base — requer validação"
+                        : "Base catalogue — requires validation"
+                      : lang === "pt"
+                        ? "Notas do roteiro"
+                        : "Itinerary notes"}
                   </p>
                   {(lang === "en"
                     ? (route.catalogNotes.en ?? route.catalogNotes.pt)
@@ -594,7 +608,13 @@ function ItineraryDetailPage() {
                       {lang === "pt" ? "Sem paragens neste dia." : "No stops on this day."}
                     </p>
                   )}
-                  {day.stops.map((stop, index) => {
+                  {day.stops.map((stop) => {
+                    if (stop.kind === "travel")
+                      return <TravelLegCard key={stop.id} stop={stop} lang={lang} />;
+                    const number =
+                      day.stops
+                        .filter((x) => x.kind !== "travel")
+                        .findIndex((x) => x.id === stop.id) + 1;
                     const done = completed.includes(stop.id);
                     return (
                       <Card
@@ -609,7 +629,7 @@ function ItineraryDetailPage() {
                                 : "bg-secondary text-secondary-foreground"
                             } flex items-center justify-center shrink-0 font-bold`}
                           >
-                            {index + 1}
+                            {number}
                           </div>
                           <div className="flex-1 min-w-0 break-words">
                             <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1 uppercase">
@@ -691,6 +711,7 @@ function ItineraryDetailPage() {
                                 </div>
                               )}
                             </div>
+                            <StopSourceLink stop={stop} lang={lang} />
                             {stop.notes && (
                               <p className="text-sm mt-3 text-muted-foreground">{stop.notes}</p>
                             )}
