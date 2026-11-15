@@ -44,6 +44,7 @@ import {
   CheckCircle2,
   Hourglass,
   Medal,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -51,6 +52,7 @@ import { Badge } from "@/components/ui/badge";
 import { getGameTask } from "@/data/game-tasks";
 import { LOCATION_PROMPT_TEXT, requestPreciseLocation } from "@/lib/geo";
 import { BackButton } from "@/components/BackButton";
+import { ProvincePassports } from "@/components/ProvincePassports";
 
 // Challenge fields only show inside the challenge dialog, after a tap: loaded on demand.
 const loadTaskFields = () => import("@/components/GameTaskFields");
@@ -602,6 +604,7 @@ function GamesPage() {
                 />
               ))}
             </div>
+            {q.data && <ProvincePassports state={q.data.state} lang={lang} />}
           </>
         )}
 
@@ -1094,6 +1097,7 @@ function QuizModal({
     correct: boolean;
     correct_index: number;
     explanation: string;
+    source_url: string | null;
   } | null>(null);
   const [score, setScore] = useState(0);
   const [result, setResult] = useState<{
@@ -1109,7 +1113,7 @@ function QuizModal({
     setBusy(true);
     setErr(null);
     try {
-      const s = await startQuiz(game.id);
+      const s = await startQuiz(game.id, lang);
       setSession({ id: s.attempt_id, questions: s.questions });
       setCurrent(0);
       setSelected(null);
@@ -1317,7 +1321,20 @@ function QuizModal({
                   ) : (
                     <AlertCircle className="size-5 shrink-0 text-destructive" />
                   )}
-                  <p>{feedback.explanation}</p>
+                  <div className="min-w-0">
+                    <p>{feedback.explanation}</p>
+                    {feedback.source_url && (
+                      <a
+                        href={feedback.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                      >
+                        <ExternalLink className="size-3" aria-hidden />
+                        {pt ? "Fonte" : "Source"}
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
               <Button disabled={!feedback || busy} onClick={next} className="w-full mt-4">

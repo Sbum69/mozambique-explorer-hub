@@ -44,6 +44,7 @@ import {
   importRouteByCode,
   resetRouteProgress,
   routeAllStops,
+  routeGivesPassport,
   routeCover,
   routePriceMzn,
   setProgressDay,
@@ -75,6 +76,7 @@ import {
 } from "@/components/ui/dialog";
 import { BackButton } from "@/components/BackButton";
 import { StopSourceLink, TravelLegCard } from "@/components/RouteStopExtras";
+import { RoutePassportCard } from "@/components/RoutePassportCard";
 
 export const Route = createFileRoute("/itinerary/$id")({
   loader: ({ params }) => routeMeta(params.id),
@@ -266,8 +268,20 @@ function ItineraryDetailPage() {
     setBusy(true);
     try {
       await finishRouteProgress(progress.id);
+      // Route → game: an official route gives its province passport (server-checked, once).
+      const game = routeGivesPassport(route)
+        ? await import("@/lib/games").then((m) => m.claimPassport(progress.id, lang === "pt"))
+        : null;
       await refreshProgress();
-      toast.success(lang === "pt" ? "Rota concluída!" : "Route completed!");
+      toast.success(
+        game?.ok && game.awarded
+          ? lang === "pt"
+            ? "Rota concluída! Ganhaste o jogo desta rota."
+            : "Route completed! You won this route's game."
+          : lang === "pt"
+            ? "Rota concluída!"
+            : "Route completed!",
+      );
     } catch {
       toast.error(
         lang === "pt"
@@ -933,6 +947,12 @@ function ItineraryDetailPage() {
                     : "Progress is stored in your account and follows you across devices."}
                 </p>
               </Card>
+              <RoutePassportCard
+                route={route}
+                progress={progress}
+                lang={lang}
+                onClaimed={refreshProgress}
+              />
             </div>
           </div>
         </div>
