@@ -104,7 +104,8 @@ RPCs chamadas pelo cliente: `has_role`, `save_route_plan`, `reset_my_route_progr
 `finish_game_quiz`, `submit_game_step`, `save_my_preferences`, `delete_my_account`,
 `admin_set_internal`, `admin_platform_summary`, `accept_legal_documents`, `current_legal_versions`,
 `claim_route_games` (passaportes `pp-<província>` e Grande Viagem `gv`, só a partir de um roteiro
-oficial com todas as provas aprovadas).
+oficial com todas as provas aprovadas),
+`set_my_guide` (guia da primeira entrada dos painéis, `profiles.guide_*`, 0068).
 
 Aceitação dos Termos e da Privacidade (`legal_acceptances`, 0049): o registo grava-a no servidor a
 partir dos metadados da conta; contas antigas ou versões novas aceitam pelo `LegalAcceptanceGate`.

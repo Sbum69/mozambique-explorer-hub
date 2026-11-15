@@ -2052,6 +2052,10 @@ export type Database = {
           deleted_at: string | null
           display_name: string | null
           duration_days: number | null
+          guide_business: string | null
+          guide_business_at: string | null
+          guide_tourist: string | null
+          guide_tourist_at: string | null
           id: string
           interests: string[] | null
           is_internal: boolean
@@ -2067,6 +2071,10 @@ export type Database = {
           deleted_at?: string | null
           display_name?: string | null
           duration_days?: number | null
+          guide_business?: string | null
+          guide_business_at?: string | null
+          guide_tourist?: string | null
+          guide_tourist_at?: string | null
           id: string
           interests?: string[] | null
           is_internal?: boolean
@@ -2082,6 +2090,10 @@ export type Database = {
           deleted_at?: string | null
           display_name?: string | null
           duration_days?: number | null
+          guide_business?: string | null
+          guide_business_at?: string | null
+          guide_tourist?: string | null
+          guide_tourist_at?: string | null
           id?: string
           interests?: string[] | null
           is_internal?: boolean
@@ -3284,6 +3296,10 @@ export type Database = {
       save_route_plan: {
         Args: { _curated?: boolean; _input: Json; _route_id: string }
         Returns: string
+      }
+      set_my_guide: {
+        Args: { _guide: string; _status: string }
+        Returns: undefined
       }
       sponsored_notify: {
         Args: {

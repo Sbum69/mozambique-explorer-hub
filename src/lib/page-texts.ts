@@ -1566,6 +1566,7 @@ export const ASSISTANT_TXT = {
     mode: "Respostas automáticas a partir da ajuda do EKAYA (sem IA generativa).",
     modeAi: "Assistente com IA, pode errar. Confirma as informações importantes.",
     close: "Fechar o assistente",
+    guideAgain: "Ver o guia outra vez",
     placeholder: "Escreve a tua pergunta",
     inputLabel: "Pergunta",
     send: "Perguntar",
@@ -1634,6 +1635,7 @@ export const ASSISTANT_TXT = {
     mode: "Automatic answers from the EKAYA help pages (no generative AI).",
     modeAi: "AI assistant, it can make mistakes. Check important information.",
     close: "Close the assistant",
+    guideAgain: "See the guide again",
     placeholder: "Type your question",
     inputLabel: "Question",
     send: "Ask",
@@ -1747,5 +1749,23 @@ export const LAUNCH_TXT = {
     loading: "Loading…",
     errLoad: "Could not load the launch status.",
     retry: "Try again",
+  },
+} as const;
+
+/** The two Home actions (HomeCta): the subtitles show on larger screens only. */
+export const HOME_CTA_TXT = {
+  pt: {
+    nav: "Ações principais",
+    recommend: "Ver recomendações",
+    recommendSub: "Roteiros feitos para ti",
+    app: "Explorar a app",
+    appSub: "Mapa, jogos e reservas",
+  },
+  en: {
+    nav: "Main actions",
+    recommend: "Recommendations",
+    recommendSub: "Trips made for you",
+    app: "Open the app",
+    appSub: "Map, games and bookings",
   },
 } as const;
