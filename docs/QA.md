@@ -32,6 +32,7 @@ Depois, confirmar por leitura que não ficaram dados de teste (consulta no topo 
 | `seg-2_bookings_integrity.sql`        | integridade das reservas                                                                                         |
 | `8e5_commercial_flow.sql`             | expiração, não comparência, capacidade                                                                           |
 | `10b_rewards_and_proofs.sql`          | recompensas e provas localizadas                                                                                 |
+| `route_points_cooldown.sql`           | pontos só após conclusão de roteiros públicos aprovados; limite de 72 horas e revisão após edição               |
 | `adm-1_admin_management.sql`          | gestão de utilizadores e negócios                                                                                |
 | `adm-2c_admin_broadcasts.sql`         | avisos do admin                                                                                                  |
 | `dados-1_exchange_rates.sql`          | câmbio                                                                                                           |

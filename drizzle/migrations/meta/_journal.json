@@ -421,6 +421,13 @@
       "when": 1794900000000,
       "tag": "0059_content_photos_policies_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1795000000000,
+      "tag": "0060_verified_route_points_cooldown",
+      "breakpoints": true
     }
   ]
 }

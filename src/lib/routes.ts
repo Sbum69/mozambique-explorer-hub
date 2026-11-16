@@ -920,7 +920,7 @@ export function personalizeRoutes(
   return res;
 }
 
-/** Admin decision on a pending stop proof; approving awards the stop points once (server trigger). */
+/** Admin decision on a pending stop proof; eligible points are awarded when the route is completed. */
 export async function reviewStopProof(
   progressId: string,
   stopId: string,

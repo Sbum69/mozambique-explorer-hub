@@ -269,12 +269,31 @@ function ItineraryDetailPage() {
     try {
       await finishRouteProgress(progress.id);
       await refreshProgress();
-      toast.success(lang === "pt" ? "Rota concluída!" : "Route completed!");
-    } catch {
+      const earnsPoints =
+        route.isPublic &&
+        route.status === "active" &&
+        route.reviewStatus === "approved" &&
+        !route.requiresValidation &&
+        stops.every((stop) => !stop.pendingValidation);
+      toast.success(
+        earnsPoints
+          ? lang === "pt"
+            ? "Rota concluída! Os pontos são atribuídos uma vez por roteiro."
+            : "Route completed! Points are awarded once per route."
+          : lang === "pt"
+            ? "Rota concluída. Só roteiros públicos aprovados e validados atribuem pontos."
+            : "Route completed. Only approved, validated public routes award points.",
+      );
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "";
       toast.error(
-        lang === "pt"
-          ? "Conclui todas as paragens com fotografia antes de terminar. Se já o fizeste, tenta novamente."
-          : "Complete every stop with a photo before finishing. If already done, try again.",
+        message.includes("ROUTE_COOLDOWN_72H")
+          ? lang === "pt"
+            ? "Só podes concluir um roteiro a cada 72 horas. Tenta novamente mais tarde."
+            : "You can complete one route every 72 hours. Please try again later."
+          : lang === "pt"
+            ? "Conclui todas as paragens com provas verificadas antes de terminar. Se já o fizeste, tenta novamente."
+            : "Complete every stop with a verified proof before finishing. If already done, try again.",
       );
     } finally {
       setBusy(false);
@@ -337,8 +356,8 @@ function ItineraryDetailPage() {
       } else {
         toast.success(
           lang === "pt"
-            ? "Prova enviada. Fica pendente de verificação; os pontos são atribuídos quando for aprovada."
-            : "Proof sent. It is pending verification; points are awarded once it is approved.",
+            ? "Prova enviada. Fica pendente de verificação. Os pontos de roteiros elegíveis são atribuídos após a conclusão."
+            : "Proof sent for review. Eligible route points are awarded after completion.",
         );
       }
     } catch (e) {

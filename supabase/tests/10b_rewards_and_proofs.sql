@@ -1,16 +1,10 @@
 -- =====================================================================================
--- 10B — Recompensas e provas localizadas (migração 0038)
+-- 10B — Recompensas e provas localizadas (migrações 0038 e 0060)
 -- -------------------------------------------------------------------------------------
 -- O que testa: criação de recompensas (dono sim, turista não), resgate com pontos, provas de paragem com localização.
 -- Como correr: colar inteiro no SQL da Lovable Cloud (query_database).
 -- Resultado esperado: erro TEST_10B_ROLLBACK com [… PASS …] em todos os itens. Tudo é revertido.
--- Última execução registada (antes de passar para o repositório):
---   TEST_10B_ROLLBACK [RW-owner-create PASS via RLS] [RW-tourist-create PASS: new row violates
---   row-level security policy for table "reward] [RD-insufficient PASS: insufficient_balance]
---   [PR-50m PASS verified, +20, d=50.0] [PR-2km PASS pending, no points] [PR-acc500 PASS not
---   verified] [PR-bypass PASS forced pending, coords dropped] [PR-nocoords PASS null] [coords
---   stored=0] [RD-ok+same-request PASS one debit] [RD-second-request PASS: out_of_stock]
---   [RD-balance-0 PASS: insufficient_balance] [VC-tourist PASS: voucher_not_found] [
+-- Atualizado para 0060; ainda não executado nesta versão. As provas isoladas já não dão pontos.
 -- Confirmar depois, por leitura: SELECT count(*) FROM rewards WHERE title_pt LIKE 'SEG-10B%';  -- 0
 -- =====================================================================================
 DO $$
@@ -68,12 +62,12 @@ BEGIN
   SELECT c.lat, c.lng INTO tlat, tlng FROM public.route_stop_coords(sA[1]) c;
   res := public.submit_stop_proof(pA, sA[1], cust::text || '/seg10b-1.jpg', tlat + 50 / 111195.0, tlng, 20);
   SELECT count(*) INTO led FROM public.points_ledger WHERE user_id = cust;
-  r := r || CASE WHEN res->>'review_status' = 'verified' AND led = 1 THEN '[PR-50m PASS verified, +20, d=' || (res->>'distance_m') || '] ' ELSE '[PR-50m FAIL ' || res::text || ' ledger=' || led || '] ' END;
+  r := r || CASE WHEN res->>'review_status' = 'verified' AND led = 0 THEN '[PR-50m PASS verified, no early points, d=' || (res->>'distance_m') || '] ' ELSE '[PR-50m FAIL ' || res::text || ' ledger=' || led || '] ' END;
 
   SELECT c.lat, c.lng INTO tlat, tlng FROM public.route_stop_coords(sA[2]) c;
   res := public.submit_stop_proof(pA, sA[2], cust::text || '/seg10b-2.jpg', tlat + 2000 / 111195.0, tlng, 20);
   SELECT count(*) INTO led FROM public.points_ledger WHERE user_id = cust;
-  r := r || CASE WHEN res->>'review_status' = 'pending' AND (res->>'location_verified')::boolean = false AND led = 1 THEN '[PR-2km PASS pending, no points] ' ELSE '[PR-2km FAIL ' || res::text || '] ' END;
+  r := r || CASE WHEN res->>'review_status' = 'pending' AND (res->>'location_verified')::boolean = false AND led = 0 THEN '[PR-2km PASS pending, no points] ' ELSE '[PR-2km FAIL ' || res::text || '] ' END;
 
   SELECT c.lat, c.lng INTO tlat, tlng FROM public.route_stop_coords(sA[3]) c;
   res := public.submit_stop_proof(pA, sA[3], cust::text || '/seg10b-3.jpg', tlat, tlng, 500);
@@ -85,14 +79,16 @@ BEGIN
     VALUES (pA, sA[4], cust::text || '/seg10b-4.jpg', 'verified', true, -25.9, 32.5);
   SELECT review_status, location_verified, lat INTO st, vb, la FROM public.route_stop_progress WHERE progress_id = pA AND route_stop_id = sA[4];
   SELECT count(*) INTO led FROM public.points_ledger WHERE user_id = cust;
-  r := r || CASE WHEN st = 'pending' AND vb IS NULL AND la IS NULL AND led = 1 THEN '[PR-bypass PASS forced pending, coords dropped] ' ELSE '[PR-bypass FAIL ' || st || '] ' END;
+  r := r || CASE WHEN st = 'pending' AND vb IS NULL AND la IS NULL AND led = 0 THEN '[PR-bypass PASS forced pending, coords dropped] ' ELSE '[PR-bypass FAIL ' || st || '] ' END;
 
   res := public.submit_stop_proof(pB, sB, cust::text || '/seg10b-5.jpg', -25.96, 32.58, 10);
   r := r || CASE WHEN res->>'review_status' = 'pending' AND res->>'location_verified' IS NULL THEN '[PR-nocoords PASS null] ' ELSE '[PR-nocoords FAIL ' || res::text || '] ' END;
   SELECT count(*) INTO n FROM public.route_stop_progress sp JOIN public.route_progress p ON p.id = sp.progress_id WHERE p.user_id = cust AND (sp.lat IS NOT NULL OR sp.lng IS NOT NULL);
   r := r || '[coords stored=' || n || '] ';
 
-  -- ===== Redemption with the 20 earned points =====
+  -- Redemption needs a separate, trusted fixture balance; proofs alone no longer pay.
+  INSERT INTO public.points_ledger (user_id, points, kind, reason, source_type, source_id)
+  VALUES (cust, 20, 'award', 'game_completed', 'game', gen_random_uuid());
   res := public.redeem_reward(rw1, req);
   code1 := res->>'code';
   res := public.redeem_reward(rw1, req);

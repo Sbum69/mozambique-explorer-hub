@@ -154,8 +154,8 @@ export function PointsCard({
         {recent.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {pt
-              ? `Ainda sem pontos. Ganhas ${POINT_VALUES.booking_completed} por atividade concluída, ${POINT_VALUES.route_stop_proof} por paragem de roteiro com foto, ${POINT_VALUES.route_completed} por roteiro concluído com todas as provas e XP por cada jogo verificado concluído.`
-              : `No points yet. You earn ${POINT_VALUES.booking_completed} per completed activity, ${POINT_VALUES.route_stop_proof} per route stop with a photo, ${POINT_VALUES.route_completed} per route completed with every proof and XP for each verified game completed.`}
+              ? `Ainda sem pontos. Ganhas ${POINT_VALUES.booking_completed} por atividade concluída. Ao concluir um roteiro público aprovado e validado, ganhas ${POINT_VALUES.route_stop_proof} por paragem com prova verificada e ${POINT_VALUES.route_completed} pelo roteiro, no máximo uma conclusão a cada 72 horas. Os jogos verificados também dão XP.`
+              : `No points yet. You earn ${POINT_VALUES.booking_completed} per completed activity. Finishing an approved, validated public route awards ${POINT_VALUES.route_stop_proof} per proven stop and ${POINT_VALUES.route_completed} for the route, with one completion allowed every 72 hours. Verified games also award XP.`}
           </p>
         ) : (
           <ul className="divide-y">
