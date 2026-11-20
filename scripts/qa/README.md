@@ -40,6 +40,7 @@ Desliga outros servidores (por exemplo `bun run dev`) antes do Lighthouse.
 | `bun scripts/qa/shots.ts`          | capturas claro/escuro, 1280 e 390 px                                                                                           | revisão visual                                   |
 | `bun scripts/qa/login-redirect.ts` | botão da home → login (→ 2FA) → painel do papel (turista, negócio, admin)                                                      | 12/12 PASS                                       |
 | `bun scripts/qa/guide.ts`          | guia do painel: abre na 1.ª entrada, "Não voltar a mostrar" grava, noutro browser não abre (grava 1 valor na conta de turista) | todos PASS                                       |
+| `bun scripts/qa/spotlight.ts`      | destaque dos botões da home: 5 s parado em "Para onde vais?"/destinos, uma vez por visita, sai com scroll, CLS 0, PT/EN        | todos PASS                                       |
 | `bun scripts/qa/brand-assets.ts`   | volta a gerar logótipos, ícones, manifest e imagem de partilha em `public/`                                                    | `brand.test.ts` PASS, `git diff` só o esperado   |
 
 Opções comuns: `--pages=home,map` (nomes em `lib.ts`), `--widths=320,390` (widths),
