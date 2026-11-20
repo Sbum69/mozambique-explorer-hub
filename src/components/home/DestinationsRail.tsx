@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { HOME_RAIL_ID } from "@/components/home/HomeCta";
 import { PhotoCredit } from "@/components/PhotoCredit";
 import type { Lang } from "@/contexts/LanguageContext";
 import type { Destination } from "@/lib/destinations";
@@ -23,7 +24,7 @@ export function DestinationsRail({
   const count = (code: string) => routes.filter((r) => r.province?.code === code).length;
 
   return (
-    <section className="pt-14" aria-labelledby="home-destinations">
+    <section id={HOME_RAIL_ID} className="pt-14" aria-labelledby="home-destinations">
       <div className="px-4 sm:px-10 max-w-6xl mx-auto flex items-end justify-between gap-4">
         <h2 id="home-destinations" className="font-display text-3xl font-bold tracking-tight">
           {pt ? "Destinos" : "Destinations"}
