@@ -1760,6 +1760,7 @@ export const HOME_CTA_TXT = {
     recommendSub: "Roteiros feitos para ti",
     app: "Explorar a app",
     appSub: "Mapa, jogos e reservas",
+    spotlight: "Atalhos no fundo do ecrã: Ver recomendações e Explorar a app.",
   },
   en: {
     nav: "Main actions",
@@ -1767,5 +1768,6 @@ export const HOME_CTA_TXT = {
     recommendSub: "Trips made for you",
     app: "Open the app",
     appSub: "Map, games and bookings",
+    spotlight: "Shortcuts at the bottom of the screen: Recommendations and Open the app.",
   },
 } as const;

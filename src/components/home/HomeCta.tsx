@@ -1,13 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Compass, Map as MapIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Lang } from "@/contexts/LanguageContext";
+import {
+  createSpotlight,
+  sessionSpotlightStore,
+  type SpotlightController,
+} from "@/lib/home-spotlight";
 import { HOME_CTA_TXT } from "@/lib/page-texts";
 
 /** Ids the bar watches: the plan card has its own "Ver recomendações", and the bar ends after the rail. */
 export const HOME_PLAN_ID = "home-plan";
 export const HOME_CTA_END_ID = "home-cta-end";
+/** The destinations rail: with the plan card, the zone where the spotlight can happen. */
+export const HOME_RAIL_ID = "home-rail";
 
 /**
  * The two Home actions, always on screen through the story (coast, Ilha de Moçambique, Gorongosa)
@@ -30,7 +37,48 @@ export function HomeCta({
   const t = HOME_CTA_TXT[lang];
   const [planOnScreen, setPlanOnScreen] = useState(false);
   const [pastEnd, setPastEnd] = useState(false);
-  const hidden = planOnScreen || pastEnd;
+  const [zoneOnScreen, setZoneOnScreen] = useState(false);
+  // Spotlight: shown (even over the plan card) and highlighted until the next scroll.
+  const [spot, setSpot] = useState(false);
+  const spotlight = useRef<SpotlightController | null>(null);
+  const hidden = pastEnd || (planOnScreen && !spot);
+
+  useEffect(() => {
+    const ctl = createSpotlight({
+      onChange: setSpot,
+      store: sessionSpotlightStore(),
+      isVisible: () => document.visibilityState === "visible",
+    });
+    spotlight.current = ctl;
+    const onScroll = () => ctl.onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    let io: IntersectionObserver | undefined;
+    if (typeof IntersectionObserver !== "undefined") {
+      const onScreen = new Set<Element>();
+      io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) onScreen.add(e.target);
+          else onScreen.delete(e.target);
+        }
+        setZoneOnScreen(onScreen.size > 0);
+      });
+      for (const id of [HOME_PLAN_ID, HOME_RAIL_ID]) {
+        const el = document.getElementById(id);
+        if (el) io.observe(el);
+      }
+    }
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      io?.disconnect();
+      ctl.dispose();
+      spotlight.current = null;
+    };
+  }, []);
+
+  // The zone counts until the bar ends (after the rail), so the one spotlight is never spent unseen.
+  useEffect(() => {
+    spotlight.current?.setInZone(zoneOnScreen && !pastEnd);
+  }, [zoneOnScreen, pastEnd]);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
@@ -64,45 +112,52 @@ export function HomeCta({
   }, [hidden]);
 
   return (
-    <nav
-      aria-label={t.nav}
-      className="home-cta dark"
-      data-hidden={hidden ? "" : undefined}
-      inert={hidden || undefined}
-    >
-      <style>{CTA_CSS}</style>
-      <button
-        type="button"
-        onClick={onRecommend}
-        className="home-cta-btn bg-primary text-primary-foreground hover:bg-primary/90"
+    <>
+      {/* Outside the nav, so it is never inside an inert subtree when the message is set. */}
+      <span className="sr-only" aria-live="polite">
+        {spot ? t.spotlight : ""}
+      </span>
+      <nav
+        aria-label={t.nav}
+        className="home-cta dark"
+        data-hidden={hidden ? "" : undefined}
+        data-spotlight={spot ? "" : undefined}
+        inert={hidden || undefined}
       >
-        <span className="home-cta-tile home-cta-tile-primary" aria-hidden="true">
-          <Compass className="home-cta-ic home-cta-turn size-5" />
-        </span>
-        <span className="home-cta-text">
-          <span className="home-cta-label">{t.recommend}</span>
-          <span className="home-cta-sub">{t.recommendSub}</span>
-        </span>
-      </button>
-      <Link
-        // Visitors sign in first; /login turns "/dashboard" into the panel of their role.
-        to={isGuest ? "/login" : panel}
-        search={isGuest ? { redirect: "/dashboard" } : undefined}
-        className="home-cta-btn home-cta-secondary"
-      >
-        <span className="home-cta-tile home-cta-wide" aria-hidden="true">
-          <MapIcon className="size-5" />
-        </span>
-        <span className="home-cta-text">
-          <span className="home-cta-label">{t.app}</span>
-          <span className="home-cta-sub">{t.appSub}</span>
-        </span>
-        <ArrowRight
-          className="home-cta-ic home-cta-nudge home-cta-narrow size-5"
-          aria-hidden="true"
-        />
-      </Link>
-    </nav>
+        <style>{CTA_CSS}</style>
+        <button
+          type="button"
+          onClick={onRecommend}
+          className="home-cta-btn bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          <span className="home-cta-tile home-cta-tile-primary" aria-hidden="true">
+            <Compass className="home-cta-ic home-cta-turn size-5" />
+          </span>
+          <span className="home-cta-text">
+            <span className="home-cta-label">{t.recommend}</span>
+            <span className="home-cta-sub">{t.recommendSub}</span>
+          </span>
+        </button>
+        <Link
+          // Visitors sign in first; /login turns "/dashboard" into the panel of their role.
+          to={isGuest ? "/login" : panel}
+          search={isGuest ? { redirect: "/dashboard" } : undefined}
+          className="home-cta-btn home-cta-secondary"
+        >
+          <span className="home-cta-tile home-cta-wide" aria-hidden="true">
+            <MapIcon className="size-5" />
+          </span>
+          <span className="home-cta-text">
+            <span className="home-cta-label">{t.app}</span>
+            <span className="home-cta-sub">{t.appSub}</span>
+          </span>
+          <ArrowRight
+            className="home-cta-ic home-cta-nudge home-cta-narrow size-5"
+            aria-hidden="true"
+          />
+        </Link>
+      </nav>
+    </>
   );
 }
 
@@ -112,6 +167,8 @@ export function HomeCta({
  * (icon tile, title and subtitle) that lift 2 px on hover. Dark background (not the photo) behind
  * both buttons, so their contrast holds on any scene and in both themes. Only transform and
  * opacity move, and nothing moves with prefers-reduced-motion.
+ * Spotlight (5 s still in the plan/rail zone, once per visit): both buttons get an ochre ring
+ * (the highlight, also with reduced motion), rise once and glow once; the next scroll removes it.
  */
 const CTA_CSS = `
 .home-cta{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1.2fr 1fr;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgb(10 14 16);border-top:1px solid rgb(255 255 255/.18);transition:transform .2s ease-out,opacity .2s ease-out;animation:home-cta-in .4s ease-out .3s backwards}
@@ -140,6 +197,13 @@ const CTA_CSS = `
 .home-cta-wide{display:inline-flex}
 .home-cta-narrow{display:none}
 }
+.home-cta[data-spotlight] .home-cta-btn{box-shadow:0 0 0 2px rgb(10 14 16),0 0 0 4px var(--warning)}
+@media (prefers-reduced-motion:no-preference){
+.home-cta[data-spotlight] .home-cta-btn{animation:home-cta-rise .45s ease-out backwards,home-cta-glow 1s ease-out .45s 1}
+.home-cta[data-spotlight] .home-cta-btn+.home-cta-btn{animation-delay:.08s,.53s}
+}
 @keyframes home-cta-in{from{opacity:0;transform:translate3d(0,16px,0)}}
+@keyframes home-cta-rise{from{opacity:.4;transform:translate3d(0,10px,0)}}
+@keyframes home-cta-glow{40%{box-shadow:0 0 0 2px rgb(10 14 16),0 0 0 4px var(--warning),0 0 18px 6px rgb(240 180 74/.45)}}
 @media (prefers-reduced-motion:reduce){.home-cta,.home-cta-btn,.home-cta-ic{animation:none;transition:none}.home-cta-btn:hover,.home-cta-btn:active,.home-cta-btn:hover .home-cta-ic{transform:none}}
 `;
