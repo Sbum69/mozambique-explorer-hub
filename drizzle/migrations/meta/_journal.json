@@ -484,6 +484,13 @@
       "when": 1795800000000,
       "tag": "0068_onboarding_guides",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1795900000000,
+      "tag": "0069_route_points_curated_only",
+      "breakpoints": true
     }
   ]
 }
