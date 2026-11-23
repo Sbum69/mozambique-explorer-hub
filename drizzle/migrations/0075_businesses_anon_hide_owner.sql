@@ -1,0 +1,50 @@
+-- 0075 — O visitante (anon) deixa de ler businesses.owner_id e rejection_reason (PROPOSTA, não aplicada).
+--
+-- PROBLEMA
+--   Depois da 0073, o anon tem SELECT por colunas em businesses, mas ainda lê owner_id (id da conta
+--   dona do negócio) e rejection_reason (motivo de uma recusa do admin). Só se veem os negócios
+--   aprovados (RLS), mas owner_id liga um negócio a uma conta e rejection_reason é uma nota interna.
+--
+-- QUEM USA ESTAS COLUNAS (pesquisa em src/, drizzle/migrations/, supabase/migrations/; não há edge functions)
+--   Frontend sem sessão (anon): NENHUM. As leituras anónimas de businesses usam colunas explícitas
+--   sem owner_id nem rejection_reason:
+--     - src/lib/local-businesses.ts (SELECT fixo; o comentário diz "owner_id is never selected")
+--     - src/lib/page-meta.ts (name, description, location)
+--     - src/lib/sitemap-entries.ts (id, updated_at; businesses!inner(status))
+--     - embeds businesses(name) / businesses!inner(name, status) / businesses(name, contact)
+--   Frontend com sessão (authenticated, não afetado):
+--     - owner_id: businesses.ts, bookings.ts, experiences.ts, rewards.ts (sempre .eq("owner_id", <o próprio>)),
+--       AdminBusinesses.tsx, AdminContent.tsx (admin), business-management.functions.ts,
+--       business-registration.functions.ts, dashboard.functions.ts, account.functions.ts
+--       (requireSupabaseAuth), platform-users.functions.ts (supabaseAdmin).
+--     - rejection_reason: businesses.ts (fetchOwnBusiness), BusinessManagement.tsx, AdminBusinesses.tsx.
+--   SQL:
+--     - Políticas que leem businesses.owner_id numa subconsulta: todas TO authenticated
+--       (businesses "Owners can …", content-photos 0051/0059). Nenhuma é avaliada pelo anon.
+--     - Funções que leem owner_id: owns_business, owns_experience, triggers de reservas e
+--       experiências, platform_impact_stats, admin_*, delete_my_account… — todas SECURITY DEFINER
+--       (correm como dono, não dependem dos grants do anon).
+--     - Vistas: só community_post_authors, que não lê businesses.
+--   Conclusão: nada parte. O guião de teste confirma-o na produção (casos C1–C5).
+--
+-- O QUE MUDA
+--   anon: perde SELECT nas colunas owner_id e rejection_reason. Fica com as outras 16 colunas da 0073.
+--
+-- O QUE NÃO MUDA
+--   authenticated, service_role, políticas RLS, triggers, funções e o frontend.
+--
+-- RISCO / MANUTENÇÃO
+--   - Um pedido anónimo novo que selecione ou filtre por owner_id/rejection_reason (incluindo '*')
+--     passa a dar "permission denied for table businesses".
+--   - Se uma política nova TO anon (ou TO public) ler businesses.owner_id numa subconsulta, falha
+--     para o anon: escrever essas verificações numa função SECURITY DEFINER.
+--
+-- COMO REVERTER (volta ao estado da 0073)
+--   GRANT SELECT (owner_id, rejection_reason) ON public.businesses TO anon;
+--
+-- ANTES DE APLICAR: o PASSO 0 de docs/security/testes/0075_businesses_anon_owner.sql (confirma que o
+-- anon não tem SELECT na tabela inteira, só por colunas, como deixou a 0073).
+--
+-- Teste: docs/security/testes/0075_businesses_anon_owner.sql
+
+REVOKE SELECT (owner_id, rejection_reason) ON public.businesses FROM anon;

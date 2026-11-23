@@ -43,6 +43,9 @@ restantes ficheiros de `supabase/tests/`).
 | `user_roles`                                                                                 | —                            | o próprio                       | só por RPC de admin                                                               |
 | `admin_broadcasts`, `exchange_rate_requests`, `game_quiz_questions`                          | —                            | —                               | só por RPC (sem políticas)                                                        |
 
+`businesses` (0073): o `anon` tem `SELECT` só por colunas; `decided_by` e `decided_at` ficam de fora.
+`owner_id` e `rejection_reason` continuam visíveis ao `anon` (proposta 0075, por aplicar).
+
 Vista `community_post_authors` (`security_invoker = on` desde a 0071, lê de
 `community_post_author_cards()`): expõe só `id`, `display_name` e `avatar_url` de quem tem uma
 publicação publicada (mais o próprio e o admin com `aal2`) — de propósito, para mostrar o autor.
@@ -56,6 +59,10 @@ publicação publicada (mais o próprio e o admin com `aal2`) — de propósito,
   `platform_impact_stats`, `news_like_counts`, `event_participant_counts`, `booked_people`.
 - Retirado ao `anon` na 0045: `business_decide_booking`, `can_edit_route`, `owns_experience`,
   `generate_route_code`.
+- Retirado a `anon` e `authenticated` na 0072: `commission_quote`, `is_founder` e
+  `is_internal_user` já não se chamam pela API (só `service_role`). Continuam a ser usadas por
+  dentro do trigger de comissões, de `admin_set_founder` e de `request_sponsored_placement`, que
+  são `SECURITY DEFINER`.
 - SEG-2 — 2FA (TOTP, Supabase Auth MFA): Definições → Segurança ativa/desativa; o pedido do código
   aparece em qualquer página quando a conta tem 2FA e a sessão é só com palavra-passe. A rota
   `/admin` exige `aal2` (`requireAdmin`); a 0050 faz o mesmo em `has_role(auth.uid(), 'admin')`
@@ -172,9 +179,19 @@ Aplicação:
 - Ficheiros de provas (`route-proofs`, `game-proofs`) de contas apagadas ficam no storage, sem dono
   que os possa ler (só o admin): limpeza periódica a decidir.
 
-- `zod` 3.25.76 (validadores das server functions): aviso alto de memória com coleções enormes; a
-  correção só existe no zod 4 (mudança major — migrar num bloco próprio). Exposição baixa: as
-  entradas são pequenas e quase todas exigem sessão.
+- `zod`: já na versão 4 (`^4.6.6`); o aviso alto de memória do zod 3 está resolvido.
+- `businesses`: `owner_id` e `rejection_reason` ainda são visíveis ao `anon` (proposta 0075, por
+  aprovar e aplicar).
+- Buckets `community-photos`, `route-proofs` e `game-proofs` sem migração que os crie (proposta 0076,
+  por confirmar contra a produção).
+- `has_role(<outro id>, …)`: qualquer conta autenticada pode saber o papel de outra conta. Alternativa
+  em `docs/security/QUALIDADE-V1.md` e na proposta `docs/security/propostas/has_role_self_only.sql`
+  (depois do lançamento).
+- Regra da 0074 (foto de jogo sem localização válida não conta) aplicada mas **desligada**
+  (`game_photo_location_required()` = false): decidir quando a ligar.
+- CSP com `script-src 'unsafe-inline'`: plano para nonces em `docs/security/CSP-INLINE.md`.
+- Quotas por IP nos endpoints anónimos com limite "no total": proposta em
+  `docs/security/QUOTAS-ANONIMOS.md`.
 - Ferramentas de desenvolvimento ainda com avisos (`undici`, `ws` 8.18.0, `sharp`, `esbuild`):
   não entram no bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
 - CSP obrigatória: verificada localmente nas 29 páginas da QA (`csp.ts`, 0 violações); confirmar a
