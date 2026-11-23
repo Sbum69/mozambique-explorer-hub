@@ -214,6 +214,11 @@ export function isUnlocked(g: CatalogGame, completed: Record<string, string>) {
 export function gameErrorText(msg: string, pt: boolean): string {
   const map: Record<string, [string, string]> = {
     proof_required: ["É preciso uma foto de prova.", "A proof photo is required."],
+    // Only when the server rule (0074, game_photo_location_required) is switched on.
+    location_required: [
+      "Esta prova precisa da tua localização (ativa o GPS e tenta de novo).",
+      "This proof needs your location (turn on GPS and try again).",
+    ],
     step_already_done: ["Este passo já foi registado.", "This step was already recorded."],
     already_completed: ["Este jogo já está concluído.", "This game is already completed."],
     game_locked: ["Este jogo ainda está bloqueado.", "This game is still locked."],

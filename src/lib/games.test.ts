@@ -4,6 +4,7 @@ import {
   BADGES,
   PROVINCE_REGIONS,
   badgeStatus,
+  gameErrorText,
   isUnlocked,
   passportKey,
   quizPassed,
@@ -63,5 +64,12 @@ describe("games rules", () => {
     expect(new Set(ALL_PROVINCES).size).toBe(11);
     const all = Object.fromEntries(ALL_PROVINCES.map((p) => [passportKey(p), "2026-11-12"]));
     expect(badgeStatus(badge("s12"), { ...empty, completed: all }).earned).toBe(true);
+  });
+});
+
+describe("gameErrorText", () => {
+  it("translates the location rule of photo proofs (0074) in PT and EN", () => {
+    expect(gameErrorText("location_required", true)).toMatch(/localização/);
+    expect(gameErrorText("location_required", false)).toMatch(/location/);
   });
 });

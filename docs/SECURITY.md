@@ -43,8 +43,9 @@ restantes ficheiros de `supabase/tests/`).
 | `user_roles`                                                                                 | —                            | o próprio                       | só por RPC de admin                                                               |
 | `admin_broadcasts`, `exchange_rate_requests`, `game_quiz_questions`                          | —                            | —                               | só por RPC (sem políticas)                                                        |
 
-Vista `community_post_authors` (sem `security_invoker`): expõe só `id`, `display_name` e
-`avatar_url` de quem publicou na comunidade — de propósito, para mostrar o autor.
+Vista `community_post_authors` (`security_invoker = on` desde a 0071, lê de
+`community_post_author_cards()`): expõe só `id`, `display_name` e `avatar_url` de quem tem uma
+publicação publicada (mais o próprio e o admin com `aal2`) — de propósito, para mostrar o autor.
 
 ## 3. Funções privilegiadas
 
