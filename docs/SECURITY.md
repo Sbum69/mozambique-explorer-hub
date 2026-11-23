@@ -44,7 +44,7 @@ restantes ficheiros de `supabase/tests/`).
 | `admin_broadcasts`, `exchange_rate_requests`, `game_quiz_questions`                          | —                            | —                               | só por RPC (sem políticas)                                                        |
 
 `businesses` (0073): o `anon` tem `SELECT` só por colunas; `decided_by` e `decided_at` ficam de fora.
-`owner_id` e `rejection_reason` continuam visíveis ao `anon` (proposta 0075, por aplicar).
+`owner_id` e `rejection_reason` também deixaram de ser visíveis ao `anon` (0075, aplicada em 23/11/2026).
 
 Vista `community_post_authors` (`security_invoker = on` desde a 0071, lê de
 `community_post_author_cards()`): expõe só `id`, `display_name` e `avatar_url` de quem tem uma
@@ -180,10 +180,10 @@ Aplicação:
   que os possa ler (só o admin): limpeza periódica a decidir.
 
 - `zod`: já na versão 4 (`^4.6.6`); o aviso alto de memória do zod 3 está resolvido.
-- `businesses`: `owner_id` e `rejection_reason` ainda são visíveis ao `anon` (proposta 0075, por
-  aprovar e aplicar).
-- Buckets `community-photos`, `route-proofs` e `game-proofs` sem migração que os crie (proposta 0076,
-  por confirmar contra a produção).
+- `businesses`: `owner_id` e `rejection_reason` deixaram de ser visíveis ao `anon` (0075, aplicada
+  em 23/11/2026).
+- Buckets `community-photos`, `route-proofs` e `game-proofs` descritos numa migração idempotente
+  (0076, aplicada em 23/11/2026).
 - `has_role(<outro id>, …)`: qualquer conta autenticada pode saber o papel de outra conta. Alternativa
   em `docs/security/QUALIDADE-V1.md` e na proposta `docs/security/propostas/has_role_self_only.sql`
   (depois do lançamento).
