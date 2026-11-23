@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { contentSecurityPolicy, securityHeaders } from "./security-headers";
+import {
+  contentSecurityPolicy,
+  createCspNonce,
+  reportOnlyContentSecurityPolicy,
+  securityHeaders,
+} from "./security-headers";
 
 const SUPA = "https://abcd.supabase.co";
 
@@ -31,6 +36,26 @@ describe("security headers", () => {
     expect(csp).not.toMatch(/osrm|open-meteo|api\.met\.no|arcgisonline/);
     expect(csp).toContain("object-src 'none'");
     expect(csp).toMatch(/frame-ancestors 'self' [^;]*lovable/);
+  });
+
+  it("keeps 'unsafe-inline' in the enforced policy (test mode does not change it)", () => {
+    expect(contentSecurityPolicy(SUPA)).toMatch(/script-src 'self' 'unsafe-inline'/);
+  });
+
+  it("test policy: inline scripts only with the nonce, other directives unchanged", () => {
+    const ro = reportOnlyContentSecurityPolicy(SUPA, "abc123==");
+    const scriptSrc = ro.split("; ").find((d) => d.startsWith("script-src "));
+    expect(scriptSrc).toBe("script-src 'self' 'nonce-abc123=='");
+    const rest = (p: string) => p.split("; ").filter((d) => !d.startsWith("script-src "));
+    expect(rest(ro)).toEqual(rest(contentSecurityPolicy(SUPA)));
+  });
+
+  it("creates a different base64 nonce of 16 bytes each time", () => {
+    const a = createCspNonce();
+    const b = createCspNonce();
+    expect(a).not.toBe(b);
+    expect(atob(a)).toHaveLength(16);
+    expect(a).toMatch(/^[A-Za-z0-9+/]+=*$/);
   });
 
   it("still builds a policy without a backend URL", () => {

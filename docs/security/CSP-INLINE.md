@@ -1,8 +1,9 @@
 # CSP: tirar `script-src 'unsafe-inline'` (plano)
 
-> Só plano: o código não muda neste bloco. Estado a 23/11/2026, `@tanstack/react-router` 1.170.41,
-> `@tanstack/react-start` 1.168.60. CSP atual em `src/lib/security-headers.ts`:
-> `script-src 'self' 'unsafe-inline'`.
+> Estado a 23/11/2026, `@tanstack/react-router` 1.170.41, `@tanstack/react-start` 1.168.60.
+> **Modo de teste ativo (passos 1, 2, 3 e 5 do plano):** cada página leva, além da CSP obrigatória
+> (`script-src 'self' 'unsafe-inline'`, sem mudanças), um `Content-Security-Policy-Report-Only` com
+> `script-src 'self' 'nonce-<valor do pedido>'`. Ver "Modo de teste" no fim.
 
 ## Scripts inline do site
 
@@ -53,3 +54,70 @@
   framer-motion precisam dele. Retirá-lo é outro trabalho e tem menos risco do que o dos scripts.
 - **Scripts de terceiros futuros** (CAPTCHA, análise) precisam do nonce ou de entrar na CSP, e entram
   em `CSP_SOURCES` e no `scripts/qa/csp.ts`.
+
+## Modo de teste (implementado)
+
+### Como funciona
+
+- `src/lib/csp-nonce-middleware.ts` (request middleware, o primeiro em `src/start.ts`):
+  - gera um nonce por pedido (`createCspNonce`, 16 bytes, base64);
+  - passa-o no contexto do pedido;
+  - nas respostas `text/html`, acrescenta `Content-Security-Policy-Report-Only` com
+    `reportOnlyContentSecurityPolicy()` (`src/lib/security-headers.ts`).
+  - As outras diretivas são as da CSP obrigatória (o teste unitário confirma).
+- `src/router.tsx`: `ssr: { nonce }` com o nonce do contexto (`getGlobalStartContext()`). O
+  TanStack põe-no em todos os `<script>` (tema, movimento, hidratação, módulos) e em
+  `<meta property="csp-nonce">`, de onde o router do browser o lê ao hidratar.
+- O passo 3 do plano resolveu-se assim: o cabeçalho é posto pelo middleware, que conhece o nonce,
+  e não pelo `headers()` da rota raiz.
+
+### Verificado localmente (wrangler dev, 23/11/2026)
+
+- 19 páginas de convidado, em tema claro e escuro (38 casos):
+  - cabeçalho Report-Only presente;
+  - 0 avisos de CSP na consola, 0 erros de hidratação, 0 erros de página;
+  - tema certo antes de hidratar.
+- Todos os `<script>` levam o nonce do pedido, e o nonce muda de pedido para pedido.
+- Controlo negativo: um script inline injetado sem nonce gera o aviso `[Report Only]` e continua a
+  correr (a CSP obrigatória ainda o permite).
+- **Por fazer:** as páginas com sessão (turista, negócio, admin). Correr `bun scripts/qa/csp.ts`
+  com as contas de teste (lê o `.env.test.local`).
+
+### Como verificar em produção
+
+O cabeçalho não tem `report-uri`/`report-to`: as violações aparecem **só na consola do browser**
+(não há endpoint que as receba).
+
+1. Confirmar o cabeçalho:
+   `curl -sI https://exploreekaya.com/home | grep -i content-security-policy`
+   - Têm de aparecer as duas linhas.
+   - O `nonce-…` tem de mudar entre dois pedidos. Se se repetir, o HTML está em cache: parar.
+2. No computador, abrir F12 → Console e percorrer:
+   - as páginas de `docs/LAUNCH.md` §9, passo 7;
+   - entrar e sair;
+   - uma reserva de teste;
+   - o mapa;
+   - o painel do negócio;
+   - o admin com 2FA.
+3. **O que procurar:** mensagens que começam por `[Report Only] Refused to execute inline script` ou
+   `Executing inline script violates the following Content Security Policy directive 'script-src 'self' 'nonce-…''`.
+   - **0 mensagens** = pronto para o modo ativo.
+   - Uma mensagem mostra o script (o `sha256-…` e a linha). Se vier da Lovable ou da Cloudflare
+     (Rocket Loader, Email Obfuscation, Web Analytics), desligar essa função no painel ou decidir
+     se entra na política.
+4. Repetir no preview da Lovable (dentro do editor) e em `bun scripts/qa/csp.ts` com
+   `QA_BASE=https://exploreekaya.com`. O script já conta as mensagens Report-Only como violações.
+
+### Como passar a modo ativo
+
+Depois de pelo menos uma semana com 0 mensagens em produção:
+
+1. Em `securityHeaders()`, a CSP obrigatória passa a receber o nonce. É preciso movê-la para o
+   middleware (o único sítio que conhece o nonce), com `script-src 'self' 'nonce-…'`. Retirar o
+   `Content-Security-Policy` do `headers()` da rota raiz para não haver duas políticas
+   obrigatórias, porque o browser aplica as duas e a mais restrita ganha.
+2. Retirar o `Content-Security-Policy-Report-Only` (ou mantê-lo uma semana com a próxima política
+   em teste).
+3. Atualizar `security-headers.test.ts`: a obrigatória sem `'unsafe-inline'` em `script-src`.
+4. Correr `bun scripts/qa/csp.ts`, `scripts/qa/hydration.ts` e o `prelaunch.ts`.
+5. **Para voltar atrás**: repor `'unsafe-inline'` em `script-src` (uma linha).

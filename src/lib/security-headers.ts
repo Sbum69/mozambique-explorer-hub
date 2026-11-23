@@ -18,7 +18,11 @@ export const CSP_SOURCES = {
   lovable: ["https://lovable.dev", "https://*.lovable.dev", "https://*.lovable.app"],
 };
 
-export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
+export function contentSecurityPolicy(
+  supabaseUrl: string | undefined,
+  // Hydration data and the theme script are inline.
+  scriptSrc: string[] = ["'self'", "'unsafe-inline'"],
+): string {
   let supabase: string[] = [];
   try {
     if (supabaseUrl) {
@@ -31,8 +35,7 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
   const s = CSP_SOURCES;
   const directives: [string, string[]][] = [
     ["default-src", ["'self'"]],
-    // Hydration data and the theme script are inline.
-    ["script-src", ["'self'", "'unsafe-inline'"]],
+    ["script-src", scriptSrc],
     // Fonts are self-hosted (public/fonts): no Google Fonts origin.
     ["style-src", ["'self'", "'unsafe-inline'"]],
     ["font-src", ["'self'", "data:"]],
@@ -45,6 +48,25 @@ export function contentSecurityPolicy(supabaseUrl: string | undefined): string {
     ["object-src", ["'none'"]],
   ];
   return directives.map(([name, values]) => `${name} ${values.join(" ")}`).join("; ");
+}
+
+/** A fresh nonce for one HTML response: 16 random bytes, base64. */
+export function createCspNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes));
+}
+
+/**
+ * Test policy (docs/security/CSP-INLINE.md), sent as Content-Security-Policy-Report-Only next to
+ * the enforced one: the same directives, but inline scripts only with this response's nonce.
+ * The browser reports what it would block and blocks nothing.
+ */
+export function reportOnlyContentSecurityPolicy(
+  supabaseUrl: string | undefined,
+  nonce: string,
+): string {
+  return contentSecurityPolicy(supabaseUrl, ["'self'", `'nonce-${nonce}'`]);
 }
 
 export function securityHeaders(supabaseUrl: string | undefined): Record<string, string> {

@@ -1,0 +1,48 @@
+/** RESET_TXT (see src/lib/page-texts.ts). Both languages must have the same keys. */
+
+export const RESET_TXT = {
+  pt: {
+    title: "Nova palavra-passe",
+    subtitle: "Escolhe uma palavra-passe nova para a tua conta.",
+    password: "Nova palavra-passe",
+    confirm: "Confirmar a nova palavra-passe",
+    show: "Mostrar palavra-passe",
+    hide: "Esconder palavra-passe",
+    save: "Guardar palavra-passe",
+    saving: "A guardar…",
+    checking: "A verificar a ligação…",
+    done: "Palavra-passe alterada. A abrir a tua conta…",
+    expiredTitle: "Ligação expirada ou já usada",
+    expired: "Pede uma nova ligação para definir a palavra-passe.",
+    requestNew: "Pedir nova ligação",
+    errShort: "Mínimo 8 caracteres.",
+    errMismatch: "As palavras-passe não coincidem.",
+    errWeak: "Esta palavra-passe é fácil de adivinhar ou aparece em fugas de dados. Escolhe outra.",
+    errSame: "A nova palavra-passe tem de ser diferente da anterior.",
+    errNetwork: "Sem ligação. Verifica a internet e tenta novamente.",
+    errGeneric: "Não foi possível guardar. Tenta novamente.",
+  },
+  en: {
+    title: "New password",
+    subtitle: "Choose a new password for your account.",
+    password: "New password",
+    confirm: "Confirm the new password",
+    show: "Show password",
+    hide: "Hide password",
+    save: "Save password",
+    saving: "Saving…",
+    checking: "Checking the link…",
+    done: "Password changed. Opening your account…",
+    expiredTitle: "Link expired or already used",
+    expired: "Request a new link to set your password.",
+    requestNew: "Request a new link",
+    errShort: "At least 8 characters.",
+    errMismatch: "The passwords don't match.",
+    errWeak: "This password is easy to guess or appears in data leaks. Choose another.",
+    errSame: "The new password must be different from the old one.",
+    errNetwork: "No connection. Check the internet and try again.",
+    errGeneric: "Could not save. Please try again.",
+  },
+} as const;
+
+/** UX-1 — user menu, /settings and the "in preparation" legal pages. */

@@ -1,6 +1,20 @@
 import { createRouter, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
+import { getGlobalStartContext } from "@tanstack/react-start";
 import { routeTree } from "./routeTree.gen";
 import { QueryClient } from "@tanstack/react-query";
+
+/**
+ * This request's CSP nonce (src/lib/csp-nonce-middleware.ts), on the server only. In the browser
+ * the router reads it from <meta property="csp-nonce"> when it hydrates.
+ */
+function requestNonce(): string | undefined {
+  try {
+    const nonce = (getGlobalStartContext() as { nonce?: unknown } | undefined)?.nonce;
+    return typeof nonce === "string" ? nonce : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
@@ -69,6 +83,7 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
+    ssr: { nonce: requestNonce() },
   });
 
   return router;
