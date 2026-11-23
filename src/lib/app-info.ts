@@ -10,7 +10,7 @@ export const CANONICAL_HOST = "exploreekaya.com";
  * Terms and the Privacy Policy: switching it changes their text, so bump LEGAL_VERSIONS and
  * current_legal_versions() in the same change.
  */
-export const DOMAIN_EMAIL_LIVE = false;
+export const DOMAIN_EMAIL_LIVE = true;
 
 /** Support contact published in the app and in the legal texts. */
 export const SUPPORT_EMAIL = DOMAIN_EMAIL_LIVE
