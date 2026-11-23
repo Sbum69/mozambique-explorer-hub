@@ -74,7 +74,7 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [ ] Bundle inicial **~250 KB gz**: separar os dicionários de texto não reduziu (o empacotador volta a juntá-los); rever a divisão em blocos (`manualChunks`) e o que o root importa.
 
 **Prioridade 2 — segurança (auditoria de 05/11/2026)**
-- [ ] `zod` 3 → 4 (aviso alto: memória com coleções enormes; hoje o servidor só valida `{ lang }`).
+- [x] `zod` 3 → 4 (aviso alto: memória com coleções enormes): já na versão 4 (`^4.6.6` no `package.json`).
 - [ ] CSP com nonces (ou hashes) nos scripts inline, para retirar `script-src 'unsafe-inline'`.
 - [ ] Atualizar as ferramentas de desenvolvimento com avisos (`undici`, `ws`, `esbuild`, `minimatch`, `sharp`) quando o wrangler e o plugin da Lovable subirem.
 - [ ] `admin_set_user_role` não escreve no `admin_audit`: registar as mudanças de papel na própria RPC.
