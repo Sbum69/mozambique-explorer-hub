@@ -526,6 +526,20 @@
       "when": 1796400000000,
       "tag": "0074_game_photo_location_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1796500000000,
+      "tag": "0075_businesses_anon_hide_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1796600000000,
+      "tag": "0076_storage_buckets_baseline",
+      "breakpoints": true
     }
   ]
 }
