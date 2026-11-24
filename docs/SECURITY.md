@@ -203,6 +203,11 @@ Aplicação:
   o Publish**: com só um dos dois feito, ninguém consegue aceitar os textos.
 - Mudanças de papel no `admin_audit`: já feito na 0060 (`supabase/tests/adm-3_role_audit.sql`).
   Não há proposta 0078.
+- Propostas por aplicar do `feat/suporte-recompensas`, cada uma com o guião em `docs/security/testes/`:
+  - **0080**: desativar as contas de teste no dia D (banir no Auth e suspender os negócios de QA), sem apagar nada. Não usar o `launch-day.sql`, que apaga;
+  - **0081**: o preço 0 já é aceite; a proposta tira os pontos de reserva concluída a 0 MZN, que hoje permitem juntar pontos sem custo;
+  - **0082**: destino da Cidade de Maputo, só se faltar (a 0052 já o resolveu);
+  - **0083**: custo e stock das recompensas limitados na BD como no formulário (1–100 000).
 - Ferramentas de desenvolvimento: `undici` e `ws` atualizados por `overrides` (avisos do `bun audit`
   de 37 para 6). Ficam `esbuild`, `minimatch` e `sharp`, que exigem versão major. Não entram no
   bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
