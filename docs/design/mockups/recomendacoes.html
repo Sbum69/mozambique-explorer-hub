@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Recomendações EKAYA</title>
+<link rel="stylesheet" href="mockup.css">
+<style>
+/* Recommendations: the trip is one editable sentence (the same as on the Home); every suggestion
+   says why it matches. No choice -> "Descobrir" (bottom block shows that state). */
+header.bar { background: var(--card); border-bottom: 1px solid var(--border); }
+.brief { margin-top: 36px; }
+.brief h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.35; font-weight: 700; max-width: 22ch; }
+.brief .pick { color: var(--primary); border-bottom: 3px solid var(--primary); white-space: nowrap; }
+.brief .edit { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.cols { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; margin-top: 40px; }
+h2 { font-size: 24px; }
+.item { display: grid; grid-template-columns: 160px 1fr; gap: 16px; padding: 12px; margin-top: 12px; }
+.item img { width: 160px; height: 120px; object-fit: cover; border-radius: 6px; }
+.item h3 { font-size: 20px; }
+.why { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.side .card { padding: 18px; }
+.discover { margin-top: 56px; border: 1px dashed var(--input); border-radius: 10px; padding: 20px; }
+@media (max-width: 640px) {
+  .cols { grid-template-columns: 1fr; }
+  .item { grid-template-columns: 96px 1fr; }
+  .item img { width: 96px; height: 96px; }
+}
+</style>
+</head>
+<body>
+<header class="bar"><div class="wrap top"><a class="btn" style="padding:0" href="home.html">← Voltar</a><img class="logo" src="../../../public/logo.svg" alt="EKAYA"><span class="chip hide-sm">Painel</span></div></header>
+
+<main class="wrap">
+  <section class="brief">
+    <h1>Vou a <span class="pick">Ilha de Moçambique</span> durante <span class="pick">3 dias</span> e gosto de <span class="pick">cultura</span> e <span class="pick">praia</span>.</h1>
+    <div class="edit"><span class="chip on">Cultura e história ×</span><span class="chip on">Praias e natureza ×</span><span class="chip">+ Gastronomia</span><span class="chip">+ Vida selvagem</span></div>
+  </section>
+
+  <div class="cols">
+    <section>
+      <h2>Roteiros</h2>
+      <article class="card item"><img src="../../../src/assets/dest-ilha-thumb.webp" alt="">
+        <div><h3>Ilha de Moçambique: Património UNESCO</h3><div class="muted">3 dias · Nampula</div>
+          <div class="why"><span class="tag ok">Mesma província</span><span class="tag">Cultura</span><span class="tag">Praia</span></div></div></article>
+      <article class="card item"><img src="../../../src/assets/dest-ilha-thumb.webp" alt="">
+        <div><h3>Nacala e Baía de Memba</h3><div class="muted">3 dias · Nampula</div>
+          <div class="why"><span class="tag ok">Mesma província</span><span class="tag">Praia</span></div></div></article>
+      <article class="card item"><img src="../../../src/assets/dest-ilha-thumb.webp" alt="">
+        <div><h3>Nampula: Cultura e Museus</h3><div class="muted">2 dias · Nampula</div>
+          <div class="why"><span class="tag ok">Mesma província</span><span class="tag">Cultura</span></div></div></article>
+    </section>
+    <aside class="side">
+      <h2>Atividades</h2>
+      <div class="card" style="margin-top:12px"><strong>Sem atividades com reserva nesta província por agora.</strong><p class="muted" style="margin:6px 0 0">Mostramos só o que existe. <a href="#">Ver atividades noutras províncias</a></p></div>
+      <h2 style="margin-top:28px">Guardar</h2>
+      <div class="card" style="margin-top:12px"><p style="margin:0">Cria conta para guardar esta viagem e receber sugestões no teu painel.</p><a class="btn btn-primary" style="margin-top:12px" href="#">Criar conta</a></div>
+    </aside>
+  </div>
+
+  <section class="discover">
+    <h2>Sem escolhas: Descobrir</h2>
+    <p class="muted" style="margin:6px 0 0">Quando ainda não disseste nada, a página mostra roteiros e destinos gerais com o título "Descobrir" e nunca "para ti".</p>
+  </section>
+</main>
+
+<footer class="brand"><div class="wrap"><img src="../../../public/logo-dark.svg" alt="EKAYA" style="height:28px"><span>Turismo comunitário em Moçambique.</span></div></footer>
+</body>
+</html>
