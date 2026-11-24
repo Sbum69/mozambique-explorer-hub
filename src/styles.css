@@ -1,6 +1,9 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+/* Look variants (tokens only), active with <html data-variant="a|b"> (src/lib/theme-variant.ts). */
+@import "./themes/variant-a.css";
+@import "./themes/variant-b.css";
 
 @custom-variant dark (&:is(.dark *));
 

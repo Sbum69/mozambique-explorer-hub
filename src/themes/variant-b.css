@@ -1,0 +1,96 @@
+/*
+ * Variant B — "Limpo": cleaner and more modern (white surfaces, neutral greys, the Índico teal as
+ * the only action colour, system fonts, smaller radius, a light shadow on cards).
+ * Only tokens. Active when <html data-variant="b"> (src/lib/theme-variant.ts). Contrast AA of the
+ * main pairs is checked by src/lib/theme-variants.test.ts.
+ */
+:root[data-variant="b"] {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius: 0.5rem;
+  --background: #ffffff;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #0b6b77;
+  --primary-foreground: #ffffff;
+  --primary-glow: #08525a;
+  --secondary: #374151;
+  --secondary-foreground: #ffffff;
+  --muted: #f3f5f7;
+  --muted-foreground: #4b5563;
+  --accent: #eef6f7;
+  --accent-foreground: #0b4650;
+  --success: #2c6a43;
+  --success-foreground: #ffffff;
+  --warning: #e2a12b;
+  --warning-foreground: #111827;
+  --destructive: #b3372b;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #878f9a;
+  --ring: #0b6b77;
+  --shadow-soft: 0 1px 2px rgb(17 24 39 / 0.06), 0 0 0 1px var(--border);
+  --shadow-elegant: 0 1px 3px rgb(17 24 39 / 0.08), 0 0 0 1px var(--input);
+  --shadow-overlay: 0 16px 40px -12px rgb(17 24 39 / 0.25);
+  --chart-1: #0b6b77;
+  --chart-2: #e2a12b;
+  --chart-3: #2c6a43;
+  --chart-4: #b3372b;
+  --chart-5: #4b5563;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #0b6b77;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef6f7;
+  --sidebar-accent-foreground: #0b4650;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #0b6b77;
+}
+
+/* Also inside elements forced dark on a light page (e.g. the home action bar, HomeCta). */
+:root[data-variant="b"].dark,
+:root[data-variant="b"] .dark {
+  --background: #0b0f14;
+  --foreground: #e5e7eb;
+  --card: #111827;
+  --card-foreground: #e5e7eb;
+  --popover: #111827;
+  --popover-foreground: #e5e7eb;
+  --primary: #5ec4d2;
+  --primary-foreground: #06222a;
+  --primary-glow: #7fd2dd;
+  --secondary: #d1d5db;
+  --secondary-foreground: #111827;
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --accent: #13303a;
+  --accent-foreground: #e5e7eb;
+  --success: #6cc08a;
+  --success-foreground: #062326;
+  --warning: #f0b44a;
+  --warning-foreground: #111827;
+  --destructive: #f87171;
+  --destructive-foreground: #111827;
+  --border: #263040;
+  --input: #6b7280;
+  --ring: #5ec4d2;
+  --shadow-soft: 0 0 0 1px var(--border);
+  --shadow-elegant: 0 0 0 1px var(--input);
+  --shadow-overlay: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --chart-1: #5ec4d2;
+  --chart-2: #f0b44a;
+  --chart-3: #6cc08a;
+  --chart-4: #f87171;
+  --chart-5: #9ca3af;
+  --sidebar: #111827;
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #5ec4d2;
+  --sidebar-primary-foreground: #06222a;
+  --sidebar-accent: #13303a;
+  --sidebar-accent-foreground: #e5e7eb;
+  --sidebar-border: #263040;
+  --sidebar-ring: #5ec4d2;
+}

@@ -21,6 +21,7 @@ import { AssistantLauncher } from "@/components/AssistantLauncher";
 import { StorageNoticeGate } from "@/components/StorageNoticeGate";
 import { installErrorLogger } from "@/lib/launch";
 import { CANONICAL_ORIGIN } from "@/lib/app-info";
+import { variantAttribute } from "@/lib/theme-variant";
 
 const OG_IMAGE = `${CANONICAL_ORIGIN}/og-image.png`;
 
@@ -108,7 +109,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     // The theme script sets class/style on <html> before React hydrates.
-    <html lang={readLangCookie() ?? DEFAULT_LANG} suppressHydrationWarning>
+    <html
+      lang={readLangCookie() ?? DEFAULT_LANG}
+      data-variant={variantAttribute()}
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>

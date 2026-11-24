@@ -1,0 +1,92 @@
+/*
+ * Variant A — "Terra e Índico": warmer and more cultural (earth, sea, ochre).
+ * Only tokens. Active when <html data-variant="a"> (src/lib/theme-variant.ts). Contrast AA of the
+ * main pairs is checked by src/lib/theme-variants.test.ts.
+ * Action colour: terracotta (earth); sea blue as secondary; ochre for highlights.
+ */
+:root[data-variant="a"] {
+  --radius: 0.75rem;
+  --background: #f6f0e6;
+  --foreground: #2b1d12;
+  --card: #fffbf5;
+  --card-foreground: #2b1d12;
+  --popover: #fffbf5;
+  --popover-foreground: #2b1d12;
+  --primary: #9c3f1c;
+  --primary-foreground: #ffffff;
+  --primary-glow: #7f3215;
+  --secondary: #0e5a6b;
+  --secondary-foreground: #ffffff;
+  --muted: #ede3d3;
+  --muted-foreground: #6b5442;
+  --accent: #f2e2c4;
+  --accent-foreground: #5c3a0c;
+  --success: #2f6b3a;
+  --success-foreground: #ffffff;
+  --warning: #d4951f;
+  --warning-foreground: #2b1d12;
+  --destructive: #a32a22;
+  --destructive-foreground: #ffffff;
+  --border: #e2d4bf;
+  --input: #8e7660;
+  --ring: #9c3f1c;
+  --shadow-soft: 0 0 0 1px var(--border);
+  --shadow-elegant: 0 0 0 1px var(--input);
+  --shadow-overlay: 0 12px 32px -8px rgb(43 29 18 / 0.25);
+  --chart-1: #9c3f1c;
+  --chart-2: #d4951f;
+  --chart-3: #0e5a6b;
+  --chart-4: #2f6b3a;
+  --chart-5: #6b5442;
+  --sidebar: #fffbf5;
+  --sidebar-foreground: #2b1d12;
+  --sidebar-primary: #9c3f1c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f2e2c4;
+  --sidebar-accent-foreground: #5c3a0c;
+  --sidebar-border: #e2d4bf;
+  --sidebar-ring: #9c3f1c;
+}
+
+/* Also inside elements forced dark on a light page (e.g. the home action bar, HomeCta). */
+:root[data-variant="a"].dark,
+:root[data-variant="a"] .dark {
+  --background: #17110c;
+  --foreground: #f3e9dc;
+  --card: #211812;
+  --card-foreground: #f3e9dc;
+  --popover: #211812;
+  --popover-foreground: #f3e9dc;
+  --primary: #e48a5c;
+  --primary-foreground: #24110a;
+  --primary-glow: #eda27c;
+  --secondary: #5fb7c9;
+  --secondary-foreground: #0b1d22;
+  --muted: #2e231a;
+  --muted-foreground: #c3ad97;
+  --accent: #3a2a1a;
+  --accent-foreground: #f3e9dc;
+  --success: #7cc68b;
+  --success-foreground: #10200f;
+  --warning: #f0b44a;
+  --warning-foreground: #24110a;
+  --destructive: #f08070;
+  --destructive-foreground: #24110a;
+  --border: #3a2d22;
+  --input: #7d6a58;
+  --ring: #e48a5c;
+  --shadow-overlay: 0 12px 32px -8px rgb(0 0 0 / 0.6);
+  --chart-1: #e48a5c;
+  --chart-2: #f0b44a;
+  --chart-3: #5fb7c9;
+  --chart-4: #7cc68b;
+  --chart-5: #c3ad97;
+  --sidebar: #211812;
+  --sidebar-foreground: #f3e9dc;
+  --sidebar-primary: #e48a5c;
+  --sidebar-primary-foreground: #24110a;
+  --sidebar-accent: #3a2a1a;
+  --sidebar-accent-foreground: #f3e9dc;
+  --sidebar-border: #3a2d22;
+  --sidebar-ring: #e48a5c;
+}
