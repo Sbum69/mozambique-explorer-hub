@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { REWARD_OFFER_TXT } from "@/lib/texts/reward-offer";
 
 /**
  * First-entry guide of the panels. Each step points at a real element of the page
@@ -83,12 +84,10 @@ export const GUIDE_STEPS: Record<GuideRole, GuideStep[]> = {
       },
     },
     {
+      // Optional step (the guide can be skipped): same text as after the registration.
       target: "biz-rewards",
-      title: { pt: "Cria uma recompensa", en: "Create a reward" },
-      body: {
-        pt: "Oferece algo em troca de pontos e traz viajantes ao teu negócio.",
-        en: "Offer something in exchange for points and bring travellers to your business.",
-      },
+      title: { pt: REWARD_OFFER_TXT.pt.title, en: REWARD_OFFER_TXT.en.title },
+      body: { pt: REWARD_OFFER_TXT.pt.body, en: REWARD_OFFER_TXT.en.body },
     },
   ],
 };

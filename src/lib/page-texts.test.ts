@@ -40,6 +40,7 @@ describe("ADM-2B page texts exist in PT and EN", () => {
         "PHOTOS_TXT",
         "PRICING_TXT",
         "RESET_TXT",
+        "REWARD_OFFER_TXT",
         "SETTINGS_TXT",
         "SIGNUP_TXT",
         "SPONSORED_TXT",

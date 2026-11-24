@@ -15,6 +15,7 @@ import {
   Shield,
   LogIn,
   UserPlus,
+  Gift,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,6 +29,9 @@ import { registerMyBusiness } from "@/lib/business-registration.functions";
 import type { BusinessRegistrationError } from "@/lib/business-registration";
 import { useBusinessCategories, useProvinces } from "@/hooks/useProvinces";
 import { useBackTarget } from "@/lib/nav";
+import { Button } from "@/components/ui/button";
+import { REWARD_OFFER_TXT } from "@/lib/page-texts";
+import { NEW_REWARD_SEARCH } from "@/lib/reward-offer";
 
 export const Route = createFileRoute("/business-register")({
   head: () => ({
@@ -158,6 +162,8 @@ function BusinessRegisterPage() {
   const [businessType, setBusinessType] = useState<"small" | "large" | null>(null);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const offer = REWARD_OFFER_TXT[lang];
+  const [showRewardOffer, setShowRewardOffer] = useState(true);
 
   // form state
   const [businessName, setBusinessName] = useState("");
@@ -228,6 +234,37 @@ function BusinessRegisterPage() {
               <p className="text-sm text-accent-foreground mt-1">{t.pendingBody}</p>
             </div>
           </div>
+
+          {/* Optional, can be ignored: offer a product as a reward (created after approval). */}
+          {showRewardOffer && (
+            <section
+              aria-labelledby="reward-offer-title"
+              className="mt-4 text-left rounded-[10px] border border-border bg-card p-4"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {offer.optional}
+              </p>
+              <h2 id="reward-offer-title" className="mt-1 font-semibold flex items-center gap-2">
+                <Gift className="size-4 text-primary shrink-0" aria-hidden="true" />
+                {offer.title}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">{offer.body}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {offer.delivery} {offer.afterApproval}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => navigate({ to: "/business-dashboard", search: NEW_REWARD_SEARCH })}
+                >
+                  {offer.create}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setShowRewardOffer(false)}>
+                  {offer.later}
+                </Button>
+              </div>
+            </section>
+          )}
 
           <button
             onClick={() => navigate({ to: "/business-dashboard", search: { status: "all" } })}

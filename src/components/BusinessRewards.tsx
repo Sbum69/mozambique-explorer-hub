@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Gift, Pencil, Plus, Ticket } from "lucide-react";
 import { toast } from "sonner";
@@ -28,6 +28,8 @@ import {
   type BusinessReward,
   type VoucherCheck,
 } from "@/lib/rewards";
+import { REWARD_OFFER_TXT } from "@/lib/page-texts";
+import { newRewardAction } from "@/lib/reward-offer";
 
 const TXT = {
   pt: {
@@ -142,7 +144,14 @@ const emptyForm = (businessId: string): FormState => ({
   active: true,
 });
 
-export function BusinessRewards() {
+export function BusinessRewards({
+  openNew,
+  onOpenNewHandled,
+}: {
+  /** "new" (from /business-dashboard?reward=new) opens the "New reward" form once. */
+  openNew?: "new";
+  onOpenNewHandled?: () => void;
+} = {}) {
   const { authUser } = useAuth();
   const { lang } = useLang();
   const t = TXT[lang];
@@ -162,6 +171,21 @@ export function BusinessRewards() {
 
   const approved = (q.data?.businesses ?? []).filter((b) => b.status === "approved");
   const refresh = () => qc.invalidateQueries({ queryKey: ["owner-rewards", uid] });
+
+  // Direct link from the optional reward step: open the form (approved business) or show the
+  // section with its "needs approval" message. Handled once, then the link is cleared.
+  const firstApprovedId = approved[0]?.id;
+  const approvedCount = approved.length;
+  const handledNew = useRef(false);
+  useEffect(() => {
+    if (!q.isSuccess || handledNew.current) return;
+    const action = newRewardAction(openNew, approvedCount);
+    if (action === "none") return;
+    handledNew.current = true;
+    document.getElementById("business-rewards")?.scrollIntoView({ block: "start" });
+    if (action === "open" && firstApprovedId) setForm(emptyForm(firstApprovedId));
+    onOpenNewHandled?.();
+  }, [q.isSuccess, openNew, approvedCount, firstApprovedId, onOpenNewHandled]);
 
   const openEdit = (r: BusinessReward) =>
     setForm({
@@ -238,7 +262,7 @@ export function BusinessRewards() {
     new Date(d).toLocaleString(lang === "pt" ? "pt-PT" : "en-GB", { timeZone: "Africa/Maputo" });
 
   return (
-    <section className="space-y-6">
+    <section id="business-rewards" className="space-y-6 scroll-mt-24">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3" data-guide="biz-rewards">
           <div>
@@ -359,7 +383,9 @@ export function BusinessRewards() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{form?.id ? t.formTitleEdit : t.formTitleNew}</DialogTitle>
-            <DialogDescription>{t.formDesc}</DialogDescription>
+            <DialogDescription>
+              {t.formDesc} {REWARD_OFFER_TXT[lang].delivery}
+            </DialogDescription>
           </DialogHeader>
           {form && (
             <form onSubmit={submit} className="grid gap-3">

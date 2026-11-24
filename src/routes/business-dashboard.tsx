@@ -30,6 +30,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getOwnerBookings } from "@/lib/dashboard.functions";
 import { bookingMetrics, bookingHasStarted } from "@/lib/business-dashboard";
 import { BusinessRewards } from "@/components/BusinessRewards";
+import { parseRewardParam } from "@/lib/reward-offer";
 import { requireRole } from "@/lib/auth";
 import { useGuide } from "@/hooks/useGuide";
 import { GUIDE_STEPS } from "@/lib/guide";
@@ -39,11 +40,16 @@ const OnboardingGuide = lazy(() => import("@/components/OnboardingGuide"));
 
 export const Route = createFileRoute("/business-dashboard")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({
-    status: STATUS_FILTERS.includes(search.status as BookingStatus | "all")
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { status: BookingStatus | "all"; reward?: "new" } => {
+    const status = STATUS_FILTERS.includes(search.status as BookingStatus | "all")
       ? (search.status as BookingStatus | "all")
-      : ("all" as const),
-  }),
+      : ("all" as const);
+    // ?reward=new opens the "New reward" form (link from the optional reward step).
+    const reward = parseRewardParam(search.reward);
+    return reward ? { status, reward } : { status };
+  },
   beforeLoad: () => requireRole(["business_small", "business_large"]),
   head: () => ({
     meta: [
@@ -120,7 +126,7 @@ function BusinessDashboardPage() {
     await refetch();
   };
   const [busy, setBusy] = useState<string | null>(null);
-  const { status: filter } = Route.useSearch();
+  const { status: filter, reward: rewardParam } = Route.useSearch();
   const setFilter = (status: BookingStatus | "all") =>
     void navigate({ to: "/business-dashboard", search: { status } });
   const [detail, setDetail] = useState<Booking | null>(null);
@@ -446,7 +452,16 @@ function BusinessDashboardPage() {
             </ul>
           )}
         </section>
-        <BusinessRewards />
+        <BusinessRewards
+          openNew={rewardParam}
+          onOpenNewHandled={() =>
+            void navigate({
+              to: "/business-dashboard",
+              search: { status: filter },
+              replace: true,
+            })
+          }
+        />
         {guide.open && (
           <Suspense fallback={null}>
             <OnboardingGuide steps={GUIDE_STEPS.business} lang={lang} onClose={guide.close} />
