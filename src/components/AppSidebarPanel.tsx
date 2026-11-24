@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 
 import { BrandLogo } from "@/components/BrandLogo";
 import { LegalFooterLinks } from "@/components/LegalFooterLinks";
+import { SupportSection } from "@/components/SupportSection";
 import {
   X,
   Home,
@@ -275,6 +276,9 @@ export function AppSidebarPanel({ close }: { close: () => void }) {
             </div>
           </div>
         ))}
+
+        {/* Support: for everyone (guests too), on desktop and phone (same menu). */}
+        <SupportSection lang={lang} onNavigate={close} />
 
         {/* Premium card */}
         {SHOW_PLANS && user && user.role !== "guest" && (

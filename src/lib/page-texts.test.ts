@@ -44,6 +44,7 @@ describe("ADM-2B page texts exist in PT and EN", () => {
         "SIGNUP_TXT",
         "SPONSORED_TXT",
         "STORAGE_NOTICE_TXT",
+        "SUPPORT_TXT",
         "TREASURE_TXT",
       ].sort(),
     );

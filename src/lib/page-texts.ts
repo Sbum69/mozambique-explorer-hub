@@ -17,3 +17,4 @@ export { FOR_BUSINESS_TXT } from "./texts/for-business";
 export { ASSISTANT_TXT } from "./texts/assistant";
 export { LAUNCH_TXT } from "./texts/launch";
 export { HOME_CTA_TXT } from "./texts/home-cta";
+export { SUPPORT_TXT } from "./texts/support";
