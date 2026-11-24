@@ -1,6 +1,8 @@
 # Lançamento do EKAYA — guia passo a passo
 
 Para quem faz o lançamento (dono do projeto). Cada passo diz **onde** se faz e **como confirmar**.
+A ordem do dia D, com o responsável de cada passo, está em `docs/OPERACAO.md` (checklist única);
+este guia tem o passo a passo.
 Valores que dependem de fornecedores estão entre `<…>`; os passos marcados **[CONFIRMAR]** devem
 ser conferidos no ecrã do fornecedor no dia (os menus mudam).
 
@@ -145,6 +147,10 @@ pode mudar):
 
 ## 4. Email: receber em apoio@exploreekaya.com
 
+> **Feito a 23/11/2026:** `apoio@exploreekaya.com` recebe mensagens (Cloudflare Email Routing para o
+> Gmail da equipa). `DOMAIN_EMAIL_LIVE = true` e versões legais 2026-11-23 no branch
+> `feat/pre-lancamento`. Falta a migração 0077 (proposta), aplicada junto com o Publish.
+
 **Opção recomendada: Cloudflare Email Routing (grátis).** Reencaminha `apoio@exploreekaya.com` para
 o teu Gmail. Exige que o DNS do domínio esteja no Cloudflare (plano grátis). Fonte:
 <https://developers.cloudflare.com/email-routing/>.
@@ -203,6 +209,8 @@ Se o NUIT já existir, preencher `LEGAL_ENTITY.nuit` e `incorporated` em `app-in
 **Dia D**
 
 1. Ensaiar `supabase/launch/launch-day.sql` com `ROLLBACK` (ver o cabeçalho do ficheiro).
+   **[DECIDIR]** Este SQL **apaga** as contas de teste. A checklist (`docs/OPERACAO.md`, n.º 31) pede
+   desativá-las sem apagar, e para isso ainda não há procedimento.
 2. **Aprovar** e correr com `COMMIT`; correr a verificação do fim do ficheiro.
 3. Apagar no Storage os ficheiros listados pelo SQL.
 4. Apagar `.env.test.local` e as sessões de teste; retirar das Redirect URLs o URL de

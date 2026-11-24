@@ -1,126 +1,89 @@
-# Operação: checklist das Fases 4 e 5
+# Operação: checklist única do lançamento (Fases 4, 5 e 7)
 
-Índice do que falta fazer antes de lançar: **Fase 4** (operação) e **Fase 5** (legal). Cada linha
-remete para o documento onde está o passo a passo. Esta lista não acrescenta dados novos.
+Lista única e ordenada, do D-7 ao D+14. O passo a passo de cada linha está na fonte indicada; esta
+lista não acrescenta dados novos.
 
-- **[SEM DOC]**: o tema ainda não tem nenhum documento no repositório. É preciso decidir ou pedir.
+- **Responsáveis:**
+  - **CEO**: decide, aprova SQL e carrega em Publish;
+  - **Claude Code**: repositório, PRs, propostas SQL e QA;
+  - **Claude chat**: textos e revisão de redação;
+  - **Advogado**;
+  - **Lovable/Cloudflare**: ação num painel desses serviços, feita pelo CEO.
+- **[SEM DOC]**: ainda não há documento nem procedimento no repositório. É preciso decidir ou pedir.
+- **[CONFIRMAR]**: o valor ou o estado tem de ser visto no painel ou na produção.
 - Não confundir com "FASE 4/5" do `roadmap.md`, que são as fases do fluxo de reservas.
 
-## Fase 4 — Operação
+## A. Antes (D-7 a D-1)
 
-### 4.1 Domínio e email
+### A1. Legal (Fase 5)
 
-- [ ] Domínio `exploreekaya.com` ligado na Lovable (plano pago), estado **Active**, HTTPS e `www` →
-      raiz (`docs/LAUNCH.md` §1).
-- [ ] HSTS confirmado no domínio real (`docs/LAUNCH.md` §1, passo 7).
-- [ ] `www` com 301 pelo Cloudflare: **depois do lançamento** (decidido a 08/11/2026;
-      `docs/LAUNCH.md` §1, passo 8).
-- [ ] Envio de email: Emails da Lovable Cloud com remetente `nao-responder@exploreekaya.com`, e
-      registos TXT, NS `notify` e `_dmarc` no DNS (`docs/LAUNCH.md` §2). Alternativa: Resend ou
-      Brevo por SMTP.
-- [ ] Textos dos emails de autenticação aplicados (`docs/email-templates.md`; `docs/LAUNCH.md` §2,
-      passo 6).
-- [ ] Receção em `apoio@exploreekaya.com` por Cloudflare Email Routing ou pelo reencaminhamento do
-      registrador (`docs/LAUNCH.md` §4).
-- [ ] Depois do email a funcionar: ligar `DOMAIN_EMAIL_LIVE` (`src/lib/app-info.ts`). Muda os Termos e
-      a Política, por isso sobe `LEGAL_VERSIONS` e precisa de uma migração de
-      `current_legal_versions()` (`docs/LAUNCH.md` §4).
-- [ ] DMARC de `p=none` para `p=quarantine` quando não houver falhas (`docs/LAUNCH.md` §5, D+1 a
-      D+14).
+| #   | Passo                                                                                                                                                                         | Responsável   | Fonte                                                               |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------- |
+| 1   | Revisão jurídica dos Termos e da Privacidade (versão 2026-11-23, já com `apoio@exploreekaya.com`). Se mudarem, nova versão em `LEGAL_VERSIONS` e numa migração                | Advogado      | `docs/LAUNCH.md` §5; `drizzle/migrations/0077_…sql`                 |
+| 2   | Licença de atividade (intermediação turística ou agência) e Banco de Moçambique (Lei 15/2026)                                                                                 | Advogado      | `docs/monetizacao/ESTUDO.md`                                        |
+| 3   | RNAVT ou registo equivalente em Moçambique **[SEM DOC]**                                                                                                                      | Advogado      | —                                                                   |
+| 4   | Seguro (responsabilidade civil, atividades) **[SEM DOC]**                                                                                                                     | Advogado, CEO | —                                                                   |
+| 5   | DPA da Lovable (planos Business/Enterprise) ou confirmação por escrito **[DECIDIR]**; transferências para fora de Moçambique e da UE                                          | CEO, Advogado | `docs/legal/SUBCONTRATANTES.md`                                     |
+| 6   | DPO formal ou não; contacto de privacidade (o email de apoio)                                                                                                                 | Advogado      | `docs/legal/ENCARREGADO-PROTECAO-DADOS.md`                          |
+| 7   | Cookies: o aviso de armazenamento aparece e fecha-se. Política de cookies à parte **[SEM DOC]**                                                                               | Claude Code   | `docs/LAUNCH.md` §9, passo 7                                        |
+| 8   | Aviso de IA: o assistente está sem IA (`ASSISTANT_LLM_ENABLED = false`). Antes de ligar a IA: Política, DPA da Cloudflare, texto "pode errar" e limite por IP (proposta 0079) | CEO           | `docs/legal/SUBCONTRATANTES.md`; `docs/security/QUOTAS-ANONIMOS.md` |
+| 9   | Ler e aceitar os termos da MET Norway                                                                                                                                         | CEO           | `docs/legal/SUBCONTRATANTES.md`                                     |
 
-### 4.2 Pagamentos M-Pesa (manual)
+### A2. Domínio, email e Auth (Fase 4)
 
-- [ ] Instruções de pagamento M-Pesa em Admin → Destaques, com o número e o nome reais da conta
-      (`docs/LAUNCH.md` §5).
-- [ ] Integração automática (EPay, pawaPay, M-Pesa direto): só depois das respostas dos fornecedores
-      (`docs/monetizacao/ESTUDO.md`; perguntas em `docs/monetizacao/emails-fornecedores.md`).
-      Pagamentos na app: não usados hoje (`docs/legal/SUBCONTRATANTES.md`).
+| #   | Passo                                                                                                                                                                                                    | Responsável        | Fonte                                        |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | -------------------------------------------- |
+| 10  | Domínio `exploreekaya.com` em **Active** na Lovable, HTTPS, `www` → raiz (302 da Lovable por agora)                                                                                                      | Lovable/Cloudflare | `docs/LAUNCH.md` §1                          |
+| 11  | Receção em `apoio@exploreekaya.com`: **feito** (Cloudflare Email Routing, 23/11/2026)                                                                                                                    | Lovable/Cloudflare | `docs/LAUNCH.md` §4                          |
+| 12  | Envio de emails (Emails da Lovable, remetente `nao-responder@exploreekaya.com`, registos TXT/NS/`_dmarc`) e textos de `docs/email-templates.md` **[CONFIRMAR]** o estado                                 | Lovable/Cloudflare | `docs/LAUNCH.md` §2                          |
+| 13  | Contacto `apoio@` na app (`DOMAIN_EMAIL_LIVE = true`) e versões legais 2026-11-23: merge do PR `feat/pre-lancamento`                                                                                     | Claude Code, CEO   | `src/lib/app-info.ts`; `docs/LAUNCH.md` §4   |
+| 14  | Aplicar a 0077 (`current_legal_versions` = 2026-11-23) **e** fazer Publish logo a seguir, juntos. Com só um dos dois feito, ninguém consegue aceitar os textos. Todas as contas voltam a aceitar uma vez | CEO                | `drizzle/migrations/0077_…sql` (cabeçalho)   |
+| 15  | Auth → URL configuration: Site URL e Redirect URLs com `/auth/callback`                                                                                                                                  | Lovable/Cloudflare | `docs/LAUNCH.md` §3                          |
+| 16  | Auth → Password: mínimo de **8** caracteres, letras e números; proteção contra palavras-passe em fugas, se o plano a tiver                                                                               | Lovable/Cloudflare | `docs/LAUNCH.md` §8                          |
+| 17  | Auth → **confirmação de email ligada** (não desligar: sem ela, o registo revela contas existentes)                                                                                                       | Lovable/Cloudflare | `docs/SECURITY.md` §6                        |
+| 18  | Auth → Rate limits: `/token` 90 por 5 min, registos 30 por 5 min, emails 60 por hora                                                                                                                     | Lovable/Cloudflare | `docs/LAUNCH.md` §8                          |
+| 19  | **2FA em todos os administradores** (a administração só abre com `aal2`)                                                                                                                                 | CEO                | `docs/SECURITY.md` §6.1; `docs/LAUNCH.md` §0 |
 
-### 4.3 Autenticação (painel do Auth)
+### A3. Pagamentos, conteúdo e dados
 
-- [ ] URLs de retorno: Site URL e Redirect URLs com `/auth/callback` (`docs/LAUNCH.md` §3;
-      `docs/SECURITY.md` §8).
-- [ ] Limites: Token endpoint de 150 para 90 por 5 min; Sign-ups e sign-ins em 30 por 5 min; envio
-      de emails em 60 por hora (`docs/LAUNCH.md` §8; `docs/security/RATE-LIMITS.md` §1).
-- [ ] Palavra-passe com mínimo de 8 caracteres, letras e números; proteção contra palavras-passe
-      em fugas, se o plano a tiver (`docs/LAUNCH.md` §8).
-- [ ] 2FA ligada em todos os administradores (`docs/LAUNCH.md` §0; `docs/SECURITY.md` §6.1 e §8).
+| #   | Passo                                                                                                                                                                                                        | Responsável      | Fonte                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- | --------------------------------------------------------------------- |
+| 20  | M-Pesa manual: instruções em Admin → Destaques, com o número e o nome reais da conta                                                                                                                         | CEO              | `docs/LAUNCH.md` §5                                                   |
+| 21  | Mínimos: pelo menos 5 negócios aprovados e 5 atividades ativas, com fotografias licenciadas e créditos                                                                                                       | CEO              | `docs/LAUNCH.md` §0 e §5; `docs/content/RECRUTAMENTO.md`              |
+| 22  | Negócios demo: os 8 negócios sem dono do catálogo inicial (0001: Capitão Sálvio, Tofo Dive Co-op, …) **[CONFIRMAR]** quais são reais; para os que não forem, suspender ou retirar **[SEM DOC]** (não há SQL) | CEO, Claude Code | `drizzle/migrations/0001_seed_experiences_catalogue.sql`              |
+| 23  | Regra da 0074 (foto de jogo sem localização não conta): **ligar só antes de ativar recompensas reais**, numa migração própria                                                                                | CEO, Claude Code | `drizzle/migrations/0074_game_photo_location_flag.sql` ("COMO LIGAR") |
+| 24  | Aplicar e testar as propostas pendentes: 0079 (quotas por IP)                                                                                                                                                | CEO, Claude Code | `drizzle/migrations/0079_anon_quotas_per_ip.sql`                      |
 
-### 4.4 Backups
+### A4. Backups e verificação técnica
 
-- [ ] Confirmar no painel o backup diário e a retenção de cerca de 14 dias **[VALIDAR]**
-      (`docs/security/BACKUPS.md`).
-- [ ] Rotina semanal: exportar a BD e descarregar os buckets do Storage (que não têm backup), e
-      guardar tudo cifrado fora da Lovable (`docs/security/BACKUPS.md`).
-- [ ] Teste de restauro numa BD temporária, com a data registada (`docs/security/BACKUPS.md`).
-- [ ] Cópia de segurança antes do lançamento (`docs/LAUNCH.md` §5, D-7 a D-1).
+| #   | Passo                                                                                                                  | Responsável        | Fonte                                           |
+| --- | ---------------------------------------------------------------------------------------------------------------------- | ------------------ | ----------------------------------------------- |
+| 25  | Confirmar o backup diário e a retenção de cerca de 14 dias **[VALIDAR]**                                               | Lovable/Cloudflare | `docs/security/BACKUPS.md`                      |
+| 26  | Exportar a BD e descarregar os buckets do Storage (sem backup automático); guardar tudo cifrado fora da Lovable        | CEO                | `docs/security/BACKUPS.md`; `docs/LAUNCH.md` §5 |
+| 27  | Testes de BD a PASS no projeto final (registo em `qa-output/db-tests.json` com menos de 24 h; o atual é de 05/11/2026) | Claude Code        | `docs/QA.md`; `docs/LAUNCH.md` §5               |
+| 28  | `bun scripts/qa/prelaunch.ts` → `PRELAUNCH: PASS` (entra com as contas de teste: só com autorização)                   | Claude Code        | `docs/LAUNCH.md` §6                             |
+| 29  | CSP em modo de teste: 0 avisos `[Report Only]` na consola do site publicado                                            | Claude Code, CEO   | `docs/security/CSP-INLINE.md`                   |
 
-### 4.5 Pré-lançamento (prelaunch)
+## B. Dia D (Fase 7)
 
-- [ ] Mínimos em Admin → Estado do lançamento: pelo menos 5 negócios aprovados e 5 atividades
-      ativas (`docs/LAUNCH.md` §0).
-- [ ] `bun scripts/qa/prelaunch.ts` → `PRELAUNCH: PASS` (`docs/LAUNCH.md` §6), e depois contra o
-      domínio real (`docs/LAUNCH.md` §9, passo 6).
-- [ ] Testes de BD a PASS (`docs/QA.md`; `docs/LAUNCH.md` §5).
-- [ ] CSP sem avisos na consola do site publicado (`docs/SECURITY.md` §7.1 e §8).
-- [ ] Dia D: ensaiar `supabase/launch/launch-day.sql` com ROLLBACK, aprovar, apagar as contas de teste
-      e o `.env.test.local` (`docs/LAUNCH.md` §5; `docs/SECURITY.md` §8).
-- [ ] Decidir sobre as 2 contas internas que ficaram (`docs/SECURITY.md` §8).
+| #   | Passo                                                                                                                                                                                                                                                                         | Responsável      | Fonte                                                   |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------- |
+| 30  | Cópia de segurança imediatamente antes (BD e Storage)                                                                                                                                                                                                                         | CEO              | `docs/security/BACKUPS.md`                              |
+| 31  | **Contas QA (turista, negócio, admin): desativar, não apagar** **[SEM DOC]**. O `supabase/launch/launch-day.sql` atual **apaga** as contas, os dados e o negócio "EKAYA Teste — não reservar". Para desativar falta o procedimento (ex.: banir no Auth e suspender o negócio) | CEO, Claude Code | `supabase/launch/launch-day.sql`; `docs/SECURITY.md` §8 |
+| 32  | Decidir sobre as 2 contas internas que ficaram                                                                                                                                                                                                                                | CEO              | `docs/SECURITY.md` §8                                   |
+| 33  | Apagar o `.env.test.local` das máquinas de quem testou; retirar das Redirect URLs o URL de pré-visualização, se já não for preciso                                                                                                                                            | CEO              | `docs/LAUNCH.md` §5                                     |
+| 34  | **Publish** na Lovable                                                                                                                                                                                                                                                        | CEO              | `docs/LAUNCH.md` §5 e §9                                |
+| 35  | Verificação no domínio real: `prelaunch.ts --skip-build` e Lighthouse; no telemóvel: registo, recuperação, reserva de teste, painel do negócio, admin com 2FA, mapa; consola sem erros de CSP                                                                                 | Claude Code, CEO | `docs/LAUNCH.md` §9                                     |
+| 36  | **Repositório GitHub a privado** **[SEM DOC]** (decisão e momento por definir; a CI e os PRs continuam a funcionar)                                                                                                                                                           | CEO              | —                                                       |
 
-## Fase 5 — Legal
+## C. Depois (D+1 a D+14)
 
-### 5.1 Proteção de dados (RGPD e lei moçambicana)
-
-- [ ] Contacto de privacidade e prazos de resposta (30 dias, mais 60 se for complexo)
-      (`docs/legal/ENCARREGADO-PROTECAO-DADOS.md`).
-- [ ] Decidir se é preciso um DPO formal (`docs/legal/ENCARREGADO-PROTECAO-DADOS.md`).
-- [ ] DPA da Lovable **[DECIDIR]**: só existe nos planos Business e Enterprise
-      (`docs/legal/SUBCONTRATANTES.md`).
-- [ ] Transferências para fora de Moçambique e da UE **[VALIDAR COM JURISTA]**
-      (`docs/legal/SUBCONTRATANTES.md`).
-- [ ] Notificação de violações: 72 h à autoridade da UE e aviso às pessoas afetadas, se o risco
-      for elevado (`docs/security/INCIDENTES.md`).
-- [ ] Lei moçambicana de proteção de dados: proposta submetida mas sem aprovação encontrada até
-      agosto de 2026 (`docs/monetizacao/ESTUDO.md`).
-
-### 5.2 Termos e Política de Privacidade
-
-- [ ] Revisão jurídica dos Termos e da Privacidade. Se mudarem, nova versão em `LEGAL_VERSIONS` e
-      migração de `current_legal_versions()`, o que obriga a aceitar de novo (`docs/LAUNCH.md` §5;
-      `CLAUDE.md`).
-- [ ] Ler e confirmar os termos da MET Norway (têm de ser aceites por uma pessoa responsável)
-      (`docs/legal/SUBCONTRATANTES.md`).
-- [ ] Licença do react-leaflet para uso comercial **[VALIDAR COM JURISTA]**
-      (`docs/legal/SUBCONTRATANTES.md`).
-- [ ] Questões para o jurista: contrato de parceiro, defesa do consumidor (Lei n.º 22/2009),
-      publicidade e conteúdo patrocinado (`docs/monetizacao/ESTUDO.md`).
-- [ ] Questões para o contabilista: IVA, faturação legal e retenções (`docs/monetizacao/ESTUDO.md`).
-
-### 5.3 Licença de atividade (RNAVT ou equivalente)
-
-- [ ] **[SEM DOC]** O RNAVT não aparece em nenhum documento. A única referência é a pergunta ao
-      jurista sobre se o EKAYA é intermediação turística ou agência de viagens à luz da lei do
-      turismo, e se precisa de licença de atividade (`docs/monetizacao/ESTUDO.md`).
-- [ ] Banco de Moçambique: confirmar se o fluxo de pagamento é um serviço de pagamento à luz da Lei
-      15/2026 (`docs/monetizacao/ESTUDO.md`).
-
-### 5.4 Seguro
-
-- [ ] **[SEM DOC]** Nenhum documento trata de seguros (responsabilidade civil, atividades).
-
-### 5.5 Cookies e armazenamento
-
-- [ ] O aviso de armazenamento aparece no primeiro toque e o OK fecha-o (`docs/LAUNCH.md` §9,
-      passo 7).
-- [ ] **[SEM DOC]** Não há uma política de cookies à parte. Sem ferramentas de análise nem de
-      publicidade (`docs/legal/SUBCONTRATANTES.md`).
-
-### 5.6 Aviso de IA
-
-- [ ] Hoje o assistente não usa IA generativa (`ASSISTANT_LLM_ENABLED = false`).
-- [ ] Antes de ligar a fase 2 (Cloudflare Workers AI):
-  - acrescentar o fornecedor à tabela de subcontratantes e à Política, e mudar a versão da Política;
-  - confirmar que o DPA da Cloudflare cobre o Workers AI;
-  - confirmar que o texto passa a "Assistente com IA, pode errar".
-  - Fonte: `docs/legal/SUBCONTRATANTES.md`, "Assistente com IA (futuro)".
-- [ ] Ligar só com limite por IP (`docs/security/QUALIDADE-V1.md`).
+| #   | Passo                                                                                                 | Responsável        | Fonte                         |
+| --- | ----------------------------------------------------------------------------------------------------- | ------------------ | ----------------------------- |
+| 37  | Admin → Estado do lançamento → erros, todos os dias na primeira semana; `apoio@` no Gmail             | CEO                | `docs/LAUNCH.md` §5 e §9      |
+| 38  | Responder aos pedidos "Para negócios" em 48 h ou menos; rever as perguntas sem resposta do assistente | CEO                | `docs/LAUNCH.md` §5           |
+| 39  | **`www` com 301** pelo Cloudflare (decidido a 08/11/2026: depois do lançamento)                       | Lovable/Cloudflare | `docs/LAUNCH.md` §1, passo 8  |
+| 40  | DMARC de `p=none` para `p=quarantine` quando não houver falhas                                        | Lovable/Cloudflare | `docs/LAUNCH.md` §5           |
+| 41  | CSP: com uma semana sem avisos, passar o modo de teste a obrigatório                                  | Claude Code        | `docs/security/CSP-INLINE.md` |
+| 42  | Rotina semanal de backups e teste de restauro                                                         | CEO                | `docs/security/BACKUPS.md`    |
+| 43  | Apagar a pasta local `backups/` (fora do Git; só com o lançamento estável e com autorização)          | CEO                | `docs/LAUNCH.md` §5           |

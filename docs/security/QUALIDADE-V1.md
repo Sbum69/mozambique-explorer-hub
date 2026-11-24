@@ -1,8 +1,9 @@
 # QUALIDADE-V1: segurança e quotas (branch `feat/qualidade-v1`)
 
-> Estado em 22/11/2026: as migrações 0071 a 0074 são **propostas**. Ainda não foram aplicadas nem
-> registadas no `_journal.json`. O registo faz-se depois de cada SQL ser testado e aplicado na
-> produção, como na 0069 e na 0070. Os guiões de teste estão em `docs/security/testes/`.
+> Estado em 23/11/2026: as migrações 0071 a 0074 estão **aplicadas** na produção e registadas no
+> `_journal.json`, tal como a 0075 e a 0076 (aplicadas a 23/11/2026). Os cabeçalhos dos ficheiros
+> SQL ainda dizem "PROPOSTA": não se mudam, para o hash registado não mudar. Os guiões de teste
+> estão em `docs/security/testes/`.
 
 ## O que mudou no código (já ativo depois do merge)
 
@@ -16,7 +17,7 @@
   regra da 0074 for ligada.
 - Testes: `src/lib/upstream-guard.test.ts` e um caso novo em `src/lib/games.test.ts`.
 
-## Migrações propostas
+## Migrações (aplicadas)
 
 | Ficheiro                                  | O que faz                                                                                                                                                           | Guião                                    |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
@@ -61,10 +62,10 @@ de PUBLIC. Para a lista real, correr:
 
 ## Objetos usados mas sem migração no repositório
 
-- Os buckets `community-photos`, `route-proofs` e `game-proofs`:
-  - as políticas (0016, 0018, 0031) e o `UPDATE storage.buckets` (0045) dependem deles;
-  - nenhuma migração os cria. Foram criados à mão na Lovable/painel.
-  - `avatars` (0046) e `content-photos` (0051) têm `INSERT INTO storage.buckets`.
+- Os buckets `community-photos`, `route-proofs` e `game-proofs`: foram criados à mão na
+  Lovable/painel. Desde a **0076** (aplicada a 23/11/2026) estão descritos numa migração
+  idempotente, com as políticas das 0016, 0018, 0031 e 0045. Na produção não mudou nada; num projeto
+  novo, a 0076 cria-os. `avatars` (0046) e `content-photos` (0051) já tinham o seu INSERT.
 - O esquema `drizzle` (`drizzle.__drizzle_migrations`): é criado pela ferramenta, não por uma migração.
 - Tudo o resto que o frontend usa existe numa migração: as tabelas e vistas de `.from()`, as RPCs
   de `.rpc()`, as funções e colunas de `types.ts` e as funções chamadas dentro do SQL.

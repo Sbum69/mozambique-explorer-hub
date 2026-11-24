@@ -102,7 +102,9 @@
   },
   "overrides": {
     "seroval": "^1.7.3",
-    "seroval-plugins": "^1.7.3"
+    "seroval-plugins": "^1.7.3",
+    "undici": "^7.30.1",
+    "ws": "^8.21.0"
   },
   "resolutions": {
     "seroval": "^1.7.3",

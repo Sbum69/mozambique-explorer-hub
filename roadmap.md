@@ -71,13 +71,13 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 - [ ] Roteiros (`/itineraries`): **57** (TBT 1,05 s). Objetivo ≥ 70: reduzir o trabalho no primeiro carregamento da lista.
 - [ ] Jogos (`/games`): **59** (LCP 5,2 s, TBT 1,18 s). Objetivo ≥ 70: esqueleto vindo do servidor e redireção para o login no browser (decisão de produto adiada).
 - [ ] Painel (`/dashboard`): **59** (LCP 6,0 s). Objetivo ≤ 2,5 s a pintar com sessão: sessão em cookies e SSR das páginas privadas.
-- [ ] Bundle inicial **~250 KB gz**: separar os dicionários de texto não reduziu (o empacotador volta a juntá-los); rever a divisão em blocos (`manualChunks`) e o que o root importa.
+- [ ] Bundle inicial: `page-texts` dividido num módulo por página (`src/lib/texts/`): JS inicial da `/home` 306 → 297 KB gz e do `/map` 323 → 310 KB gz (23/11/2026, soma do gzip dos scripts e modulepreload do HTML). O que resta no arranque: `react-dom` 56, `supabase/auth-js` 24, `router-core` 22, `supabase/realtime-js` + `phoenix` 18, `icons` 14, `routeTree` 12 KB gz.
 
 **Prioridade 2 — segurança (auditoria de 05/11/2026)**
 - [x] `zod` 3 → 4 (aviso alto: memória com coleções enormes): já na versão 4 (`^4.6.6` no `package.json`).
-- [ ] CSP com nonces (ou hashes) nos scripts inline, para retirar `script-src 'unsafe-inline'`.
-- [ ] Atualizar as ferramentas de desenvolvimento com avisos (`undici`, `ws`, `esbuild`, `minimatch`, `sharp`) quando o wrangler e o plugin da Lovable subirem.
-- [ ] `admin_set_user_role` não escreve no `admin_audit`: registar as mudanças de papel na própria RPC.
+- [ ] CSP com nonces: modo de teste ativo (`Content-Security-Policy-Report-Only` com nonce por pedido); passar a obrigatória depois de uma semana sem avisos em produção (`docs/security/CSP-INLINE.md`).
+- [ ] Ferramentas de desenvolvimento com avisos: `undici` e `ws` atualizados por `overrides` (37 → 6 avisos); ficam `esbuild` (0.27 → 0.28), `minimatch` (10 → 11) e `sharp` (0.34 → 0.35), que exigem versão major, até o wrangler e o plugin da Lovable subirem.
+- [x] `admin_set_user_role` escreve no `admin_audit` (`role.grant`/`role.revoke`) desde a 0060 (`supabase/tests/adm-3_role_audit.sql`).
 
 **Outros**
 - [ ] `www.exploreekaya.com` com 301 em vez de 302: Redirect Rule no Cloudflare + `A www` em Proxied + HSTS no Cloudflare (passos em `docs/LAUNCH.md` §1.8). Hoje o 302 é da Lovable (não configurável); impacto mínimo porque o canonical aponta para a raiz (medido a 08/11/2026: raiz 301 http→https com HSTS)
