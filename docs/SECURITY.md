@@ -189,11 +189,23 @@ Aplicação:
   (depois do lançamento).
 - Regra da 0074 (foto de jogo sem localização válida não conta) aplicada mas **desligada**
   (`game_photo_location_required()` = false): decidir quando a ligar.
-- CSP com `script-src 'unsafe-inline'`: plano para nonces em `docs/security/CSP-INLINE.md`.
-- Quotas por IP nos endpoints anónimos com limite "no total": proposta em
-  `docs/security/QUOTAS-ANONIMOS.md`.
-- Ferramentas de desenvolvimento ainda com avisos (`undici`, `ws` 8.18.0, `sharp`, `esbuild`):
-  não entram no bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
+- CSP: a obrigatória continua com `script-src 'self' 'unsafe-inline'`. Desde o `feat/pre-lancamento`
+  há também um `Content-Security-Policy-Report-Only` com nonce por pedido
+  (`src/lib/csp-nonce-middleware.ts`):
+  - verificado localmente com 0 avisos nas páginas de convidado, nos dois temas;
+  - falta confirmar as páginas com sessão e o site publicado;
+  - depois passa a obrigatória (`docs/security/CSP-INLINE.md`).
+- Quotas por IP nos endpoints anónimos com limite "no total": proposta **0079**
+  (`drizzle/migrations/0079_anon_quotas_per_ip.sql`, por aprovar e aplicar;
+  `docs/security/QUOTAS-ANONIMOS.md`).
+- Contacto `apoio@exploreekaya.com` ligado (`DOMAIN_EMAIL_LIVE = true`, versões legais 2026-11-23).
+  A proposta **0077** (`current_legal_versions`) está por aplicar. Tem de ser aplicada **junto com
+  o Publish**: com só um dos dois feito, ninguém consegue aceitar os textos.
+- Mudanças de papel no `admin_audit`: já feito na 0060 (`supabase/tests/adm-3_role_audit.sql`).
+  Não há proposta 0078.
+- Ferramentas de desenvolvimento: `undici` e `ws` atualizados por `overrides` (avisos do `bun audit`
+  de 37 para 6). Ficam `esbuild`, `minimatch` e `sharp`, que exigem versão major. Não entram no
+  bundle; atualizar quando o wrangler/plugin da Cloudflare subirem.
 - CSP obrigatória: verificada localmente nas 29 páginas da QA (`csp.ts`, 0 violações); confirmar a
   consola no preview da Lovable e no site publicado (o preview pede sessão: 401).
 - 2FA para administradores (recomendação).
