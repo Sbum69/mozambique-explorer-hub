@@ -540,6 +540,13 @@
       "when": 1796600000000,
       "tag": "0076_storage_buckets_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1796700000000,
+      "tag": "0077_legal_versions_2026_11_23",
+      "breakpoints": true
     }
   ]
 }
