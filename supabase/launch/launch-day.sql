@@ -1,4 +1,10 @@
 -- =====================================================================================
+-- !!! NÃO USAR PARA DESATIVAR AS CONTAS DE TESTE !!!
+-- Este ficheiro APAGA as contas QA, as suas reservas, pontos (points_ledger), publicações e o
+-- negócio de teste. A decisão em vigor é DESATIVAR sem apagar: usar
+-- supabase/launch/proposta-0080-desativar-contas-qa.sql (docs/OPERACAO-PASSOS.md §5).
+-- Fica só como referência; não correr sem nova decisão explícita do CEO.
+-- =====================================================================================
 -- DIA DO LANÇAMENTO — remover as contas de teste e os seus dados.  NÃO CORRER ANTES DO DIA.
 -- -------------------------------------------------------------------------------------
 -- Aprovação explícita obrigatória (escrita destrutiva). Ver docs/LAUNCH.md, passo "Dia D".
