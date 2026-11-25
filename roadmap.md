@@ -68,8 +68,8 @@ Migrações aplicadas: 0000–0053. Por aprovar (Lote B): 0054–0057. Identidad
 ## Depois do lançamento
 
 **Prioridade 1 — desempenho** (Lighthouse mobile, mediana de 3, medido a 05/11/2026 no `prelaunch.ts`):
-- [ ] Roteiros (`/itineraries`): **57** (TBT 1,05 s). Objetivo ≥ 70: reduzir o trabalho no primeiro carregamento da lista.
-- [ ] Jogos (`/games`): **59** (LCP 5,2 s, TBT 1,18 s). Objetivo ≥ 70: esqueleto vindo do servidor e redireção para o login no browser (decisão de produto adiada).
+- [ ] Roteiros (`/itineraries`): **57** (TBT 1,05 s). Objetivo ≥ 70: reduzir o trabalho no primeiro carregamento da lista. **25/11/2026:** cartões com `content-visibility` (TBT 810 → 600 ms, pintura 375 → 116 ms; score dentro do ruído), `docs/DESEMPENHO.md`.
+- [ ] Jogos (`/games`): **59** (LCP 5,2 s, TBT 1,18 s). Objetivo ≥ 70: esqueleto vindo do servidor e redireção para o login no browser (decisão de produto adiada). **25/11/2026:** o zod deixou de vir com a rota (JS da rota 102 → 77 KB gz), `docs/DESEMPENHO.md`.
 - [ ] Painel (`/dashboard`): **59** (LCP 6,0 s). Objetivo ≤ 2,5 s a pintar com sessão: sessão em cookies e SSR das páginas privadas.
 - [ ] Bundle inicial: `page-texts` dividido num módulo por página (`src/lib/texts/`): JS inicial da `/home` 306 → 297 KB gz e do `/map` 323 → 310 KB gz (23/11/2026, soma do gzip dos scripts e modulepreload do HTML). O que resta no arranque: `react-dom` 56, `supabase/auth-js` 24, `router-core` 22, `supabase/realtime-js` + `phoenix` 18, `icons` 14, `routeTree` 12 KB gz.
 

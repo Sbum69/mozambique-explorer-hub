@@ -369,7 +369,9 @@ function ItinerariesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: Math.min(idx * 0.06, 0.4), duration: 0.4 }}
-        className="rounded-[10px]"
+        // Off-screen cards skip layout and paint until they get near the viewport (no visual
+        // change); the intrinsic size keeps the scroll height stable.
+        className="rounded-[10px] [content-visibility:auto] [contain-intrinsic-size:auto_440px]"
       >
         <Card className="overflow-hidden h-full flex flex-col">
           <div className="relative h-48 overflow-hidden bg-muted">

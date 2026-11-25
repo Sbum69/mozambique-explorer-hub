@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { supabase } from "@/integrations/supabase/client";
+import { maputoToday } from "@/lib/maputo-date";
 
 /**
  * Business rewards: owners manage the rewards of their own business (RLS), tourists redeem them
@@ -71,10 +72,8 @@ function mapReward(r: RewardRow): BusinessReward {
   };
 }
 
-/** Today's date in Mozambique (YYYY-MM-DD), the reference for reward validity. */
-export function maputoToday(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Maputo" }).format(now);
-}
+// Kept exported from here for existing imports; lives in maputo-date.ts (no zod for the games).
+export { maputoToday };
 
 /** A reward can be redeemed while active, in stock and not past its last valid day. */
 export function isRewardRedeemable(
