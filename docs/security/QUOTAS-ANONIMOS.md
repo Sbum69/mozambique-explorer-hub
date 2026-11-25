@@ -40,3 +40,48 @@
 2. Uma tabela de contadores por `(função, hash do IP do dia)` ou uma coluna `ip_day_hash` em cada
    tabela de destino, como na 0055 **[DECIDIR]**. É uma migração nova e precisa de aprovação.
 3. Os mesmos testes auto-revertíveis de `supabase/tests/` para cada limite novo.
+
+## 0079 — O que confirmar sobre o cabeçalho de IP (antes de aprovar)
+
+A 0079 (`drizzle/migrations/0079_anon_quotas_per_ip.sql`) conta pedidos por `request_ip()` (0055). Essa
+função lê, por esta ordem, o cabeçalho `cf-connecting-ip` e o primeiro valor de `x-forwarded-for`.
+Se nenhum chegar, usa `'unknown'`, e então **todos os visitantes partilham o mesmo contador**: com o
+limite de 50 por dia, o registo de erros ficaria calado para toda a gente.
+
+Factos do código:
+
+- O browser chama a API da Lovable Cloud (Supabase) diretamente: `VITE_SUPABASE_URL` em
+  `src/integrations/supabase/client.ts`.
+- Estes pedidos **não passam** pelo domínio `exploreekaya.com` nem pela Cloudflare do EKAYA. Os
+  cabeçalhos que contam são os que o gateway da Supabase passa ao PostgREST (`request.headers`).
+
+### Lista a confirmar [CONFIRMAR]
+
+1. Se os pedidos à API (`/rest/v1/rpc/…`) chegam ao Postgres com `cf-connecting-ip` em
+   `request.headers` (Lovable Cloud / Supabase).
+2. Se não, se `x-forwarded-for` traz **o IP do visitante como primeiro valor**, e não o IP de um
+   proxy intermédio.
+3. Se o valor é IPv4 ou IPv6. Ambos servem, porque o hash usa o texto tal como vem.
+4. Em que fuso corre `current_date` na BD. O hash diário usa a data da BD, por isso o "dia" pode
+   não coincidir com o dia de Moçambique (só muda a hora da viragem).
+5. Quem pode responder a 1–3: o suporte da Lovable, ou o teste abaixo.
+
+### Teste (só leitura, sobre dados que já existem)
+
+`submit_business_lead` (0055) já grava `ip_day_hash = sha256(request_ip() | data | 'ekaya-leads')`.
+Se o cabeçalho **não** chegar, os pedidos de adesão têm o hash de `'unknown'`:
+
+```sql
+-- Quantos pedidos de adesão foram gravados com IP 'unknown' (cabeçalho em falta)?
+SELECT count(*) FILTER (WHERE ip_day_hash = encode(extensions.digest('unknown|' || created_at::date::text || '|ekaya-leads', 'sha256'), 'hex')) AS sem_ip,
+       count(*) AS total
+  FROM public.business_leads;
+```
+
+- **Resultado esperado:** `sem_ip = 0`, com `total > 0`. Quer dizer que o IP chega e que a 0079
+  conta por visitante.
+- **Se `sem_ip = total`:** o cabeçalho não chega. **Não aplicar a 0079** antes de resolver.
+- **Se `total = 0`:** não há dados para concluir. Fazer um pedido de adesão de teste com uma conta
+  QA em `/para-negocios` e repetir.
+- O guião `docs/security/testes/0079_anon_quotas.sql` simula os IPs (`203.0.113.7`/`.8`): prova os
+  limites, mas **não** prova que o cabeçalho real chega.

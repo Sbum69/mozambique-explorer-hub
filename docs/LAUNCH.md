@@ -208,11 +208,12 @@ Se o NUIT já existir, preencher `LEGAL_ENTITY.nuit` e `incorporated` em `app-in
 
 **Dia D**
 
-1. Ensaiar `supabase/launch/launch-day.sql` com `ROLLBACK` (ver o cabeçalho do ficheiro).
-   **[DECIDIR]** Este SQL **apaga** as contas de teste. A checklist (`docs/OPERACAO.md`, n.º 31) pede
-   desativá-las sem apagar, e para isso ainda não há procedimento.
+1. Ensaiar `supabase/launch/proposta-0080-desativar-contas-qa.sql` com `ROLLBACK` (ver o
+   cabeçalho do ficheiro). Desativa as contas QA e suspende os negócios de teste **sem apagar nada**.
+   **NÃO usar `supabase/launch/launch-day.sql`**: apaga contas, reservas e pontos.
 2. **Aprovar** e correr com `COMMIT`; correr a verificação do fim do ficheiro.
-3. Apagar no Storage os ficheiros listados pelo SQL.
+3. (Só com o `launch-day.sql`, que não se usa: apagar no Storage os ficheiros listados.) Com a
+   0080 não se apaga nenhum ficheiro.
 4. Apagar `.env.test.local` e as sessões de teste; retirar das Redirect URLs o URL de
    pré-visualização se já não for preciso.
 5. Publicar no Lovable (**Publish**) — só tu.
@@ -282,8 +283,9 @@ Fonte dos valores por omissão: <https://supabase.com/docs/guides/auth/rate-limi
 
 ## 9. Dia do piloto (checklist)
 
-As contas de teste **ficam** durante o piloto. O SQL do dia D (`supabase/launch/launch-day.sql`) só
-corre no lançamento público.
+As contas de teste **ficam** durante o piloto. No lançamento público são **desativadas** com
+`supabase/launch/proposta-0080-desativar-contas-qa.sql`. O `supabase/launch/launch-day.sql` apaga
+contas e pontos e **não deve ser usado**.
 
 1. **Merges**, por esta ordem e cada um com o CI verde:
    1. `chore/deps-pre-launch`
