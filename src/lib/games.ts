@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { PreciseLocation } from "@/lib/geo";
-import { maputoToday } from "@/lib/rewards";
+import { maputoToday } from "@/lib/maputo-date";
 
 /**
  * Games ↔ achievements bridge. The database is the only authority:
