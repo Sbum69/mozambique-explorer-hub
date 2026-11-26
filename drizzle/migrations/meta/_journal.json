@@ -547,6 +547,20 @@
       "when": 1796700000000,
       "tag": "0077_legal_versions_2026_11_23",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1796800000000,
+      "tag": "0081_free_activities_no_booking_points",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1796900000000,
+      "tag": "0083_rewards_limits",
+      "breakpoints": true
     }
   ]
 }

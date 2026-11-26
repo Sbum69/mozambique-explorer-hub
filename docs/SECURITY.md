@@ -201,6 +201,7 @@ Aplicação:
 - Contacto `apoio@exploreekaya.com` ligado (`DOMAIN_EMAIL_LIVE = true`, versões legais 2026-11-23).
   A proposta **0077** (`current_legal_versions`) está por aplicar. Tem de ser aplicada **junto com
   o Publish**: com só um dos dois feito, ninguém consegue aceitar os textos.
+- 0081 (atividades a 0 MZN sem pontos de reserva) e 0083 (limites das recompensas) aplicadas e registadas a 26/11/2026; 0080 e 0082 não aplicadas.
 - Mudanças de papel no `admin_audit`: já feito na 0060 (`supabase/tests/adm-3_role_audit.sql`).
   Não há proposta 0078.
 - Ferramentas de desenvolvimento: `undici` e `ws` atualizados por `overrides` (avisos do `bun audit`
